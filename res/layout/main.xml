@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="match_parent" android:layout_width="match_parent">
+
+	<!-- Map / AR -->
+	<ViewAnimator android:id="@+id/viewAnimator"
+		android:layout_width="match_parent" android:layout_height="match_parent">
+		<!-- Map -->
+		<RelativeLayout android:layout_height="match_parent"
+			android:layout_width="match_parent">
+			<org.n52.android.view.map.NoiseMapView
+				android:id="@+id/noiseMapView" android:layout_width="match_parent"
+				android:clickable="true" android:apiKey="0eb-7cFUWWL65MVHG1CFqQ3OfvNXnKutPYzjNsw"
+				android:layout_height="match_parent" />
+			<!-- Interface for Calibration -->
+			<org.n52.android.view.map.ManualPositionView
+				android:id="@+id/manualPositionView" android:layout_height="wrap_content"
+				android:layout_width="match_parent"
+				android:layout_alignParentBottom="true" android:background="@android:drawable/toast_frame"
+				android:visibility="gone" />
+		</RelativeLayout>
+		
+		<!-- AR -->
+		<RelativeLayout android:layout_height="match_parent"
+			android:layout_width="match_parent">
+
+			<org.n52.android.view.geoar.ARNoiseView
+				android:id="@+id/glNoiseView" android:layout_width="match_parent"
+				android:layout_height="match_parent" />
+
+			<org.n52.android.view.geoar.CameraView
+				android:layout_width="match_parent" android:layout_height="match_parent" />
+
+			<org.n52.android.view.geoar.NoiseChartView
+				android:id="@+id/noiseDiagramView" android:layout_width="match_parent"
+				android:layout_height="100dp" android:layout_alignParentBottom="true" />
+
+			<!-- Interface for Calibration -->
+			<org.n52.android.view.geoar.CalibrationControlView
+				android:id="@+id/calibrationView" android:layout_height="wrap_content"
+				android:layout_width="match_parent"
+				android:layout_alignParentBottom="true" android:background="@android:drawable/toast_frame"
+				android:visibility="gone" />
+
+		</RelativeLayout>
+	</ViewAnimator>
+
+	<!-- Info Panel -->
+	<org.n52.android.view.InfoView
+		android:layout_height="wrap_content" android:layout_width="match_parent"
+		android:layout_alignParentTop="true" android:layout_toLeftOf="@+id/imageButtonMapARSwitcher"
+		android:layout_alignParentLeft="true" android:background="@android:drawable/toast_frame"
+		android:id="@+id/infoView" />
+
+
+	<!-- Map / AR Switching Button -->
+	<ImageButton android:layout_height="wrap_content"
+		android:id="@+id/imageButtonMapARSwitcher" android:layout_width="wrap_content"
+		android:src="@drawable/ic_menu_mapmode" android:layout_alignParentTop="true"
+		android:layout_alignParentRight="true" />
+
+</RelativeLayout>
+

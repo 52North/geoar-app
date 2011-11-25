@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Statusviews -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+	<TextView android:id="@+id/textViewStatusInfo"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:textAppearance="@android:style/TextAppearance.Small"
+		android:textColor="@android:color/white" android:shadowColor="#BB000000"
+		android:shadowRadius="2.75" android:text="Test" />
+	<TextView android:id="@+id/textViewProgressInfo"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:textAppearance="@android:style/TextAppearance.Small"
+		android:textColor="@android:color/white" android:shadowColor="#BB000000"
+		android:shadowRadius="2.75" android:text="Test" />
+
+	<ProgressBar android:layout_height="wrap_content"
+		android:id="@+id/progressBar" style="@android:style/Widget.ProgressBar.Horizontal"
+		android:layout_width="match_parent" android:shadowColor="#BB000000"
+		android:shadowRadius="2.75"></ProgressBar>
+</merge>

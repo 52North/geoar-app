@@ -1,0 +1,27 @@
+
+################################################################################
+# ARclient                                                                     #
+################################################################################
+
+An augmented reality client for live spatial data.
+
+################################################################################
+##### Required Software
+
+Following Software needs to be installed:
+
+- <add all dependencies and required software (like Eclipse, Maven, ...)>
+
+Optional:
+
+- <add optional features, e.g. M2Eclipse>
+
+##### <section name>
+
+<add sections for important information, like how to run parts of  the
+software, what steps to follow for installation and configuration>
+
+################################################################################
+## Questions? Issues?
+
+Contact Daniel Nüst (d.nuest@52north.org) if you have questions or comments.

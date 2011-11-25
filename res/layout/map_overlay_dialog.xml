@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="wrap_content" android:layout_height="wrap_content"
+	android:orientation="horizontal">
+	<ToggleButton android:textOn="@string/satellite"
+		android:layout_width="wrap_content" android:textOff="@string/satellite"
+		android:id="@+id/ToggleButtonSatellite" android:layout_height="wrap_content"
+		android:drawableTop="@drawable/map_overlay_satellite"></ToggleButton>
+	<ToggleButton android:id="@+id/toggleButtonStreet"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:textOn="@string/streets" android:textOff="@string/streets"
+		android:drawableTop="@drawable/map_overlay_street"></ToggleButton>
+	<ToggleButton android:id="@+id/toggleButtonTraffic"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:textOn="@string/traffic" android:textOff="@string/traffic"
+		android:drawableTop="@drawable/map_overlay_traffic" android:layout_marginLeft="10dp"></ToggleButton>
+</LinearLayout>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="wrap_content" android:layout_height="wrap_content"
+	android:orientation="horizontal">
+	<ToggleButton android:id="@+id/toggleButtonOverlayNoise"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:drawableTop="@drawable/ic_button_overlaynoise" android:textOn="@string/noise_overlays"
+		android:textOff="@string/noise_overlays"></ToggleButton>
+	<!-- <ToggleButton android:id="@+id/toggleButtonOverlayNoiseGrid" android:text="ToggleButton" 
+		android:layout_width="wrap_content" android:layout_height="wrap_content" 
+		android:drawableTop="@drawable/ic_button_overlaynoisegrid" android:textOn="@string/noise_overlay_grid" 
+		android:textOff="@string/noise_overlay_grid"></ToggleButton> -->
+	<ToggleButton android:textOn="@string/calibration"
+		android:text="ToggleButton" android:layout_width="wrap_content"
+		android:textOff="@string/calibration" android:id="@+id/toggleButtonOverlayCalib"
+		android:layout_height="wrap_content" android:drawableTop="@drawable/ic_button_calib"
+		android:layout_marginLeft="10dp"></ToggleButton>
+</LinearLayout>
