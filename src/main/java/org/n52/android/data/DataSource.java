@@ -48,7 +48,7 @@ public interface DataSource {
 			throws ConnectException, RequestException;
 
 	/**
-	 * Gets the {@link Mercator} zoom to use for the spatial index of the
+	 * Gets the {@link MercatorProj} zoom to use for the spatial index of the
 	 * {@link MeasurementManager}
 	 * 
 	 * @return

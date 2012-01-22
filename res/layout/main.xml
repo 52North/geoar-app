@@ -8,9 +8,9 @@
 		<!-- Map -->
 		<RelativeLayout android:layout_height="match_parent"
 			android:layout_width="match_parent">
-			<org.n52.android.view.map.NoiseMapView
+			<org.n52.android.view.map.GeoMapView
 				android:id="@+id/noiseMapView" android:layout_width="match_parent"
-				android:clickable="true" android:apiKey="0eb-7cFUWWL65MVHG1CFqQ3OfvNXnKutPYzjNsw"
+				android:clickable="true" android:apiKey="0tZocCdCJKKKdsPuP_ndeiC1OJo-VM8ymiNMy5g"
 				android:layout_height="match_parent" />
 			<!-- Interface for Calibration -->
 			<org.n52.android.view.map.ManualPositionView
@@ -28,7 +28,7 @@
 				android:id="@+id/glNoiseView" android:layout_width="match_parent"
 				android:layout_height="match_parent" />
 
-			<org.n52.android.view.geoar.CameraView
+			<org.n52.android.view.camera.CameraView
 				android:layout_width="match_parent" android:layout_height="match_parent" />
 
 			<org.n52.android.view.geoar.NoiseChartView

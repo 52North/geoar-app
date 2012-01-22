@@ -14,7 +14,7 @@
  * limitations under the License.
  * 
  */
-package org.n52.android.data;
+package org.n52.android.data.noise;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -46,6 +46,12 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.n52.android.data.DataSource;
+import org.n52.android.data.MeasureParserException;
+import org.n52.android.data.Measurement;
+import org.n52.android.data.MeasurementFilter;
+import org.n52.android.data.Tile;
+import org.n52.android.data.DataSource.RequestException;
 import org.n52.android.geoar.R;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -207,7 +213,7 @@ public class NoiseDroidServerSource implements DataSource {
 	public static Measurement getMeasureFromXML(XmlPullParser parser)
 			throws MeasureParserException {
 		try {
-			Measurement m = new Measurement();
+			Measurement m = new NoiseMeasurement();
 
 			while (true) {
 				if (parser.getEventType() == XmlPullParser.START_TAG) {
@@ -226,7 +232,7 @@ public class NoiseDroidServerSource implements DataSource {
 								"provider"));
 						m.setLocation(location);
 					} else if (parser.getName().equals("NoiseMeasure")) {
-						m.setNoise(Float.parseFloat(parser.getAttributeValue(
+						m.setValue(Float.parseFloat(parser.getAttributeValue(
 								null, "value")));
 					}
 				}

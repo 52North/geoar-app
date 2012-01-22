@@ -47,14 +47,14 @@ public class MercatorPoint extends Point {
 	}
 
 	/**
-	 * Transforms a point to be expressed in another {@link Mercator} zoom level
+	 * Transforms a point to be expressed in another {@link MercatorProj} zoom level
 	 * 
 	 * @param dstZoom
 	 * @return
 	 */
 	public MercatorPoint transform(byte dstZoom) {
 		return new MercatorPoint(
-				(int) Mercator.transformPixel(x, zoom, dstZoom),
-				(int) Mercator.transformPixel(y, zoom, dstZoom), dstZoom);
+				(int) MercatorProj.transformPixel(x, zoom, dstZoom),
+				(int) MercatorProj.transformPixel(y, zoom, dstZoom), dstZoom);
 	}
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  * 
  */
-package org.n52.android.data;
+package org.n52.android.data.noise;
 
 import java.io.File;
 import java.io.FileReader;
@@ -23,6 +23,11 @@ import java.net.ConnectException;
 import java.util.Iterator;
 import java.util.List;
 
+import org.n52.android.data.DataSource;
+import org.n52.android.data.Measurement;
+import org.n52.android.data.MeasurementFilter;
+import org.n52.android.data.Tile;
+import org.n52.android.data.DataSource.RequestException;
 import org.n52.android.geoar.R;
 
 import android.os.Environment;

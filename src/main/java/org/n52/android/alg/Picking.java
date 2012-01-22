@@ -16,7 +16,7 @@
  */
 package org.n52.android.alg;
 
-import org.n52.android.view.geoar.NoiseCamera;
+import org.n52.android.view.camera.NoiseCamera;
 
 import android.graphics.PointF;
 import android.opengl.GLU;

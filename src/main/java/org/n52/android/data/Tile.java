@@ -16,12 +16,12 @@
  */
 package org.n52.android.data;
 
-import org.n52.android.alg.proj.Mercator;
+import org.n52.android.alg.proj.MercatorProj;
 
 import android.graphics.RectF;
 
 /**
- * A tile in the spatial index, based on {@link Mercator}
+ * A tile in the spatial index, based on {@link MercatorProj}
  * 
  * @author Holger Hopmann
  * 
@@ -50,10 +50,10 @@ public class Tile {
 	 */
 	public RectF getLLBBox() {
 		RectF bb = new RectF();
-		bb.top = (float) Mercator.tileYToLatitude(y, zoom);
-		bb.bottom = (float) Mercator.tileYToLatitude(y + 1, zoom);
-		bb.left = (float) Mercator.tileXToLongitude(x, zoom);
-		bb.right = (float) Mercator.tileXToLongitude(x + 1, zoom);
+		bb.top = (float) MercatorProj.transformTileYToLat(y, zoom);
+		bb.bottom = (float) MercatorProj.transformTileYToLat(y + 1, zoom);
+		bb.left = (float) MercatorProj.transformTileXToLon(x, zoom);
+		bb.right = (float) MercatorProj.transformTileXToLon(x + 1, zoom);
 		return bb;
 	}
 

@@ -17,7 +17,7 @@
 package org.n52.android.alg.proj;
 
 /**
- * Class to hold bounds in {@link Mercator} coordinates
+ * Class to hold bounds in {@link MercatorProj} coordinates
  * 
  * @author Holger Hopmann
  *
@@ -62,10 +62,10 @@ public class MercatorRect {
 	}
 
 	public MercatorRect transform(byte dstZoom) {
-		return new MercatorRect((int) Mercator.transformPixel(left, zoom,
-				dstZoom), (int) Mercator.transformPixel(top, zoom, dstZoom),
-				(int) Mercator.transformPixel(right, zoom, dstZoom),
-				(int) Mercator.transformPixel(bottom, zoom, dstZoom), dstZoom);
+		return new MercatorRect((int) MercatorProj.transformPixel(left, zoom,
+				dstZoom), (int) MercatorProj.transformPixel(top, zoom, dstZoom),
+				(int) MercatorProj.transformPixel(right, zoom, dstZoom),
+				(int) MercatorProj.transformPixel(bottom, zoom, dstZoom), dstZoom);
 	}
 
 }

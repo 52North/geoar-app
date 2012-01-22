@@ -28,9 +28,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import org.n52.android.alg.Interpolation;
 import org.n52.android.alg.OnProgressUpdateListener;
-import org.n52.android.alg.proj.Mercator;
+import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.data.DataSource.RequestException;
+import org.n52.android.data.MeasurementManager.GetMeasurementBoundsCallback;
+import org.n52.android.data.MeasurementManager.RequestHolder;
 import org.n52.android.view.geoar.Settings;
 
 import android.util.Log;
@@ -44,8 +46,9 @@ import android.util.Log;
  * @author Holger Hopmann
  * 
  */
-public class MeasurementManager {
+public abstract class MeasurementManager {
 
+	
 	public interface RequestHolder {
 		void cancel();
 	}
@@ -58,7 +61,7 @@ public class MeasurementManager {
 	}
 
 	public class MeasurementTile {
-		protected Tile tile;
+		public Tile tile;
 		public long lastUpdate;
 		public boolean updatePending;
 		public Runnable fetchRunnable;
@@ -72,7 +75,7 @@ public class MeasurementManager {
 			}
 		}
 
-		protected void setMeasurements(List<Measurement> measurements) {
+		public void setMeasurements(List<Measurement> measurements) {
 			lastUpdate = System.currentTimeMillis();
 			this.measurements = measurements;
 
@@ -109,16 +112,16 @@ public class MeasurementManager {
 	public static final int ABORT_NO_CONNECTION = 1;
 	public static final int ABORT_CANCELED = 2;
 
-	private Map<Tile, SoftReference<MeasurementTile>> tileCacheMapping = new HashMap<Tile, SoftReference<MeasurementTile>>();
-	private DataSource dataSource;
-	private ThreadPoolExecutor downloadThreadPool;
-	private byte tileZoom = 14;
+	protected Map<Tile, SoftReference<MeasurementTile>> tileCacheMapping = new HashMap<Tile, SoftReference<MeasurementTile>>();
+	protected DataSource dataSource;
+	protected ThreadPoolExecutor downloadThreadPool;
+	protected byte tileZoom = 14;
 	protected MeasurementFilter measurementFilter;
 
 	public MeasurementManager(DataSource dataSource) {
 		this.dataSource = dataSource;
 		tileZoom = dataSource.getPreferredRequestZoom();
-		measurementFilter = new MeasurementFilter();
+		measurementFilter = DataSourceAdapter.getInstance().CreateMeasurementFilter();// new MeasurementFilter();
 		downloadThreadPool = (ThreadPoolExecutor) Executors
 				.newFixedThreadPool(3);
 	}
@@ -215,28 +218,100 @@ public class MeasurementManager {
 
 	public static final int STEP_REQUEST = 3;
 
-	public interface GetInterpolationBoundsCallback extends
+	public abstract interface GetMeasurementBoundsCallback extends
 			OnProgressUpdateListener {
-		void onReceiveInterpolation(MercatorRect bounds, byte[] interpolation);
+		void onReceiveInterpolation(MercatorRect bounds, Object interpolation);
 
 		void onAbort(MercatorRect bounds, int reason);
 	}
+	
+//	public abstract interface GetPOIBoundsCallback extends 
+//			OnProgressUpdateListener {
+//		void onReceiveMeasurements(MercatorRect bounds, List<Measurement> measurementsList);
+//		
+//		void onAbort(MercatorRect bounds, int reason);
+//	}
+	
+	public RequestHolder getMeasurementsAsPOIs(final MercatorRect bounds, final GetMeasurementBoundsCallback callback, 
+			boolean forceUpdate, final List<Measurement> measurementsList){
+				
+		// Kachelgrenzen
+		final int tileLeftX = (int) MercatorProj.transformPixelXToTileX(
+				MercatorProj.transformPixel(bounds.left, bounds.zoom, tileZoom),
+				tileZoom);
+		final int tileTopY = (int) MercatorProj.transformPixelYToTileY(
+				MercatorProj.transformPixel(bounds.top, bounds.zoom, tileZoom),
+				tileZoom);
+		int tileRightX = (int) MercatorProj.transformPixelXToTileX(
+				MercatorProj.transformPixel(bounds.right, bounds.zoom, tileZoom),
+				tileZoom);
+		int tileBottomY = (int) MercatorProj.transformPixelYToTileY(
+				MercatorProj.transformPixel(bounds.bottom, bounds.zoom, tileZoom),
+				tileZoom);
+		final int tileGridWidth = tileRightX - tileLeftX + 1;
+		
+		// Liste zum Nachverfolgen der erhaltenen Messungen
+		final Vector<List<Measurement>> tileMeasurementsList = new Vector<List<Measurement>>();
+		tileMeasurementsList.setSize(tileGridWidth * (tileBottomY - tileTopY +1));
+		
+		// Callback für die Messungen
+		final GetMeasurementsCallback measureCallback = new GetMeasurementsCallback(){
+			boolean active = true;
+			private int progress;
+			
+			public void onReceiveMeasurements(MeasurementTile measurements) {
+				if(!active){
+					return;
+				}
+				
+				int checkIndex = ((measurements.tile.y - tileTopY) * tileGridWidth) + (measurements.tile.x - tileLeftX);
+				
+				if (tileMeasurementsList.set(checkIndex, measurements.measurements) == null){
+					progress++;
+					callback.onProgressUpdate(progress, tileMeasurementsList.size(), STEP_REQUEST);
+				}
+				if (!tileMeasurementsList.contains(null)){
+					final List<Measurement> measurementsList = new ArrayList<Measurement>();
+					for(List<Measurement> tileMeasurements : tileMeasurementsList){
+						measurementsList.addAll(tileMeasurements);
+					}
+					
+					callback.onReceiveInterpolation(bounds, measurementsList);
+
+				}
+			}
+
+			@Override
+			public void onAbort(MeasurementTile measurements, int reason) {
+				callback.onAbort(bounds,  reason);
+				if(reason == ABORT_CANCELED){
+					active = false;
+				}
+			}
+		};
+		
+		return new RequestHolder() {
+			public void cancel() {
+				measureCallback.onAbort(null, ABORT_CANCELED);
+			}
+		};
+	}
 
 	public RequestHolder getInterpolation(final MercatorRect bounds,
-			final GetInterpolationBoundsCallback callback, boolean forceUpdate,
+			final GetMeasurementBoundsCallback callback, boolean forceUpdate,
 			final byte[] resInterpolation) {
 		// Kachelgrenzen
-		final int tileLeftX = (int) Mercator.pixelXToTileX(
-				Mercator.transformPixel(bounds.left, bounds.zoom, tileZoom),
+		final int tileLeftX = (int) MercatorProj.transformPixelXToTileX(
+				MercatorProj.transformPixel(bounds.left, bounds.zoom, tileZoom),
 				tileZoom);
-		final int tileTopY = (int) Mercator.pixelYToTileY(
-				Mercator.transformPixel(bounds.top, bounds.zoom, tileZoom),
+		final int tileTopY = (int) MercatorProj.transformPixelYToTileY(
+				MercatorProj.transformPixel(bounds.top, bounds.zoom, tileZoom),
 				tileZoom);
-		int tileRightX = (int) Mercator.pixelXToTileX(
-				Mercator.transformPixel(bounds.right, bounds.zoom, tileZoom),
+		int tileRightX = (int) MercatorProj.transformPixelXToTileX(
+				MercatorProj.transformPixel(bounds.right, bounds.zoom, tileZoom),
 				tileZoom);
-		int tileBottomY = (int) Mercator.pixelYToTileY(
-				Mercator.transformPixel(bounds.bottom, bounds.zoom, tileZoom),
+		int tileBottomY = (int) MercatorProj.transformPixelYToTileY(
+				MercatorProj.transformPixel(bounds.bottom, bounds.zoom, tileZoom),
 				tileZoom);
 		final int tileGridWidth = tileRightX - tileLeftX + 1;
 
@@ -315,5 +390,6 @@ public class MeasurementManager {
 		tileZoom = dataSource.getPreferredRequestZoom();
 		dataSource = selectedSource;
 	}
+
 
 }

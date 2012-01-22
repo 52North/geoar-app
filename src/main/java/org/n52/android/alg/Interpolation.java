@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.n52.android.alg.NoiseView.NoiseGridValueProvider;
-import org.n52.android.alg.proj.Mercator;
+import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorPoint;
 import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.data.Measurement;
@@ -79,7 +79,7 @@ public class Interpolation {
 
 			for (Measurement measurement : measurements) {
 				// Noise average
-				sumSoundPressure += Math.pow(10, measurement.noise / 10f) / 1000f;
+				sumSoundPressure += Math.pow(10, measurement.getValue() / 10f) / 1000f;
 
 				// Centroid
 				Point locationTile = measurement.getLocationTile(zoom);
@@ -326,7 +326,7 @@ public class Interpolation {
 		List<Cluster> clusters = new ArrayList<Cluster>();
 
 		int maxDiffY = (int) Math.ceil(Settings.MAX_CLUSTER_SIZE_METER
-				/ Mercator.calculateGroundResolution(0, zoom));
+				/ MercatorProj.getGroundResolution(0, zoom));
 
 		for (int count = 1; count <= Settings.MAX_KMEANS_COUNT; count++) {
 			// number of iterations times
@@ -511,16 +511,20 @@ public class Interpolation {
 			offsetHeight = attenQuarterHeight - 1;
 			scaleY = -1;
 		}
-		for (int i = Math.max(0, y); i < setHeight; i++) {
-			for (int j = Math.max(0, x); j < setWidth; j++) {
-				int indexDst = (i * width + j);
-				int indexSrc = dataOffset + (offsetHeight + scaleY * (i - y))
-						* dataStride + (offsetWidth + scaleX * (j - x));
-
-				if ((attenQuarterData[indexSrc] & 0xFF) > (interpolation[indexDst] & 0xFF)) {
-					interpolation[indexDst] = attenQuarterData[indexSrc];
+		try{
+			for (int i = Math.max(0, y); i < setHeight; i++) {
+				for (int j = Math.max(0, x); j < setWidth; j++) {
+					int indexDst = (i * width + j);
+					int indexSrc = dataOffset + (offsetHeight + scaleY * (i - y))
+							* dataStride + (offsetWidth + scaleX * (j - x));
+	
+					if ((attenQuarterData[indexSrc] & 0xFF) > (interpolation[indexDst] & 0xFF)) {
+						interpolation[indexDst] = attenQuarterData[indexSrc];
+					}
 				}
 			}
+		} catch (ArrayIndexOutOfBoundsException e){
+
 		}
 	}
 
@@ -544,8 +548,8 @@ public class Interpolation {
 		// C ------- | >
 
 		float noiseDistMeter = getDistBetweenNoise(noise, noiseLimit);
-		int noiseDistPixel = (int) (noiseDistMeter / Mercator
-				.calculateGroundResolution(latitude, zoom));
+		int noiseDistPixel = (int) (noiseDistMeter / MercatorProj
+				.getGroundResolution(latitude, zoom));
 
 		int attenQuarterWidth = noiseDistPixel + 1;
 		attenQuarterSize[0] = attenQuarterSize[1] = attenQuarterWidth;
@@ -621,7 +625,7 @@ public class Interpolation {
 		int height = maxY - minY + 1;
 
 		// Reference for accumulation value
-		int standardAcc = (int) (50 / Mercator.calculateGroundResolution(
+		int standardAcc = (int) (50 / MercatorProj.getGroundResolution(
 				cluster.latitude, zoom));
 
 		// Accumulator for probabilities

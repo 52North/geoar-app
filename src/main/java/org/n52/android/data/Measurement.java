@@ -18,7 +18,7 @@ package org.n52.android.data;
 
 import java.util.Calendar;
 
-import org.n52.android.alg.proj.Mercator;
+import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorPoint;
 
 import android.location.Location;
@@ -27,28 +27,26 @@ import android.location.Location;
  * Simple class holding a measurement
  * 
  * @author Holger Hopmann
- * 
+ * @author Arne de Wall
  */
-public class Measurement {
+public abstract class Measurement implements Cloneable {
 
-	public float noise;
 	public double latitude;
-	private double longitude;
-	private float accuracy;
-	private Calendar time;
+	protected double longitude;
+	protected float accuracy;
+	protected Calendar time;
 
 	public void setTime(Calendar time) {
 		this.time = time;
 	}
+	
+	public abstract void setValue(float value);
+	public abstract float getValue();
 
 	public void setLocation(Location location) {
 		this.latitude = location.getLatitude();
 		this.longitude = location.getLongitude();
 		this.accuracy = location.getAccuracy();
-	}
-
-	public void setNoise(float noise) {
-		this.noise = noise;
 	}
 
 	/**
@@ -59,19 +57,19 @@ public class Measurement {
 	 * @return
 	 */
 	public MercatorPoint getLocationTile(byte zoom) {
-		return new MercatorPoint((int) Mercator.longitudeToPixelX(longitude,
-				zoom), (int) Mercator.latitudeToPixelY(latitude, zoom), zoom);
+		return new MercatorPoint((int) MercatorProj.transformLonToPixelX(longitude,
+				zoom), (int) MercatorProj.transformLatToPixelY(latitude, zoom), zoom);
 	}
 
 	/**
-	 * Get acciracy in pixel coordinates at the specified {@link Mercator} zoom
+	 * Get acciracy in pixel coordinates at the specified {@link MercatorProj} zoom
 	 * level
 	 * 
 	 * @param zoom
 	 * @return
 	 */
 	public int getAccuracy(byte zoom) {
-		return (int) (accuracy / Mercator.calculateGroundResolution(latitude,
+		return (int) (accuracy / MercatorProj.getGroundResolution(latitude,
 				zoom));
 	}
 
@@ -81,5 +79,10 @@ public class Measurement {
 
 	public Calendar getTime() {
 		return time;
+	}
+	
+	@Override
+	public Object clone() throws CloneNotSupportedException{
+		return super.clone();
 	}
 }

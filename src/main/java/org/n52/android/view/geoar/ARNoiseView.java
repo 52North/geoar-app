@@ -20,6 +20,7 @@ import org.n52.android.alg.NoiseView.NoiseGridValueProvider;
 import org.n52.android.data.MeasurementManager;
 import org.n52.android.geoar.R;
 import org.n52.android.view.InfoView;
+import org.n52.android.view.camera.NoiseCamera;
 import org.n52.android.view.geoar.LocationHandler.OnLocationUpdateListener;
 import org.n52.android.view.geoar.gl.OpenGLRenderer;
 import org.n52.android.view.geoar.gl.OpenGLRenderer.RotationMatrixProvider;

@@ -27,17 +27,17 @@ import org.n52.android.alg.Interpolation;
 import org.n52.android.alg.NoiseView.NoiseGridValueProvider;
 import org.n52.android.alg.NoiseView.NoiseViewChangedListener;
 import org.n52.android.alg.Picking;
-import org.n52.android.alg.proj.Mercator;
+import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorPoint;
 import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.data.MeasurementManager;
-import org.n52.android.data.MeasurementManager.GetInterpolationBoundsCallback;
+import org.n52.android.data.MeasurementManager.GetMeasurementBoundsCallback;
 import org.n52.android.data.MeasurementManager.RequestHolder;
 import org.n52.android.geoar.R;
 import org.n52.android.view.InfoView;
-import org.n52.android.view.geoar.CameraView;
-import org.n52.android.view.geoar.NoiseCamera;
-import org.n52.android.view.geoar.NoiseCamera.CameraUpdateListener;
+import org.n52.android.view.camera.CameraView;
+import org.n52.android.view.camera.NoiseCamera;
+import org.n52.android.view.camera.NoiseCamera.CameraUpdateListener;
 import org.n52.android.view.geoar.Settings;
 
 import android.content.Context;
@@ -109,7 +109,7 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 	};
 
 	// Callback for the interpolation request in setCenter
-	private GetInterpolationBoundsCallback callback = new GetInterpolationBoundsCallback() {
+	private GetMeasurementBoundsCallback callback = new GetMeasurementBoundsCallback() {
 		public void onAbort(MercatorRect bounds, int reason) {
 			if (infoHandler != null) {
 				infoHandler.clearProgress(OpenGLRenderer.this);
@@ -145,10 +145,10 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 		}
 
 		public void onReceiveInterpolation(MercatorRect bounds,
-				byte[] interpolation) {
+				Object interpolation) {
 			// Save result reference in variable. Those should always be the
 			// same
-			currentInterpolation = interpolation;
+			currentInterpolation = (byte[]) interpolation;
 			currentInterpolationRect = bounds;
 			// Update geometry to reflect the results dimension
 			glInterpolation.setWidth(bounds.width());
@@ -415,21 +415,21 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 		}
 
 		// Calculate thresholds for request of data
-		double meterPerPixel = Mercator.calculateGroundResolution(
+		double meterPerPixel = MercatorProj.getGroundResolution(
 				gPoint.getLatitudeE6() / 1E6f, Settings.ZOOM_AR);
 		int pixelRadius = (int) (Settings.SIZE_AR_INTERPOLATION / meterPerPixel);
 		int pixelReloadDist = (int) (Settings.RELOAD_DIST_AR / meterPerPixel);
 
 		// Calculate new center point in world coordinates
-		int centerPixelX = (int) Mercator.longitudeToPixelX(
+		int centerPixelX = (int) MercatorProj.transformLonToPixelX(
 				gPoint.getLongitudeE6() / 1E6f, Settings.ZOOM_AR);
-		int centerPixelY = (int) Mercator.latitudeToPixelY(
+		int centerPixelY = (int) MercatorProj.transformLatToPixelY(
 				gPoint.getLatitudeE6() / 1E6f, Settings.ZOOM_AR);
 		currentCenterMercator = new MercatorPoint(centerPixelX, centerPixelY,
 				Settings.ZOOM_AR);
 		currentCenterGPoint = gPoint;
 
-		currentGroundResolution = (float) Mercator.calculateGroundResolution(
+		currentGroundResolution = (float) MercatorProj.getGroundResolution(
 				currentCenterGPoint.getLatitudeE6() / 1E6f, Settings.ZOOM_AR);
 
 		// determination if data request is needed or if just a simple shift is

@@ -14,10 +14,12 @@
  * limitations under the License.
  * 
  */
-package org.n52.android.view.geoar;
+package org.n52.android.view.camera;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.n52.android.view.geoar.Settings;
 
 import android.hardware.Camera.Size;
 

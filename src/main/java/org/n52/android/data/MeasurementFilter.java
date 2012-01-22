@@ -25,11 +25,11 @@ import java.util.Calendar;
  * @author Holger Hopmann
  * 
  */
-public class MeasurementFilter {
+public abstract class MeasurementFilter {
 	// package scope
-	Calendar timeFrom, timeTo;
-	Integer hourFrom;
-	Integer hourTo;
+	public Calendar timeFrom, timeTo;
+	public Integer hourFrom;
+	public Integer hourTo;
 
 	public Integer getHourFrom() {
 		return hourFrom;
@@ -70,22 +70,7 @@ public class MeasurementFilter {
 		timeTo = tempFilter.timeTo;
 	}
 
-	public MeasurementFilter clone() {
-		MeasurementFilter cloneFilter = new MeasurementFilter();
-		if (hourFrom != null) {
-			cloneFilter.hourFrom = new Integer(hourFrom);
-		}
-		if (hourTo != null) {
-			cloneFilter.hourTo = new Integer(hourTo);
-		}
-		if (timeFrom != null) {
-			cloneFilter.timeFrom = (Calendar) timeFrom.clone();
-		}
-		if (timeTo != null) {
-			cloneFilter.timeTo = (Calendar) timeTo.clone();
-		}
-		return cloneFilter;
-	}
+	public abstract MeasurementFilter clone();
 
 	/**
 	 * Checks if a measurement conforms to that filter

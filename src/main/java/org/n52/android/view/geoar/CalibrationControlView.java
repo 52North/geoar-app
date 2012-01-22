@@ -20,7 +20,8 @@ import java.text.DecimalFormat;
 
 import org.n52.android.geoar.R;
 import org.n52.android.view.InfoView;
-import org.n52.android.view.geoar.NoiseCamera.CameraUpdateListener;
+import org.n52.android.view.camera.NoiseCamera;
+import org.n52.android.view.camera.NoiseCamera.CameraUpdateListener;
 
 import android.content.Context;
 import android.os.Bundle;
