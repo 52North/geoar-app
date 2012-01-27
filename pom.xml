@@ -30,6 +30,19 @@
 		</license>
 	</licenses>
 
+	<repositories>
+		<repository>
+			<id>sonatype-central-staging</id>
+			<url>https://oss.sonatype.org/content/groups/public/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.google.android</groupId>
@@ -43,6 +56,12 @@
 			<artifactId>maps</artifactId>
 			<version>14_r1</version>
 			<scope>provided</scope><!-- must be added to buildpath using IDE -->
+		</dependency>
+
+		<dependency>
+			<groupId>org.osmdroid</groupId>
+			<artifactId>osmdroid-android</artifactId>
+			<version>3.0.7-SNAPSHOT</version>
 		</dependency>
 
 		<!-- NOTE: those are the ones defined by goole and are NOT in the maven 
@@ -88,6 +107,35 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
+				</configuration>
+			</plugin>
+
+			<!-- http://stackoverflow.com/questions/6352208/how-to-solve-plugin-execution-not-covered-by-lifecycle-configuration-for-sprin -->
+			<!--This plugin's configuration is used to store Eclipse m2e settings 
+				only. It has no influence on the Maven build itself. -->
+			<plugin>
+				<groupId>org.eclipse.m2e</groupId>
+				<artifactId>lifecycle-mapping</artifactId>
+				<version>1.0.0</version>
+				<configuration>
+					<lifecycleMappingMetadata>
+						<pluginExecutions>
+							<pluginExecution>
+								<pluginExecutionFilter>
+									<groupId>org.codehaus.mojo</groupId>
+									<artifactId>aspectj-maven-plugin</artifactId>
+									<versionRange>[1.0,)</versionRange>
+									<goals>
+										<goal>test-compile</goal>
+										<goal>compile</goal>
+									</goals>
+								</pluginExecutionFilter>
+								<action>
+									<execute />
+								</action>
+							</pluginExecution>
+						</pluginExecutions>
+					</lifecycleMappingMetadata>
 				</configuration>
 			</plugin>
 		</plugins>
