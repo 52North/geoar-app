@@ -41,7 +41,7 @@ import android.widget.LinearLayout;
 public class ManualPositionView extends LinearLayout implements NoiseARView,
 		OnClickListener {
 
-	private NoiseMapView mapView;
+	private GeoMapView mapView;
 	private LocationHandler locationHandler;
 
 	public ManualPositionView(Context context, AttributeSet attrs) {
@@ -58,7 +58,7 @@ public class ManualPositionView extends LinearLayout implements NoiseARView,
 		okButton.setOnClickListener(this);
 	}
 
-	public void setMapView(NoiseMapView mapView) {
+	public void setMapView(GeoMapView mapView) {
 		this.mapView = mapView;
 	}
 

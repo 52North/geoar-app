@@ -27,8 +27,8 @@ import org.n52.android.alg.Interpolation;
 import org.n52.android.alg.NoiseView.NoiseGridValueProvider;
 import org.n52.android.alg.NoiseView.NoiseViewChangedListener;
 import org.n52.android.alg.Picking;
-import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorPoint;
+import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.data.MeasurementManager;
 import org.n52.android.data.MeasurementManager.GetMeasurementBoundsCallback;
@@ -39,6 +39,7 @@ import org.n52.android.view.camera.CameraView;
 import org.n52.android.view.camera.NoiseCamera;
 import org.n52.android.view.camera.NoiseCamera.CameraUpdateListener;
 import org.n52.android.view.geoar.Settings;
+import org.osmdroid.util.GeoPoint;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -47,8 +48,6 @@ import android.graphics.PointF;
 import android.location.Location;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.GLU;
-
-import com.google.android.maps.GeoPoint;
 
 
 /**

@@ -52,13 +52,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.google.android.maps</groupId>
-			<artifactId>maps</artifactId>
-			<version>14_r1</version>
-			<scope>provided</scope><!-- must be added to buildpath using IDE -->
-		</dependency>
-
-		<dependency>
 			<groupId>org.osmdroid</groupId>
 			<artifactId>osmdroid-android</artifactId>
 			<version>3.0.7-SNAPSHOT</version>

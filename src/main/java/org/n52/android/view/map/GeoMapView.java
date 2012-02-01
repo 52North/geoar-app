@@ -16,16 +16,24 @@
  */
 package org.n52.android.view.map;
 
+import java.util.List;
+
 import org.n52.android.data.MeasurementManager;
 import org.n52.android.geoar.R;
 import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.LocationHandler;
 import org.n52.android.view.geoar.LocationHandler.OnLocationUpdateListener;
 import org.n52.android.view.geoar.NoiseARView;
+import org.n52.android.view.map.overlay.InterpolationOverlay;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapController;
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.Overlay;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.location.Location;
+import android.os.Bundle;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
@@ -40,8 +48,6 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.google.android.maps.GeoPoint;
-import com.google.android.maps.MapView;
 
 
 /**
@@ -51,7 +57,7 @@ import com.google.android.maps.MapView;
  * @author Holger Hopmann
  * 
  */
-public class NoiseMapView extends MapView implements NoiseARView,
+public class GeoMapView extends MapView implements NoiseARView,
 		OnGestureListener, OnLocationUpdateListener {
 
 	/**
@@ -68,23 +74,23 @@ public class NoiseMapView extends MapView implements NoiseARView,
 		private ToggleButton buttonStreets;
 
 		public MapOverlayDialog() {
-			super(NoiseMapView.this.getContext());
+			super(GeoMapView.this.getContext());
 			// Inflate Layout
 			View layout = LayoutInflater.from(getContext()).inflate(
 					R.layout.map_overlay_dialog, null);
 
-			// Find Button Views
-			buttonStreets = (ToggleButton) layout
-					.findViewById(R.id.toggleButtonStreet);
-			buttonStreets.setChecked(!isSatellite());
-
-			buttonSatellite = (ToggleButton) layout
-					.findViewById(R.id.ToggleButtonSatellite);
-			buttonSatellite.setChecked(isSatellite());
-
-			buttonTraffic = (ToggleButton) layout
-					.findViewById(R.id.toggleButtonTraffic);
-			buttonTraffic.setChecked(isTraffic());
+//			// Find Button Views
+//			buttonStreets = (ToggleButton) layout
+//					.findViewById(R.id.toggleButtonStreet);
+//			buttonStreets.setChecked(!isSatellite());
+//
+//			buttonSatellite = (ToggleButton) layout
+//					.findViewById(R.id.ToggleButtonSatellite);
+//			buttonSatellite.setChecked(isSatellite());
+//
+//			buttonTraffic = (ToggleButton) layout
+//					.findViewById(R.id.toggleButtonTraffic);
+//			buttonTraffic.setChecked(isTraffic());
 
 			// Bind Check Listeners
 			buttonStreets.setOnCheckedChangeListener(this);
@@ -99,45 +105,53 @@ public class NoiseMapView extends MapView implements NoiseARView,
 					(Message) null);
 		}
 
-		public void onCheckedChanged(CompoundButton buttonView,
-				boolean isChecked) {
-			// Change renderer state based on user check input
-			switch (buttonView.getId()) {
-			case R.id.toggleButtonStreet:
-				if (buttonSatellite.isChecked() == isChecked) {
-					buttonSatellite.setChecked(!isChecked);
-				}
-				break;
-			case R.id.ToggleButtonSatellite:
-				setSatellite(isChecked);
-				if (buttonStreets.isChecked() == isChecked) {
-					buttonStreets.setChecked(!isChecked);
-				}
-				break;
-			case R.id.toggleButtonTraffic:
-				setTraffic(isChecked);
-				break;
-			}
+		@Override
+		public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+			// TODO Auto-generated method stub
+			
 		}
+
+//		public void onCheckedChanged(CompoundButton buttonView,
+//				boolean isChecked) {
+//			// Change renderer state based on user check input
+//			switch (buttonView.getId()) {
+//			case R.id.toggleButtonStreet:
+//				if (buttonSatellite.isChecked() == isChecked) {
+//					buttonSatellite.setChecked(!isChecked);
+//				}
+//				break;
+//			case R.id.ToggleButtonSatellite:
+//				setSatellite(isChecked);
+//				if (buttonStreets.isChecked() == isChecked) {
+//					buttonStreets.setChecked(!isChecked);
+//				}
+//				break;
+//			case R.id.toggleButtonTraffic:
+//				setTraffic(isChecked);
+//				break;
+//			}
+//		}
 	}
 
 	private InfoView infoHandler;
 	private InterpolationOverlay interpolationOverlay;
+	private List<Overlay> mapOverlays;
 	private ImageView locationIndicator;
 
 	private LocationHandler locationHandler;
 	private GestureDetector gesture;
 	private boolean manualPositionMode;
-
-	public NoiseMapView(Context context, AttributeSet attrs) {
+	private MapController mapController;
+	
+	public GeoMapView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init(context);
 	}
 
-	public NoiseMapView(Context context, String apiKey) {
-		super(context, apiKey);
-		init(context);
-	}
+//	public GeoMapView(Context context, String apiKey) {
+////		super(context, apiKey);
+//		init(context);
+//	}
 
 	private void init(Context context) {
 		if (isInEditMode()) {
@@ -151,6 +165,9 @@ public class NoiseMapView extends MapView implements NoiseARView,
 				.setImageResource(R.drawable.ic_maps_indicator_current_position_anim);
 		locationIndicator.setVisibility(View.GONE);
 		this.addView(locationIndicator);
+		mapController = this.getController();
+		mapController.setZoom(15);
+		GeoPoint point2 = new GeoPoint(51963694, 7612933);
 
 		setBuiltInZoomControls(true);
 	}
@@ -166,8 +183,8 @@ public class NoiseMapView extends MapView implements NoiseARView,
 	 * @param measureManager
 	 */
 	public void setMeasureManager(MeasurementManager measureManager) {
-		if (interpolationOverlay == null) {
-			interpolationOverlay = new InterpolationOverlay(measureManager,
+		if (interpolationOverlay == null || mapOverlays == null) {
+			interpolationOverlay = new InterpolationOverlay(this.getContext(), measureManager,
 					getWidth(), getHeight());
 			if (infoHandler != null) {
 				interpolationOverlay.setInfoHandler(infoHandler);
@@ -216,9 +233,9 @@ public class NoiseMapView extends MapView implements NoiseARView,
 			GeoPoint geoPoint = new GeoPoint(
 					(int) (location.getLatitude() * 1E6),
 					(int) (location.getLongitude() * 1E6));
-			locationIndicator.setLayoutParams(new MapView.LayoutParams(
-					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
-					geoPoint, LayoutParams.CENTER));
+//			locationIndicator.setLayoutParams(new MapView.LayoutParams(
+//					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
+//					geoPoint, LayoutParams.CENTER));
 			locationIndicator.setVisibility(View.VISIBLE);
 		}
 	}
@@ -324,7 +341,7 @@ public class NoiseMapView extends MapView implements NoiseARView,
 	public boolean onSingleTapUp(MotionEvent e) {
 		if (manualPositionMode) {
 			// Set manual position in tap
-			GeoPoint geoPoint = getProjection().fromPixels((int) e.getX(),
+			GeoPoint geoPoint = (GeoPoint) getProjection().fromPixels((int) e.getX(),
 					(int) e.getY());
 
 			locationHandler.setManualLocation(geoPoint);
@@ -334,5 +351,17 @@ public class NoiseMapView extends MapView implements NoiseARView,
 
 	public void onLocationChanged(Location location) {
 		showLocation(location);
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onRestoreInstanceState(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.n52.android.geoar.R;
 import org.n52.android.view.InfoView;
+import org.osmdroid.util.GeoPoint;
 
 import android.content.Context;
 import android.location.Location;
@@ -28,8 +29,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
-
-import com.google.android.maps.GeoPoint;
 
 
 /**

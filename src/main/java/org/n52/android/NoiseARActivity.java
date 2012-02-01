@@ -37,6 +37,8 @@ import org.n52.android.view.geoar.NoiseARView;
 import org.n52.android.view.geoar.NoiseChartView;
 import org.n52.android.view.map.GeoMapView;
 import org.n52.android.view.map.ManualPositionView;
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.Overlay;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -52,10 +54,6 @@ import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ViewAnimator;
 
-import com.google.android.maps.MapActivity;
-import com.google.android.maps.MapView;
-import com.google.android.maps.Overlay;
-
 
 /**
  * Core and only {@link Activity} in this application. Coordinates all its child
@@ -67,7 +65,7 @@ import com.google.android.maps.Overlay;
  * @author Holger Hopmann
  * 
  */
-public class NoiseARActivity extends MapActivity {
+public class NoiseARActivity extends Activity {
 
 	private DataSource[] dataSources = new DataSource[] {
 			new NoiseDroidServerSource(), new NoiseDroidLocalSource() };
@@ -206,10 +204,6 @@ public class NoiseARActivity extends MapActivity {
 		window.setFormat(PixelFormat.TRANSLUCENT);
 	}
 
-	@Override
-	protected boolean isRouteDisplayed() {
-		return false;
-	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {

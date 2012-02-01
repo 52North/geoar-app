@@ -23,6 +23,12 @@ package org.n52.android.view.geoar;
  * @author Holger Hopmann
  */
 public class Settings {
+	
+	public static enum DataSourceSetting{
+		NOISE,
+		AIRPOLUTION
+	}
+	
 	// AR view settings
 	// Radius in meters for the interpolation in AR view
 	public static final int SIZE_AR_INTERPOLATION = 150;

@@ -14,18 +14,23 @@
  * limitations under the License.
  * 
  */
-package org.n52.android.view.map;
+package org.n52.android.view.map.overlay;
 
 import org.n52.android.alg.Interpolation;
-import org.n52.android.alg.proj.Mercator;
+import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.data.MeasurementManager;
-import org.n52.android.data.MeasurementManager.GetInterpolationBoundsCallback;
+import org.n52.android.data.MeasurementManager.GetMeasurementBoundsCallback;
 import org.n52.android.data.MeasurementManager.RequestHolder;
 import org.n52.android.geoar.R;
 import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.Settings;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.MapView.Projection;
+import org.osmdroid.views.overlay.Overlay;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -33,16 +38,12 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.MotionEvent;
 
-import com.google.android.maps.GeoPoint;
-import com.google.android.maps.MapView;
-import com.google.android.maps.Overlay;
-import com.google.android.maps.Projection;
-
 
 /**
  * Map {@link Overlay} to show interpolation data in a {@link MapView}
  * 
  * @author Holger Hopmann
+ * @author Arne de Wall
  * 
  */
 public class InterpolationOverlay extends Overlay {
@@ -66,14 +67,14 @@ public class InterpolationOverlay extends Overlay {
 		private RequestHolder requestHolder;
 
 		// Callback for finished interpolation
-		private GetInterpolationBoundsCallback callback = new GetInterpolationBoundsCallback() {
+		private GetMeasurementBoundsCallback callback = new GetMeasurementBoundsCallback() {
 
 			public void onReceiveInterpolation(MercatorRect bounds,
-					byte[] interpolation) {
+					Object dataStream) {
 
 				if (!canceled) {
 					synchronized (interpolationLock) {
-						interpolationBuffer = interpolation;
+						interpolationBuffer = (byte[]) dataStream;
 						interpolationBmp = Interpolation.interpolationToBitmap(
 								bounds, interpolationBuffer, interpolationBmp);
 					}
@@ -84,6 +85,7 @@ public class InterpolationOverlay extends Overlay {
 					mapView.postInvalidate();
 				}
 			}
+			
 
 			public void onAbort(MercatorRect bounds, final int reason) {
 				canceled = true;
@@ -124,6 +126,8 @@ public class InterpolationOverlay extends Overlay {
 							UpdateInterpolationHolder.this);
 				}
 			}
+
+
 		};
 
 		public UpdateInterpolationHolder(MercatorRect bounds, MapView mapView) {
@@ -179,8 +183,9 @@ public class InterpolationOverlay extends Overlay {
 	 * @param cacheWidth
 	 * @param cacheHeight
 	 */
-	public InterpolationOverlay(MeasurementManager measureManager,
+	public InterpolationOverlay(Context context, MeasurementManager measureManager,
 			int cacheWidth, int cacheHeight) {
+		super(context);
 		this.measureManager = measureManager;
 		this.cacheWidth = cacheWidth;
 		this.cacheHeight = cacheHeight;
@@ -189,7 +194,7 @@ public class InterpolationOverlay extends Overlay {
 	}
 
 	/**
-	 * changs the interpolation buffer size after construction
+	 * changes the interpolation buffer size after construction
 	 * 
 	 * @param width
 	 * @param height
@@ -220,7 +225,7 @@ public class InterpolationOverlay extends Overlay {
 
 	@Override
 	public void draw(Canvas canvas, MapView mapView, boolean shadow) {
-		super.draw(canvas, mapView, shadow);
+
 		if (shadow || currentInterpolationUpdate == null)
 			return;
 		// only draw if not shadow processing and if interpolation really
@@ -230,22 +235,22 @@ public class InterpolationOverlay extends Overlay {
 		Point tileTopLeft = proj
 				.toPixels(
 						new GeoPoint(
-								(int) (Mercator.pixelYToLatitude(
+								(int) (MercatorProj.transformPixelYToLat(
 										currentInterpolationUpdate.bounds.top,
 										currentInterpolationUpdate.bounds.zoom) * 1E6),
-								(int) (Mercator.pixelXToLongitude(
+								(int) (MercatorProj.transformPixelXToLon(
 										currentInterpolationUpdate.bounds.left,
 										currentInterpolationUpdate.bounds.zoom) * 1E6)),
 						null);
 		Point tileBottomRight = proj
 				.toPixels(
 						new GeoPoint(
-								(int) (Mercator
-										.pixelYToLatitude(
+								(int) (MercatorProj
+										.transformPixelYToLat(
 												currentInterpolationUpdate.bounds.bottom,
 												currentInterpolationUpdate.bounds.zoom) * 1E6),
-								(int) (Mercator
-										.pixelXToLongitude(
+								(int) (MercatorProj
+										.transformPixelXToLon(
 												currentInterpolationUpdate.bounds.right,
 												currentInterpolationUpdate.bounds.zoom) * 1E6)),
 						null);
@@ -271,11 +276,11 @@ public class InterpolationOverlay extends Overlay {
 		zoom = (byte) Math.min(zoom, Settings.MAX_ZOOM_MAPINTERPOLATION);
 		Projection proj = mapView.getProjection();
 
-		GeoPoint gPoint = proj.fromPixels(0, 0);
+		GeoPoint gPoint = (GeoPoint) proj.fromPixels(0, 0);
 
-		int x = (int) Mercator.longitudeToPixelX(
+		int x = (int) MercatorProj.transformLonToPixelX(
 				gPoint.getLongitudeE6() / 1E6f, zoom);
-		int y = (int) Mercator.latitudeToPixelY(gPoint.getLatitudeE6() / 1E6f,
+		int y = (int) MercatorProj.transformLatToPixelY(gPoint.getLatitudeE6() / 1E6f,
 				zoom);
 
 		synchronized (interpolationLock) {

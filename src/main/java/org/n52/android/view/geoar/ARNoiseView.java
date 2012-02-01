@@ -24,6 +24,7 @@ import org.n52.android.view.camera.NoiseCamera;
 import org.n52.android.view.geoar.LocationHandler.OnLocationUpdateListener;
 import org.n52.android.view.geoar.gl.OpenGLRenderer;
 import org.n52.android.view.geoar.gl.OpenGLRenderer.RotationMatrixProvider;
+import org.osmdroid.util.GeoPoint;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -48,7 +49,6 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ToggleButton;
 
-import com.google.android.maps.GeoPoint;
 
 /**
  * View to show virtual information based on the camera's settings. It also
