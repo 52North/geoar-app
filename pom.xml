@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.n52.android</groupId>
-	<artifactId>geoar</artifactId>
+	<artifactId>52n-geoar</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>apk</packaging>
 
@@ -30,19 +30,7 @@
 		</license>
 	</licenses>
 
-	<repositories>
-		<repository>
-			<id>sonatype-central-staging</id>
-			<url>https://oss.sonatype.org/content/groups/public/org/osmdroid/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
+	
 	<dependencies>
 		<dependency>
 			<groupId>com.google.android</groupId>
@@ -52,17 +40,10 @@
 		</dependency>
 
 		<dependency>
-		    <groupId>org.osmdroid</groupId>
-		    <artifactId>osmdroid-android</artifactId>
-		    <version>3.0.7-SNAPSHOT</version>
+			<groupId>org.osmdroid</groupId>
+			<artifactId>osmdroid-android</artifactId>
+			<version>3.0.7</version>
 		</dependency>
-		
-		<dependency>
-	        <groupId>org.slf4j</groupId>
-	        <artifactId>slf4j-api</artifactId>
-	        <version>1.5.8</version>
-    	</dependency> 
-
 
 		<!-- NOTE: those are the ones defined by goole and are NOT in the maven 
 			central repository and need to be installed manually with: mvn install:install-file -->
@@ -137,11 +118,6 @@
 						</pluginExecutions>
 					</lifecycleMappingMetadata>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.osmdroid</groupId>
-				<artifactId>osmdoid-android</artifactId>
-				<version>3.0.7-SNAPSHOT</version>
 			</plugin>
 		</plugins>
 	</build>
