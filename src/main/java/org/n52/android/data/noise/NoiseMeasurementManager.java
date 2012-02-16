@@ -125,9 +125,10 @@ public class NoiseMeasurementManager extends MeasurementManager {
 
 
 
+	@Override
 	public RequestHolder getInterpolation(final MercatorRect bounds,
 			final GetMeasurementBoundsCallback callback, boolean forceUpdate,
-			final byte[] resInterpolation) {
+			MeasurementsCallback dataCallback) {
 		// Kachelgrenzen
 		final int tileLeftX = (int) MercatorProj.transformPixelXToTileX(
 				MercatorProj.transformPixel(bounds.left, bounds.zoom, tileZoom),
@@ -155,6 +156,9 @@ public class NoiseMeasurementManager extends MeasurementManager {
 			
 			
 			public void onReceiveMeasurements(MeasurementTile measurements) {
+				
+				final MeasurementsCallback res = new MeasurementsCallback();
+				
 				if (!active) {
 					return;
 				}
@@ -173,15 +177,18 @@ public class NoiseMeasurementManager extends MeasurementManager {
 					for (List<Measurement> tileMeasurements : tileMeasurementsList) {
 						measurementsList.addAll(tileMeasurements);
 					}
-
+					
+					res.measurementBuffer = measurementsList;
+					
 					new Thread(new Runnable() {
 						public void run() {
 							if (active) {
-								byte[] interpolation = Interpolation
+								
+								res.interpolationBuffer = Interpolation
 										.interpolate(measurementsList, bounds,
-												resInterpolation, callback);
-								callback.onReceiveInterpolation(bounds,
-										interpolation);
+												res.interpolationBuffer, callback);
+								callback.onReceiveDataUpdate(bounds,
+										res);
 							}
 						}
 					}).run();
@@ -220,6 +227,9 @@ public class NoiseMeasurementManager extends MeasurementManager {
 		tileZoom = dataSource.getPreferredRequestZoom();
 		dataSource = selectedSource;
 	}
+
+
+
 
 
 

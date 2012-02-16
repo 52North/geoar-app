@@ -69,7 +69,7 @@ public class NoiseARActivity extends Activity {
 
 	private DataSource[] dataSources = new DataSource[] {
 			new NoiseDroidServerSource(), new NoiseDroidLocalSource() };
-
+	
 	private DataSourceAdapter adapter = DataSourceAdapter.getInstance();
 	
 	private MeasurementManager measurementManager;

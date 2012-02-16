@@ -25,9 +25,11 @@ import org.n52.android.view.geoar.LocationHandler;
 import org.n52.android.view.geoar.LocationHandler.OnLocationUpdateListener;
 import org.n52.android.view.geoar.NoiseARView;
 import org.n52.android.view.map.overlay.InterpolationOverlay;
+import org.n52.android.view.map.overlay.MapOverlayHandler;
+import org.osmdroid.ResourceProxy;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapController;
-import org.osmdroid.views.MapView;
+import org.osmdroid.views.MapView; 
 import org.osmdroid.views.overlay.Overlay;
 
 import android.app.AlertDialog;
@@ -68,10 +70,9 @@ public class GeoMapView extends MapView implements NoiseARView,
 	 */
 	private class MapOverlayDialog extends AlertDialog implements
 			OnCheckedChangeListener {
-
-		private ToggleButton buttonSatellite;
-		private ToggleButton buttonTraffic;
-		private ToggleButton buttonStreets;
+		
+		private ToggleButton buttonInterpolationOverlay;
+		private ToggleButton buttonItemizedOverlay;
 
 		public MapOverlayDialog() {
 			super(GeoMapView.this.getContext());
@@ -80,23 +81,17 @@ public class GeoMapView extends MapView implements NoiseARView,
 					R.layout.map_overlay_dialog, null);
 
 //			// Find Button Views
-//			buttonStreets = (ToggleButton) layout
-//					.findViewById(R.id.toggleButtonStreet);
-//			buttonStreets.setChecked(!isSatellite());
-//
-//			buttonSatellite = (ToggleButton) layout
-//					.findViewById(R.id.ToggleButtonSatellite);
-//			buttonSatellite.setChecked(isSatellite());
-//
-//			buttonTraffic = (ToggleButton) layout
-//					.findViewById(R.id.toggleButtonTraffic);
-//			buttonTraffic.setChecked(isTraffic());
-
-			// Bind Check Listeners
-			buttonStreets.setOnCheckedChangeListener(this);
-			buttonSatellite.setOnCheckedChangeListener(this);
-			buttonTraffic.setOnCheckedChangeListener(this);
-
+			buttonInterpolationOverlay = (ToggleButton) layout
+					.findViewById(R.id.ToggleButtonInterpolation);
+			buttonInterpolationOverlay.setChecked(showInterpolationOverlay);
+			
+			buttonItemizedOverlay = (ToggleButton) layout
+					.findViewById(R.id.ToggleButtonItemizedOverlay);
+			buttonItemizedOverlay.setChecked(showItemizedOverlay);
+			
+			buttonInterpolationOverlay.setOnCheckedChangeListener(this);
+			buttonItemizedOverlay.setOnCheckedChangeListener(this);
+			
 			// Set Dialog Options
 			setView(layout);
 			setCancelable(true);
@@ -106,35 +101,24 @@ public class GeoMapView extends MapView implements NoiseARView,
 		}
 
 		@Override
-		public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
-			// TODO Auto-generated method stub
-			
+		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+			switch (buttonView.getId()){
+			case R.id.ToggleButtonInterpolation:
+				mapOverlayHandler.showInterpolationOverlay(isChecked);
+				showInterpolationOverlay = isChecked;
+				invalidate();
+				break;
+			case R.id.ToggleButtonItemizedOverlay:
+				mapOverlayHandler.showItemizedOverlay(isChecked);
+				showItemizedOverlay = isChecked;
+				invalidate();
+				break;
+			}
 		}
-
-//		public void onCheckedChanged(CompoundButton buttonView,
-//				boolean isChecked) {
-//			// Change renderer state based on user check input
-//			switch (buttonView.getId()) {
-//			case R.id.toggleButtonStreet:
-//				if (buttonSatellite.isChecked() == isChecked) {
-//					buttonSatellite.setChecked(!isChecked);
-//				}
-//				break;
-//			case R.id.ToggleButtonSatellite:
-//				setSatellite(isChecked);
-//				if (buttonStreets.isChecked() == isChecked) {
-//					buttonStreets.setChecked(!isChecked);
-//				}
-//				break;
-//			case R.id.toggleButtonTraffic:
-//				setTraffic(isChecked);
-//				break;
-//			}
-//		}
 	}
 
 	private InfoView infoHandler;
-	private InterpolationOverlay interpolationOverlay;
+	private MapOverlayHandler mapOverlayHandler;
 	private List<Overlay> mapOverlays;
 	private ImageView locationIndicator;
 
@@ -143,33 +127,38 @@ public class GeoMapView extends MapView implements NoiseARView,
 	private boolean manualPositionMode;
 	private MapController mapController;
 	
+	private ResourceProxy mResourceProxy;
+	
+	private boolean showItemizedOverlay;
+	private boolean showInterpolationOverlay;
+	
 	public GeoMapView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init(context);
 	}
 
-//	public GeoMapView(Context context, String apiKey) {
-////		super(context, apiKey);
-//		init(context);
-//	}
 
 	private void init(Context context) {
-		if (isInEditMode()) {
+		if (isInEditMode()) 
 			return;
-		}
-
+		
 		this.gesture = new GestureDetector(getContext(), this);
 
 		locationIndicator = new ImageView(context);
-		locationIndicator
-				.setImageResource(R.drawable.ic_maps_indicator_current_position_anim);
+		locationIndicator.setImageResource(R.drawable.ic_maps_indicator_current_position_anim);
 		locationIndicator.setVisibility(View.GONE);
 		this.addView(locationIndicator);
+		
 		mapController = this.getController();
 		mapController.setZoom(15);
-		GeoPoint point2 = new GeoPoint(51963694, 7612933);
+		// set first view to Mensa II 
+		GeoPoint point2 = new GeoPoint(51965344, 7600003);
+		mapController.setCenter(point2);
+		
+		mResourceProxy = getResourceProxy();
 
 		setBuiltInZoomControls(true);
+		setMultiTouchControls(true);
 	}
 
 	public void setLocationHandler(LocationHandler locationHandler) {
@@ -183,31 +172,34 @@ public class GeoMapView extends MapView implements NoiseARView,
 	 * @param measureManager
 	 */
 	public void setMeasureManager(MeasurementManager measureManager) {
-		if (interpolationOverlay == null || mapOverlays == null) {
-			interpolationOverlay = new InterpolationOverlay(this.getContext(), measureManager,
+		if (mapOverlayHandler == null || mapOverlays == null) {
+			mapOverlayHandler = new MapOverlayHandler(this, measureManager,
 					getWidth(), getHeight());
+			mapOverlayHandler.setDrawable(this.getResources().getDrawable(R.drawable.icon));
 			if (infoHandler != null) {
-				interpolationOverlay.setInfoHandler(infoHandler);
+				mapOverlayHandler.setInfoHandler(infoHandler);
 			}
-			getOverlays().add(0, interpolationOverlay);
-			interpolationOverlay.updateInterpolation(this, true);
+//			getOverlays().clear();
+//			getOverlays().addAll(mapOverlayHandler.getOverlays());
+			
+			mapOverlayHandler.updateOverlay(this, true);
 		} else {
-			interpolationOverlay.setMeasureManager(measureManager);
-			interpolationOverlay.updateInterpolation(this, true);
+			mapOverlayHandler.setMeasureManager(measureManager);
+			mapOverlayHandler.updateOverlay(this, true);
 		}
 	}
 
 	public void setInfoHandler(InfoView infoHandler) {
 		this.infoHandler = infoHandler;
-		if (interpolationOverlay != null) {
-			interpolationOverlay.setInfoHandler(infoHandler);
+		if (mapOverlayHandler != null) {
+			mapOverlayHandler.setInfoHandler(infoHandler);
 		}
 	}
 
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-		if (interpolationOverlay != null) {
-			interpolationOverlay.setInterpolationPixelSize(w, h);
+		if (mapOverlayHandler != null) {
+			mapOverlayHandler.setInterpolationPixelSize(w, h);
 		}
 		super.onSizeChanged(w, h, oldw, oldh);
 	}
@@ -217,8 +209,8 @@ public class GeoMapView extends MapView implements NoiseARView,
 		super.onVisibilityChanged(changedView, visibility);
 		if (!isShown()) {
 			// Cancel interpolation overlay updates if view gets invisible
-			if (interpolationOverlay != null) {
-				interpolationOverlay.abort();
+			if (mapOverlayHandler != null) {
+				mapOverlayHandler.abort();
 			}
 		}
 	}
@@ -233,9 +225,9 @@ public class GeoMapView extends MapView implements NoiseARView,
 			GeoPoint geoPoint = new GeoPoint(
 					(int) (location.getLatitude() * 1E6),
 					(int) (location.getLongitude() * 1E6));
-//			locationIndicator.setLayoutParams(new MapView.LayoutParams(
-//					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
-//					geoPoint, LayoutParams.CENTER));
+			locationIndicator.setLayoutParams(new MapView.LayoutParams(
+					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
+					geoPoint, LayoutParams.CENTER, 0 , 0));
 			locationIndicator.setVisibility(View.VISIBLE);
 		}
 	}
@@ -251,6 +243,7 @@ public class GeoMapView extends MapView implements NoiseARView,
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
 		gesture.onTouchEvent(ev);
+		mapOverlayHandler.onTouchEvent(ev, this);
 		return super.onTouchEvent(ev);
 	}
 
@@ -268,8 +261,8 @@ public class GeoMapView extends MapView implements NoiseARView,
 			// Event konsumieren
 			return true;
 		case R.id.item_reload_map:
-			if (interpolationOverlay != null) {
-				interpolationOverlay.updateInterpolation(this, true);
+			if (mapOverlayHandler != null) {
+				mapOverlayHandler.updateOverlay(this, true);
 			}
 			// Event konsumieren
 			return true;
@@ -364,4 +357,7 @@ public class GeoMapView extends MapView implements NoiseARView,
 		// TODO Auto-generated method stub
 		
 	}
+
+	
+
 }

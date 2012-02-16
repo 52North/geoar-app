@@ -85,4 +85,12 @@ public abstract class Measurement implements Cloneable {
 	public Object clone() throws CloneNotSupportedException{
 		return super.clone();
 	}
+	
+	public double getLatitude(){
+		return latitude;
+	}
+	
+	public double getLongitude(){
+		return longitude;
+	}
 }

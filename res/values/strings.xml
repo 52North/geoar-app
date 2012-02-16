@@ -36,7 +36,7 @@
 	<string name="satellite">Satellit</string>
 	<string name="streets">Straßen</string>
 	<string name="traffic">Verkehr</string>
-	<string name="select_map">Karte wählen</string>
+	<string name="select_map">Select Overlay Type</string>
 	<string name="manual_position">Manuelle Positionsangabe</string>
 	<string name="set_location">Standort setzen</string>
 	<string name="show_location">Standort zeigen</string>
@@ -61,4 +61,7 @@
 		werden.\n© 2011 52°North, visit http://52north.org/android
 	</string>
 	<string name="advice">Hinweis</string>
+	<string name="info_measurement_query">Messungsabfrage</string>
+	<string name="toggle_interpolation">Interpolation  Overlay</string>
+	<string name="toggle_itemized">Itemized  Overlay</string>
 </resources>

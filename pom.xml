@@ -44,6 +44,13 @@
 			<artifactId>osmdroid-android</artifactId>
 			<version>3.0.7</version>
 		</dependency>
+		
+		<dependency>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-android</artifactId>
+		    <version>1.6.1-RC1</version>
+		</dependency>
+
 
 		<!-- NOTE: those are the ones defined by goole and are NOT in the maven 
 			central repository and need to be installed manually with: mvn install:install-file -->

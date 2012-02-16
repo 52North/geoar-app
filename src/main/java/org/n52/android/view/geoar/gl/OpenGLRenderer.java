@@ -32,6 +32,7 @@ import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.data.MeasurementManager;
 import org.n52.android.data.MeasurementManager.GetMeasurementBoundsCallback;
+import org.n52.android.data.MeasurementManager.MeasurementsCallback;
 import org.n52.android.data.MeasurementManager.RequestHolder;
 import org.n52.android.geoar.R;
 import org.n52.android.view.InfoView;
@@ -103,7 +104,7 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 		@Override
 		protected Bitmap getBitmap() {
 			return Interpolation.interpolationToBitmap(
-					currentInterpolationRect, currentInterpolation, null);
+					currentInterpolationRect, currentMeasurement.interpolationBuffer, null);
 		}
 	};
 
@@ -143,11 +144,12 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 			}
 		}
 
-		public void onReceiveInterpolation(MercatorRect bounds,
-				Object interpolation) {
+		public void onReceiveDataUpdate(MercatorRect bounds,
+				MeasurementsCallback measurementsCallback) {
 			// Save result reference in variable. Those should always be the
 			// same
-			currentInterpolation = (byte[]) interpolation;
+			
+			currentMeasurement = measurementsCallback;
 			currentInterpolationRect = bounds;
 			// Update geometry to reflect the results dimension
 			glInterpolation.setWidth(bounds.width());
@@ -166,7 +168,8 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 	private Context context;
 
 	// currently used data
-	private byte[] currentInterpolation;
+//	private byte[] currentInterpolation;
+	private MeasurementsCallback currentMeasurement;
 	private MercatorRect currentInterpolationRect;
 	// performing measurement request
 	private RequestHolder currentRequest;
@@ -222,7 +225,7 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 		if (currentInterpolationRect != null && x >= 0
 				&& x < currentInterpolationRect.width() && y >= 0
 				&& y < currentInterpolationRect.height()) {
-			return currentInterpolation[y * currentInterpolationRect.width()
+			return currentMeasurement.interpolationBuffer[y * currentInterpolationRect.width()
 					+ x];
 		} else {
 			return NO_DATA;
@@ -454,13 +457,14 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 				// cancel currently running data request
 				currentRequest.cancel();
 			}
+			
 			// trigger data request
 			currentRequest = measureManager.getInterpolation(new MercatorRect(
 					currentCenterMercator.x - pixelRadius,
 					currentCenterMercator.y - pixelRadius,
 					currentCenterMercator.x + pixelRadius,
 					currentCenterMercator.y + pixelRadius, Settings.ZOOM_AR),
-					callback, false, currentInterpolation);
+					callback, false, currentMeasurement);
 		}
 	}
 

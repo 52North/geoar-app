@@ -48,6 +48,11 @@ import android.util.Log;
  */
 public abstract class MeasurementManager {
 
+	public static final int ABORT_UNKOWN = 0;
+	public static final int ABORT_NO_CONNECTION = 1;
+	public static final int ABORT_CANCELED = 2;
+	public static final int STEP_REQUEST = 3;
+	
 	
 	public interface RequestHolder {
 		void cancel();
@@ -58,6 +63,11 @@ public abstract class MeasurementManager {
 		void onReceiveMeasurements(MeasurementTile measurements);
 
 		void onAbort(MeasurementTile measurements, int reason);
+	}
+	
+	public class MeasurementsCallback{
+		public List<Measurement> measurementBuffer;
+		public byte[] interpolationBuffer;
 	}
 
 	public class MeasurementTile {
@@ -108,9 +118,7 @@ public abstract class MeasurementManager {
 
 	}
 
-	public static final int ABORT_UNKOWN = 0;
-	public static final int ABORT_NO_CONNECTION = 1;
-	public static final int ABORT_CANCELED = 2;
+
 
 	protected Map<Tile, SoftReference<MeasurementTile>> tileCacheMapping = new HashMap<Tile, SoftReference<MeasurementTile>>();
 	protected DataSource dataSource;
@@ -214,172 +222,18 @@ public abstract class MeasurementManager {
 		};
 	}
 
-	// ************ Interpolation ************
-
-	public static final int STEP_REQUEST = 3;
 
 	public abstract interface GetMeasurementBoundsCallback extends
 			OnProgressUpdateListener {
-		void onReceiveInterpolation(MercatorRect bounds, Object interpolation);
-
+		void onReceiveDataUpdate(MercatorRect bounds, MeasurementsCallback measureCallback);
 		void onAbort(MercatorRect bounds, int reason);
 	}
 	
-//	public abstract interface GetPOIBoundsCallback extends 
-//			OnProgressUpdateListener {
-//		void onReceiveMeasurements(MercatorRect bounds, List<Measurement> measurementsList);
-//		
-//		void onAbort(MercatorRect bounds, int reason);
-//	}
-	
-	public RequestHolder getMeasurementsAsPOIs(final MercatorRect bounds, final GetMeasurementBoundsCallback callback, 
-			boolean forceUpdate, final List<Measurement> measurementsList){
-				
-		// Kachelgrenzen
-		final int tileLeftX = (int) MercatorProj.transformPixelXToTileX(
-				MercatorProj.transformPixel(bounds.left, bounds.zoom, tileZoom),
-				tileZoom);
-		final int tileTopY = (int) MercatorProj.transformPixelYToTileY(
-				MercatorProj.transformPixel(bounds.top, bounds.zoom, tileZoom),
-				tileZoom);
-		int tileRightX = (int) MercatorProj.transformPixelXToTileX(
-				MercatorProj.transformPixel(bounds.right, bounds.zoom, tileZoom),
-				tileZoom);
-		int tileBottomY = (int) MercatorProj.transformPixelYToTileY(
-				MercatorProj.transformPixel(bounds.bottom, bounds.zoom, tileZoom),
-				tileZoom);
-		final int tileGridWidth = tileRightX - tileLeftX + 1;
-		
-		// Liste zum Nachverfolgen der erhaltenen Messungen
-		final Vector<List<Measurement>> tileMeasurementsList = new Vector<List<Measurement>>();
-		tileMeasurementsList.setSize(tileGridWidth * (tileBottomY - tileTopY +1));
-		
-		// Callback für die Messungen
-		final GetMeasurementsCallback measureCallback = new GetMeasurementsCallback(){
-			boolean active = true;
-			private int progress;
-			
-			public void onReceiveMeasurements(MeasurementTile measurements) {
-				if(!active){
-					return;
-				}
-				
-				int checkIndex = ((measurements.tile.y - tileTopY) * tileGridWidth) + (measurements.tile.x - tileLeftX);
-				
-				if (tileMeasurementsList.set(checkIndex, measurements.measurements) == null){
-					progress++;
-					callback.onProgressUpdate(progress, tileMeasurementsList.size(), STEP_REQUEST);
-				}
-				if (!tileMeasurementsList.contains(null)){
-					final List<Measurement> measurementsList = new ArrayList<Measurement>();
-					for(List<Measurement> tileMeasurements : tileMeasurementsList){
-						measurementsList.addAll(tileMeasurements);
-					}
-					
-					callback.onReceiveInterpolation(bounds, measurementsList);
 
-				}
-			}
-
-			@Override
-			public void onAbort(MeasurementTile measurements, int reason) {
-				callback.onAbort(bounds,  reason);
-				if(reason == ABORT_CANCELED){
-					active = false;
-				}
-			}
-		};
-		
-		return new RequestHolder() {
-			public void cancel() {
-				measureCallback.onAbort(null, ABORT_CANCELED);
-			}
-		};
-	}
-
-	public RequestHolder getInterpolation(final MercatorRect bounds,
+	public abstract RequestHolder getInterpolation (final MercatorRect bounds,
 			final GetMeasurementBoundsCallback callback, boolean forceUpdate,
-			final byte[] resInterpolation) {
-		// Kachelgrenzen
-		final int tileLeftX = (int) MercatorProj.transformPixelXToTileX(
-				MercatorProj.transformPixel(bounds.left, bounds.zoom, tileZoom),
-				tileZoom);
-		final int tileTopY = (int) MercatorProj.transformPixelYToTileY(
-				MercatorProj.transformPixel(bounds.top, bounds.zoom, tileZoom),
-				tileZoom);
-		int tileRightX = (int) MercatorProj.transformPixelXToTileX(
-				MercatorProj.transformPixel(bounds.right, bounds.zoom, tileZoom),
-				tileZoom);
-		int tileBottomY = (int) MercatorProj.transformPixelYToTileY(
-				MercatorProj.transformPixel(bounds.bottom, bounds.zoom, tileZoom),
-				tileZoom);
-		final int tileGridWidth = tileRightX - tileLeftX + 1;
+			final MeasurementsCallback dataCallback);
 
-		// Liste zum Nachverfolgen der erhaltenen Messungen
-		final Vector<List<Measurement>> tileMeasurementsList = new Vector<List<Measurement>>();
-		tileMeasurementsList.setSize(tileGridWidth
-				* (tileBottomY - tileTopY + 1));
-
-		// Callback fï¿½r die Messungen
-		final GetMeasurementsCallback measureCallback = new GetMeasurementsCallback() {
-			boolean active = true;
-			private int progress;
-
-			public void onReceiveMeasurements(MeasurementTile measurements) {
-				if (!active) {
-					return;
-				}
-
-				int checkIndex = ((measurements.tile.y - tileTopY) * tileGridWidth)
-						+ (measurements.tile.x - tileLeftX);
-
-				if (tileMeasurementsList.set(checkIndex,
-						measurements.measurements) == null) {
-					progress++;
-					callback.onProgressUpdate(progress,
-							tileMeasurementsList.size(), STEP_REQUEST);
-				}
-				if (!tileMeasurementsList.contains(null)) {
-					final List<Measurement> measurementsList = new ArrayList<Measurement>();
-					for (List<Measurement> tileMeasurements : tileMeasurementsList) {
-						measurementsList.addAll(tileMeasurements);
-					}
-
-					new Thread(new Runnable() {
-						public void run() {
-							if (active) {
-								byte[] interpolation = Interpolation
-										.interpolate(measurementsList, bounds,
-												resInterpolation, callback);
-								callback.onReceiveInterpolation(bounds,
-										interpolation);
-							}
-						}
-					}).run();
-				}
-			}
-
-			public void onAbort(MeasurementTile measurements, int reason) {
-				callback.onAbort(bounds, reason);
-				if (reason == ABORT_CANCELED) {
-					active = false;
-				}
-			}
-		};
-
-		// Messungen besorgen
-		for (int y = tileTopY; y <= tileBottomY; y++)
-			for (int x = tileLeftX; x <= tileRightX; x++) {
-				Tile tile = new Tile(x, y, tileZoom);
-				getMeasurementsByTile(tile, measureCallback, forceUpdate);
-			}
-
-		return new RequestHolder() {
-			public void cancel() {
-				measureCallback.onAbort(null, ABORT_CANCELED);
-			}
-		};
-	}
 
 	public DataSource getDataSource() {
 		return dataSource;
