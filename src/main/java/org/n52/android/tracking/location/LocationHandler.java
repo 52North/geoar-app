@@ -14,7 +14,7 @@
  * limitations under the License.
  * 
  */
-package org.n52.android.view.geoar;
+package org.n52.android.tracking.location;
 
 import java.util.ArrayList;
 import java.util.List;

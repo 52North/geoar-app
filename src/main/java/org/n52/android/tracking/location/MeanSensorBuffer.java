@@ -14,36 +14,52 @@
  * limitations under the License.
  * 
  */
-package org.n52.android.view.geoar;
+package org.n52.android.tracking.location;
+
 
 /**
- * 
- * Simple low pass filter for sensor data
+ * A simple mean filter for sensor data
  * 
  * @author Holger Hopmann
  * 
  */
-public class LowPassSensorBuffer extends SensorBuffer {
+public class MeanSensorBuffer extends SensorBuffer {
+	private int size;
+	private int nextIndex = 0;
+	private boolean hasValues = false;
 	private float[] buffer;
 
-	public LowPassSensorBuffer(int dataLength, float alpha) {
+	public MeanSensorBuffer(int dataLength, int size) {
 		super(dataLength);
-		this.alpha = alpha;
-		buffer = new float[dataLength];
+		buffer = new float[size * dataLength];
+		this.size = size;
 	}
 
-	private float alpha;
-	private boolean hasValues;
-
 	public void put(float[] sensordata) {
-		for (int i = 0; i < dataLength; i++) {
-			buffer[i] = alpha * sensordata[i] + (1 - alpha) * buffer[i];
+		System.arraycopy(sensordata, 0, buffer, nextIndex * dataLength,
+				dataLength);
+		nextIndex = (nextIndex + 1) % size;
+		if (!hasValues && nextIndex == 0) {
+			hasValues = true;
 		}
-		hasValues = true;
 	}
 
 	public float[] get() {
-		return buffer;
+		float[] sum = new float[dataLength];
+		if (!hasValues) {
+			// Nullvektor zur�ckgeben
+			return sum;
+		}
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < dataLength; j++) {
+				sum[j] += buffer[i * dataLength + j];
+			}
+		}
+
+		for (int j = 0; j < dataLength; j++) {
+			sum[j] = sum[j] / size;
+		}
+		return sum;
 	}
 
 	public boolean hasValues() {

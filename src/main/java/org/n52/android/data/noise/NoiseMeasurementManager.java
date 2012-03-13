@@ -126,7 +126,7 @@ public class NoiseMeasurementManager extends MeasurementManager {
 
 
 	@Override
-	public RequestHolder getInterpolation(final MercatorRect bounds,
+	public RequestHolder getMeasurementCallback(final MercatorRect bounds,
 			final GetMeasurementBoundsCallback callback, boolean forceUpdate,
 			MeasurementsCallback dataCallback) {
 		// Kachelgrenzen
@@ -149,7 +149,7 @@ public class NoiseMeasurementManager extends MeasurementManager {
 		tileMeasurementsList.setSize(tileGridWidth
 				* (tileBottomY - tileTopY + 1));
 
-		// Callback f�r die Messungen
+		// Callback für die Messungen
 		final GetMeasurementsCallback measureCallback = new GetMeasurementsCallback() {
 			boolean active = true;
 			private int progress;

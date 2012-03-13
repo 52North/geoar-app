@@ -20,7 +20,6 @@ import org.n52.android.alg.Interpolation;
 import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.data.MeasurementManager;
-import org.n52.android.view.InfoView;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.MapView.Projection;
@@ -32,7 +31,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.util.Log;
 import android.view.MotionEvent;
 
 
@@ -45,14 +43,6 @@ import android.view.MotionEvent;
  */
 public class InterpolationOverlay extends Overlay {
 
-	public interface OnProgressUpdateListener extends
-			org.n52.android.alg.OnProgressUpdateListener {
-		void onAbort(int reason);
-	}
-
-
-
-	private Object interpolationLock = new Object();
 	private byte[] interpolationBuffer;
 	private MercatorRect bounds;
 	private Bitmap interpolationBmp;
@@ -61,7 +51,7 @@ public class InterpolationOverlay extends Overlay {
 
 	private int cacheWidth;
 	private int cacheHeight;
-	private InfoView infoHandler;
+
 	private Paint paint;
 
 	/**
@@ -93,10 +83,10 @@ public class InterpolationOverlay extends Overlay {
 		this.cacheHeight = height;
 		this.cacheWidth = width;
 
-//		if (interpolationBmp != null) {
-//			interpolationBmp.recycle();
-//			interpolationBmp = null;
-//		}
+		if (interpolationBmp != null) {
+			interpolationBmp.recycle();
+			interpolationBmp = null;
+		}
 	}
 
 	@Override
@@ -141,27 +131,39 @@ public class InterpolationOverlay extends Overlay {
 		canvas.drawBitmap(interpolationBmp, null, dstRect, paint);
 	}
 
-
-
-
-	public void setInfoHandler(InfoView infoHandler) {
-		this.infoHandler = infoHandler;
-	}
-
+	/**
+	 * 
+	 * @param measureManager
+	 */
 	public void setMeasureManager(MeasurementManager measureManager) {
 		this.measureManager = measureManager;
 	}
 	
+	/**
+	 * Updates the interpolation Overlay bitmap and the bounds
+	 * @param bounds
+	 * 				Bounds of the interpolation rectangle
+	 * @param overlay
+	 * 				Bitmap of interpolation results
+	 */
 	public void setOverlayBitmap(MercatorRect bounds, Bitmap overlay){
 		this.interpolationBmp = overlay;
 		this.bounds = bounds;
 	}
 	
+	/**
+	 * Updates the interpolation Overlay bitmap and the bounds
+	 * 			not needed anymore i think
+	 * @param bounds
+	 * 				Bounds of the interpolation rectangle
+	 * @param overlay
+	 * 				byte array of interpolation results
+	 */
 	public void setOverlayData(MercatorRect bounds, byte[] interpolationOverlay){
 		this.bounds = bounds;
 		this.interpolationBuffer = interpolationOverlay;
-		Log.d("yea", "yeaaeae");
-		this.interpolationBmp = Interpolation.interpolationToBitmap(bounds, interpolationBuffer, interpolationBmp);
+		this.interpolationBmp = Interpolation.interpolationToBitmap(
+				bounds, interpolationBuffer, interpolationBmp);
 	}
 
 

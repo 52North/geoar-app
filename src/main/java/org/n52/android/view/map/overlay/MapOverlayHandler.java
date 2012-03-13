@@ -15,11 +15,8 @@ import org.n52.android.geoar.R;
 import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.Settings;
 import org.osmdroid.util.GeoPoint;
-import org.osmdroid.api.IMapView;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.MapView.Projection;
-import org.osmdroid.views.overlay.ItemizedOverlay;
-import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
 
 import android.graphics.Bitmap;
@@ -150,7 +147,7 @@ public class MapOverlayHandler {
 				if (bounds.zoom >= Settings.MIN_ZOOM_MAPINTERPOLATION) {
 					// Just runs if zoom is in range
 					synchronized (interpolationLock) {
-						requestHolder = measureManager.getInterpolation(bounds,
+						requestHolder = measureManager.getMeasurementCallback(bounds,
 								callback, false, measurementCallback);
 					}
 				} else {
@@ -183,9 +180,6 @@ public class MapOverlayHandler {
 	private Drawable drawable;
 	private Bitmap interpolationBmp;
 	
-	private boolean showInterpolation;
-	private boolean showItemizedMeasures;
-	
 	private final int INTERPOLATION = 0;
 	private final int POI = 1;
 	
@@ -208,14 +202,16 @@ public class MapOverlayHandler {
  
 			            @Override
 			            public boolean onItemSingleTapUp(final int index, final OverlayItem item) {
-			                Toast.makeText( mapView.getContext(), "Description: \n" +
-			                		"value: " + item.mTitle + "\n" + "" + item.mDescription, Toast.LENGTH_LONG).show();
+//			                Toast.makeText( mapView.getContext(), "Description: \n" +
+//			                		"value: " + item.mTitle + "\n" + "" + item.mDescription, Toast.LENGTH_LONG).show();
+			                itemizedOverlay.setBubbleItem(mapView, item, index);
 			                return true; 
 			            }
 			            @Override
 			            public boolean onItemLongPress(final int index, final OverlayItem item) {
-			                Toast.makeText( mapView.getContext(), "Overlay Titled: " + 
-			                		item.mTitle + " Long pressed" + "\n" + "Description: " + item.mDescription ,Toast.LENGTH_LONG).show();
+//			                Toast.makeText( mapView.getContext(), "Overlay Titled: " + 
+//			                		item.mTitle + " Long pressed" + "\n" + "Description: " + item.mDescription ,Toast.LENGTH_LONG).show();
+			            	itemizedOverlay.setBubbleItem(mapView, item, index);
 			                return false;
 			            }
 					

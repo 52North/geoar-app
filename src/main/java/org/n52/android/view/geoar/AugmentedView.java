@@ -16,15 +16,18 @@
  */
 package org.n52.android.view.geoar;
 
+import org.n52.android.NoiseARView;
 import org.n52.android.alg.NoiseView.NoiseGridValueProvider;
 import org.n52.android.data.MeasurementManager;
 import org.n52.android.geoar.R;
+import org.n52.android.tracking.camera.RealityCamera;
+import org.n52.android.tracking.location.LocationHandler;
+import org.n52.android.tracking.location.LocationHandler.OnLocationUpdateListener;
+import org.n52.android.tracking.location.LowPassSensorBuffer;
+import org.n52.android.tracking.location.SensorBuffer;
 import org.n52.android.view.InfoView;
-import org.n52.android.view.camera.NoiseCamera;
-import org.n52.android.view.geoar.LocationHandler.OnLocationUpdateListener;
-import org.n52.android.view.geoar.gl.OpenGLRenderer;
-import org.n52.android.view.geoar.gl.OpenGLRenderer.RotationMatrixProvider;
-import org.osmdroid.util.GeoPoint;
+import org.n52.android.view.geoar.gl.GLESAugmentedRenderer;
+import org.n52.android.view.geoar.gl.GLESAugmentedRenderer.IRotationMatrixProvider;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -56,8 +59,8 @@ import android.widget.ToggleButton;
  * 
  * @author Holger Hopmann
  */
-public class ARNoiseView extends GLSurfaceView implements SensorEventListener,
-		OnLocationUpdateListener, NoiseARView, RotationMatrixProvider {
+public class AugmentedView extends GLSurfaceView implements SensorEventListener,
+		OnLocationUpdateListener, NoiseARView, IRotationMatrixProvider {
 
 	/**
 	 * Dialog to allow users to choose overlays. Nested class makes modification
@@ -71,7 +74,7 @@ public class ARNoiseView extends GLSurfaceView implements SensorEventListener,
 		private ToggleButton buttonOverlayNoise;
 
 		public AROverlayDialog() {
-			super(ARNoiseView.this.getContext());
+			super(AugmentedView.this.getContext());
 			// Inflate Layout
 			View layout = LayoutInflater.from(getContext()).inflate(
 					R.layout.ar_overlay_dialog, null);
@@ -137,18 +140,19 @@ public class ARNoiseView extends GLSurfaceView implements SensorEventListener,
 	private float[] rotMatrixSensor = new float[16];
 	private float[] rotMatrix = new float[16];
 
-	private OpenGLRenderer renderer;
+	private GLESAugmentedRenderer renderer;
 	private InfoView infoHandler;
 	private LocationHandler locationHandler;
 	private boolean updateMagneticVector = true;
 	private boolean sensorValuesChanged;
 
-	public ARNoiseView(Context context) {
+
+	public AugmentedView(Context context) {
 		super(context);
 		init();
 	}
 
-	public ARNoiseView(Context context, AttributeSet attrs) {
+	public AugmentedView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init();
 	}
@@ -162,17 +166,17 @@ public class ARNoiseView extends GLSurfaceView implements SensorEventListener,
 		display = ((WindowManager) getContext().getSystemService(
 				Context.WINDOW_SERVICE)).getDefaultDisplay();
 
-		renderer = new OpenGLRenderer(getContext(), this);
+		renderer = new GLESAugmentedRenderer(getContext(), this);
+		setEGLContextClientVersion(2);
 		setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Forces to make translucent
 												// drawing available
 		getHolder().setFormat(PixelFormat.TRANSLUCENT);
 		setRenderer(renderer);
-
-		// Coesfelder
-		// renderer.setCenter(new GeoPoint(51965040, 7600607));
-
-		renderer.setCenter(new GeoPoint(51930058, 7574787));
+		
+		
 	}
+	
+
 
 	/**
 	 * Get a {@link NoiseGridValueProvider} to access the raw noise
@@ -181,12 +185,13 @@ public class ARNoiseView extends GLSurfaceView implements SensorEventListener,
 	 * @return
 	 */
 	public NoiseGridValueProvider getNoiseGridValueProvider() {
-		return renderer;
+//		return renderer;
+		return null;
 	}
 
 	public void setInfoHandler(InfoView infoHandler) {
 		this.infoHandler = infoHandler;
-		renderer.setInfoHandler(infoHandler);
+//		renderer.setInfoHandler(infoHandler);
 	}
 
 	public void setMeasureManager(MeasurementManager measureManager) {
@@ -257,7 +262,7 @@ public class ARNoiseView extends GLSurfaceView implements SensorEventListener,
 
 	@Override
 	public void onPause() {
-		NoiseCamera.removeCameraUpdateListener(renderer);
+		RealityCamera.removeCameraUpdateListener(renderer);
 		mSensorManager.unregisterListener(this);
 		if (locationHandler != null) {
 			locationHandler.removeLocationUpdateListener(this);
@@ -267,7 +272,7 @@ public class ARNoiseView extends GLSurfaceView implements SensorEventListener,
 
 	@Override
 	public void onResume() {
-		NoiseCamera.addCameraUpdateListener(renderer);
+		RealityCamera.addCameraUpdateListener(renderer);
 		if (!mSensorManager.registerListener(this, magnet,
 				SensorManager.SENSOR_DELAY_GAME)) {
 			infoHandler.setStatus(R.string.magnetic_field_not_started, 5000,
@@ -311,7 +316,10 @@ public class ARNoiseView extends GLSurfaceView implements SensorEventListener,
 		locationHandler.addLocationUpdateListener(this);
 	}
 
+////
+
 	public void onLocationChanged(Location location) {
+		
 		renderer.setCenter(location);
 	}
 

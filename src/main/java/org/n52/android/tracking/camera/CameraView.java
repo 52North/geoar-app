@@ -14,7 +14,7 @@
  * limitations under the License.
  * 
  */
-package org.n52.android.view.camera;
+package org.n52.android.tracking.camera;
 
 import java.io.IOException;
 import java.util.List;
@@ -153,14 +153,14 @@ public class CameraView extends SurfaceView implements Callback {
 		parameters.setPreviewSize(bestSize.width, bestSize.height);
 
 		// Update static camera settings fields
-		NoiseCamera.setViewportSize(bestSize);
+		RealityCamera.setViewportSize(bestSize);
 		if (cameraRotation == 0 || cameraRotation == 180) {
-			NoiseCamera.setFovY(parameters.getVerticalViewAngle());
-			NoiseCamera.setAspect(parameters.getHorizontalViewAngle()
+			RealityCamera.setFovY(parameters.getVerticalViewAngle());
+			RealityCamera.setAspect(parameters.getHorizontalViewAngle()
 					/ parameters.getVerticalViewAngle());
 		} else {
-			NoiseCamera.setFovY(parameters.getHorizontalViewAngle());
-			NoiseCamera.setAspect(parameters.getVerticalViewAngle()
+			RealityCamera.setFovY(parameters.getHorizontalViewAngle());
+			RealityCamera.setAspect(parameters.getVerticalViewAngle()
 					/ parameters.getHorizontalViewAngle());
 		}
 		camera.setParameters(parameters);

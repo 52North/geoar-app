@@ -3,6 +3,7 @@ package org.n52.android.data;
 import org.n52.android.data.noise.NoiseDataFactory;
 import org.n52.android.view.geoar.Settings.DataSourceSetting;
 
+// FIXME ich denke hier ist der einstigspunkt ;)
 public class DataSourceAdapter extends DataSourceAbstractFactory {
 	
 	private static DataSourceAbstractFactory factory;

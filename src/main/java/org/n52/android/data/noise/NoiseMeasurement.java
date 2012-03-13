@@ -21,7 +21,7 @@ public class NoiseMeasurement extends Measurement{
 	public void setLocation(Location location) {
 		this.latitude = location.getLatitude();
 		this.longitude = location.getLongitude();
-		this.accuracy = location.getAccuracy();
+		this.locationAccuracy = location.getAccuracy();
 	}
 
 	@Override
@@ -52,13 +52,13 @@ public class NoiseMeasurement extends Measurement{
 	 */
 	@Override
 	public int getAccuracy(byte zoom) {
-		return (int) (accuracy / MercatorProj.getGroundResolution(latitude,
+		return (int) (locationAccuracy / MercatorProj.getGroundResolution(latitude,
 				zoom));
 	}
 	
 	@Override
 	public float getAccuracy() {
-		return accuracy;
+		return locationAccuracy;
 	}
 
 	@Override

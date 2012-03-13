@@ -18,12 +18,12 @@ package org.n52.android.view.map;
 
 import java.util.List;
 
+import org.n52.android.NoiseARView;
 import org.n52.android.data.MeasurementManager;
 import org.n52.android.geoar.R;
+import org.n52.android.tracking.location.LocationHandler;
+import org.n52.android.tracking.location.LocationHandler.OnLocationUpdateListener;
 import org.n52.android.view.InfoView;
-import org.n52.android.view.geoar.LocationHandler;
-import org.n52.android.view.geoar.LocationHandler.OnLocationUpdateListener;
-import org.n52.android.view.geoar.NoiseARView;
 import org.n52.android.view.map.overlay.InterpolationOverlay;
 import org.n52.android.view.map.overlay.MapOverlayHandler;
 import org.osmdroid.ResourceProxy;

@@ -16,10 +16,10 @@
  */
 package org.n52.android.view.map;
 
+import org.n52.android.NoiseARView;
 import org.n52.android.geoar.R;
+import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.view.InfoView;
-import org.n52.android.view.geoar.LocationHandler;
-import org.n52.android.view.geoar.NoiseARView;
 
 import android.content.Context;
 import android.os.Bundle;

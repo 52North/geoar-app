@@ -16,6 +16,7 @@
  */
 package org.n52.android.view.geoar.gl;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,10 +36,10 @@ import org.n52.android.data.MeasurementManager.GetMeasurementBoundsCallback;
 import org.n52.android.data.MeasurementManager.MeasurementsCallback;
 import org.n52.android.data.MeasurementManager.RequestHolder;
 import org.n52.android.geoar.R;
+import org.n52.android.tracking.camera.CameraView;
+import org.n52.android.tracking.camera.RealityCamera;
+import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.n52.android.view.InfoView;
-import org.n52.android.view.camera.CameraView;
-import org.n52.android.view.camera.NoiseCamera;
-import org.n52.android.view.camera.NoiseCamera.CameraUpdateListener;
 import org.n52.android.view.geoar.Settings;
 import org.osmdroid.util.GeoPoint;
 
@@ -75,7 +76,7 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 		 */
 		float[] getRotationMatrix();
 	}
-
+	
 	// Texture information for calibration overlay. Loads texture automatically
 	// from defined resource
 	private OpenGLTexture calibrationTexture = new OpenGLTexture(true) {
@@ -250,7 +251,7 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 		// every sensor update (60 Hz).
 		gl11.glMultMatrixf(rotationProvider.getRotationMatrix(), 0);
 		// Camera translation
-		gl11.glTranslatef(0, -NoiseCamera.height, 0);
+		gl11.glTranslatef(0, -RealityCamera.height, 0);
 
 		if (currentInterpolationRect != null) {
 			// has interpolation to draw
@@ -260,10 +261,10 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 			float dx = currentCenterMercator.x - currentInterpolationRect.left;
 			float dy = currentCenterMercator.y - currentInterpolationRect.top;
 			gl11.glTranslatef(
-					-dx * currentGroundResolution * NoiseCamera.scale, 0, -dy
-							* currentGroundResolution * NoiseCamera.scale);
+					-dx * currentGroundResolution * RealityCamera.scale, 0, -dy
+							* currentGroundResolution * RealityCamera.scale);
 			gl11.glScalef(currentGroundResolution, 1, currentGroundResolution);
-			gl11.glScalef(NoiseCamera.scale, 1, NoiseCamera.scale);
+			gl11.glScalef(RealityCamera.scale, 1, RealityCamera.scale);
 
 			// save current matrix for unprojection
 			gl11.glGetFloatv(GL11.GL_MODELVIEW_MATRIX, modelViewMatrix, 0);
@@ -300,7 +301,7 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 		if (showCalibration) {
 			gl11.glColor4f(1, 1, 1, 1);
 			gl11.glPushMatrix();
-			gl11.glScalef(NoiseCamera.scale, 1, NoiseCamera.scale);
+			gl11.glScalef(RealityCamera.scale, 1, RealityCamera.scale);
 			gl11.glTranslatef(-glCalibration.width / 2, 0,
 					-glCalibration.height / 2);
 			glCalibration.draw(gl11);
@@ -330,12 +331,12 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 
 	public void onSurfaceChanged(GL10 gl, int width, int height) {
 		GL11 gl11 = (GL11) gl;
-		NoiseCamera.glViewportHeight = height;
-		NoiseCamera.glViewportWidth = width;
-		if (NoiseCamera.cameraViewportHeight == 0
-				|| NoiseCamera.cameraViewportWidth == 0) {
+		GLESCamera.glViewportHeight = height;
+		GLESCamera.glViewportWidth = width;
+		if (RealityCamera.cameraViewportHeight == 0
+				|| RealityCamera.cameraViewportWidth == 0) {
 			// Set camera viewport if none exists
-			NoiseCamera.setViewportSize(width, height);
+			RealityCamera.setViewportSize(width, height);
 		}
 		resetProjectionFromCamera(gl11);
 	}
@@ -381,20 +382,20 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 
 	/**
 	 * (Re)sets intrinsic camera parameters obtained from the central
-	 * {@link NoiseCamera} class. Data is updated from within the
+	 * {@link RealityCamera} class. Data is updated from within the
 	 * {@link CameraView} class.
 	 * 
 	 * @param gl11
 	 */
 	private void resetProjectionFromCamera(GL11 gl11) {
-		gl11.glViewport(0, 0, NoiseCamera.glViewportWidth,
-				NoiseCamera.glViewportHeight);
+		gl11.glViewport(0, 0, GLESCamera.glViewportWidth,
+				GLESCamera.glViewportHeight);
 
 		gl11.glMatrixMode(GL10.GL_PROJECTION);
 		gl11.glLoadIdentity();
 
-		GLU.gluPerspective(gl11, NoiseCamera.fovY, NoiseCamera.aspect,
-				NoiseCamera.zNear, NoiseCamera.zFar);
+		GLU.gluPerspective(gl11, RealityCamera.fovY, RealityCamera.aspect,
+				RealityCamera.zNear, RealityCamera.zFar);
 
 		gl11.glGetFloatv(GL11.GL_PROJECTION_MATRIX, projectionMatrix, 0);
 		gl11.glGetIntegerv(GL11.GL_VIEWPORT, viewportMatrix, 0);
@@ -459,7 +460,7 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 			}
 			
 			// trigger data request
-			currentRequest = measureManager.getInterpolation(new MercatorRect(
+			currentRequest = measureManager.getMeasurementCallback(new MercatorRect(
 					currentCenterMercator.x - pixelRadius,
 					currentCenterMercator.y - pixelRadius,
 					currentCenterMercator.x + pixelRadius,

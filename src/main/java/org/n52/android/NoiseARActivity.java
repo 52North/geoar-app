@@ -28,12 +28,11 @@ import org.n52.android.data.noise.NoiseDroidServerSource;
 import org.n52.android.dialog.DataSourceDialog;
 import org.n52.android.dialog.FilterDialog;
 import org.n52.android.geoar.R;
+import org.n52.android.tracking.camera.RealityCamera;
+import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.view.InfoView;
-import org.n52.android.view.camera.NoiseCamera;
-import org.n52.android.view.geoar.ARNoiseView;
+import org.n52.android.view.geoar.AugmentedView;
 import org.n52.android.view.geoar.CalibrationControlView;
-import org.n52.android.view.geoar.LocationHandler;
-import org.n52.android.view.geoar.NoiseARView;
 import org.n52.android.view.geoar.NoiseChartView;
 import org.n52.android.view.map.GeoMapView;
 import org.n52.android.view.map.ManualPositionView;
@@ -41,9 +40,12 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Overlay;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.ConfigurationInfo;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.view.Menu;
@@ -77,7 +79,7 @@ public class NoiseARActivity extends Activity {
 	private ImageButton mapARSwitcherButton;
 
 	private InfoView infoView;
-	private ARNoiseView noiseView;
+	private AugmentedView noiseView;
 
 	private LocationHandler locationHandler;
 	// List of NoiseARViews
@@ -120,19 +122,19 @@ public class NoiseARActivity extends Activity {
 
 		// Reset camera height if set
 		SharedPreferences prefs = getSharedPreferences("NoiseAR", MODE_PRIVATE);
-		NoiseCamera.setHeight(prefs.getFloat("cameraHeight", 1.6f));
+		RealityCamera.setHeight(prefs.getFloat("cameraHeight", 1.6f));
 		
 		
 		// Find child views, set all common object references and add to
 		// noiseARViews list
 
 		// NoiseView
-		noiseView = (ARNoiseView) findViewById(R.id.glNoiseView);
+		noiseView = (AugmentedView) findViewById(R.id.glNoiseView);
 		noiseView.setInfoHandler(infoView);
 		noiseView.setMeasureManager(measurementManager);
-		noiseView.setLocationHandler(locationHandler);
-		noiseARViews.add(noiseView);
-
+		noiseView.setLocationHandler(locationHandler);	    
+	    noiseARViews.add(noiseView);
+		
 		// Chart
 		NoiseChartView diagramView = (NoiseChartView) findViewById(R.id.noiseDiagramView);
 		diagramView.setNoiseGridValueProvider(noiseView
@@ -244,7 +246,7 @@ public class NoiseARActivity extends Activity {
 
 		SharedPreferences prefs = getSharedPreferences("NoiseAR", MODE_PRIVATE);
 		SharedPreferences.Editor editor = prefs.edit();
-		editor.putFloat("cameraHeight", NoiseCamera.height);
+		editor.putFloat("cameraHeight", RealityCamera.height);
 		editor.commit();
 	}
 

@@ -18,10 +18,11 @@ package org.n52.android.view.geoar;
 
 import java.text.DecimalFormat;
 
+import org.n52.android.NoiseARView;
 import org.n52.android.geoar.R;
+import org.n52.android.tracking.camera.RealityCamera;
+import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.n52.android.view.InfoView;
-import org.n52.android.view.camera.NoiseCamera;
-import org.n52.android.view.camera.NoiseCamera.CameraUpdateListener;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -70,9 +71,9 @@ public class CalibrationControlView extends LinearLayout implements
 	@Override
 	protected void onVisibilityChanged(View changedView, int visibility) {
 		if (isShown()) {
-			NoiseCamera.addCameraUpdateListener(this);
+			RealityCamera.addCameraUpdateListener(this);
 		} else {
-			NoiseCamera.removeCameraUpdateListener(this);
+			RealityCamera.removeCameraUpdateListener(this);
 		}
 		super.onVisibilityChanged(changedView, visibility);
 	}
@@ -81,11 +82,11 @@ public class CalibrationControlView extends LinearLayout implements
 		switch (v.getId()) {
 		case R.id.buttonCalibMoveDown:
 			// Decreases camera height
-			NoiseCamera.changeHeight(-0.1f);
+			RealityCamera.changeHeight(-0.1f);
 			break;
 		case R.id.buttonCalibMoveUp:
 			// Increases camera height
-			NoiseCamera.changeHeight(0.1f);
+			RealityCamera.changeHeight(0.1f);
 			break;
 		case R.id.buttonCalibOk:
 			// Hide on OK
@@ -102,7 +103,7 @@ public class CalibrationControlView extends LinearLayout implements
 		post(new Runnable() {
 			public void run() {
 				heightInfoTextView.setText(distFormat
-						.format(NoiseCamera.height));
+						.format(RealityCamera.height));
 			}
 		});
 	}

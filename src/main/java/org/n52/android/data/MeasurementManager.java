@@ -65,6 +65,12 @@ public abstract class MeasurementManager {
 		void onAbort(MeasurementTile measurements, int reason);
 	}
 	
+	public abstract interface GetMeasurementBoundsCallback extends
+					OnProgressUpdateListener {
+		void onReceiveDataUpdate(MercatorRect bounds, MeasurementsCallback measureCallback);
+		void onAbort(MercatorRect bounds, int reason);
+	}
+	
 	public class MeasurementsCallback{
 		public List<Measurement> measurementBuffer;
 		public byte[] interpolationBuffer;
@@ -222,18 +228,9 @@ public abstract class MeasurementManager {
 		};
 	}
 
-
-	public abstract interface GetMeasurementBoundsCallback extends
-			OnProgressUpdateListener {
-		void onReceiveDataUpdate(MercatorRect bounds, MeasurementsCallback measureCallback);
-		void onAbort(MercatorRect bounds, int reason);
-	}
-	
-
-	public abstract RequestHolder getInterpolation (final MercatorRect bounds,
+	public abstract RequestHolder getMeasurementCallback (final MercatorRect bounds,
 			final GetMeasurementBoundsCallback callback, boolean forceUpdate,
 			final MeasurementsCallback dataCallback);
-
 
 	public DataSource getDataSource() {
 		return dataSource;

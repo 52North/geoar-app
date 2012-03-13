@@ -24,11 +24,11 @@
 		<RelativeLayout android:layout_height="match_parent"
 			android:layout_width="match_parent">
 
-			<org.n52.android.view.geoar.ARNoiseView
+			<org.n52.android.view.geoar.AugmentedView
 				android:id="@+id/glNoiseView" android:layout_width="match_parent"
 				android:layout_height="match_parent" />
 
-			<org.n52.android.view.camera.CameraView
+			<org.n52.android.tracking.camera.CameraView
 				android:layout_width="match_parent" android:layout_height="match_parent" />
 
 			<org.n52.android.view.geoar.NoiseChartView

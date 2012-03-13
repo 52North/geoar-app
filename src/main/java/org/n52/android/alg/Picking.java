@@ -16,7 +16,7 @@
  */
 package org.n52.android.alg;
 
-import org.n52.android.view.camera.NoiseCamera;
+import org.n52.android.tracking.camera.RealityCamera;
 
 import android.graphics.PointF;
 import android.opengl.GLU;
@@ -118,7 +118,7 @@ public class Picking {
 			return NO_INTERSECTION;
 		}
 
-		float t = (-NoiseCamera.height - p1[p1Offset + 1])
+		float t = (-RealityCamera.height - p1[p1Offset + 1])
 				/ (p2[p2Offset + 1] - p1[p1Offset + 1]);
 		result.x = (p2[p2Offset + 0] * t) + (1 - t) * p1[p1Offset + 0];
 		result.y = (p2[p2Offset + 2] * t) + (1 - t) * p1[p1Offset + 2];

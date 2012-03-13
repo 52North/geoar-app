@@ -14,7 +14,7 @@
  * limitations under the License.
  * 
  */
-package org.n52.android.view.geoar;
+package org.n52.android.tracking.location;
 
 /**
  * Superclass for sensor data filtering classes.

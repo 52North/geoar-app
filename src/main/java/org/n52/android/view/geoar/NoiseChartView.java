@@ -18,6 +18,7 @@ package org.n52.android.view.geoar;
 
 import java.text.DecimalFormat;
 
+import org.n52.android.NoiseARView;
 import org.n52.android.alg.NoiseView;
 import org.n52.android.alg.NoiseView.NoiseGridValueProvider;
 import org.n52.android.alg.NoiseView.NoiseViewChangedListener;
@@ -255,7 +256,7 @@ public class NoiseChartView extends View implements NoiseViewChangedListener,
 		super.onVisibilityChanged(changedView, visibility);
 	}
 
-	private void setActivated(boolean active) {
+	public void setActivated(boolean active) {
 		if (provider != null) {
 			if (active) {
 				provider.addOnNoiseViewChangedListener(this);

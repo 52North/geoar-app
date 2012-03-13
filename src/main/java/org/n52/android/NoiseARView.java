@@ -14,7 +14,7 @@
  * limitations under the License.
  * 
  */
-package org.n52.android.view.geoar;
+package org.n52.android;
 
 import org.n52.android.view.InfoView;
 

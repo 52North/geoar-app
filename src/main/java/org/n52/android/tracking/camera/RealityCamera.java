@@ -14,7 +14,7 @@
  * limitations under the License.
  * 
  */
-package org.n52.android.view.camera;
+package org.n52.android.tracking.camera;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ import android.hardware.Camera.Size;
  * @author Holger Hopmann
  * 
  */
-public class NoiseCamera {
+public class RealityCamera {
 	public interface CameraUpdateListener {
 		void onCameraUpdate();
 	}
@@ -41,9 +41,7 @@ public class NoiseCamera {
 	// Viewport of camera preview
 	public static int cameraViewportWidth;
 	public static int cameraViewportHeight;
-	// Viewport of OpenGL Viewport
-	public static int glViewportWidth;
-	public static int glViewportHeight;
+
 	public static float zNear = 0.5f;
 	public static float zFar = Settings.SIZE_AR_INTERPOLATION
 			+ Settings.RELOAD_DIST_AR;
@@ -51,9 +49,6 @@ public class NoiseCamera {
 	private static List<CameraUpdateListener> listeners = new ArrayList<CameraUpdateListener>();
 	public static float aspect;
 
-	private NoiseCamera() {
-
-	}
 
 	public static void addCameraUpdateListener(CameraUpdateListener listener) {
 		listeners.add(listener);
@@ -70,12 +65,12 @@ public class NoiseCamera {
 	}
 
 	public static void setFovY(float fov) {
-		NoiseCamera.fovY = fov;
+		RealityCamera.fovY = fov;
 		onUpdate();
 	}
 
 	public static void setScale(float scale) {
-		NoiseCamera.scale = scale;
+		RealityCamera.scale = scale;
 		onUpdate();
 	}
 
@@ -90,7 +85,7 @@ public class NoiseCamera {
 	}
 
 	public static void setAspect(float aspect) {
-		NoiseCamera.aspect = aspect;
+		RealityCamera.aspect = aspect;
 	}
 
 	public static void changeHeight(float inc) {
@@ -99,7 +94,7 @@ public class NoiseCamera {
 	}
 
 	public static void setHeight(float height) {
-		NoiseCamera.height = height;
+		RealityCamera.height = height;
 		onUpdate();
 	}
 }

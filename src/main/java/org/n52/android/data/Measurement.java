@@ -33,7 +33,8 @@ public abstract class Measurement implements Cloneable {
 
 	public double latitude;
 	protected double longitude;
-	protected float accuracy;
+	
+	protected float locationAccuracy;
 	protected Calendar time;
 
 	public void setTime(Calendar time) {
@@ -46,7 +47,7 @@ public abstract class Measurement implements Cloneable {
 	public void setLocation(Location location) {
 		this.latitude = location.getLatitude();
 		this.longitude = location.getLongitude();
-		this.accuracy = location.getAccuracy();
+		this.locationAccuracy = location.getAccuracy();
 	}
 
 	/**
@@ -69,12 +70,12 @@ public abstract class Measurement implements Cloneable {
 	 * @return
 	 */
 	public int getAccuracy(byte zoom) {
-		return (int) (accuracy / MercatorProj.getGroundResolution(latitude,
+		return (int) (locationAccuracy / MercatorProj.getGroundResolution(latitude,
 				zoom));
 	}
 
 	public float getAccuracy() {
-		return accuracy;
+		return locationAccuracy;
 	}
 
 	public Calendar getTime() {
@@ -93,4 +94,5 @@ public abstract class Measurement implements Cloneable {
 	public double getLongitude(){
 		return longitude;
 	}
+	
 }
