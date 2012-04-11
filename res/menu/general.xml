@@ -2,22 +2,24 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 	<!-- AR View -->
 	<group android:id="@+id/group_noiseview">
+		<!--  
 		<item android:id="@+id/item_select_ar_overlay" android:title="@string/choose_overlay" />
 		<item android:id="@+id/item_reload_ar" android:title="@string/reload" />
 
-		<!-- Chartview -->
+		
 		<item android:id="@+id/item_select_chart" android:title="@string/change_chart" />
 
-		<!-- Calibration -->
-		<item android:id="@+id/item_calibrate" android:title="@string/calibration" />
+		
+		<item android:id="@+id/item_calibrate" android:title="@string/calibration" /> -->
 	</group>
 
 	<!-- Mapview -->
 	<group android:id="@+id/group_mapview">
+	<!--  
 		<item android:id="@+id/item_own_location" android:title="@string/show_location" />
 		<item android:id="@+id/item_select_map_overlay" android:title="@string/select_map" />
 		<item android:id="@+id/item_set_location" android:title="@string/set_location" />
-		<item android:id="@+id/item_reload_map" android:title="@string/reload" />
+		<item android:id="@+id/item_reload_map" android:title="@string/reload" /> -->
 	</group>
 
 	<!-- Both -->

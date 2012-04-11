@@ -29,7 +29,7 @@ import org.n52.android.view.map.overlay.MapOverlayHandler;
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapController;
-import org.osmdroid.views.MapView; 
+import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Overlay;
 
 import android.app.AlertDialog;
@@ -38,6 +38,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.LayoutInflater;
@@ -171,6 +172,7 @@ public class GeoMapView extends MapView implements NoiseARView,
 	 * 
 	 * @param measureManager
 	 */
+	@Override
 	public void setMeasureManager(MeasurementManager measureManager) {
 		if (mapOverlayHandler == null || mapOverlays == null) {
 			mapOverlayHandler = new MapOverlayHandler(this, measureManager,
@@ -188,7 +190,8 @@ public class GeoMapView extends MapView implements NoiseARView,
 			mapOverlayHandler.updateOverlay(this, true);
 		}
 	}
-
+	
+	@Override
 	public void setInfoHandler(InfoView infoHandler) {
 		this.infoHandler = infoHandler;
 		if (mapOverlayHandler != null) {
@@ -243,6 +246,7 @@ public class GeoMapView extends MapView implements NoiseARView,
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
 		gesture.onTouchEvent(ev);
+		Log.d("touch", "yea oh touch");
 		mapOverlayHandler.onTouchEvent(ev, this);
 		return super.onTouchEvent(ev);
 	}

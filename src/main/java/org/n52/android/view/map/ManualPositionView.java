@@ -17,6 +17,7 @@
 package org.n52.android.view.map;
 
 import org.n52.android.NoiseARView;
+import org.n52.android.data.MeasurementManager;
 import org.n52.android.geoar.R;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.view.InfoView;
@@ -121,6 +122,12 @@ public class ManualPositionView extends LinearLayout implements NoiseARView,
 	public void onRestoreInstanceState(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void setMeasureManager(MeasurementManager measureManager) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

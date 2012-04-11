@@ -30,31 +30,30 @@ import org.n52.android.dialog.FilterDialog;
 import org.n52.android.geoar.R;
 import org.n52.android.tracking.camera.RealityCamera;
 import org.n52.android.tracking.location.LocationHandler;
+import org.n52.android.view.GeoARFragment;
 import org.n52.android.view.InfoView;
-import org.n52.android.view.geoar.AugmentedView;
-import org.n52.android.view.geoar.CalibrationControlView;
-import org.n52.android.view.geoar.NoiseChartView;
-import org.n52.android.view.map.GeoMapView;
-import org.n52.android.view.map.ManualPositionView;
+import org.n52.android.view.geoar.ARFragment;
+import org.n52.android.view.map.GeoMapFragment;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.Overlay;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
-import android.content.Context;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.SharedPreferences;
-import android.content.pm.ConfigurationInfo;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageButton;
-import android.widget.ViewAnimator;
 
 
 /**
@@ -75,17 +74,20 @@ public class NoiseARActivity extends Activity {
 	private DataSourceAdapter adapter = DataSourceAdapter.getInstance();
 	
 	private MeasurementManager measurementManager;
-	private ViewAnimator viewAnimator;
 	private ImageButton mapARSwitcherButton;
 
 	private InfoView infoView;
-	private AugmentedView noiseView;
-
+	
 	private LocationHandler locationHandler;
 	// List of NoiseARViews
 	private List<NoiseARView> noiseARViews = new ArrayList<NoiseARView>();
-	private List<Overlay> mapOverlays;
-
+	private List<GeoARFragment> geoARFragments = new ArrayList<GeoARFragment>();
+	
+	private GeoMapFragment mapFragment;
+	private ARFragment arFragment;
+	
+	private boolean showMap;
+	
 	@Override
 	public Object onRetainNonConfigurationInstance() {
 		// Lets measurementManager survive a screen orientation change, so that
@@ -113,9 +115,7 @@ public class NoiseARActivity extends Activity {
 		mapARSwitcherButton = (ImageButton) findViewById(R.id.imageButtonMapARSwitcher);
 		mapARSwitcherButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				viewAnimator
-						.setDisplayedChild(viewAnimator.getDisplayedChild() == 0 ? 1
-								: 0);
+				showMap = (showMap == true) ? false : true;
 				updateButton();
 			}
 		});
@@ -125,57 +125,52 @@ public class NoiseARActivity extends Activity {
 		RealityCamera.setHeight(prefs.getFloat("cameraHeight", 1.6f));
 		
 		
-		// Find child views, set all common object references and add to
-		// noiseARViews list
-
-		// NoiseView
-		noiseView = (AugmentedView) findViewById(R.id.glNoiseView);
-		noiseView.setInfoHandler(infoView);
-		noiseView.setMeasureManager(measurementManager);
-		noiseView.setLocationHandler(locationHandler);	    
-	    noiseARViews.add(noiseView);
+		FragmentManager fragmentManager = getFragmentManager();
+		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 		
-		// Chart
-		NoiseChartView diagramView = (NoiseChartView) findViewById(R.id.noiseDiagramView);
-		diagramView.setNoiseGridValueProvider(noiseView
-				.getNoiseGridValueProvider());
-		noiseARViews.add(diagramView);
+		// Check to see if we have retained the fragments.
+		mapFragment = (GeoMapFragment) fragmentManager.findFragmentById(R.id.fragment_view);
+		arFragment = (ARFragment) fragmentManager.findFragmentById(R.id.fragment_view2);
 
-		// MapView
-		GeoMapView noiseMapView = (GeoMapView) findViewById(R.id.noiseMapView);
-		noiseMapView.setInfoHandler(infoView);
-		noiseMapView.setMeasureManager(measurementManager);
-		noiseMapView.setLocationHandler(locationHandler);
-		noiseARViews.add(noiseMapView);
+		// If not retained (or first time running), we need to create it.
+		if(mapFragment == null || arFragment == null){
+			// MapFragment
+			mapFragment = new GeoMapFragment(measurementManager, 
+					locationHandler, infoView);
+			geoARFragments.add(mapFragment);
+			
+			// AugmentedReality Fragment
+			arFragment = new ARFragment(measurementManager, 
+					locationHandler, infoView);
+			geoARFragments.add(arFragment);
+			
+			fragmentTransaction.add(R.id.fragment_view, mapFragment );
+			fragmentTransaction.add(R.id.fragment_view2, arFragment );
+			
+		} else {
+			mapFragment.setMeasureManager(measurementManager);
+			mapFragment.setLocationHandler(locationHandler);
+			mapFragment.setInfoHandler(infoView);
+			geoARFragments.add(mapFragment);
+			
+			arFragment.setMeasureManager(measurementManager);
+			arFragment.setLocationHandler(locationHandler);
+			arFragment.setInfoHandler(infoView);
+			geoARFragments.add(arFragment);
+		}
 
-		// Manual Position View
-		ManualPositionView positionView = (ManualPositionView) findViewById(R.id.manualPositionView);
-		positionView.setLocationHandler(locationHandler);
-		positionView.setMapView(noiseMapView);
-		noiseARViews.add(positionView);
-
-		// Calibration View
-		CalibrationControlView calibrationView = (CalibrationControlView) findViewById(R.id.calibrationView);
-		noiseARViews.add(calibrationView);
-
-		// Reset previous state of application when it was hidden for another.
-		viewAnimator = (ViewAnimator) findViewById(R.id.viewAnimator);
+		
+		
 		if (savedInstanceState != null) {
-			viewAnimator.setDisplayedChild(savedInstanceState.getInt(
-					"viewAnimatorState", 0));
-			for (NoiseARView arView : noiseARViews) {
-				arView.onRestoreInstanceState(savedInstanceState);
-				if (arView instanceof View) {
-					View view = (View) arView;
-					String key = arView.getClass().getName() + "visibility";
-					if (savedInstanceState.get(key) != null) {
-						view.setVisibility(savedInstanceState.getInt(key));
-					}
-				}
-			}
+			showMap = savedInstanceState.getBoolean("showMap", showMap);
+
+			for (GeoARFragment f : geoARFragments)
+				f.onRestoreInstanceState(savedInstanceState);
+
 			// restore manual positioning
 			locationHandler.onRestoreInstanceState(savedInstanceState);
 		} else {
+			showMap = true;
 			Builder builder = new AlertDialog.Builder(this);
 			builder.setMessage(R.string.info_use);
 			builder.setCancelable(true);
@@ -183,6 +178,8 @@ public class NoiseARActivity extends Activity {
 			builder.setTitle(R.string.advice);
 			builder.show();
 		}
+		Log.d("oh yea", "" + showMap);
+		fragmentTransaction.commit();
 
 		updateButton();
 
@@ -192,11 +189,19 @@ public class NoiseARActivity extends Activity {
 	 * Sets correct drawable for map/AR switching button
 	 */
 	private void updateButton() {
-		if (viewAnimator.getDisplayedChild() == 0) {
+		FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+		fragmentTransaction.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
+		if(showMap){
 			mapARSwitcherButton.setImageResource(R.drawable.ic_menu_phone);
-		} else {
+			fragmentTransaction.hide(arFragment);
+			fragmentTransaction.show(mapFragment);
+		} else{
 			mapARSwitcherButton.setImageResource(R.drawable.ic_menu_mapmode);
+			fragmentTransaction.hide(mapFragment);
+			fragmentTransaction.show(arFragment);
 		}
+			
+		fragmentTransaction.commit();
 	}
 
 	@Override
@@ -210,18 +215,11 @@ public class NoiseARActivity extends Activity {
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		// save state, whether map or AR view is visible
-		outState.putInt("viewAnimatorState", viewAnimator.getDisplayedChild());
-		for (NoiseARView arView : noiseARViews) {
-			arView.onSaveInstanceState(outState);
-			if (arView instanceof View) {
-				// if there is a real View, save its visibility
-				View view = (View) arView;
-				outState.putInt(arView.getClass().getName() + "visibility",
-						view.getVisibility());
-			}
-		}
-
+		// save state, whether map or AR fragment is visible
+		outState.putBoolean("showMap", showMap);
+		for (GeoARFragment f : geoARFragments)
+			f.onSaveInstanceState(outState);
+		
 		// save manual positioning
 		locationHandler.onSaveInstanceState(outState);
 	}
@@ -304,5 +302,22 @@ public class NoiseARActivity extends Activity {
 
 		}
 		return super.onPrepareOptionsMenu(menu);
+	}
+	
+	private static class UiFragment extends Fragment {
+
+		@Override
+		public void onActivityCreated(Bundle savedInstanceState) {
+			// TODO Auto-generated method stub
+			super.onActivityCreated(savedInstanceState);
+		}
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			// TODO Auto-generated method stub
+			return super.onCreateView(inflater, container, savedInstanceState);
+		}
+		
 	}
 }

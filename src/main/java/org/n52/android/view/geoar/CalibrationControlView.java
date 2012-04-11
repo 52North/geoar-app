@@ -19,9 +19,11 @@ package org.n52.android.view.geoar;
 import java.text.DecimalFormat;
 
 import org.n52.android.NoiseARView;
+import org.n52.android.data.MeasurementManager;
 import org.n52.android.geoar.R;
 import org.n52.android.tracking.camera.RealityCamera;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
+import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.view.InfoView;
 
 import android.content.Context;
@@ -121,7 +123,8 @@ public class CalibrationControlView extends LinearLayout implements
 	public Integer getMenuGroupId() {
 		return null;
 	}
-
+	
+	@Override
 	public void setInfoHandler(InfoView infoHandler) {
 	}
 
@@ -130,6 +133,18 @@ public class CalibrationControlView extends LinearLayout implements
 	}
 
 	public void onRestoreInstanceState(Bundle savedInstanceState) {
+		
+	}
+
+	@Override
+	public void setMeasureManager(MeasurementManager measureManager) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setLocationHandler(LocationHandler locationHandler) {
+		// TODO Auto-generated method stub
 		
 	}
 

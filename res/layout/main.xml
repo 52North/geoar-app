@@ -1,63 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_height="match_parent" android:layout_width="match_parent">
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+	
+<!--     <set>
+         <objectAnimator xmlns:android="http://schemas.android.com/apk/res/android"
+		    android:propertyName="x" 
+		    android:valueType="floatType"
+		    android:valueFrom="-1280"
+		    android:valueTo="0" 
+		    android:duration="500"/> 
+    </set>  -->
+        
+    <!-- replace dynamically via a FragmentTransaction and non statically defined fragments -->
+    <FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/fragment_view"
+        android:layout_width="230dp"
+        android:layout_height="348dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:name="org.n52.android.view.map.GeoMapFragment" />
+     
+    <FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/fragment_view2"
+        android:layout_width="230dp"
+        android:layout_height="348dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:name="org.n52.android.view.geoar.ARFragment" />
 
-	<!-- Map / AR -->
-	<ViewAnimator android:id="@+id/viewAnimator"
-		android:layout_width="match_parent" android:layout_height="match_parent">
-		<!-- Map -->
-		<RelativeLayout android:layout_height="match_parent"
-			android:layout_width="match_parent">
-			<org.n52.android.view.map.GeoMapView
-				android:id="@+id/noiseMapView" android:layout_width="match_parent"
-				android:clickable="true" android:apiKey="0tZocCdCJKKKdsPuP_ndeiC1OJo-VM8ymiNMy5g"
-				android:layout_height="match_parent" />
-			<!-- Interface for Calibration -->
-			<org.n52.android.view.map.ManualPositionView
-				android:id="@+id/manualPositionView" android:layout_height="wrap_content"
-				android:layout_width="match_parent"
-				android:layout_alignParentBottom="true" android:background="@android:drawable/toast_frame"
-				android:visibility="gone" />
-		</RelativeLayout>
-		
-		<!-- AR -->
-		<RelativeLayout android:layout_height="match_parent"
-			android:layout_width="match_parent">
+    <!-- Info Panel -->
+    <org.n52.android.view.InfoView
+        android:id="@+id/infoView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:background="@android:drawable/toast_frame" />
 
-			<org.n52.android.view.geoar.AugmentedView
-				android:id="@+id/glNoiseView" android:layout_width="match_parent"
-				android:layout_height="match_parent" />
-
-			<org.n52.android.tracking.camera.CameraView
-				android:layout_width="match_parent" android:layout_height="match_parent" />
-
-			<org.n52.android.view.geoar.NoiseChartView
-				android:id="@+id/noiseDiagramView" android:layout_width="match_parent"
-				android:layout_height="100dp" android:layout_alignParentBottom="true" />
-
-			<!-- Interface for Calibration -->
-			<org.n52.android.view.geoar.CalibrationControlView
-				android:id="@+id/calibrationView" android:layout_height="wrap_content"
-				android:layout_width="match_parent"
-				android:layout_alignParentBottom="true" android:background="@android:drawable/toast_frame"
-				android:visibility="gone" />
-
-		</RelativeLayout>
-	</ViewAnimator>
-
-	<!-- Info Panel -->
-	<org.n52.android.view.InfoView
-		android:layout_height="wrap_content" android:layout_width="match_parent"
-		android:layout_alignParentTop="true" android:layout_toLeftOf="@+id/imageButtonMapARSwitcher"
-		android:layout_alignParentLeft="true" android:background="@android:drawable/toast_frame"
-		android:id="@+id/infoView" />
-
-
-	<!-- Map / AR Switching Button -->
-	<ImageButton android:layout_height="wrap_content"
-		android:id="@+id/imageButtonMapARSwitcher" android:layout_width="wrap_content"
-		android:src="@drawable/ic_menu_mapmode" android:layout_alignParentTop="true"
-		android:layout_alignParentRight="true" />
+    <!-- Map / AR Switching Button -->
+    <ImageButton
+        android:id="@+id/imageButtonMapARSwitcher"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/ic_menu_mapmode" />
 
 </RelativeLayout>
-

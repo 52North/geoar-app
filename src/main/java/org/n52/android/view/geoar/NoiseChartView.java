@@ -22,7 +22,9 @@ import org.n52.android.NoiseARView;
 import org.n52.android.alg.NoiseView;
 import org.n52.android.alg.NoiseView.NoiseGridValueProvider;
 import org.n52.android.alg.NoiseView.NoiseViewChangedListener;
+import org.n52.android.data.MeasurementManager;
 import org.n52.android.geoar.R;
+import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.view.InfoView;
 
 import android.app.AlertDialog;
@@ -297,6 +299,7 @@ public class NoiseChartView extends View implements NoiseViewChangedListener,
 		return isShown();
 	}
 
+	@Override
 	public void setInfoHandler(InfoView infoHandler) {
 
 	}
@@ -309,6 +312,18 @@ public class NoiseChartView extends View implements NoiseViewChangedListener,
 	public void onRestoreInstanceState(Bundle savedInstanceState) {
 		showBars = savedInstanceState.getBoolean("ChartViewBars", true);
 		showLabels = savedInstanceState.getBoolean("ChartViewLabels", true);
+	}
+
+	@Override
+	public void setMeasureManager(MeasurementManager measureManager) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setLocationHandler(LocationHandler locationHandler) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <item type="id" name="actionbar_compat" />
+    <item type="id" name="actionbar_compat_title" />
+    <item type="id" name="actionbar_compat_item_refresh_progress" />
+    <item type="id" name="actionbar_compat_item_refresh" />
+    <item type="id" name="menu_refresh" />
 	<item type="id" name="bubble_inner_layout" />
 	<item type="id" name="bubble_close" />
 </resources>

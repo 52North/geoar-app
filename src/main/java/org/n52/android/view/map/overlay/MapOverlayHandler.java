@@ -30,7 +30,7 @@ import android.widget.Toast;
 /**
  * @author Holger Hopmann
  * @author Arne de Wall
- *
+ * 
  */
 public class MapOverlayHandler {
 	
@@ -336,6 +336,7 @@ public class MapOverlayHandler {
 			}
 			
 			if (updateDelay >= 0 || force) {
+				
 				newBounds.expand(Settings.BUFFER_MAPINTERPOLATION,
 						Settings.BUFFER_MAPINTERPOLATION);
 				if (nextUpdate != null) {
@@ -346,6 +347,7 @@ public class MapOverlayHandler {
 				mapView.postDelayed(nextUpdate,
 						Math.max(0, updateDelay));
 			}
+			Log.d("UPDATE", "irgend nen update ist drin");
 		}
 	}
 	
