@@ -35,10 +35,15 @@ import android.widget.TextView;
  * Core information bar. Takes records of objects which currently try to show
  * information and presents them as possible
  * 
- * @author Holger Hopmann
+ * @author Holger Hopmann, Arne de Wall
  * 
  */
-public class InfoView extends LinearLayout {
+public class InfoView extends LinearLayout  {
+	
+	public static final int STEP_CLUSTERING = 1;
+	public static final int STEP_INTERPOLATION = 2;
+	public static final int STEP_REQUEST = 3;
+
 
 	private class ProgressHolder {
 		private int progress, maxProgress;

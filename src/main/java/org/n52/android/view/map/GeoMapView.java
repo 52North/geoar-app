@@ -18,7 +18,7 @@ package org.n52.android.view.map;
 
 import java.util.List;
 
-import org.n52.android.NoiseARView;
+import org.n52.android.GeoARView;
 import org.n52.android.data.MeasurementManager;
 import org.n52.android.geoar.R;
 import org.n52.android.tracking.location.LocationHandler;
@@ -37,6 +37,7 @@ import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Message;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -60,7 +61,7 @@ import android.widget.ToggleButton;
  * @author Holger Hopmann
  * 
  */
-public class GeoMapView extends MapView implements NoiseARView,
+public class GeoMapView extends MapView implements GeoARView,
 		OnGestureListener, OnLocationUpdateListener {
 
 	/**
@@ -144,7 +145,7 @@ public class GeoMapView extends MapView implements NoiseARView,
 			return;
 		
 		this.gesture = new GestureDetector(getContext(), this);
-
+	
 		locationIndicator = new ImageView(context);
 		locationIndicator.setImageResource(R.drawable.ic_maps_indicator_current_position_anim);
 		locationIndicator.setVisibility(View.GONE);
@@ -157,7 +158,7 @@ public class GeoMapView extends MapView implements NoiseARView,
 		mapController.setCenter(point2);
 		
 		mResourceProxy = getResourceProxy();
-
+		
 		setBuiltInZoomControls(true);
 		setMultiTouchControls(true);
 	}
@@ -297,12 +298,48 @@ public class GeoMapView extends MapView implements NoiseARView,
 		}
 	}
 
+
+	/**
+	 * 	Saves the current center of the map so that it can 
+	 *  be restored.
+	 */
+	@Override
+	protected Parcelable onSaveInstanceState() {
+		// begin boilerplate code that allows parent classes to save state
+		Bundle outState = new Bundle();
+		outState.putParcelable("instanceState", super.onSaveInstanceState());
+		outState.putInt("lat", getMapCenter().getLatitudeE6());
+		outState.putInt("lon", getMapCenter().getLongitudeE6());
+		outState.putInt("zoom", getZoomLevel());
+		return outState;
+	}
+
+	@Override
+	protected void onRestoreInstanceState(Parcelable state) {
+		if(state instanceof Bundle){
+			Bundle bundle = (Bundle) state;
+			int lat = bundle.getInt("lat");
+			int lon = bundle.getInt("lon");
+			getController().setZoom(bundle.getInt("zoom"));
+			getController().setCenter(new GeoPoint(lat, lon));
+			super.onRestoreInstanceState(bundle.getParcelable("instanceState"));
+			return;
+		}
+		super.onRestoreInstanceState(state);
+	}
+
 	public void setManualPositioning(boolean enabled) {
 		if (enabled) {
 			// activate manual positioning
 			showOwnLocation(true, false);
 		}
 		manualPositionMode = enabled;
+	}
+	
+	public void setCenterAndZoom(GeoPoint g, int zoomLevel){
+		MapController controller = getController();
+		controller.setCenter(g);
+		controller.setZoom(zoomLevel);
 	}
 
 	public Integer getMenuGroupId() {

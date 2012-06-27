@@ -8,7 +8,6 @@ import java.util.List;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import org.n52.android.alg.Interpolation;
 import org.n52.android.alg.proj.MercatorPoint;
 import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorRect;
@@ -26,8 +25,6 @@ import android.content.Context;
 import android.location.Location;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.opengl.Matrix;
-import android.util.Log;
 
 /**
  * 
@@ -83,12 +80,12 @@ public class GLESAugmentedRenderer implements GLSurfaceView.Renderer,
 			if (mInfoHandler != null) {
 				String stepTitle = "";
 				switch (step) {
-				case Interpolation.STEP_CLUSTERING:
-					stepTitle = mContext.getString(R.string.clustering);
-					break;
-				case Interpolation.STEP_INTERPOLATION:
-					stepTitle = mContext.getString(R.string.interpolation);
-					break;
+//				case NoiseInterpolation.STEP_CLUSTERING:
+//					stepTitle = mContext.getString(R.string.clustering);
+//					break;
+//				case NoiseInterpolation.STEP_INTERPOLATION:
+//					stepTitle = mContext.getString(R.string.interpolation);
+//					break;
 				case MeasurementManager.STEP_REQUEST:
 					stepTitle = mContext.getString(R.string.measurement_request);
 					break;

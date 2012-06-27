@@ -16,7 +16,7 @@
  */
 package org.n52.android.view.map.overlay;
 
-import org.n52.android.alg.Interpolation;
+import org.n52.android.alg.InterpolationProvider;
 import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.data.MeasurementManager;
@@ -37,7 +37,6 @@ import android.view.MotionEvent;
 /**
  * Map {@link Overlay} to show interpolation data in a {@link MapView}
  * 
- * @author Holger Hopmann
  * @author Arne de Wall
  * 
  */
@@ -46,8 +45,6 @@ public class InterpolationOverlay extends Overlay {
 	private byte[] interpolationBuffer;
 	private MercatorRect bounds;
 	private Bitmap interpolationBmp;
-
-	private MeasurementManager measureManager;
 
 	private int cacheWidth;
 	private int cacheHeight;
@@ -62,10 +59,8 @@ public class InterpolationOverlay extends Overlay {
 	 * @param cacheWidth
 	 * @param cacheHeight
 	 */
-	public InterpolationOverlay(Context context, MeasurementManager measureManager,
-			int cacheWidth, int cacheHeight) {
+	public InterpolationOverlay(Context context, int cacheWidth, int cacheHeight) {
 		super(context);
-		this.measureManager = measureManager;
 		this.cacheWidth = cacheWidth;
 		this.cacheHeight = cacheHeight;
 		paint = new Paint();
@@ -131,13 +126,7 @@ public class InterpolationOverlay extends Overlay {
 		canvas.drawBitmap(interpolationBmp, null, dstRect, paint);
 	}
 
-	/**
-	 * 
-	 * @param measureManager
-	 */
-	public void setMeasureManager(MeasurementManager measureManager) {
-		this.measureManager = measureManager;
-	}
+
 	
 	/**
 	 * Updates the interpolation Overlay bitmap and the bounds
@@ -162,7 +151,7 @@ public class InterpolationOverlay extends Overlay {
 	public void setOverlayData(MercatorRect bounds, byte[] interpolationOverlay){
 		this.bounds = bounds;
 		this.interpolationBuffer = interpolationOverlay;
-		this.interpolationBmp = Interpolation.interpolationToBitmap(
+		this.interpolationBmp = InterpolationProvider.interpolationToBitmap(
 				bounds, interpolationBuffer, interpolationBmp);
 	}
 

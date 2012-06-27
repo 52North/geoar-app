@@ -37,12 +37,12 @@
 			<artifactId>android</artifactId>
 			<version>2.3.3</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency>  
 
 		<dependency>
 			<groupId>org.osmdroid</groupId>
 			<artifactId>osmdroid-android</artifactId>
-			<version>3.0.7</version>
+			<version>3.0.8</version>
 		</dependency>
 		
 		<dependency>
@@ -50,6 +50,24 @@
 		    <artifactId>slf4j-android</artifactId>
 		    <version>1.6.1-RC1</version>
 		</dependency>
+		
+<!-- 		<dependency> -->
+<!-- 		    <groupId>org.n52.android</groupId> -->
+<!-- 		    <artifactId>52n-geoar-ds</artifactId> -->
+<!-- 			<version>0.0.1-SNAPSHOT</version> -->
+<!-- 		</dependency> -->
+		
+		<!-- <dependency>
+		    <groupId>org.n52.android</groupId>
+		    <artifactId>52n-geoar-ds-noise</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>  -->
+		
+		<!-- <dependency>
+			<groupId>android.support</groupId>
+			<artifactId>compatibility-v4</artifactId>
+			<version>r7</version>
+		</dependency>  --> 
 
 
 		<!-- NOTE: those are the ones defined by goole and are NOT in the maven 
@@ -74,14 +92,14 @@
 			<plugin>
 				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 				<artifactId>android-maven-plugin</artifactId>
-				<version>3.0.0-alpha-14</version>
+				<version>3.2.0</version>
 				<configuration>
 					<androidManifestFile>${project.basedir}/AndroidManifest.xml</androidManifestFile>
 					<assetsDirectory>${project.basedir}/assets</assetsDirectory>
 					<resourceDirectory>${project.basedir}/res</resourceDirectory>
 					<nativeLibrariesDirectory>${project.basedir}/src/main/native</nativeLibrariesDirectory>
 					<sdk>
-						<platform>10</platform>
+						<platform>15</platform>
 					</sdk>
 					<deleteConflictingFiles>true</deleteConflictingFiles>
 					<undeployBeforeDeploy>true</undeployBeforeDeploy>
@@ -128,4 +146,11 @@
 			</plugin>
 		</plugins>
 	</build>
+	<repositories>
+		<repository> <!-- Tentative local repo for libs that are not migrated to Maven dependency mechanism and available in online repositories. -->
+			<id>lib-repository</id>
+			<name>Local Repository</name>
+			<url>file:///${basedir}/lib-repository/</url>
+		</repository>
+	</repositories>
 </project>

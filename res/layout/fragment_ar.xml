@@ -10,9 +10,9 @@
 	<org.n52.android.tracking.camera.CameraView
 		android:layout_width="match_parent" android:layout_height="match_parent" />
 
-	<org.n52.android.view.geoar.NoiseChartView
+	<!-- <org.n52.android.view.geoar.NoiseChartView
 		android:id="@+id/noiseDiagramView" android:layout_width="match_parent"
-		android:layout_height="100dp" android:layout_alignParentBottom="true" />
+		android:layout_height="100dp" android:layout_alignParentBottom="true" />  -->
 
 	<!-- Interface for Calibration -->
 	<org.n52.android.view.geoar.CalibrationControlView

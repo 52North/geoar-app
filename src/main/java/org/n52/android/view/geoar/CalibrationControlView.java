@@ -18,7 +18,7 @@ package org.n52.android.view.geoar;
 
 import java.text.DecimalFormat;
 
-import org.n52.android.NoiseARView;
+import org.n52.android.GeoARView;
 import org.n52.android.data.MeasurementManager;
 import org.n52.android.geoar.R;
 import org.n52.android.tracking.camera.RealityCamera;
@@ -45,7 +45,7 @@ import android.widget.TextView;
  * 
  */
 public class CalibrationControlView extends LinearLayout implements
-		OnClickListener, CameraUpdateListener, NoiseARView {
+		OnClickListener, CameraUpdateListener, GeoARView {
 
 	private TextView heightInfoTextView;
 	private DecimalFormat distFormat;

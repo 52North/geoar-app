@@ -16,7 +16,7 @@
  */
 package org.n52.android.view.map;
 
-import org.n52.android.NoiseARView;
+import org.n52.android.GeoARView;
 import org.n52.android.data.MeasurementManager;
 import org.n52.android.geoar.R;
 import org.n52.android.tracking.location.LocationHandler;
@@ -39,7 +39,7 @@ import android.widget.LinearLayout;
  * @author Holger Hopmann
  * 
  */
-public class ManualPositionView extends LinearLayout implements NoiseARView,
+public class ManualPositionView extends LinearLayout implements GeoARView,
 		OnClickListener {
 
 	private GeoMapView mapView;

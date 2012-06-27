@@ -3,7 +3,7 @@ package org.n52.android.view.map.overlay;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.n52.android.alg.Interpolation;
+import org.n52.android.alg.InterpolationProvider;
 import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.data.Measurement;
@@ -60,10 +60,10 @@ public class MapOverlayHandler {
 				if(infoHandler != null){
 					String stepTitle = "";
 					switch(step){
-					case Interpolation.STEP_CLUSTERING:
+					case InfoView.STEP_CLUSTERING:
 						stepTitle = "Clustering";
 						break;
-					case Interpolation.STEP_INTERPOLATION:
+					case InfoView.STEP_INTERPOLATION:
 						stepTitle = "Interpolation";
 						break;
 					case MeasurementManager.STEP_REQUEST:
@@ -106,7 +106,7 @@ public class MapOverlayHandler {
 					synchronized(interpolationLock){
 						measurementCallback = measureCallback;
 						 
-						interpolationBmp = Interpolation.interpolationToBitmap(bounds, 
+						interpolationBmp = InterpolationProvider.interpolationToBitmap(bounds, 
 								measureCallback.interpolationBuffer, interpolationBmp);
 						interpolationOverlay.setOverlayBitmap(bounds, interpolationBmp);
 						
@@ -194,7 +194,7 @@ public class MapOverlayHandler {
 		this.mapView = mapView;
 		
 		// TODO ma schaun was ich brauch
-		interpolationOverlay = new InterpolationOverlay(mapView.getContext(), measureManager, cacheWidth, cacheHeight);
+		interpolationOverlay = new InterpolationOverlay(mapView.getContext(), cacheWidth, cacheHeight);
 		this.mapView.getOverlays().add(this.interpolationOverlay);
 		
 		itemizedOverlay = new ItemizedDataOverlay<OverlayItem>(new ArrayList<OverlayItem>(), mapView.getResources().getDrawable(R.drawable.mapmarker), 
@@ -228,7 +228,7 @@ public class MapOverlayHandler {
 		paint = new Paint();
 		paint.setAlpha(200);
 		
-		interpolationOverlay = new InterpolationOverlay(mapView.getContext(), measureManager, cacheWidth, cacheHeight);
+		interpolationOverlay = new InterpolationOverlay(mapView.getContext(), cacheWidth, cacheHeight);
 		this.mapView.getOverlays().add(this.interpolationOverlay);
 		
 		itemizedOverlay = new ItemizedDataOverlay<OverlayItem>(new ArrayList<OverlayItem>(), mapView.getResources().getDrawable(R.drawable.mapmarker), 

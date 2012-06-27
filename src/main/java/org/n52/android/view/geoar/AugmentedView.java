@@ -16,8 +16,7 @@
  */
 package org.n52.android.view.geoar;
 
-import org.n52.android.NoiseARView;
-import org.n52.android.alg.NoiseView.NoiseGridValueProvider;
+import org.n52.android.GeoARView;
 import org.n52.android.data.MeasurementManager;
 import org.n52.android.geoar.R;
 import org.n52.android.tracking.camera.RealityCamera;
@@ -60,7 +59,7 @@ import android.widget.ToggleButton;
  * @author Holger Hopmann
  */
 public class AugmentedView extends GLSurfaceView implements SensorEventListener,
-		OnLocationUpdateListener, NoiseARView, IRotationMatrixProvider {
+		OnLocationUpdateListener, GeoARView, IRotationMatrixProvider {
 
 	/**
 	 * Dialog to allow users to choose overlays. Nested class makes modification
@@ -184,10 +183,10 @@ public class AugmentedView extends GLSurfaceView implements SensorEventListener,
 	 * 
 	 * @return
 	 */
-	public NoiseGridValueProvider getNoiseGridValueProvider() {
-//		return renderer;
-		return null;
-	}
+//	public NoiseGridValueProvider getNoiseGridValueProvider() {
+////		return renderer;
+//		return null;
+//	}
 
 	public void setInfoHandler(InfoView infoHandler) {
 		this.infoHandler = infoHandler;

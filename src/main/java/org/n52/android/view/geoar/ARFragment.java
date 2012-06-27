@@ -2,7 +2,7 @@ package org.n52.android.view.geoar;
 
 import java.util.ArrayList;
 
-import org.n52.android.NoiseARView;
+import org.n52.android.GeoARView;
 import org.n52.android.data.MeasurementManager;
 import org.n52.android.geoar.R;
 import org.n52.android.tracking.location.LocationHandler;
@@ -21,7 +21,7 @@ public class ARFragment extends GeoARFragment {
 	private AugmentedView augmentedView;
 	
 	public ARFragment(){
-		geoARViews = new ArrayList<NoiseARView>();
+		geoARViews = new ArrayList<GeoARView>();
 	}
 	
 	public ARFragment(MeasurementManager measureManager, LocationHandler locationHandler, InfoView infoView){
@@ -29,6 +29,7 @@ public class ARFragment extends GeoARFragment {
 		this.mMeasureManager 	= measureManager;
 		this.mInfoHandler 		= infoView;
 		this.mLocationHandler 	= locationHandler;
+		this.setRetainInstance(true);
 	}
 	
 	@Override
@@ -42,9 +43,9 @@ public class ARFragment extends GeoARFragment {
 			augmentedView.setMeasureManager(mMeasureManager);
 			
 			// Chart
-			NoiseChartView diagramView = (NoiseChartView) view.findViewById(R.id.noiseDiagramView);
-			diagramView.setNoiseGridValueProvider(augmentedView.getNoiseGridValueProvider());
-			geoARViews.add(diagramView);
+//			NoiseChartView diagramView = (NoiseChartView) view.findViewById(R.id.noiseDiagramView);
+//			diagramView.setNoiseGridValueProvider(augmentedView.getNoiseGridValueProvider());
+//			geoARViews.add(diagramView);
 			
 			// Calibration View
 			CalibrationControlView calibrationView = (CalibrationControlView) view.findViewById(R.id.calibrationView);
@@ -67,12 +68,6 @@ public class ARFragment extends GeoARFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-	}
-
-	@Override
-	public void onRestoreInstanceState(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

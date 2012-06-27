@@ -16,6 +16,7 @@
  */
 package org.n52.android.tracking.location;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +39,8 @@ import android.os.Bundle;
  * @author Holger Hopmann
  * 
  */
-public class LocationHandler implements LocationListener {
+public class LocationHandler implements LocationListener, Serializable {
+	private static final long serialVersionUID = 6337877169906901138L;
 
 	public interface OnLocationUpdateListener {
 		void onLocationChanged(Location location);
@@ -112,13 +114,13 @@ public class LocationHandler implements LocationListener {
 	 * Performs processes needed to enable location updates
 	 */
 	public void onResume() {
-		if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-			infoHandler.setStatus(R.string.gps_nicht_aktiviert, -1,
-					gpsProviderInfo);
-		}
-
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-				5000, 0, this);
+//		if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+//			infoHandler.setStatus(R.string.gps_nicht_aktiviert, -1,
+//					gpsProviderInfo);
+//		}
+//
+//		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+//				5000, 0, this);
 
 	}
 

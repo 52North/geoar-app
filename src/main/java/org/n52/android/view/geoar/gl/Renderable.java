@@ -3,16 +3,15 @@ package org.n52.android.view.geoar.gl;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import org.n52.android.alg.NoiseView.NoiseGridValueProvider;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.osmdroid.util.GeoPoint;
 
 import android.opengl.GLES20;
-import android.opengl.Matrix;
 import android.opengl.GLSurfaceView.Renderer;
+import android.opengl.Matrix;
 import android.util.Log;
 
-public abstract class Renderable implements Renderer, CameraUpdateListener, NoiseGridValueProvider {
+public abstract class Renderable implements Renderer, CameraUpdateListener{// FIXME , NoiseGridValueProvider {
 	
 	// OpenGL Variables and Matrices
 	// How many bytes per float

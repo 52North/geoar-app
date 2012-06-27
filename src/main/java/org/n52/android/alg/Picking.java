@@ -22,6 +22,9 @@ import android.graphics.PointF;
 import android.opengl.GLU;
 
 /**
+ * 
+ * TODO move to -ds component
+ * 
  * Class to calculate intersection of viewing frustum with interpolation plane.
  * See 5.3.1
  * 

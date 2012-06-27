@@ -10,7 +10,6 @@ import javax.microedition.khronos.opengles.GL10;
 
 import org.n52.android.alg.proj.MercatorPoint;
 import org.n52.android.data.Measurement;
-import org.n52.android.data.MeasurementManager;
 import org.n52.android.data.MeasurementManager.MeasurementsCallback;
 import org.n52.android.tracking.location.LocationConverter;
 import org.n52.android.tracking.location.LocationVector;
@@ -21,7 +20,6 @@ import org.osmdroid.util.GeoPoint;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.SystemClock;
-import android.util.Log;
 
 public class GLESItemizedRenderer implements IRenderable {
 	

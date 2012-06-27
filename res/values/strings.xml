@@ -64,4 +64,6 @@
 	<string name="info_measurement_query">Messungsabfrage</string>
 	<string name="toggle_interpolation">Interpolation  Overlay</string>
 	<string name="toggle_itemized">Itemized  Overlay</string>
+	
+	<string name="cb_menu_refresh">Refresh</string>
 </resources>

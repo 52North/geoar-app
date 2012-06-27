@@ -55,15 +55,15 @@ public class DataSourceDialog extends AlertDialog {
 
 		for (final DataSource source : dataSources) {
 			final ToggleButton button = new ToggleButton(context);
-			button.setTextOn(source.getTitle());
-			button.setTextOff(source.getTitle());
-			button.setEnabled(source.isAvailable());
-			button.setChecked(source.getClass().equals(
-					measurementManager.getDataSource().getClass()));
-			if (source.getIconDrawableId() != null) {
-				button.setCompoundDrawablesWithIntrinsicBounds(0,
-						source.getIconDrawableId(), 0, 0);
-			}
+//			button.setTextOn(source.getTitle());
+//			button.setTextOff(source.getTitle());
+//			button.setEnabled(source.isAvailable());
+//			button.setChecked(source.getClass().equals(
+//					measurementManager.getDataSource().getClass()));
+//			if (source.getIconDrawableId() != null) {
+//				button.setCompoundDrawablesWithIntrinsicBounds(0,
+//						source.getIconDrawableId(), 0, 0);
+//			}
 			button.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 				public void onCheckedChanged(CompoundButton buttonView,
 						boolean isChecked) {

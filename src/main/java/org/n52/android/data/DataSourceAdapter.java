@@ -1,54 +1,43 @@
 package org.n52.android.data;
 
-import org.n52.android.data.noise.NoiseDataFactory;
-import org.n52.android.view.geoar.Settings.DataSourceSetting;
+import org.n52.android.GeoARActivity;
+import org.n52.android.alg.InterpolationProvider;
 
-// FIXME ich denke hier ist der einstigspunkt ;)
-public class DataSourceAdapter extends DataSourceAbstractFactory {
+import android.content.Context;
+import android.content.Intent;
+
+/**
+ * Static 
+ * @author FYIE
+ *
+ */
+public final class DataSourceAdapter  {
 	
-	private static DataSourceAbstractFactory factory;
-	private static DataSourceAdapter singleton;
-	private static DataSourceSetting dataSelected = DataSourceSetting.NOISE;
+	private static DataSourceAbstractFactory 	factory;
+	private static PluginLoader 				pluginLoader;
+	private static Context						mcontext;
 	
-	private DataSourceAdapter(DataSourceSetting dataSelected){
-		setDataSource(dataSelected);
-	}
-	
-	public static DataSourceAdapter getInstance(){
-		if(singleton == null){
-			singleton = new DataSourceAdapter(dataSelected);
-		}
-		return singleton;
-	}
-	
-	public static void setDataSource(DataSourceSetting dataSource){
-		switch(dataSelected){
-		case NOISE:
-			factory = (DataSourceAbstractFactory) new NoiseDataFactory();
-			break;
-		case AIRPOLUTION:
-			factory = null;
-			break;
-		}
-	}
-	
-	public static DataSourceSetting getSelectedDataSource(){
-		return dataSelected;
-	}
-	
-	@Override
-	public Measurement CreateMeasurement() {
-		return factory.CreateMeasurement();
+	public static void initFactoryLoader(ClassLoader classLoader, Context context){
+		pluginLoader = new PluginLoader(classLoader, context);
+		mcontext = context;
 	}
 
-	@Override
-	public MeasurementFilter CreateMeasurementFilter() {
-		return factory.CreateMeasurementFilter();
-	}
-
-	@Override
-	public MeasurementManager CreateMeasurementManager() {
-		return factory.CreateMeasurementManager();
+	public static void refreshPluginLoader(){
+		pluginLoader.refresh();
 	}
  
+	public static void startDataSource(String id){
+		factory = pluginLoader.getFactoryById(id);
+		InterpolationProvider.setInterpolation(factory.getInterpolationProvider());
+		Intent intent = new Intent(mcontext.getApplicationContext(), GeoARActivity.class);
+		mcontext.startActivity(intent);
+		
+	}
+	public static Measurement createMeasurement() {
+		return factory.createMeasurement();
+	}
+
+	public static MeasurementManager createMeasurementManager() {
+		return factory.createMeasurementManager();
+	}
 }

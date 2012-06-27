@@ -16,7 +16,6 @@
  */
 package org.n52.android.view.geoar.gl;
 
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,9 +23,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL11;
 
-import org.n52.android.alg.Interpolation;
-import org.n52.android.alg.NoiseView.NoiseGridValueProvider;
-import org.n52.android.alg.NoiseView.NoiseViewChangedListener;
+import org.n52.android.alg.InterpolationProvider;
 import org.n52.android.alg.Picking;
 import org.n52.android.alg.proj.MercatorPoint;
 import org.n52.android.alg.proj.MercatorProj;
@@ -54,12 +51,12 @@ import android.opengl.GLU;
 
 /**
  * {@link Renderer} implementation to serve a augmented reality view on noise
- * interpolations
+ * interpolation
  * 
  * @author Holger Hopmann
  * 
  */
-public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
+public class OpenGLRenderer implements Renderer, //NoiseGridValueProvider,
 		CameraUpdateListener {
 
 	/**
@@ -104,7 +101,7 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 	private OpenGLTexture interpolationTexture = new OpenGLTexture() {
 		@Override
 		protected Bitmap getBitmap() {
-			return Interpolation.interpolationToBitmap(
+			return InterpolationProvider.interpolationToBitmap(
 					currentInterpolationRect, currentMeasurement.interpolationBuffer, null);
 		}
 	};
@@ -128,13 +125,13 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 			if (infoHandler != null) {
 				String stepTitle = "";
 				switch (step) {
-				case Interpolation.STEP_CLUSTERING:
+				case InfoView.STEP_CLUSTERING:
 					stepTitle = context.getString(R.string.clustering);
 					break;
-				case Interpolation.STEP_INTERPOLATION:
+				case InfoView.STEP_INTERPOLATION:
 					stepTitle = context.getString(R.string.interpolation);
 					break;
-				case MeasurementManager.STEP_REQUEST:
+				case InfoView.STEP_REQUEST:
 					stepTitle = context.getString(R.string.measurement_request);
 					break;
 				}
@@ -197,7 +194,7 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 	private int[] viewportMatrix = new int[4];
 
 	// Listeners for noise view feature
-	private List<NoiseViewChangedListener> noiseViewChangedListeners = new ArrayList<NoiseViewChangedListener>();
+//	private List<NoiseViewChangedListener> noiseViewChangedListeners = new ArrayList<NoiseViewChangedListener>();
 
 	// Flag indicating that projection needs update
 	private boolean resetProjection;
@@ -215,12 +212,13 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 		this.rotationProvider = rotationProvider;
 		this.context = context;
 	}
-
-	public void addOnNoiseViewChangedListener(NoiseViewChangedListener listener) {
-		if (!noiseViewChangedListeners.contains(listener)) {
-			noiseViewChangedListeners.add(listener);
-		}
-	}
+	
+	//FIXME
+//	public void addOnNoiseViewChangedListener(NoiseViewChangedListener listener) {
+//		if (!noiseViewChangedListeners.contains(listener)) {
+//			noiseViewChangedListeners.add(listener);
+//		}
+//	}
 
 	public byte getNoiseValue(int x, int y) {
 		if (currentInterpolationRect != null && x >= 0
@@ -229,7 +227,9 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 			return currentMeasurement.interpolationBuffer[y * currentInterpolationRect.width()
 					+ x];
 		} else {
-			return NO_DATA;
+			//FIXME
+			return 0;
+//			return NO_DATA;
 		}
 	}
 
@@ -276,25 +276,26 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 			}
 			gl11.glPopMatrix();
 
-			// Find noise view, i. e. intersections with interpolation plane
-			if (noiseViewChangedListeners.size() != 0) {
-
-				OnNoiseViewChanged( // Unten, Top / Bottom getauscht
-						Picking.getGridPoint(modelViewMatrix, projectionMatrix,
-								viewportMatrix, 0, viewportMatrix[3], 0,
-								viewportMatrix[2]), // Bottom Left
-						Picking.getGridPoint(modelViewMatrix, projectionMatrix,
-								viewportMatrix, 0, viewportMatrix[3],
-								viewportMatrix[2], 0), // Bottom Right
-						// Oben Top / Bottom korrekt
-						Picking.getGridPoint(modelViewMatrix, projectionMatrix,
-								viewportMatrix, viewportMatrix[3], 0, 0,
-								viewportMatrix[2]), // Top Left
-						Picking.getGridPoint(modelViewMatrix, projectionMatrix,
-								viewportMatrix, viewportMatrix[3], 0,
-								viewportMatrix[2], 0), // Top Right
-						new PointF(dx, dy));
-			}
+			//FIXME
+//			// Find noise view, i. e. intersections with interpolation plane
+//			if (noiseViewChangedListeners.size() != 0) {
+//
+//				OnNoiseViewChanged( // Unten, Top / Bottom getauscht
+//						Picking.getGridPoint(modelViewMatrix, projectionMatrix,
+//								viewportMatrix, 0, viewportMatrix[3], 0,
+//								viewportMatrix[2]), // Bottom Left
+//						Picking.getGridPoint(modelViewMatrix, projectionMatrix,
+//								viewportMatrix, 0, viewportMatrix[3],
+//								viewportMatrix[2], 0), // Bottom Right
+//						// Oben Top / Bottom korrekt
+//						Picking.getGridPoint(modelViewMatrix, projectionMatrix,
+//								viewportMatrix, viewportMatrix[3], 0, 0,
+//								viewportMatrix[2]), // Top Left
+//						Picking.getGridPoint(modelViewMatrix, projectionMatrix,
+//								viewportMatrix, viewportMatrix[3], 0,
+//								viewportMatrix[2], 0), // Top Right
+//						new PointF(dx, dy));
+//			}
 		}
 
 		// Show calibration plane
@@ -321,13 +322,14 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 	 * @param topRight
 	 * @param viewerPos
 	 */
-	private void OnNoiseViewChanged(PointF bottomLeft, PointF bottomRight,
-			PointF topLeft, PointF topRight, PointF viewerPos) {
-		for (NoiseViewChangedListener listener : noiseViewChangedListeners) {
-			listener.onNoiseViewChanged(bottomLeft, bottomRight, topLeft,
-					topRight, viewerPos);
-		}
-	}
+	//FIXME
+//	private void OnNoiseViewChanged(PointF bottomLeft, PointF bottomRight,
+//			PointF topLeft, PointF topRight, PointF viewerPos) {
+//		for (NoiseViewChangedListener listener : noiseViewChangedListeners) {
+//			listener.onNoiseViewChanged(bottomLeft, bottomRight, topLeft,
+//					topRight, viewerPos);
+//		}
+//	}
 
 	public void onSurfaceChanged(GL10 gl, int width, int height) {
 		GL11 gl11 = (GL11) gl;
@@ -375,10 +377,11 @@ public class OpenGLRenderer implements Renderer, NoiseGridValueProvider,
 		}
 	}
 
-	public void removeOnNoiseViewChangedListener(
-			NoiseViewChangedListener listener) {
-		noiseViewChangedListeners.remove(listener);
-	}
+	//FIXME
+//	public void removeOnNoiseViewChangedListener(
+//			NoiseViewChangedListener listener) {
+//		noiseViewChangedListeners.remove(listener);
+//	}
 
 	/**
 	 * (Re)sets intrinsic camera parameters obtained from the central
