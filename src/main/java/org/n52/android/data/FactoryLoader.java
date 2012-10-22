@@ -55,9 +55,9 @@ public class FactoryLoader {
 		
 		public DatasourceHolder(String name){
 			String[] split = name.split("\\.")[0].split("\\-");
-			this.identification = split[0];
+			this.identification = name;
 			if(split.length > 1)
-				version = Long.parseLong(split[1]);
+				version = (long) 12;
 		}
 		
 		public DatasourceHolder(String name, DataSourceAbstractFactory factory){
