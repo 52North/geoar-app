@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.android.view.geoar.gl;
+package org.n52.android.view.geoar.gl.model.primitives;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -27,6 +27,7 @@ import javax.microedition.khronos.opengles.GL11;
  * @author Holger Hopmann
  *
  */
+@Deprecated
 public abstract class Rectangle {
 	protected static FloatBuffer vertexBuffer;
 

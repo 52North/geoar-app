@@ -1,7 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
-	<item android:id="@+id/item_own_location" android:title="@string/show_location" />
-	<item android:id="@+id/item_select_map_overlay" android:title="@string/select_map" />
-	<item android:id="@+id/item_set_location" android:title="@string/set_location" />
-	<item android:id="@+id/item_reload_map" android:title="@string/reload" />
+
+    <item
+        android:id="@+id/item_own_location"
+        android:title="@string/show_location"/>
+    <item
+        android:id="@+id/item_select_map_overlay"
+        android:title="@string/select_map"/>
+    <item
+        android:id="@+id/item_set_location"
+        android:title="@string/set_location"/>
+    <item
+        android:id="@+id/item_reload_map"
+        android:title="@string/reload"/>
+	<item 
+	    android:id="@+id/map_item_camera"
+	    android:title="@string/map_item_camera"
+	    android:showAsAction="always"
+	    android:icon="@drawable/ic_menu_phone"/>
 </menu>

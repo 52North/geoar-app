@@ -21,22 +21,19 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.microedition.khronos.opengles.GL10;
-
 import org.n52.android.alg.proj.MercatorPoint;
 import org.n52.android.data.Measurement;
 import org.n52.android.data.MeasurementManager.MeasurementsCallback;
 import org.n52.android.tracking.location.LocationConverter;
 import org.n52.android.tracking.location.LocationVector;
-import org.n52.android.view.geoar.gl.GLESAugmentedRenderer.IRenderable;
-import org.n52.android.view.geoar.gl.GLESAugmentedRenderer.IRotationMatrixProvider;
+import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.IRotationMatrixProvider;
 import org.osmdroid.util.GeoPoint;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.SystemClock;
 
-public class GLESItemizedRenderer implements IRenderable {
+public class GLESItemizedRenderer  {
 	
 	private class POI{
 		
@@ -54,7 +51,7 @@ public class GLESItemizedRenderer implements IRenderable {
 	    private float[] mMVPMatrix = new float[16];
 		
 
-		public POI(Measurement measurement){
+		public POI(Measurement measurement){ 
 			this.measurement = measurement;
 			this.relativeLocation = LocationConverter.getRelativePositionVec(
 					currentCenterGPoint, measurement.getLongitude(), measurement.getLatitude(), 0);
@@ -62,49 +59,96 @@ public class GLESItemizedRenderer implements IRenderable {
 //			float color = (measurement.getValue() - min) / (max - min);
 			float[] color = getColor(measurement.getValue());
 			// This triangle is red, green, and blue.
-//			final float[] triangleVerticesData = {
-//					// X, Y, Z, 
-//					// R, G, B, A
-//		            -0.5f, -0.25f, 0.0f, 
-//		            color[0], color[1], 0.0f, 1.0f,
-//		            
-//		            0.5f, -0.25f, 0.0f,
-//		            color[0], color[1], 0.0f, 1.0f,
-//		            
-//		            0.0f, 0.559016994f, 0.0f, 
-//		            color[0], color[1], 0.0f, 1.0f};
-			
+
 			final float[] triangleVerticesData = {
 				// X, Y, Z
 				// R, G, B, A,
-				0.0f, 0.0f, 0.0f,
-				color[0], color[1], 0.0f, 1.0f,
-				-0.25f, 1.0f, -0.25f,
-				color[0], color[1], 0.0f, 1.0f,
-				0.25f, 1.0f, -0.25f,
-				color[0], color[1], 0.0f, 1.0f,
-				
-				0.0f, 0.0f, 0.0f,
-				color[0], color[1], 0.0f, 1.0f,
-				-0.25f, 1.0f, 0.25f,
-				color[0], color[1], 0.0f, 1.0f,
-				-0.25f, 1.0f, -0.25f,
-				color[0], color[1], 0.0f, 1.0f,
-				
-				0.0f, 0.0f, 0.0f,
-				color[0], color[1], 0.0f, 1.0f,
-				0.25f, 1.0f, 0.25f,
-				color[0], color[1], 0.0f, 1.0f,
-				-0.25f, 1.0f, 0.25f,
-				color[0], color[1], 0.0f, 1.0f,
-				
-				
-				0.0f, 0.0f, 0.0f,
-				color[0], color[1], 0.0f, 1.0f,
-				0.25f, 1.0f, 0.25f,
-				color[0], color[1], 0.0f, 1.0f,
-				0.25f, 1.0f, -0.25f,
-				color[0], color[1], 0.0f, 1.0f,
+		        // Front face
+		        -0.25f,-0.25f,0.25f,
+		        color[0], color[1], 0.0f, 1.0f,
+		        0.25f,-0.25f,0.25f, 
+		        color[0], color[1], 0.0f, 1.0f,
+		        -0.25f,0.25f,0.25f,
+		        color[0], color[1], 0.0f, 1.0f,
+		        0.25f,0.25f,0.25f,
+		        color[0], color[1], 0.0f, 1.0f,
+		        // Right face
+		        0.25f,0.25f,0.25f,
+		        color[0], color[1], 0.0f, 1.0f,
+		        0.25f,-0.25f,0.25f, 
+		        color[0], color[1], 0.0f, 1.0f,
+		        0.25f,0.25f,-0.25f, 
+		        color[0], color[1], 0.0f, 1.0f,
+		        0.25f,-0.25f,-0.25f,
+		        color[0], color[1], 0.0f, 1.0f,
+		        // Back face
+		        0.25f,-0.25f,-0.25f, 
+		        color[0], color[1], 0.0f, 1.0f,
+		        -0.25f,-0.25f,-0.25f, 
+		        color[0], color[1], 0.0f, 1.0f,
+		        0.25f,0.25f,-0.25f, 
+		        color[0], color[1], 0.0f, 1.0f,
+		        -0.25f,0.25f,-0.25f,
+		        color[0], color[1], 0.0f, 1.0f,
+		        // Left face
+		        -0.25f,0.25f,-0.25f, 
+		        color[0], color[1], 0.0f, 1.0f,
+		        -0.25f,-0.25f,-0.25f, 
+		        color[0], color[1], 0.0f, 1.0f,
+		        -0.25f,0.25f,0.25f, 
+		        color[0], color[1], 0.0f, 1.0f,
+		        -0.25f,-0.25f,0.25f,
+		        color[0], color[1], 0.0f, 1.0f,
+		        // Bottom face
+		        -0.25f,-0.25f,0.25f, 
+		        color[0], color[1], 0.0f, 1.0f,
+		        -0.25f,-0.25f,-0.25f, 
+		        color[0], color[1], 0.0f, 1.0f,
+		        0.25f,-0.25f,0.25f, 
+		        color[0], color[1], 0.0f, 1.0f,
+		        0.25f,0.25f,-0.25f,
+		        color[0], color[1], 0.0f, 1.0f,
+		        // Move to top
+		        0.25f,-0.25f,-0.25f,
+		        color[0], color[1], 0.0f, 1.0f,
+		        -0.25f,0.25f,0.25f,
+		        color[0], color[1], 0.0f, 1.0f,
+		        // Top face
+		        -0.25f,	0.25f, 	0.25f, 
+		        color[0], color[1], 0.0f, 1.0f,
+		        0.25f, 	0.25f, 	0.25f, 
+		        color[0], color[1], 0.0f, 1.0f,
+		        -0.25f,	0.25f,	-0.25f, 
+		        color[0], color[1], 0.0f, 1.0f,
+		        0.25f, 	0.25f,	-0.25f,
+		        color[0], color[1], 0.0f, 1.0f
+//				color[0], color[1], 0.0f, 1.0f,
+//				-0.25f, 1.0f, -0.25f,
+//				color[0], color[1], 0.0f, 1.0f,
+//				0.25f, 1.0f, -0.25f,
+//				color[0], color[1], 0.0f, 1.0f,
+//				
+//				0.0f, 0.0f, 0.0f,
+//				color[0], color[1], 0.0f, 1.0f,
+//				-0.25f, 1.0f, 0.25f,
+//				color[0], color[1], 0.0f, 1.0f,
+//				-0.25f, 1.0f, -0.25f,
+//				color[0], color[1], 0.0f, 1.0f,
+//				
+//				0.0f, 0.0f, 0.0f,
+//				color[0], color[1], 0.0f, 1.0f,
+//				0.25f, 1.0f, 0.25f,
+//				color[0], color[1], 0.0f, 1.0f,
+//				-0.25f, 1.0f, 0.25f,
+//				color[0], color[1], 0.0f, 1.0f,
+//				
+//				
+//				0.0f, 0.0f, 0.0f,
+//				color[0], color[1], 0.0f, 1.0f,
+//				0.25f, 1.0f, 0.25f,
+//				color[0], color[1], 0.0f, 1.0f,
+//				0.25f, 1.0f, -0.25f,
+//				color[0], color[1], 0.0f, 1.0f,
 			};
 			// init the buffer
 			mRenderObjectBuffer = ByteBuffer.allocateDirect(triangleVerticesData.length * mBytesPerFloat)
@@ -141,12 +185,12 @@ public class GLESItemizedRenderer implements IRenderable {
 		 * Draw the POI
 		 */
 		public void onDrawFrame() {
-			
+//			GLES20.glClear(mask)
 			Matrix.setIdentityM(mModelMatrix, 0);
 			 
 			Matrix.translateM(mModelMatrix, 0, 0.0f, -1.6f, 0.0f);
 			Matrix.translateM(mModelMatrix,  0, relativeLocation.x, relativeLocation.y, relativeLocation.z);
-			Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 0.0f, 1.0f, 0.0f);    
+//			Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 0.0f, 1.0f, 0.0f);    
 		    // Pass in the position information
 			mRenderObjectBuffer.position(mPositionOffset);
 		    GLES20.glVertexAttribPointer(mPositionHandle, mPositionDataSize, GLES20.GL_FLOAT, false,
@@ -172,28 +216,28 @@ public class GLESItemizedRenderer implements IRenderable {
 		    GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
 //			GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
 
-			GLES20.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 12);
+			GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 26);
 
-			
 		}
 	}
+	
 	
 	private boolean mIsVisible;
 	// How many bytes per float
 	private final int mBytesPerFloat = 4;
-    private final int mStrideBytes = 7 * mBytesPerFloat;
-    private final int mPositionOffset = 0;
-    private final int mPositionDataSize = 3;
-    private final int mColorOffset = 3;
-    private final int mColorDataSize = 4; 
-    // Shader-id
+        private final int mStrideBytes = 7 * mBytesPerFloat;
+        private final int mPositionOffset = 0;
+        private final int mPositionDataSize = 3;
+        private final int mColorOffset = 3;
+        private final int mColorDataSize = 4; 
+        // Shader-id
 	private int mSimpleColorProgram;
 	// various matrices handle
 	private int mMVPMatrixHandle;
 	private int mPositionHandle;
 	private int mColorHandle;
-    // Allocate storage for the final combined matrix. This will be passed into the shader program.
-    private float[] mViewMatrix = new float[16];
+	// Allocate storage for the final combined matrix. This will be passed into the shader program.
+	private float[] mViewMatrix = new float[16];
     
 	float angleInDegrees;
 	
@@ -206,7 +250,6 @@ public class GLESItemizedRenderer implements IRenderable {
 	private final IRotationMatrixProvider mRotationProvider;
 	
 
-	
 	public GLESItemizedRenderer (IRotationMatrixProvider rotationProvider){
 		
 		final String vertexShader =
@@ -256,7 +299,7 @@ public class GLESItemizedRenderer implements IRenderable {
 		poiList = new ArrayList<POI>();
 	}
 
-	@Override
+
 	public void onDrawFrame() {
 //		if(!mIsVisible)
 //			return;
@@ -272,7 +315,7 @@ public class GLESItemizedRenderer implements IRenderable {
 			p.onDrawFrame();
 	}
 
-	@Override
+	
 	public void onLocationUpdate(GeoPoint locationUpdate) {
 		this.currentCenterGPoint = locationUpdate;
 		for(POI p : poiList)
@@ -280,12 +323,12 @@ public class GLESItemizedRenderer implements IRenderable {
 	}
 
 
-	@Override
+	
 	public void unloadResources() {
 		this.mIsVisible = false;
 	}
 	
-	@Override
+	
 	public void loadResources() {
 		this.mIsVisible = true;
 	}
@@ -295,7 +338,7 @@ public class GLESItemizedRenderer implements IRenderable {
 	 * @param measurements
 	 * 					list of measurements
 	 */
-	@Override
+	
 	public void onObservationUpdate(MeasurementsCallback m) {
 		// get max and min values for color interpolation
 		float value;

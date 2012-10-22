@@ -19,7 +19,7 @@ import org.osmdroid.util.GeoPoint;
 
 import android.content.Context;
 
-public class AugmentedViewController {
+public class ARViewController {
 
 	public interface IRenderSettings {
 
@@ -98,7 +98,7 @@ public class AugmentedViewController {
 	// }
 	// };
 	//
-	public AugmentedViewController(Context context) {
+	public ARViewController(Context context) {
 
 	}
 

@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
-	<org.n52.android.view.geoar.AugmentedView
+	<org.n52.android.view.geoar.ARSurfaceView
 		android:id="@+id/glNoiseView" android:layout_width="match_parent"
 		android:layout_height="match_parent" />
 

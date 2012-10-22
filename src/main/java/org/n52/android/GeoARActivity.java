@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.n52.android;
 
 import java.util.ArrayList;
@@ -34,6 +33,7 @@ import org.n52.android.view.geoar.ARFragment;
 import org.n52.android.view.map.GeoMapFragment;
 import org.osmdroid.views.MapView;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -52,7 +52,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageButton;
 
-
 /**
  * Core and only {@link Activity} in this application. Coordinates all its child
  * views, manager classes and inter-view communication. Derived from
@@ -66,40 +65,26 @@ import android.widget.ImageButton;
 public class GeoARActivity extends ActionBarActivity {
 
 	private MeasurementManager measurementManager;
-	private InfoView infoView;
-	
-	private LocationHandler locationHandler;
 	private List<GeoARView> noiseARViews = new ArrayList<GeoARView>();
-
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-//		setContentView(R.layout.main);
-		
-		if(savedInstanceState == null){
-//			DataSourceAdapter.initFactoryLoader(getClassLoader(), this);
-		}
 
-
-		infoView = (InfoView) findViewById(R.id.infoView);
-		locationHandler = new LocationHandler(this, infoView);
-		
 		// Get MeasurementManager from previous instance or create new one
 		Object lastMeasureManager = getLastCustomNonConfigurationInstance();
-		if (lastMeasureManager != null) { 
+		if (lastMeasureManager != null) {
 			measurementManager = (MeasurementManager) lastMeasureManager;
 		} else {
 			measurementManager = DataSourceAdapter.createMeasurementManager();
 		}
-		
-		// First time init, create the UI.
-		if(savedInstanceState == null){
-			Fragment newFragment = UiFragment.newInstance(measurementManager, locationHandler);
-			getSupportFragmentManager().beginTransaction().add(android.R.id.content, 
-					newFragment).commit();
-		}
 
+		// First time init, create the UI.
+		if (savedInstanceState == null) {
+			Fragment newFragment = ViewFragment.newInstance(measurementManager);
+			getSupportFragmentManager().beginTransaction()
+					.add(android.R.id.content, newFragment).commit();
+		}
 
 		// Reset camera height if set
 		SharedPreferences prefs = getSharedPreferences("NoiseAR", MODE_PRIVATE);
@@ -108,7 +93,7 @@ public class GeoARActivity extends ActionBarActivity {
 		if (savedInstanceState != null) {
 
 			// restore manual positioning
-			locationHandler.onRestoreInstanceState(savedInstanceState);
+			// locationHandler.onRestoreInstanceState(savedInstanceState);
 		} else {
 			Builder builder = new AlertDialog.Builder(this);
 			builder.setMessage(R.string.info_use);
@@ -123,9 +108,8 @@ public class GeoARActivity extends ActionBarActivity {
 	public Object onRetainCustomNonConfigurationInstance() {
 		// Lets measurementManager survive a screen orientation change, so that
 		// no measurements need to get recached
-		return measurementManager; 
-	} 
-
+		return measurementManager;
+	}
 
 	@Override
 	public void onAttachedToWindow() {
@@ -134,25 +118,27 @@ public class GeoARActivity extends ActionBarActivity {
 		window.setFormat(PixelFormat.TRANSLUCENT);
 	}
 
-
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		// save manual positioning
-		locationHandler.onSaveInstanceState(outState);
+		// locationHandler.onSaveInstanceState(outState);
 	}
 
 	@Override
 	protected void onResume() {
 		// delegate to locationHandler
-		locationHandler.onResume();
+		// TODO locationhandler ist in UIFragment gewandert => onResume Fragment
+		// later!
+		// if(locationHandler != null)
+		// locationHandler.onResume();
 		super.onResume();
 	}
 
 	@Override
 	protected void onPause() {
 		// delegate to locationHandler
-//		locationHandler.onPause();
+		// locationHandler.onPause();
 		super.onPause();
 	}
 
@@ -201,9 +187,11 @@ public class GeoARActivity extends ActionBarActivity {
 			case R.id.item_source:
 				// show data sources dialog
 				// TODO
-//				new DataSourceDialog(this, dataSources, measurementManager)
-				new DataSourceDialog(this, null, measurementManager)
-						.show();
+				// new DataSourceDialog(this, dataSources, measurementManager)
+				new DataSourceDialog(this, null, measurementManager).show();
+				break;
+			case R.id.map_item_camera:
+				ViewFragment.instance.updateFragmentView();
 				break;
 			}
 		}
@@ -216,116 +204,120 @@ public class GeoARActivity extends ActionBarActivity {
 		// Update visibility of menu items according to visiblity of the child
 		// views
 		for (GeoARView view : noiseARViews) {
-			if (view.getMenuGroupId() != null) { 
+			if (view.getMenuGroupId() != null) {
 				menu.setGroupVisible(view.getMenuGroupId(), view.isVisible());
 			}
 
 		}
 		return super.onPrepareOptionsMenu(menu);
 	}
-	
-	private static class UiFragment extends Fragment {
+
+	private static class ViewFragment extends Fragment {
 		GeoARFragment mapFragment;
 		GeoARFragment arFragment;
 
-		private static UiFragment instance;
-		
+		private static ViewFragment instance;
+
 		private MeasurementManager measureManager;
 		private LocationHandler locationHandler;
 		private InfoView infoView;
-		
+
 		private ImageButton mapARSwitcherButton;
-		
-		private boolean showMap = true;
-		
-		static UiFragment newInstance(MeasurementManager measurementManager, 
-				 LocationHandler locationHandler){
-			instance = new UiFragment();
+
+		private boolean showMap = false;
+
+		static ViewFragment newInstance(MeasurementManager measurementManager) {
+			instance = new ViewFragment();
 			instance.setRetainInstance(true);
 			instance.measureManager = measurementManager;
-			instance.locationHandler = locationHandler;
-
 			return instance;
 		}
-		
+
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
 			View v = inflater.inflate(R.layout.main, container, false);
-			
+
 			// AR / Map switcher Button
-			mapARSwitcherButton = (ImageButton) v.findViewById(R.id.imageButtonMapARSwitcher);
+			mapARSwitcherButton = (ImageButton) v
+					.findViewById(R.id.imageButtonMapARSwitcher);
 			mapARSwitcherButton.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					showMap = (showMap == true) ? false : true;
-					updateButton();
-				} 
+					// showMap = (showMap == true) ? false : true;
+					updateFragmentView();
+				}
 			});
-			
-			return v; 
+			return v;
 		}
-		
+
 		@Override
 		public void onActivityCreated(Bundle savedInstanceState) {
 			super.onActivityCreated(savedInstanceState);
-						
+
 			FragmentManager fm = getFragmentManager();
-			
+
 			// find fragments
-			mapFragment = (GeoARFragment) fm.findFragmentById(R.id.fragment_view);
-			arFragment = (GeoARFragment) fm.findFragmentById(R.id.fragment_view2);
-			
+			mapFragment = (GeoARFragment) fm
+					.findFragmentById(R.id.fragment_view);
+			arFragment = (GeoARFragment) fm
+					.findFragmentById(R.id.fragment_view2);
+
 			infoView = (InfoView) getView().findViewById(R.id.infoView);
+			locationHandler = new LocationHandler(getActivity(), infoView);
 			FragmentTransaction f = fm.beginTransaction();
-			
-			if(arFragment == null){
+
+			if (arFragment == null) {
 				// AugmentedReality Fragment
-				arFragment = new ARFragment(measureManager, 
-						locationHandler, infoView);
-				
+				arFragment = new ARFragment(measureManager, locationHandler,
+						infoView);
+
 				arFragment.setMeasureManager(measureManager);
 				arFragment.setLocationHandler(locationHandler);
 				arFragment.setInfoHandler(infoView);
-				
+
 				f.add(R.id.fragment_view2, arFragment);
-			}
-			else{
+			} else {
 				arFragment.setInfoHandler(infoView);
 			}
 
-			if(mapFragment == null){
+			if (mapFragment == null) {
 				// Map Fragment
-				mapFragment = new GeoMapFragment(measureManager, 						
+				mapFragment = new GeoMapFragment(measureManager,
 						locationHandler, infoView);
-				
+
 				mapFragment.setMeasureManager(measureManager);
 				mapFragment.setLocationHandler(locationHandler);
 				mapFragment.setInfoHandler(infoView);
-				
+
 				f.add(R.id.fragment_view, mapFragment);
-			}
-			else{
+			} else {
 				mapFragment.setInfoHandler(infoView);
 			}
-			
+
 			f.commit();
-			updateButton();
+			updateFragmentView();
 		}
 
 		/**
 		 * Sets correct drawable for map/AR switching button
 		 */
-		private void updateButton(){			
-			FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-			if(showMap){
+		@TargetApi(11)
+		private void updateFragmentView() {
+			showMap = (showMap == true) ? false : true;
+			FragmentTransaction fragmentTransaction = getFragmentManager()
+					.beginTransaction();
+			if (showMap) {
+				getActivity().getActionBar().show();
 				mapARSwitcherButton.setImageResource(R.drawable.ic_menu_phone);
 				fragmentTransaction.hide(arFragment);
 				fragmentTransaction.show(mapFragment);
-			} else{
-				mapARSwitcherButton.setImageResource(R.drawable.ic_menu_mapmode);
+			} else {
+				getActivity().getActionBar().hide();
+				mapARSwitcherButton
+						.setImageResource(R.drawable.ic_menu_mapmode);
 				fragmentTransaction.hide(mapFragment);
 				fragmentTransaction.show(arFragment);
-			}	
+			}
 			fragmentTransaction.commit();
 		}
 	}

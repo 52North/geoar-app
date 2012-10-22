@@ -24,16 +24,20 @@ import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.view.GeoARFragment;
 import org.n52.android.view.InfoView;
 
+import android.app.Activity;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 
 public class ARFragment extends GeoARFragment {
 	
-	private AugmentedView augmentedView;
+	private ARSurfaceView augmentedView;
 	
 	public ARFragment(){
 		geoARViews = new ArrayList<GeoARView>();
@@ -51,8 +55,19 @@ public class ARFragment extends GeoARFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.fragment_ar, container, false);
+		
+//	     // When working with the camera, it's useful to stick to one orientation.
+//        Activity activity = getActivity();
+//		activity.setRequestedOrientation( ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE );
+//     
+//        // Next, we disable the application's title bar...
+//		activity.requestWindowFeature( Window.FEATURE_NO_TITLE );
+//        // ...and the notification bar. That way, we can use the full screen.
+//		activity.getWindow().setFlags( WindowManager.LayoutParams.FLAG_FULLSCREEN,
+//                                WindowManager.LayoutParams.FLAG_FULLSCREEN );
+		
 		if(savedInstanceState == null){
-			augmentedView = (AugmentedView) view.findViewById(R.id.glNoiseView);
+			augmentedView = (ARSurfaceView) view.findViewById(R.id.glNoiseView);
 			augmentedView.setInfoHandler(mInfoHandler);
 			augmentedView.setLocationHandler(mLocationHandler);
 			augmentedView.setMeasureManager(mMeasureManager);
@@ -62,6 +77,8 @@ public class ARFragment extends GeoARFragment {
 //			diagramView.setNoiseGridValueProvider(augmentedView.getNoiseGridValueProvider());
 //			geoARViews.add(diagramView);
 			
+			
+		
 			// Calibration View
 			CalibrationControlView calibrationView = (CalibrationControlView) view.findViewById(R.id.calibrationView);
 			geoARViews.add(calibrationView);

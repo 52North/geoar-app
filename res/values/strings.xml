@@ -64,6 +64,32 @@
 	<string name="info_measurement_query">Messungsabfrage</string>
 	<string name="toggle_interpolation">Interpolation  Overlay</string>
 	<string name="toggle_itemized">Itemized  Overlay</string>
-	
+	<!-- Codebase Strings -->
 	<string name="cb_menu_refresh">Refresh</string>
+	<string name="cb_menu_about">About</string>
+	<!-- About Dialog -->
+	<string name="about_info_text">
+	    More information at 
+	    http://52north.org/android 
+	</string>
+	<string name="about_more_info_text">
+	    GeoAR is part of the 52°North Geostatistics Commnity: \n
+		http://52north.org/communities/geostatistics/ \n
+		Contact: Daniel Nüst (d.nuest@52north.org) \n
+		Development Credits: Arne de Wall, Holger Hopmann
+	</string>
+	<string name="about_legal_text">
+	    This development is supported by the European Commissions Seventh
+		Framework Programme (FP7) via the project GeoViQua (QUAlity aware
+		VIsualisation for the Global Earth Observation system of systems), grant
+		number 265178.</string>
+	<string name="about_titel">
+	    52°North GeoAR Augmented Reality Browser for Android
+	</string>
+	<string name="about_version_text">
+	    ${version}
+	</string>
+	
+	<!-- Map Strings -->
+	<string name="map_item_camera">CameraView</string>
 </resources>
