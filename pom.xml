@@ -30,44 +30,45 @@
 		</license>
 	</licenses>
 
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>com.google.android</groupId>
 			<artifactId>android</artifactId>
-			<version>2.3.3</version>
+			<version>4.1.1.4</version>
 			<scope>provided</scope>
-		</dependency>  
+		</dependency>
 
 		<dependency>
 			<groupId>org.osmdroid</groupId>
 			<artifactId>osmdroid-android</artifactId>
 			<version>3.0.8</version>
 		</dependency>
-		
+
 		<dependency>
-		    <groupId>org.slf4j</groupId>
-		    <artifactId>slf4j-android</artifactId>
-		    <version>1.6.1-RC1</version>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-android</artifactId>
+			<version>1.6.1-RC1</version>
 		</dependency>
-		
-<!-- 		<dependency> -->
-<!-- 		    <groupId>org.n52.android</groupId> -->
-<!-- 		    <artifactId>52n-geoar-ds</artifactId> -->
-<!-- 			<version>0.0.1-SNAPSHOT</version> -->
-<!-- 		</dependency> -->
-		
-		<!-- <dependency>
-		    <groupId>org.n52.android</groupId>
-		    <artifactId>52n-geoar-ds-noise</artifactId>
+
+		<dependency>
+			<groupId>org.n52.android</groupId>
+			<artifactId>52n-geoar-ds</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-		</dependency>  -->
-		
-		<!-- <dependency>
-			<groupId>android.support</groupId>
-			<artifactId>compatibility-v4</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.android</groupId>
+			<artifactId>support-v4</artifactId>
 			<version>r7</version>
-		</dependency>  --> 
+		</dependency>
+
+
+		<!-- <dependency> <groupId>org.n52.android</groupId> <artifactId>52n-geoar-ds-noise</artifactId> 
+			<version>0.0.1-SNAPSHOT</version> </dependency> -->
+
+		<!-- <dependency> <groupId>android.support</groupId> <artifactId>compatibility-v4</artifactId> 
+			<version>r7</version> </dependency> -->
 
 
 		<!-- NOTE: those are the ones defined by goole and are NOT in the maven 
@@ -107,36 +108,38 @@
 				<extensions>true</extensions>
 			</plugin>
 			<plugin>
-            <!-- check for correct source file headers during test phase: http://code.google.com/p/maven-license-plugin/wiki/HowTo -->
-            <!-- run "mvn license:check -Dyear=2011" to check -->
-            <!-- run "mvn license:format -Dyear=2011" to add to the files -->
-            <groupId>com.mycila.maven-license-plugin</groupId>
-            <artifactId>maven-license-plugin</artifactId>
-            <version>1.9.0</version>
-            <configuration>
-               <header>src/main/resources/license_header.txt</header>
-               <includes>
-                  <include>**/*.java</include>
-               </includes>
-               <excludes>
-                  <exclude>**/ext/actionbar/*.java</exclude>
-               </excludes>
-               <strictCheck>true</strictCheck>
-               <properties>
-                  <year>${project.inceptionYear}</year>
-               </properties>
-            </configuration>
-            <executions>
-               <execution>
-                  <phase>test</phase>
-                  <!-- test will fail if license headers are not correct -->
-                  <goals>
-                     <goal>check</goal>
-                     <!-- <goal>format</goal> -->
-                  </goals>
-               </execution>
-            </executions>
-         </plugin>
+				<!-- check for correct source file headers during test phase: http://code.google.com/p/maven-license-plugin/wiki/HowTo -->
+				<!-- run "mvn license:check -Dyear=2011" to check -->
+				<!-- run "mvn license:format -Dyear=2011" to add to the files -->
+				<groupId>com.mycila.maven-license-plugin</groupId>
+				<artifactId>maven-license-plugin</artifactId>
+				<version>1.9.0</version>
+				<configuration>
+					<header>src/main/resources/license_header.txt</header>
+					<includes>
+						<include>**/*.java</include>
+					</includes>
+					<excludes>
+						<exclude>**/R.java</exclude>
+						<exclude>**/ext/actionbar/*.java</exclude>
+						<exclude>**/BuildConfig.java</exclude>
+					</excludes>
+					<strictCheck>true</strictCheck>
+					<properties>
+						<year>${project.inceptionYear}</year>
+					</properties>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>test</phase>
+						<!-- test will fail if license headers are not correct -->
+						<goals>
+							<goal>check</goal>
+							<!-- <goal>format</goal> -->
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
@@ -177,7 +180,8 @@
 		</plugins>
 	</build>
 	<repositories>
-		<repository> <!-- Tentative local repo for libs that are not migrated to Maven dependency mechanism and available in online repositories. -->
+		<repository> <!-- Tentative local repo for libs that are not migrated to Maven dependency 
+				mechanism and available in online repositories. -->
 			<id>lib-repository</id>
 			<name>Local Repository</name>
 			<url>file:///${basedir}/lib-repository/</url>

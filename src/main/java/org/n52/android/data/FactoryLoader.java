@@ -26,13 +26,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.Enumeration;
 
+import org.n52.android.alg.InterpolationProvider.DatasourceInterpolation;
+import org.n52.android.data.Annotations.DataSource;
 import org.n52.android.data.PluginLoader.AddPluginCallback;
 import org.n52.android.data.PluginLoader.PluginHolder;
 
 import android.content.Context;
 import android.os.Environment;
 import dalvik.system.DexClassLoader;
+import dalvik.system.DexFile;
+import dalvik.system.PathClassLoader;
 
 /**
  * 
@@ -86,7 +91,6 @@ public class FactoryLoader {
 	}
 
 	private void loadPluginHolder(AddPluginCallback callback) {
-		final File tmpDir = context.getDir("dex", 0);
 
 		String[] apksInDirectory = (new File(PLUGIN_PATH).list(new OnlyAPK()));
 		// final String[] pluginFileNames = getAllPluginDirectorys();
@@ -102,16 +106,65 @@ public class FactoryLoader {
 					throw new FileNotFoundException("Directory not found: "
 							+ pluginDirectory);
 
+				File tmpDir = context.getDir(pluginFileName + ".odex", 0);
+
+				Enumeration<String> entries = DexFile.loadDex(pluginDirectory,
+						tmpDir.getAbsolutePath() + "/test.odex", 0).entries();
+
 				// create ClassLoader
 				dexClassLoader = new DexClassLoader(pluginDirectory,
 						tmpDir.getAbsolutePath(), null, this.getClass()
 								.getClassLoader());
 
+				while (entries.hasMoreElements()) {
+					String entry = entries.nextElement();
+
+					Class<?> entryClass = dexClassLoader.loadClass(entry);
+					if (entryClass
+							.isAnnotationPresent(Annotations.DataSource.class)) {
+						// Test
+						final DataSource dataSource = entryClass
+								.getAnnotation(Annotations.DataSource.class);
+
+						DataSourceAbstractFactory test = new DataSourceAbstractFactory() {
+
+							@Override
+							public DatasourceInterpolation getInterpolationProvider() {
+								// TODO Auto-generated method stub
+								return null;
+							}
+
+							@Override
+							public String getDatasourceName() {
+								return dataSource.name();
+							}
+
+							@Override
+							public MeasurementManager createMeasurementManager() {
+								// TODO Auto-generated method stub
+								return null;
+							}
+
+							@Override
+							public Measurement createMeasurement() {
+								// TODO Auto-generated method stub
+								return null;
+							}
+						};
+
+						callback.addPlugin(new DatasourceHolder(pluginFileName
+								+ "Test", test, dexClassLoader));
+					}
+				}
+
+				// DexFile test = new DexFile(pluginDirectory);
+				// Test new
+				// DexFile(this.context.getApplicationInfo().sourceDir).entries();
+
 				// Check if Plugin Description exists
 				if (dexClassLoader.getResource(PLUGIN_DESCRIPTION_DIR) == null)
 					throw new FileNotFoundException(PLUGIN_DESCRIPTION_DIR
 							+ " in " + pluginDirectory + " not found");
-
 				final InputStream apkDescription = dexClassLoader
 						.getResourceAsStream(PLUGIN_DESCRIPTION_DIR);
 				BufferedReader reader = new BufferedReader(
@@ -123,8 +176,9 @@ public class FactoryLoader {
 					// Cast the return object to the library interface so that
 					// the caller can directly invoke methods in the interface.
 					Class<?> clazz = dexClassLoader.loadClass(strLine);
-					DataSourceAbstractFactory fac = (DataSourceAbstractFactory) clazz.newInstance();
-//					fac.setDatasourceLoader(dexClassLoader);
+					DataSourceAbstractFactory fac = (DataSourceAbstractFactory) clazz
+							.newInstance();
+					// fac.setDatasourceLoader(dexClassLoader);
 
 					// Add all abstract factorys to the input set
 					callback.addPlugin((PluginHolder) new DatasourceHolder(
