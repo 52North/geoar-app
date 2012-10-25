@@ -29,9 +29,10 @@ import java.io.OutputStream;
 import java.util.Enumeration;
 
 import org.n52.android.alg.InterpolationProvider.DatasourceInterpolation;
-import org.n52.android.data.Annotations.DataSource;
 import org.n52.android.data.PluginLoader.AddPluginCallback;
 import org.n52.android.data.PluginLoader.PluginHolder;
+import org.n52.android.newdata.Annotations;
+import org.n52.android.newdata.Annotations.DataSource;
 
 import android.content.Context;
 import android.os.Environment;
@@ -94,7 +95,7 @@ public class FactoryLoader {
 
 		String[] apksInDirectory = (new File(PLUGIN_PATH).list(new OnlyAPK()));
 		// final String[] pluginFileNames = getAllPluginDirectorys();
-		if (apksInDirectory.length == 0)
+		if (apksInDirectory == null || apksInDirectory.length == 0)
 			throw new RuntimeException(
 					"No Datasource APKs Found in GeoAR directory");
 
