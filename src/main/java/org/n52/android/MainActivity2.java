@@ -20,11 +20,14 @@ import java.util.ArrayList;
 import org.n52.android.data.CodebaseGridFragment;
 import org.n52.android.data.DataSourceAdapter;
 import org.n52.android.data.DatasourceGridFragment;
-import org.n52.android.newdata.DataSourceGridFragment;
 import org.n52.android.ext.actionbar.ActionBarActivity;
 import org.n52.android.geoar.R;
+import org.n52.android.newdata.DataSourceGridFragment;
+import org.n52.android.newdata.DataSourceLoader;
+import org.n52.android.newdata.DataSourceLoader.OnDataSourcesUpdateListener;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -65,7 +68,7 @@ public class MainActivity2 extends ActionBarActivity {
 		tabsAdapter.addtab(
 				tabHost.newTabSpec("Installed New").setIndicator(
 						"Installed new"), DataSourceGridFragment.class, null);
-		
+
 		tabsAdapter.addtab(
 				tabHost.newTabSpec("Codebase").setIndicator("Codebase"),
 				CodebaseGridFragment.class, null);
@@ -77,6 +80,17 @@ public class MainActivity2 extends ActionBarActivity {
 			tabHost.setCurrentTabByTag(savedInstanceState.getString("tabState"));
 		else
 			DataSourceAdapter.initFactoryLoader(getClassLoader(), this);
+
+		// Test!
+		DataSourceLoader.getInstance().addOnDataSourcesUpdateListener(
+				new OnDataSourcesUpdateListener() {
+					@Override
+					public void onDataSourcesUpdate() {
+						Intent intent = new Intent(MainActivity2.this
+								.getApplicationContext(), GeoARActivity3.class);
+						MainActivity2.this.startActivity(intent);
+					}
+				});
 	}
 
 	@Override
@@ -112,7 +126,9 @@ public class MainActivity2 extends ActionBarActivity {
 			aboutDialog.setTitle(R.string.about_titel);
 			aboutDialog.show();
 			return true;
-
+		case R.id.cb_menu_refresh:
+			DataSourceLoader.getInstance().reloadPlugins();
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}

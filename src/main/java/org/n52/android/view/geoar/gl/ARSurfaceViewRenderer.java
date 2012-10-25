@@ -32,7 +32,6 @@ import org.n52.android.data.MeasurementManager.GetMeasurementBoundsCallback;
 import org.n52.android.data.MeasurementManager.MeasurementsCallback;
 import org.n52.android.data.MeasurementManager.RequestHolder;
 import org.n52.android.geoar.R;
-import org.n52.android.newdata.gl.primitives.Cube;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.Settings;

@@ -20,6 +20,7 @@ import java.util.List;
 import org.n52.android.data.ImageLoader;
 import org.n52.android.geoar.R;
 import org.n52.android.newdata.DataSourceLoader.DataSourceHolder;
+import org.n52.android.newdata.DataSourceLoader.OnAvailableDataSourcesUpdateListener;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -33,7 +34,6 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class DataSourceGridFragment extends Fragment {
 
@@ -53,22 +53,16 @@ public class DataSourceGridFragment extends Fragment {
 			}
 
 			gridView.setOnItemClickListener(new OnItemClickListener() {
-
 				@Override
 				public void onItemClick(AdapterView<?> parent, View view,
 						int position, long id) {
 					if (getActivity() != null) {
-						DataSourceHolder dataSource = (DataSourceHolder) gridAdapter
+						DataSourceHolder selectedDataSource = gridAdapter
 								.getItem(position);
-						// DatasourceDialogFragment dialogFragment =
-						// DatasourceDialogFragment
-						// .newInstance(datasourceName.identification,
-						// datasourceName.description, "", true,
-						// null);
-						// dialogFragment.show(getFragmentManager(),
-						// "Datasource");
-						Toast.makeText(getActivity(), dataSource.getName(),
-								Toast.LENGTH_SHORT).show();
+
+						DataSourceDialogFragment
+								.newInstance(selectedDataSource).show(
+										getFragmentManager(), "DataSource");
 					}
 				}
 			});
@@ -85,7 +79,8 @@ public class DataSourceGridFragment extends Fragment {
 		return view;
 	}
 
-	private class GridAdapter extends BaseAdapter {
+	private class GridAdapter extends BaseAdapter implements
+			OnAvailableDataSourcesUpdateListener {
 
 		private class ViewHolder {
 			public ImageView imageView;
@@ -96,9 +91,13 @@ public class DataSourceGridFragment extends Fragment {
 		private LayoutInflater inflater;
 
 		public GridAdapter(Context context) {
-			dataSources = DataSourceLoader.getInstance().getDataSources();
+			dataSources = DataSourceLoader.getInstance()
+					.getAvailableDataSources();
 			inflater = (LayoutInflater) context
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+			DataSourceLoader.getInstance().addOnAvailableDataSourcesUpdateListener(this);
+			// TODO remove..Listener?
 		}
 
 		@Override
@@ -109,7 +108,7 @@ public class DataSourceGridFragment extends Fragment {
 		}
 
 		@Override
-		public Object getItem(int position) {
+		public DataSourceHolder getItem(int position) {
 			if (dataSources != null && position < getCount() && position >= 0)
 				return dataSources.get(position);
 			return null;
@@ -146,5 +145,9 @@ public class DataSourceGridFragment extends Fragment {
 			return view;
 		}
 
+		@Override
+		public void onAvailableDataSourcesUpdate() {
+			notifyDataSetChanged();
+		}
 	}
 }

@@ -22,8 +22,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.n52.android.GeoARApplication;
 import org.n52.android.newdata.Annotations.DataSource;
@@ -31,6 +33,8 @@ import org.n52.android.newdata.Annotations.SupportedVisualization;
 
 import android.content.Context;
 import android.os.Environment;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 import dalvik.system.DexClassLoader;
 import dalvik.system.DexFile;
@@ -40,14 +44,24 @@ import dalvik.system.DexFile;
  */
 public class DataSourceLoader {
 
-	public static class DataSourceHolder {
-		private static Map<Class<? extends Visualization>, Visualization> visualizationMap = new HashMap<Class<? extends Visualization>, Visualization>();
+	public interface OnAvailableDataSourcesUpdateListener {
+		void onAvailableDataSourcesUpdate();
+	}
 
+	public interface OnDataSourcesUpdateListener {
+		void onDataSourcesUpdate();
+	}
+
+	public static class DataSourceHolder implements Parcelable {
+		private static Map<Class<? extends Visualization>, Visualization> visualizationMap = new HashMap<Class<? extends Visualization>, Visualization>();
+		private static int nextId = 0;
 		private org.n52.android.newdata.DataSource dataSource;
 		private List<Visualization> visualizations = new ArrayList<Visualization>();
 		private String name;
 		private long minReloadInterval;
 		private byte preferredZoomLevel;
+		private int id = nextId++;
+		public String description;
 
 		public DataSourceHolder(
 				Class<? extends org.n52.android.newdata.DataSource> entryClass) {
@@ -59,6 +73,7 @@ public class DataSourceLoader {
 			}
 
 			name = dataSourceAnnotation.name();
+			description = dataSourceAnnotation.description();
 			minReloadInterval = dataSourceAnnotation.minReloadInterval();
 			preferredZoomLevel = dataSourceAnnotation.preferredZoomLevel();
 			try {
@@ -112,6 +127,10 @@ public class DataSourceLoader {
 			return name;
 		}
 
+		public String getDescription() {
+			return description;
+		}
+
 		public byte getPreferredZoomLevel() {
 			return preferredZoomLevel;
 		}
@@ -119,6 +138,33 @@ public class DataSourceLoader {
 		public List<Visualization> getVisualizations() {
 			return visualizations;
 		}
+
+		@Override
+		public int describeContents() {
+			return 0;
+		}
+
+		@Override
+		public void writeToParcel(Parcel dest, int flags) {
+			dest.writeInt(id);
+		}
+
+		public static final Parcelable.Creator<DataSourceHolder> CREATOR = new Parcelable.Creator<DataSourceHolder>() {
+			public DataSourceHolder createFromParcel(Parcel in) {
+				int id = in.readInt();
+				for (DataSourceHolder holder : DataSourceLoader.getInstance().dataSources) {
+					if (holder.id == id) {
+						return holder;
+					}
+				}
+
+				return null;
+			}
+
+			public DataSourceHolder[] newArray(int size) {
+				return new DataSourceHolder[size];
+			}
+		};
 	};
 
 	private FilenameFilter pluginFilenameFilter = new FilenameFilter() {
@@ -134,6 +180,10 @@ public class DataSourceLoader {
 	private Context context;
 	private List<DataSourceHolder> dataSources = new ArrayList<DataSourceHolder>();
 	private static DataSourceLoader instance;
+	private Set<OnAvailableDataSourcesUpdateListener> availableUpdateListeners = new HashSet<OnAvailableDataSourcesUpdateListener>();
+	private Set<OnDataSourcesUpdateListener> dataSourceUpdateListeners = new HashSet<OnDataSourcesUpdateListener>();
+
+	private Set<DataSourceHolder> currentDataSources = new HashSet<DataSourceHolder>();
 
 	public static DataSourceLoader getInstance() {
 		if (instance == null) {
@@ -146,6 +196,54 @@ public class DataSourceLoader {
 	private DataSourceLoader(Context context) {
 		this.context = context;
 		loadPlugins();
+	}
+
+	public void reloadPlugins() {
+		dataSources.clear();
+		loadPlugins();
+		for (OnAvailableDataSourcesUpdateListener listener : availableUpdateListeners) {
+			listener.onAvailableDataSourcesUpdate();
+		}
+	}
+
+	public Set<DataSourceHolder> getDataSources() {
+		return currentDataSources;
+	}
+
+	public void addDataSource(DataSourceHolder dataSource) {
+		currentDataSources.add(dataSource);
+		notifyDataSourcesUpdate();
+	}
+
+	public void removeDataSource(DataSourceHolder dataSource) {
+		currentDataSources.remove(dataSource);
+		notifyDataSourcesUpdate();
+	}
+
+	private void notifyDataSourcesUpdate() {
+		for (OnDataSourcesUpdateListener listener : dataSourceUpdateListeners) {
+			listener.onDataSourcesUpdate();
+		}
+	}
+
+	public void addOnAvailableDataSourcesUpdateListener(
+			OnAvailableDataSourcesUpdateListener listener) {
+		availableUpdateListeners.add(listener);
+	}
+
+	public void removeOnAvailableDataSourcesUpdateListener(
+			OnAvailableDataSourcesUpdateListener listener) {
+		availableUpdateListeners.remove(listener);
+	}
+	
+	public void addOnDataSourcesUpdateListener(
+			OnDataSourcesUpdateListener listener) {
+		dataSourceUpdateListeners.add(listener);
+	}
+
+	public void removeOnDataSourcesUpdateListener(
+			OnDataSourcesUpdateListener listener) {
+		dataSourceUpdateListeners.remove(listener);
 	}
 
 	private void loadPlugins() {
@@ -213,9 +311,10 @@ public class DataSourceLoader {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+
 	}
 
-	public List<DataSourceHolder> getDataSources() {
+	public List<DataSourceHolder> getAvailableDataSources() {
 		return dataSources;
 	}
 
