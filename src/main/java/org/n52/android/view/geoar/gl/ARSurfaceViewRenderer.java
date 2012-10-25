@@ -32,13 +32,13 @@ import org.n52.android.data.MeasurementManager.GetMeasurementBoundsCallback;
 import org.n52.android.data.MeasurementManager.MeasurementsCallback;
 import org.n52.android.data.MeasurementManager.RequestHolder;
 import org.n52.android.geoar.R;
+import org.n52.android.newdata.gl.primitives.Cube;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.Settings;
 import org.n52.android.view.geoar.gl.model.RenderNode;
-import org.n52.android.view.geoar.gl.model.primitives.Cube;
 import org.n52.android.view.geoar.gl.model.primitives.HeightMap;
-import org.n52.android.view.geoar.gl.model.rendering.ReferencedHeightMap;
+import org.n52.android.view.geoar.gl.model.renderings.ReferencedHeightMap;
 import org.osmdroid.util.GeoPoint;
 
 import android.content.Context;
@@ -268,9 +268,9 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer, CameraUpda
 //	sphere.setPosition(new float[] {0,0,5});
 //	addRenderNode(sphere);
 //	
-	Cube cube = new Cube(1);
-	cube.setPosition(new float[] {0,5,10});
-	addRenderNode(cube);
+//	Cube cube = new Cube(1);
+//	cube.setPosition(new float[] {0,5,10});
+//	addRenderNode(cube);
 	
 	HeightMap map = new HeightMap();
 	addRenderNode(map);

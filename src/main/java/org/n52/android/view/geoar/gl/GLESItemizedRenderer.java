@@ -26,6 +26,7 @@ import org.n52.android.data.Measurement;
 import org.n52.android.data.MeasurementManager.MeasurementsCallback;
 import org.n52.android.tracking.location.LocationConverter;
 import org.n52.android.tracking.location.LocationVector;
+import org.n52.android.view.geoar.GLESUtils;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.IRotationMatrixProvider;
 import org.osmdroid.util.GeoPoint;
 
@@ -278,7 +279,7 @@ public class GLESItemizedRenderer  {
 			  + "   gl_FragColor = v_Color;     \n"     // Pass the color directly through the pipeline.
 			  + "}                              \n";
 		
-		mSimpleColorProgram = GLESCommons.createProgram(vertexShader, fragmentShader);
+		mSimpleColorProgram = GLESUtils.createProgram(vertexShader, fragmentShader);
 		if(mSimpleColorProgram == 0)
 			throw new RuntimeException("Could not compile the program");
 		

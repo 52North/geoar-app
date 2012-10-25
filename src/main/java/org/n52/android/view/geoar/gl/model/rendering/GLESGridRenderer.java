@@ -252,10 +252,10 @@ public class GLESGridRenderer  {
 	}
 
 	
-	public void onLocationUpdate(GeoPoint locationUpdate) {
-		// TODO Auto-generated method stub
-		
-	}
+//	public void onLocationUpdate(GeoPoint locationUpdate) {
+//		// TODO Auto-generated method stub
+//		
+//	}
 
 	
 	public void onObservationUpdate(MeasurementsCallback m) {
