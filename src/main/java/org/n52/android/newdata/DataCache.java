@@ -63,7 +63,7 @@ public class DataCache {
 		void onAbort(Tile tile, int reason);
 	}
 
-	public abstract interface GetDataBBoxCallback extends
+	public abstract interface GetDataBoundsCallback extends
 			OnProgressUpdateListener {
 		void onReceiveDataUpdate(MercatorRect bbox, List<SpatialEntity> data);
 
@@ -230,8 +230,9 @@ public class DataCache {
 	}
 
 	// TODO ByGeoLocationRect
+	// TODO reuse of arrays
 	public RequestHolder getDataByBBox(final MercatorRect bounds,
-			final GetDataBBoxCallback callback, boolean forceUpdate) {
+			final GetDataBoundsCallback callback, boolean forceUpdate) {
 		// Transform provided bounds into tile bounds using the zoom level of
 		// this cache
 		final int tileLeftX = (int) MercatorProj

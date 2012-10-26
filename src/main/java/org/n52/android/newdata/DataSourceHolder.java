@@ -16,12 +16,15 @@
 package org.n52.android.newdata;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.n52.android.newdata.Annotations.DataSource;
 import org.n52.android.newdata.Annotations.SupportedVisualization;
+import org.n52.android.newdata.DataCache.RequestHolder;
+import org.n52.android.newdata.Visualization.MapVisualization;
 
 import android.os.Handler;
 import android.os.Message;
@@ -32,7 +35,8 @@ public class DataSourceHolder implements Parcelable {
 	private static Map<Class<? extends Visualization>, Visualization> visualizationMap = new HashMap<Class<? extends Visualization>, Visualization>();
 	private static int nextId = 0;
 	private org.n52.android.newdata.DataSource dataSource;
-	private List<Visualization> visualizations = new ArrayList<Visualization>();
+	private CheckList<Visualization> visualizations = new CheckList<Visualization>();
+
 	private String name;
 	private long minReloadInterval;
 	private byte preferredZoomLevel;
@@ -57,17 +61,13 @@ public class DataSourceHolder implements Parcelable {
 		}
 	});
 
-	/**
-	 * 
-	 * @param dataSourceClass
-	 */
 	public DataSourceHolder(
 			Class<? extends org.n52.android.newdata.DataSource> dataSourceClass) {
 
 		DataSource dataSourceAnnotation = dataSourceClass
 				.getAnnotation(Annotations.DataSource.class);
 		if (dataSourceAnnotation == null) {
-			throw new RuntimeException("Class not annotated as data source");
+			throw new RuntimeException("Class not annotated as datasource");
 		}
 
 		name = dataSourceAnnotation.name();
@@ -101,6 +101,11 @@ public class DataSourceHolder implements Parcelable {
 
 					visualizations.add(v);
 				}
+
+				if (visualizations.size() > 0) {
+					// Set first visualization as checked
+					visualizations.checkItem(0, true);
+				}
 			} catch (InstantiationException e) {
 				throw new RuntimeException(
 						"Referenced visualization has no appropriate constructor");
@@ -133,7 +138,7 @@ public class DataSourceHolder implements Parcelable {
 		return preferredZoomLevel;
 	}
 
-	public List<Visualization> getVisualizations() {
+	public CheckList<Visualization> getVisualizations() {
 		return visualizations;
 	}
 
@@ -153,6 +158,10 @@ public class DataSourceHolder implements Parcelable {
 		// Clears the cache 30s after calling this method
 		dataSourceHandler.sendMessageDelayed(
 				dataSourceHandler.obtainMessage(CLEAR_CACHE), 30000);
+	}
+
+	public DataCache getDataCache() {
+		return dataCache;
 	}
 
 	// Parcelable
