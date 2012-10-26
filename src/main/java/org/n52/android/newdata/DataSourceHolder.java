@@ -1,3 +1,18 @@
+/**
+ * Copyright 2012 52°North Initiative for Geospatial Open Source Software GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.n52.android.newdata;
 
 import java.util.ArrayList;
@@ -42,6 +57,10 @@ public class DataSourceHolder implements Parcelable {
 		}
 	});
 
+	/**
+	 * 
+	 * @param dataSourceClass
+	 */
 	public DataSourceHolder(
 			Class<? extends org.n52.android.newdata.DataSource> dataSourceClass) {
 
@@ -118,6 +137,26 @@ public class DataSourceHolder implements Parcelable {
 		return visualizations;
 	}
 
+	/**
+	 * Prevents datasource from getting unloaded. Should be called when
+	 * datasource is added to map/ar
+	 */
+	public void activate() {
+		// prevents clearing of cache by removing messages
+		dataSourceHandler.removeMessages(CLEAR_CACHE);
+	}
+
+	/**
+	 * Queues unloading of datasource and cached data
+	 */
+	public void deactivate() {
+		// Clears the cache 30s after calling this method
+		dataSourceHandler.sendMessageDelayed(
+				dataSourceHandler.obtainMessage(CLEAR_CACHE), 30000);
+	}
+
+	// Parcelable
+
 	@Override
 	public int describeContents() {
 		return 0;
@@ -148,21 +187,4 @@ public class DataSourceHolder implements Parcelable {
 		}
 	};
 
-	/**
-	 * Prevents datasource from getting unloaded. Should be called when
-	 * datasource is added to map/ar
-	 */
-	public void activate() {
-		// prevents clearing of cache by removing messages
-		dataSourceHandler.removeMessages(CLEAR_CACHE);
-	}
-
-	/**
-	 * Queues unloading of datasource and cached data
-	 */
-	public void deactivate() {
-		// Clears the cache 30s after calling this method
-		dataSourceHandler.sendMessageDelayed(
-				dataSourceHandler.obtainMessage(CLEAR_CACHE), 30000);
-	}
 }
