@@ -17,7 +17,6 @@
 package org.n52.android.newdata;
 
 import java.lang.ref.SoftReference;
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,90 +25,89 @@ import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import org.n52.android.alg.InterpolationProvider.DatasourceInterpolation;
 import org.n52.android.alg.OnProgressUpdateListener;
 import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorRect;
-import org.n52.android.data.DataSource.RequestException;
 import org.n52.android.data.Tile;
-import org.n52.android.newdata.DataSourceLoader.DataSourceHolder;
 
 import android.util.Log;
 
 /**
  * Interface to request measurements from a specific {@link DataSource}. Builds
  * an automatic tile based cache of measurements to reduce data transfer. Update
- * interval of cached tiles is controlled by , cache gets freed as required by
+ * interval of cached tiles is controlled by, cache gets freed as required by
  * the VM
  * 
  * @author Holger Hopmann
  * @author Arne de Wall
  */
-public class DataManager {
+public class DataCache {
 
 	public static final int ABORT_UNKOWN = 0;
 	public static final int ABORT_NO_CONNECTION = 1;
 	public static final int ABORT_CANCELED = 2;
 	public static final int STEP_REQUEST = 3;
 
+	/**
+	 * Future-like interface for cancellation of requests
+	 * 
+	 * 
+	 */
 	public interface RequestHolder {
 		void cancel();
 	}
 
-	public interface GetMeasurementsCallback {
-		void onReceiveMeasurements(DataTile measurements);
+	public interface GetDataCallback {
+		void onReceiveMeasurements(Tile tile, List<SpatialEntity> data);
 
-		void onAbort(DataTile measurements, int reason);
+		void onAbort(Tile tile, int reason);
 	}
 
-	public abstract interface GetMeasurementBoundsCallback extends
+	public abstract interface GetDataBBoxCallback extends
 			OnProgressUpdateListener {
-		void onReceiveDataUpdate(MercatorRect bounds,
-				MeasurementsCallback measureCallback);
+		void onReceiveDataUpdate(MercatorRect bbox, List<SpatialEntity> data);
 
-		void onAbort(MercatorRect bounds, int reason);
+		void onAbort(MercatorRect bbox, int reason);
 	}
 
-	public class MeasurementsCallback {
-		public List<SpatialEntity> measurementBuffer;
-		public byte[] interpolationBuffer;
-	}
-
+	/**
+	 * A tile in the cache
+	 */
 	public class DataTile {
 		public Tile tile;
 		public long lastUpdate;
 		public boolean updatePending;
 		public Runnable fetchRunnable;
-		public List<SpatialEntity> measurements;
+		public List<SpatialEntity> data;
 
-		protected List<GetMeasurementsCallback> callbacksMeasurement = new ArrayList<GetMeasurementsCallback>();
+		protected List<GetDataCallback> getDataCallbacks = new ArrayList<GetDataCallback>();
 
-		public void addCallback(GetMeasurementsCallback callback) {
-			synchronized (callbacksMeasurement) {
-				callbacksMeasurement.add(callback);
+		public void addCallback(GetDataCallback callback) {
+			synchronized (getDataCallbacks) {
+				getDataCallbacks.add(callback);
 			}
 		}
 
 		public void setMeasurements(List<SpatialEntity> measurements) {
 			lastUpdate = System.currentTimeMillis();
-			this.measurements = measurements;
+			this.data = measurements;
 
-			synchronized (callbacksMeasurement) {
+			synchronized (getDataCallbacks) {
 				updatePending = false;
-				for (GetMeasurementsCallback callback : callbacksMeasurement) {
-					callback.onReceiveMeasurements(this);
+				for (GetDataCallback callback : getDataCallbacks) {
+					callback.onReceiveMeasurements(this.tile, this.data);
 				}
-				callbacksMeasurement.clear();
+				getDataCallbacks.clear();
 			}
 		}
 
 		public void abort(int reason) {
-			synchronized (callbacksMeasurement) {
+			synchronized (getDataCallbacks) {
 				updatePending = false;
-				for (GetMeasurementsCallback callback : callbacksMeasurement) {
-					callback.onAbort(this, reason);
+				for (GetDataCallback callback : getDataCallbacks) {
+					callback.onAbort(this.tile, reason);
 				}
-				callbacksMeasurement.clear();
+				getDataCallbacks.clear();
 			}
 		}
 
@@ -118,41 +116,41 @@ public class DataManager {
 		}
 
 		public boolean hasMeasurements() {
-			return measurements != null;
+			return data != null;
 		}
 
 	}
 
 	protected Map<Tile, SoftReference<DataTile>> tileCacheMapping = new HashMap<Tile, SoftReference<DataTile>>();
 	protected DataSourceHolder dataSource;
-	protected ThreadPoolExecutor downloadThreadPool;
-	protected byte tileZoom = 14;
-	protected Filter measurementFilter;
+	protected ThreadPoolExecutor fetchingThreadPool;
+	final protected byte tileZoom; // Zoom level for the tiling system of this
+									// cache
+	protected Filter dataFilter;
 
-	public DataManager(DataSourceHolder dataSource) {
+	public DataCache(DataSourceHolder dataSource) {
 		this.dataSource = dataSource;
 		tileZoom = dataSource.getPreferredZoomLevel();
 		// TODO Filter
-		measurementFilter = null; // new
-									// Filter();//DataSourceAdapter.createMeasurementFilter();//
-									// new MeasurementFilter();
-		downloadThreadPool = (ThreadPoolExecutor) Executors
-				.newFixedThreadPool(3);
+		dataFilter = new Filter();// DataSourceAdapter.createMeasurementFilter();//
+		// new MeasurementFilter();
+		fetchingThreadPool = (ThreadPoolExecutor) Executors
+				.newFixedThreadPool(3); // TODO make size changeable
 	}
 
-	public void setMeasurementFilter(Filter measurementFilter) {
+	public void setFilter(Filter filter) {
 		clearCache();
-		this.measurementFilter = measurementFilter;
+		this.dataFilter = filter;
 	}
 
-	public Filter getMeasurementFilter() {
-		return measurementFilter;
+	public Filter getFilter() {
+		return dataFilter;
 	}
 
 	/**
-	 * Cancels all operations on current measurements and clears the cache
+	 * Cancels all fetching operations and clears the cache
 	 */
-	private void clearCache() {
+	public void clearCache() {
 		synchronized (tileCacheMapping) {
 			// Cancel all operations
 			for (SoftReference<DataTile> cacheReference : tileCacheMapping
@@ -165,35 +163,36 @@ public class DataManager {
 		}
 	}
 
-	public RequestHolder getMeasurementsByTile(Tile tile,
-			GetMeasurementsCallback callback, boolean forceUpdate) {
+	public RequestHolder getDataByTile(Tile tile, GetDataCallback callback,
+			boolean forceUpdate) {
 		Log.i("Test", "getMeasures " + tile.x + ", " + tile.y);
 
 		RequestHolder requestHolder = null;
 
 		synchronized (tileCacheMapping) {
 			SoftReference<DataTile> cacheReference = tileCacheMapping.get(tile);
-			DataTile tileCache = cacheReference != null ? cacheReference.get()
+			DataTile cachedTile = cacheReference != null ? cacheReference.get()
 					: null;
-			if (tileCache != null) {
+			if (cachedTile != null) {
 				// Tile bereits vorhanden
-				if (tileCache.hasMeasurements()) {
-					callback.onReceiveMeasurements(tileCache);
+				if (cachedTile.hasMeasurements()) {
+					callback.onReceiveMeasurements(cachedTile.tile,
+							cachedTile.data);
 				}
-				if (!tileCache.hasMeasurements()
-						|| tileCache.lastUpdate <= System.currentTimeMillis()
+				if (!cachedTile.hasMeasurements()
+						|| cachedTile.lastUpdate <= System.currentTimeMillis()
 								- dataSource.getMinReloadInterval()
 						|| forceUpdate) {
-					tileCache.addCallback(callback);
-					requestHolder = fetchMeasurements(tileCache);
+					cachedTile.addCallback(callback);
+					requestHolder = fetchMeasurements(cachedTile);
 				}
 			} else {
-				tileCache = new DataTile(tile);
-				tileCache.addCallback(callback);
+				cachedTile = new DataTile(tile);
+				cachedTile.addCallback(callback);
 				tileCacheMapping.put(tile, new SoftReference<DataTile>(
-						tileCache));
+						cachedTile));
 
-				requestHolder = fetchMeasurements(tileCache);
+				requestHolder = fetchMeasurements(cachedTile);
 			}
 		}
 
@@ -210,8 +209,7 @@ public class DataManager {
 					// try {
 					dataTile.setMeasurements(dataSource.getDataSource()
 							.getMeasurements(
-									measurementFilter.clone().setTile(
-											dataTile.tile)));
+									dataFilter.clone().setTile(dataTile.tile)));
 					// }
 					// catch (RequestException e) {
 					// Log.i("NoiseAR", "RequestException" + e.getMessage());
@@ -221,20 +219,21 @@ public class DataManager {
 					// }
 				}
 			};
-			downloadThreadPool.execute(dataTile.fetchRunnable);
+			fetchingThreadPool.execute(dataTile.fetchRunnable);
 		}
 
 		return new RequestHolder() {
 			public void cancel() {
-				downloadThreadPool.remove(dataTile.fetchRunnable);
+				fetchingThreadPool.remove(dataTile.fetchRunnable);
 			}
 		};
 	}
 
-	public RequestHolder getMeasurementCallback(final MercatorRect bounds,
-			final GetMeasurementBoundsCallback callback, boolean forceUpdate,
-			MeasurementsCallback dataCallback) {
-		// Kachelgrenzen
+	// TODO ByGeoLocationRect
+	public RequestHolder getDataByBBox(final MercatorRect bounds,
+			final GetDataBBoxCallback callback, boolean forceUpdate) {
+		// Transform provided bounds into tile bounds using the zoom level of
+		// this cache
 		final int tileLeftX = (int) MercatorProj
 				.transformPixelXToTileX(MercatorProj.transformPixel(
 						bounds.left, bounds.zoom, tileZoom), tileZoom);
@@ -248,67 +247,66 @@ public class DataManager {
 						tileZoom), tileZoom);
 		final int tileGridWidth = tileRightX - tileLeftX + 1;
 
-		// Liste zum Nachverfolgen der erhaltenen Messungen
-		final Vector<List<SpatialEntity>> tileMeasurementsList = new Vector<List<SpatialEntity>>();
-		tileMeasurementsList.setSize(tileGridWidth
-				* (tileBottomY - tileTopY + 1));
+		// List to monitor loading of all data for all required tiles
+		final Vector<List<SpatialEntity>> tileDataList = new Vector<List<SpatialEntity>>();
+		tileDataList.setSize(tileGridWidth * (tileBottomY - tileTopY + 1));
 
-		// Callback für die Messungen
-		final GetMeasurementsCallback measureCallback = new GetMeasurementsCallback() {
+		// Callback for data of a tile
+		final GetDataCallback measureCallback = new GetDataCallback() {
 			boolean active = true;
 			private int progress;
 
-			public void onReceiveMeasurements(DataTile measurements) {
-
-				final MeasurementsCallback res = new MeasurementsCallback();
+			public void onReceiveMeasurements(Tile tile,
+					List<SpatialEntity> data) {
 
 				if (!active) {
 					return;
 				}
 
-				int checkIndex = ((measurements.tile.y - tileTopY) * tileGridWidth)
-						+ (measurements.tile.x - tileLeftX);
+				int checkIndex = ((tile.y - tileTopY) * tileGridWidth)
+						+ (tile.x - tileLeftX);
 
-				if (tileMeasurementsList.set(checkIndex,
-						measurements.measurements) == null) {
+				if (tileDataList.set(checkIndex, data) == null) {
 					// Previously no elements for that tile
 					progress++;
-					callback.onProgressUpdate(progress,
-							tileMeasurementsList.size(), STEP_REQUEST);
+					callback.onProgressUpdate(progress, tileDataList.size(),
+							STEP_REQUEST);
 				}
-				if (!tileMeasurementsList.contains(null)) {
+				if (!tileDataList.contains(null)) {
 					// All tiles loaded
 					final List<SpatialEntity> measurementsList = new ArrayList<SpatialEntity>();
-					for (List<SpatialEntity> tileMeasurements : tileMeasurementsList) {
-						measurementsList.addAll(tileMeasurements);
+					// Merge all data of each requested tile
+					for (List<SpatialEntity> tileData : tileDataList) {
+						measurementsList.addAll(tileData);
 					}
-
-					res.measurementBuffer = measurementsList;
 
 					new Thread(new Runnable() {
 						public void run() {
 							if (active) {
-								callback.onReceiveDataUpdate(bounds, res);
+								callback.onReceiveDataUpdate(bounds,
+										measurementsList);
 							}
 						}
 					}).run();
 				}
 			}
 
-			public void onAbort(DataTile measurements, int reason) {
+			public void onAbort(Tile tile, int reason) {
 				callback.onAbort(bounds, reason);
 				if (reason == ABORT_CANCELED) {
 					active = false;
 				}
 			}
+
 		};
 
-		// Messungen besorgen
+		// Actually request data
 		for (int y = tileTopY; y <= tileBottomY; y++)
 			for (int x = tileLeftX; x <= tileRightX; x++) {
 				Tile tile = new Tile(x, y, tileZoom);
 
-				getMeasurementsByTile(tile, measureCallback, forceUpdate);
+				getDataByTile(tile, measureCallback, forceUpdate);
+				// TODO cache return value to allow proper cancellation behavior
 			}
 
 		return new RequestHolder() {
@@ -317,6 +315,5 @@ public class DataManager {
 			}
 		};
 	}
-
 
 }

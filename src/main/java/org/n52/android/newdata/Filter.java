@@ -20,7 +20,7 @@ import java.io.Serializable;
 import org.n52.android.data.Tile;
 import org.n52.android.utils.GeoLocationRect;
 
-public abstract class Filter implements Serializable, Cloneable, IFilter {
+public class Filter implements Serializable, Cloneable, IFilter {
 	private static final long serialVersionUID = 1L;
 
 	private GeoLocationRect boundingBox;
