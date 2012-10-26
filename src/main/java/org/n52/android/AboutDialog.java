@@ -31,63 +31,65 @@ import android.widget.TextView;
 
 public class AboutDialog extends Dialog {
 
-    private static Context context;
+	private static Context context;
 
-    public AboutDialog(Context context) {
-	super(context);
-	this.context = context;
-    }
+	public AboutDialog(Context context) {
+		super(context);
+		this.context = context;
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see android.app.Dialog#onCreate(android.os.Bundle)
-     */
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-	setContentView(R.layout.about_dialog);
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.app.Dialog#onCreate(android.os.Bundle)
+	 */
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		setContentView(R.layout.about_dialog);
 
-	this.setTitle("About GeoAR");
+		this.setTitle("About GeoAR");
 
-	TextView tv = (TextView) findViewById(R.id.about_legal_text);
-	tv.setText(R.string.about_legal_text);
-	tv.setTextColor(Color.GRAY);
+		TextView tv = (TextView) findViewById(R.id.about_legal_text);
+		tv.setText(R.string.about_legal_text);
+		tv.setTextColor(Color.GRAY);
 
-	tv = (TextView) findViewById(R.id.about_headline);
-	tv.setText(Html.fromHtml("<h3>" + context.getString(R.string.about_titel) + "</h3>"));
-	tv.setTextColor(Color.DKGRAY); 	    
-	
-	final String s = "More information at <br> " 
-		+ "<center><b>http://52north.org/android</b></center> <br> <br>"
-		+ "GeoAR is part of the 52°North Geostatistics Commnity: <br>"
-		+ "<b>http://52north.org/communities/geostatistics/</b> <br> <br>" 
-		+ "Contact: <i>Daniel Nüst (d.nuest@52north.org)</i> <br>"
-		+ "Development Credits: <i> Arne de Wall, Holger Hopmann </i>";
-	
-	tv = (TextView) findViewById(R.id.info_more_text);
-	tv.setText(Html.fromHtml(s));
-	Linkify.addLinks(tv, Linkify.ALL);
+		tv = (TextView) findViewById(R.id.about_headline);
+		tv.setText(Html.fromHtml("<h3>"
+				+ context.getString(R.string.about_titel) + "</h3>"));
+		tv.setTextColor(Color.DKGRAY);
 
-	ImageView im = (ImageView) findViewById(R.id.about_image);
-	im.setOnClickListener(createLinkOnClickLister("http://52north.org/"));
-	
-	im = (ImageView) findViewById(R.id.about_geoviqua_image);
-	im.setOnClickListener(createLinkOnClickLister("http://www.geoviqua.org/"));
-	
-	super.onCreate(savedInstanceState);
-    }
-    
-    private static View.OnClickListener createLinkOnClickLister(final String link){
-	return new View.OnClickListener() {
-	    
-	    @Override
-	    public void onClick(View v) {
-		Intent intent = new Intent();
-		intent.setAction(Intent.ACTION_VIEW);
-		intent.addCategory(Intent.CATEGORY_BROWSABLE);
-		intent.setData(Uri.parse(link));
-		context.startActivity(intent);
-	    }
-	};
-    }
+		final String s = "More information at <br> "
+				+ "<center><b>http://52north.org/android</b></center> <br> <br>"
+				+ "GeoAR is part of the 52°North Geostatistics Commnity: <br>"
+				+ "<b>http://52north.org/communities/geostatistics/</b> <br> <br>"
+				+ "Contact: <i>Daniel Nüst (d.nuest@52north.org)</i> <br>"
+				+ "Development Credits: <i> Arne de Wall, Holger Hopmann </i>";
+
+		tv = (TextView) findViewById(R.id.info_more_text);
+		tv.setText(Html.fromHtml(s));
+		Linkify.addLinks(tv, Linkify.ALL);
+
+		ImageView im = (ImageView) findViewById(R.id.about_image);
+		im.setOnClickListener(createLinkOnClickLister("http://52north.org/"));
+
+		im = (ImageView) findViewById(R.id.about_geoviqua_image);
+		im.setOnClickListener(createLinkOnClickLister("http://www.geoviqua.org/"));
+
+		super.onCreate(savedInstanceState);
+	}
+
+	private static View.OnClickListener createLinkOnClickLister(
+			final String link) {
+		return new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent();
+				intent.setAction(Intent.ACTION_VIEW);
+				intent.addCategory(Intent.CATEGORY_BROWSABLE);
+				intent.setData(Uri.parse(link));
+				context.startActivity(intent);
+			}
+		};
+	}
 }

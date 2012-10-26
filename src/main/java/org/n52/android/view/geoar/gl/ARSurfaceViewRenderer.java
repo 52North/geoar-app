@@ -37,7 +37,7 @@ import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.Settings;
 import org.n52.android.view.geoar.gl.model.RenderNode;
 import org.n52.android.view.geoar.gl.model.primitives.HeightMap;
-import org.n52.android.view.geoar.gl.model.renderings.ReferencedHeightMap;
+import org.n52.android.view.geoar.gl.model.rendering.ReferencedHeightMap;
 import org.osmdroid.util.GeoPoint;
 
 import android.content.Context;
