@@ -15,16 +15,12 @@
  */
 package org.n52.android.newdata;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.n52.android.newdata.Annotations.DataSource;
 import org.n52.android.newdata.Annotations.SupportedVisualization;
-import org.n52.android.newdata.DataCache.RequestHolder;
-import org.n52.android.newdata.Visualization.MapVisualization;
 
 import android.os.Handler;
 import android.os.Message;
@@ -34,9 +30,10 @@ import android.os.Parcelable;
 public class DataSourceHolder implements Parcelable {
 	private static Map<Class<? extends Visualization>, Visualization> visualizationMap = new HashMap<Class<? extends Visualization>, Visualization>();
 	private static int nextId = 0;
-	private org.n52.android.newdata.DataSource dataSource;
+	private DataSource<? super Filter> dataSource;
 	private CheckList<Visualization> visualizations = new CheckList<Visualization>();
-
+	private Class<? extends Filter> filterClass;
+	
 	private String name;
 	private long minReloadInterval;
 	private byte preferredZoomLevel;
@@ -61,10 +58,11 @@ public class DataSourceHolder implements Parcelable {
 		}
 	});
 
+	@SuppressWarnings("unchecked")
 	public DataSourceHolder(
-			Class<? extends org.n52.android.newdata.DataSource> dataSourceClass) {
+			Class<? extends DataSource<? super Filter>> dataSourceClass) {
 
-		DataSource dataSourceAnnotation = dataSourceClass
+		Annotations.DataSource dataSourceAnnotation = dataSourceClass
 				.getAnnotation(Annotations.DataSource.class);
 		if (dataSourceAnnotation == null) {
 			throw new RuntimeException("Class not annotated as datasource");
@@ -114,11 +112,23 @@ public class DataSourceHolder implements Parcelable {
 						"Referenced visualization has no appropriate constructor");
 			}
 		}
+		
+		// Find filter
+		Type[] interfaces = dataSourceClass
+				.getGenericInterfaces();
+		for (Type interfaceType : interfaces) {
+			ParameterizedType type = (ParameterizedType) interfaceType;
+			if (!type.getRawType().equals(DataSource.class)) {
+				continue;
+			}
+			
+			this.filterClass = (Class<? extends Filter>) type.getActualTypeArguments()[0];
+		}
 
 		dataCache = new DataCache(this);
 	}
 
-	public org.n52.android.newdata.DataSource getDataSource() {
+	public org.n52.android.newdata.DataSource<? super Filter> getDataSource() {
 		return dataSource;
 	}
 
