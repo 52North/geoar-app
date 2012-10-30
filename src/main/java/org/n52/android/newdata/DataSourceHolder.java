@@ -33,12 +33,13 @@ public class DataSourceHolder implements Parcelable {
 	private DataSource<? super Filter> dataSource;
 	private CheckList<Visualization> visualizations = new CheckList<Visualization>();
 	private Class<? extends Filter> filterClass;
-	
+	private Filter currentFilter;
+
 	private String name;
 	private long minReloadInterval;
 	private byte preferredZoomLevel;
 	private final int id = nextId++;
-	public String description;
+	private String description;
 
 	private DataCache dataCache;
 
@@ -112,23 +113,33 @@ public class DataSourceHolder implements Parcelable {
 						"Referenced visualization has no appropriate constructor");
 			}
 		}
-		
-		// Find filter
-		Type[] interfaces = dataSourceClass
-				.getGenericInterfaces();
+
+		// Find filter by getting the actual generic parameter type of the
+		// implemented DataSource interface
+		Type[] interfaces = dataSourceClass.getGenericInterfaces();
 		for (Type interfaceType : interfaces) {
 			ParameterizedType type = (ParameterizedType) interfaceType;
 			if (!type.getRawType().equals(DataSource.class)) {
 				continue;
 			}
-			
-			this.filterClass = (Class<? extends Filter>) type.getActualTypeArguments()[0];
+
+			filterClass = (Class<? extends Filter>) type
+					.getActualTypeArguments()[0];
+			try {
+				currentFilter = filterClass.newInstance();
+			} catch (InstantiationException e) {
+				throw new RuntimeException(
+						"Referenced filter has no appropriate constructor");
+			} catch (IllegalAccessException e) {
+				throw new RuntimeException(
+						"Referenced filter has no appropriate constructor");
+			}
 		}
 
 		dataCache = new DataCache(this);
 	}
 
-	public org.n52.android.newdata.DataSource<? super Filter> getDataSource() {
+	public DataSource<? super Filter> getDataSource() {
 		return dataSource;
 	}
 
@@ -150,6 +161,10 @@ public class DataSourceHolder implements Parcelable {
 
 	public CheckList<Visualization> getVisualizations() {
 		return visualizations;
+	}
+
+	public Filter getCurrentFilter() {
+		return currentFilter;
 	}
 
 	/**

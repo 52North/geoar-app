@@ -126,19 +126,19 @@ public class DataCache {
 	protected ThreadPoolExecutor fetchingThreadPool;
 	final protected byte tileZoom; // Zoom level for the tiling system of this
 									// cache
-	protected AbstractFilter dataFilter;
+	protected Filter dataFilter;
 
 	public DataCache(DataSourceHolder dataSource) {
 		this.dataSource = dataSource;
 		tileZoom = dataSource.getPreferredZoomLevel();
 		// TODO Filter
-		//dataFilter = new Filter();// DataSourceAdapter.createMeasurementFilter();//
+		dataFilter = dataSource.getCurrentFilter();// DataSourceAdapter.createMeasurementFilter();//
 		// new MeasurementFilter();
 		fetchingThreadPool = (ThreadPoolExecutor) Executors
 				.newFixedThreadPool(3); // TODO make size changeable
 	}
 
-	public void setFilter(AbstractFilter filter) {
+	public void setFilter(Filter filter) {
 		clearCache();
 		this.dataFilter = filter;
 	}
@@ -206,10 +206,12 @@ public class DataCache {
 			dataTile.updatePending = true;
 			dataTile.fetchRunnable = new Runnable() {
 				public void run() {
-					// try {				
+					// try {
+
+					Filter filter = dataFilter.clone();
+					// TODO set bbox
 					dataTile.setMeasurements(dataSource.getDataSource()
-							.getMeasurements(
-									 dataFilter.clone().setTile(dataTile.tile)));
+							.getMeasurements(filter));
 					// }
 					// catch (RequestException e) {
 					// Log.i("NoiseAR", "RequestException" + e.getMessage());

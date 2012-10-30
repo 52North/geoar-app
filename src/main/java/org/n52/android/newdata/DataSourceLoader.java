@@ -19,8 +19,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -177,7 +175,7 @@ public class DataSourceLoader {
 							// Class is a datasource
 							@SuppressWarnings("unchecked")
 							DataSourceHolder dataSourceHolder = new DataSourceHolder(
-									(Class<? extends org.n52.android.newdata.DataSource<? super Filter>>) entryClass);
+									(Class<? extends DataSource<? super Filter>>) entryClass);
 							dataSources.add(dataSourceHolder);
 						} else {
 							Log.e("GeoAR",
