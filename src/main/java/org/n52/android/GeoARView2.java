@@ -15,7 +15,6 @@
  */
 package org.n52.android;
 
-import org.n52.android.data.MeasurementManager;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.view.InfoView;
 

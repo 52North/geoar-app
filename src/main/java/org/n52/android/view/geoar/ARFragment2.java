@@ -15,37 +15,29 @@
  */
 package org.n52.android.view.geoar;
 
-import java.util.ArrayList;
-
-import org.n52.android.GeoARView;
-import org.n52.android.data.MeasurementManager;
 import org.n52.android.geoar.R;
 import org.n52.android.tracking.location.LocationHandler;
-import org.n52.android.view.GeoARFragment;
 import org.n52.android.view.GeoARFragment2;
 import org.n52.android.view.InfoView;
 
-import android.app.Activity;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 
 public class ARFragment2 extends GeoARFragment2 {
 
-	private ARSurfaceView augmentedView;
+	// TODO
+	// private ARSurfaceView augmentedView;
 
-//	public ARFragment2() {
-//		geoARViews = new ArrayList<GeoARView2>();
-//	}
+	// public ARFragment2() {
+	// geoARViews = new ArrayList<GeoARView2>();
+	// }
 
 	public ARFragment2(LocationHandler locationHandler, InfoView infoView) {
-//		this();
+		// this();
 		this.mInfoHandler = infoView;
 		this.mLocationHandler = locationHandler;
 		this.setRetainInstance(true);
@@ -71,9 +63,11 @@ public class ARFragment2 extends GeoARFragment2 {
 		// WindowManager.LayoutParams.FLAG_FULLSCREEN );
 
 		if (savedInstanceState == null) {
-			augmentedView = (ARSurfaceView) view.findViewById(R.id.glNoiseView);
-			augmentedView.setInfoHandler(mInfoHandler);
-			augmentedView.setLocationHandler(mLocationHandler);
+			// TODO
+			// augmentedView = (ARSurfaceView)
+			// view.findViewById(R.id.glNoiseView);
+			// augmentedView.setInfoHandler(mInfoHandler);
+			// augmentedView.setLocationHandler(mLocationHandler);
 
 			// Chart
 			// NoiseChartView diagramView = (NoiseChartView)
@@ -82,9 +76,10 @@ public class ARFragment2 extends GeoARFragment2 {
 			// geoARViews.add(diagramView);
 
 			// Calibration View
-//			CalibrationControlView calibrationView = (CalibrationControlView) view
-//					.findViewById(R.id.calibrationView);
-//			geoARViews.add(calibrationView);
+			// CalibrationControlView calibrationView = (CalibrationControlView)
+			// view
+			// .findViewById(R.id.calibrationView);
+			// geoARViews.add(calibrationView);
 		}
 		return view;
 	}

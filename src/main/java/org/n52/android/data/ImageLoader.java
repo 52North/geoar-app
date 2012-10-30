@@ -150,7 +150,8 @@ public class ImageLoader {
 		
 		Bitmap bitmap = loadBitmapFromFile(id);
 		if(bitmap == null && url != null){
-			bitmap = CodebaseDownloader.downloadDatasourceImage(url);
+		//	bitmap = CodebaseDownloader.downloadDatasourceImage(url);
+			// TODO
 		}
 		imageCache.put(id, bitmap);
 		return bitmap;

@@ -25,7 +25,6 @@ import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import org.n52.android.alg.OnProgressUpdateListener;
 import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.data.Tile;
@@ -56,16 +55,20 @@ public class DataCache {
 	public interface RequestHolder {
 		void cancel();
 	}
+	
+	public interface OnProgressUpdateListener {
+		void onProgressUpdate(int progress, int size, int stepRequest);
+	}
 
 	public interface GetDataCallback {
-		void onReceiveMeasurements(Tile tile, List<SpatialEntity> data);
+		void onReceiveMeasurements(Tile tile, List<? extends SpatialEntity> data);
 
 		void onAbort(Tile tile, int reason);
 	}
 
 	public abstract interface GetDataBoundsCallback extends
 			OnProgressUpdateListener {
-		void onReceiveDataUpdate(MercatorRect bbox, List<SpatialEntity> data);
+		void onReceiveDataUpdate(MercatorRect bbox, List<? extends SpatialEntity> data);
 
 		void onAbort(MercatorRect bbox, int reason);
 	}
@@ -78,7 +81,7 @@ public class DataCache {
 		public long lastUpdate;
 		public boolean updatePending;
 		public Runnable fetchRunnable;
-		public List<SpatialEntity> data;
+		public List<? extends SpatialEntity> data;
 
 		protected List<GetDataCallback> getDataCallbacks = new ArrayList<GetDataCallback>();
 
@@ -88,7 +91,7 @@ public class DataCache {
 			}
 		}
 
-		public void setMeasurements(List<SpatialEntity> measurements) {
+		public void setMeasurements(List<? extends SpatialEntity> measurements) {
 			lastUpdate = System.currentTimeMillis();
 			this.data = measurements;
 
@@ -208,10 +211,12 @@ public class DataCache {
 				public void run() {
 					// try {
 
-					Filter filter = dataFilter.clone();
-					// TODO set bbox
+					Filter filter = dataFilter.clone().setBoundingBox(
+							dataTile.tile.getGeoLocationRect());
+
 					dataTile.setMeasurements(dataSource.getDataSource()
 							.getMeasurements(filter));
+					
 					// }
 					// catch (RequestException e) {
 					// Log.i("NoiseAR", "RequestException" + e.getMessage());
@@ -251,7 +256,7 @@ public class DataCache {
 		final int tileGridWidth = tileRightX - tileLeftX + 1;
 
 		// List to monitor loading of all data for all required tiles
-		final Vector<List<SpatialEntity>> tileDataList = new Vector<List<SpatialEntity>>();
+		final Vector<List<? extends SpatialEntity>> tileDataList = new Vector<List<? extends SpatialEntity>>();
 		tileDataList.setSize(tileGridWidth * (tileBottomY - tileTopY + 1));
 
 		// Callback for data of a tile
@@ -260,7 +265,7 @@ public class DataCache {
 			private int progress;
 
 			public void onReceiveMeasurements(Tile tile,
-					List<SpatialEntity> data) {
+					List<? extends SpatialEntity> data) {
 
 				if (!active) {
 					return;
@@ -279,7 +284,7 @@ public class DataCache {
 					// All tiles loaded
 					final List<SpatialEntity> measurementsList = new ArrayList<SpatialEntity>();
 					// Merge all data of each requested tile
-					for (List<SpatialEntity> tileData : tileDataList) {
+					for (List<? extends SpatialEntity> tileData : tileDataList) {
 						measurementsList.addAll(tileData);
 					}
 

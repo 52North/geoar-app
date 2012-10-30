@@ -18,17 +18,13 @@ package org.n52.android.view.map.overlay;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.n52.android.alg.InterpolationProvider;
 import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorRect;
-import org.n52.android.data.Measurement;
 import org.n52.android.geoar.R;
-import org.n52.android.newdata.DataSourceHolder;
-import org.n52.android.newdata.SpatialEntity;
 import org.n52.android.newdata.DataCache.GetDataBoundsCallback;
 import org.n52.android.newdata.DataCache.RequestHolder;
-import org.n52.android.newdata.Visualization;
-import org.n52.android.newdata.Visualization.MapVisualization;
+import org.n52.android.newdata.DataSourceHolder;
+import org.n52.android.newdata.SpatialEntity;
 import org.n52.android.newdata.Visualization.MapVisualization.ItemVisualization;
 import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.Settings;
@@ -42,7 +38,6 @@ import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.Toast;
 
 /**
  * @author Holger Hopmann
@@ -52,7 +47,7 @@ import android.widget.Toast;
 public class MapOverlayHandler2 {
 
 	public interface OnProgressUpdateListener extends
-			org.n52.android.alg.OnProgressUpdateListener {
+			org.n52.android.newdata.DataCache.OnProgressUpdateListener {
 		void onAbort(int reason);
 	}
 
@@ -114,7 +109,7 @@ public class MapOverlayHandler2 {
 
 			@Override
 			public void onReceiveDataUpdate(MercatorRect bounds,
-					List<SpatialEntity> data) {
+					List<? extends SpatialEntity> data) {
 
 				if (!canceled) {
 					synchronized (interpolationLock) {

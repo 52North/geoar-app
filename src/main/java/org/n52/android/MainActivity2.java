@@ -17,9 +17,6 @@ package org.n52.android;
 
 import java.util.ArrayList;
 
-import org.n52.android.data.CodebaseGridFragment;
-import org.n52.android.data.DataSourceAdapter;
-import org.n52.android.data.DatasourceGridFragment;
 import org.n52.android.ext.actionbar.ActionBarActivity;
 import org.n52.android.geoar.R;
 import org.n52.android.newdata.DataSourceGridFragment;
@@ -69,17 +66,17 @@ public class MainActivity2 extends ActionBarActivity {
 				tabHost.newTabSpec("Installed New").setIndicator(
 						"Installed new"), DataSourceGridFragment.class, null);
 
-		tabsAdapter.addtab(
-				tabHost.newTabSpec("Codebase").setIndicator("Codebase"),
-				CodebaseGridFragment.class, null);
-		tabsAdapter.addtab(
-				tabHost.newTabSpec("Installed").setIndicator("Installed"),
-				DatasourceGridFragment.class, null);
+//		tabsAdapter.addtab(
+//				tabHost.newTabSpec("Codebase").setIndicator("Codebase"),
+//				CodebaseGridFragment.class, null);
+//		tabsAdapter.addtab(
+//				tabHost.newTabSpec("Installed").setIndicator("Installed"),
+//				DatasourceGridFragment.class, null);
 
 		if (savedInstanceState != null)
 			tabHost.setCurrentTabByTag(savedInstanceState.getString("tabState"));
 		else
-			DataSourceAdapter.initFactoryLoader(getClassLoader(), this);
+			//DataSourceAdapter.initFactoryLoader(getClassLoader(), this);
 
 		// Test!
 		DataSourceLoader.getInstance().addOnDataSourcesUpdateListener(

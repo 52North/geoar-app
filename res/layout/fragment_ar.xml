@@ -14,11 +14,11 @@
 		android:id="@+id/noiseDiagramView" android:layout_width="match_parent"
 		android:layout_height="100dp" android:layout_alignParentBottom="true" />  -->
 
-	<!-- Interface for Calibration -->
+	<!-- Interface for Calibration 
 	<org.n52.android.view.geoar.CalibrationControlView
 		android:id="@+id/calibrationView" android:layout_height="wrap_content"
 		android:layout_width="match_parent"
 		android:layout_alignParentBottom="true" android:background="@android:drawable/toast_frame"
 		android:visibility="gone" />
-	    
+	    -->
 </FrameLayout>

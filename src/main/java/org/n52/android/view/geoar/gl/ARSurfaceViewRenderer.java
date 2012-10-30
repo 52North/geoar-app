@@ -27,11 +27,12 @@ import javax.microedition.khronos.opengles.GL10;
 import org.n52.android.alg.proj.MercatorPoint;
 import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorRect;
-import org.n52.android.data.MeasurementManager;
-import org.n52.android.data.MeasurementManager.GetMeasurementBoundsCallback;
-import org.n52.android.data.MeasurementManager.MeasurementsCallback;
-import org.n52.android.data.MeasurementManager.RequestHolder;
 import org.n52.android.geoar.R;
+import org.n52.android.newdata.DataCache;
+import org.n52.android.newdata.DataCache.GetDataBoundsCallback;
+import org.n52.android.newdata.DataSourceHolder;
+import org.n52.android.newdata.DataSourceLoader;
+import org.n52.android.newdata.SpatialEntity;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.Settings;
@@ -50,350 +51,370 @@ import android.opengl.GLSurfaceView;
  * @author Arne de Wall
  * 
  */
-public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer, CameraUpdateListener, Closeable {
+public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
+		CameraUpdateListener, Closeable {
 
-    public interface OnObservationUpdateListener {
-	public void onObservationUpdate(MeasurementsCallback m);
-    }
+	public interface OnObservationUpdateListener {
+		public void onObservationUpdate(List<? extends SpatialEntity> m);
+	}
 
-    public interface GeoLocationUpdateListener {
+	public interface GeoLocationUpdateListener {
+		/**
+		 * Updates the relative location of the Renderable according to the
+		 * location device
+		 * 
+		 * @param locationUpdate
+		 *            current location of the device.
+		 */
+		public void onGeoLocationUpdate(GeoPoint g);
+	}
+
 	/**
-	 * Updates the relative location of the Renderable according to the
-	 * location device
-	 * 
-	 * @param locationUpdate
-	 *            current location of the device.
+	 * Public interface to create an object which can supplies the renderer with
+	 * the current extrinsic camera rotation. Ensures that matrices are just
+	 * computed as needed, since the renderer asks for data and does not listen
+	 * for them.
 	 */
-	public void onGeoLocationUpdate(GeoPoint g);
-    }
+	public interface IRotationMatrixProvider {
+		/**
+		 * Returns the current extrinsic rotation matrix
+		 * 
+		 * @return row major 4x4 matrix
+		 */
+		float[] getRotationMatrix();
+	}
 
-    /**
-     * Public interface to create an object which can supplies the renderer with
-     * the current extrinsic camera rotation. Ensures that matrices are just
-     * computed as needed, since the renderer asks for data and does not listen
-     * for them.
-     */
-    public interface IRotationMatrixProvider {
-	/**
-	 * Returns the current extrinsic rotation matrix
-	 * 
-	 * @return row major 4x4 matrix
-	 */
-	float[] getRotationMatrix();
-    }
+	private GetDataBoundsCallback callback = new GetDataBoundsCallback() {
 
-    private GetMeasurementBoundsCallback callback = new GetMeasurementBoundsCallback() {
+		@Override
+		public void onProgressUpdate(int progress, int maxProgress, int step) {
+			if (mInfoHandler != null) {
+				String stepTitle = "";
+				switch (step) {
+				// case NoiseInterpolation.STEP_CLUSTERING:
+				// stepTitle = mContext.getString(R.string.clustering);
+				// break;
+				// case NoiseInterpolation.STEP_INTERPOLATION:
+				// stepTitle = mContext.getString(R.string.interpolation);
+				// break;
+				case DataCache.STEP_REQUEST:
+					stepTitle = mContext
+							.getString(R.string.measurement_request);
+					break;
+				}
 
-	@Override
-	public void onProgressUpdate(int progress, int maxProgress, int step) {
-	    if (mInfoHandler != null) {
-		String stepTitle = "";
-		switch (step) {
-		// case NoiseInterpolation.STEP_CLUSTERING:
-		// stepTitle = mContext.getString(R.string.clustering);
-		// break;
-		// case NoiseInterpolation.STEP_INTERPOLATION:
-		// stepTitle = mContext.getString(R.string.interpolation);
-		// break;
-		case MeasurementManager.STEP_REQUEST:
-		    stepTitle = mContext.getString(R.string.measurement_request);
-		    break;
+				mInfoHandler.setProgressTitle(stepTitle,
+						ARSurfaceViewRenderer.this);
+				mInfoHandler.setProgress(progress, maxProgress,
+						ARSurfaceViewRenderer.this);
+			}
 		}
 
-		mInfoHandler.setProgressTitle(stepTitle, ARSurfaceViewRenderer.this);
-		mInfoHandler.setProgress(progress, maxProgress, ARSurfaceViewRenderer.this);
-	    }
-	}
+		@Override
+		public void onReceiveDataUpdate(MercatorRect bounds,
+				List<? extends SpatialEntity> data) {
+			// Save result reference in variable. Those should always be the
+			// same
+			currentInterpolationRect = bounds;
+			currentMeasurement = data;
+			if (currentCenterGPoint == null)
+				return;
 
-	@Override
-	public void onReceiveDataUpdate(MercatorRect bounds, MeasurementsCallback measureCallback) {
-	    // Save result reference in variable. Those should always be the
-	    // same
-	    currentInterpolationRect = bounds;
-	    currentMeasurement = measureCallback;
-	    if (currentCenterGPoint == null)
-		return;
+			for (OnObservationUpdateListener r : observationUpdateListener)
+				r.onObservationUpdate(currentMeasurement);
 
-	    for (OnObservationUpdateListener r : observationUpdateListener)
-		r.onObservationUpdate(currentMeasurement);
+			for (GeoLocationUpdateListener lu : geoLocationUpdateListener)
+				lu.onGeoLocationUpdate(currentCenterGPoint);
 
-	    for (GeoLocationUpdateListener lu : geoLocationUpdateListener)
-		lu.onGeoLocationUpdate(currentCenterGPoint);
-
-	    // TODO needed for Interpolation
-	    // glInterpolation.setWidth(bounds.width());
-	    // glInterpolation.setHeight(bounds.height());
-	    // Ask the corresponding texture to reload its data on next draw
-	    // interpolationTexture.reload();
-	}
-
-	@Override
-	public void onAbort(MercatorRect bounds, int reason) {
-	    if (mInfoHandler != null) {
-		mInfoHandler.clearProgress(ARSurfaceViewRenderer.this);
-		if (reason == MeasurementManager.ABORT_NO_CONNECTION) {
-		    mInfoHandler.setStatus(R.string.connection_error, 5000, ARSurfaceViewRenderer.this);
-		} else if (reason == MeasurementManager.ABORT_UNKOWN) {
-		    mInfoHandler.setStatus(R.string.unkown_error, 5000, ARSurfaceViewRenderer.this);
+			// TODO needed for Interpolation
+			// glInterpolation.setWidth(bounds.width());
+			// glInterpolation.setHeight(bounds.height());
+			// Ask the corresponding texture to reload its data on next draw
+			// interpolationTexture.reload();
 		}
-	    }
-	}
-    };
 
-    private boolean showPointsOfInterest;
-    private boolean showInterpolation;
-    private boolean showCalibration;
-    private boolean resetProjection;
+		@Override
+		public void onAbort(MercatorRect bounds, int reason) {
+			if (mInfoHandler != null) {
+				mInfoHandler.clearProgress(ARSurfaceViewRenderer.this);
+				if (reason == DataCache.ABORT_NO_CONNECTION) {
+					mInfoHandler.setStatus(R.string.connection_error, 5000,
+							ARSurfaceViewRenderer.this);
+				} else if (reason == DataCache.ABORT_UNKOWN) {
+					mInfoHandler.setStatus(R.string.unkown_error, 5000,
+							ARSurfaceViewRenderer.this);
+				}
+			}
+		}
+	};
 
-    // TODO what do we need
-    private MeasurementsCallback currentMeasurement;
-    private MercatorRect currentInterpolationRect;
-    private GeoPoint currentCenterGPoint;
-    private MercatorPoint currentCenterMercator;
-    // current resolution to calculate distances in meter
-    private float currentGroundResolution;
+	private boolean showPointsOfInterest;
+	private boolean showInterpolation;
+	private boolean showCalibration;
+	private boolean resetProjection;
 
-    private RequestHolder currentRequest;
+	// TODO what do we need
+	private List<? extends SpatialEntity> currentMeasurement;
+	private MercatorRect currentInterpolationRect;
+	private GeoPoint currentCenterGPoint;
+	private MercatorPoint currentCenterMercator;
+	// current resolution to calculate distances in meter
+	private float currentGroundResolution;
 
-    private List<OnObservationUpdateListener> observationUpdateListener;
-    private List<GeoLocationUpdateListener> geoLocationUpdateListener;
-    private Context mContext;
+	private DataCache.RequestHolder currentRequest;
 
-    private final IRotationMatrixProvider mRotationProvider;
+	private List<OnObservationUpdateListener> observationUpdateListener;
+	private List<GeoLocationUpdateListener> geoLocationUpdateListener;
+	private Context mContext;
 
-    private InfoView mInfoHandler;
-    private MeasurementManager mMeasureManager;
+	private final IRotationMatrixProvider mRotationProvider;
 
-    private Stack<RenderNode> children;
-    private int numChildren;
-    private GLSurfaceView glSurfaceView;
+	private InfoView mInfoHandler;
 
-    private boolean enableDepthBuffer;
+	private Stack<RenderNode> children;
+	private int numChildren;
+	private GLSurfaceView glSurfaceView;
 
-    public ARSurfaceViewRenderer(Context context, GLSurfaceView glSurfaceView) {
-	this.mContext = context;
-	this.mRotationProvider = (IRotationMatrixProvider) glSurfaceView;
-	this.glSurfaceView = glSurfaceView;
+	private boolean enableDepthBuffer;
 
-	this.observationUpdateListener = new ArrayList<OnObservationUpdateListener>();
-	children = new Stack<RenderNode>();
+	private DataSourceHolder dataSource;
 
-	this.geoLocationUpdateListener = new ArrayList<ARSurfaceViewRenderer.GeoLocationUpdateListener>();
-    }
+	public ARSurfaceViewRenderer(Context context, GLSurfaceView glSurfaceView) {
+		this.mContext = context;
+		this.mRotationProvider = (IRotationMatrixProvider) glSurfaceView;
+		this.glSurfaceView = glSurfaceView;
 
-    public void setInfoHandler(InfoView infoHandler) {
-	this.mInfoHandler = infoHandler;
-    }
+		this.observationUpdateListener = new ArrayList<OnObservationUpdateListener>();
+		children = new Stack<RenderNode>();
 
-    public void setMeasureManager(MeasurementManager measureManager) {
-	this.mMeasureManager = measureManager;
-    }
+		this.geoLocationUpdateListener = new ArrayList<ARSurfaceViewRenderer.GeoLocationUpdateListener>();
 
-    @Override
-    public void close() throws IOException {
-	// TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onDrawFrame(GL10 glUnused) {
-	// GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-	// GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT |
-	// GLES20.GL_COLOR_BUFFER_BIT);
-	int clearMask = GLES20.GL_COLOR_BUFFER_BIT;
-	if (enableDepthBuffer) {
-	    clearMask |= GLES20.GL_DEPTH_BUFFER_BIT;
-	    GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-	    GLES20.glDepthFunc(GLES20.GL_LESS);
-	    GLES20.glDepthMask(true);
-	    GLES20.glClearDepthf(1.f);
-	}
-	GLES20.glClear(clearMask);
-
-	for (int i = 0; i < numChildren; i++) {
-	    children.get(i).onRender(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
-		    mRotationProvider.getRotationMatrix());
+		if (DataSourceLoader.getInstance().getDataSources().size() > 0) {
+			dataSource = DataSourceLoader.getInstance().getDataSources()
+					.iterator().next();
+		}
 	}
 
-    }
-
-    @Override
-    public void onSurfaceChanged(GL10 glUnused, int width, int height) {
-	GLES20.glViewport(0, 0, width, height);
-	GLESCamera.createProjectionMatrix(width, height);
-    }
-
-    @Override
-    public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
-
-	// set the background color to transparent
-	GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-	// set up the view matrix
-	GLESCamera.createViewMatrix();
-
-	 GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-	 GLES20.glClearDepthf(1.0f);
-	 GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-	 GLES20.glDepthMask(true);
-
-	// No culling of back faces
-	GLES20.glDisable(GLES20.GL_CULL_FACE);
-
-	// No depth testing
-	GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-
-	// Enable blending
-	GLES20.glEnable(GLES20.GL_BLEND);
-	GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
-
-	// backface culling
-	// GLES20.glEnable(GLES20.GL_CULL_FACE);
-	// GLES20.glCullFace(GLES20.GL_BACK);
-	initScene();
-
-    }
-
-    private void initScene() {
-	// Grid grid = new Grid();
-	// grid.setRenderer(SimpleColorRenderer.getInstance());
-	// addRenderNode(grid);
-
-//	PointsOfInteresst poi = new PointsOfInteresst(SimpleColorRenderer.getInstance(), glSurfaceView );
-//	poi.onGeoLocationUpdate(currentCenterGPoint);
-//	addRenderNode(poi);
-	
-//	Sphere sphere = new Sphere(1, 10, 10);
-//	sphere.setPosition(new float[] {0,0,5});
-//	addRenderNode(sphere);
-//	
-//	Cube cube = new Cube(1);
-//	cube.setPosition(new float[] {0,5,10});
-//	addRenderNode(cube);
-	
-	HeightMap map = new HeightMap();
-	addRenderNode(map);
-	
-	ReferencedHeightMap hMap = new ReferencedHeightMap();
-	addRenderNode(hMap);
-	
-//	Cube cube = new Cube(1);
-//	cube.setPosition(new float[] {0,0,5});
-//	cube.setRenderer(SimpleColorRenderer.getInstance());
-//	addRenderNode(cube);
-//
-//	Cube cube2 = new Cube(1);
-//	cube2.setPosition(new float[] {0,2,5});
-//	cube2.setRenderer(SimpleColorRenderer.getInstance());
-//	cube.addChild(cube2);
-	
-	// GLESItemizedRenderer p = new GLESItemizedRenderer(mRotationProvider);
-	// p.onLocationUpdate(currentCenterGPoint);
-	// mRenderObjects.add(p);
-
-	// GridRenderer g = new GridRenderer(mRotationProvider);
-	// mRenderObjects.add(g);
-    }
-
-    private void addRenderNode(RenderNode renderNode) {
-	if (renderNode instanceof GeoLocationUpdateListener)
-	    this.geoLocationUpdateListener.add((GeoLocationUpdateListener) renderNode);
-	if (renderNode instanceof OnObservationUpdateListener)
-	    this.observationUpdateListener.add((OnObservationUpdateListener) renderNode);
-	this.children.add(renderNode);
-	this.numChildren++;
-    }
-
-    @Override
-    public void onCameraUpdate() {
-	resetProjection = true;
-
-    }
-
-    public void setCenter(Location location) {
-	setCenter(new GeoPoint((int) (location.getLatitude() * 1E6), (int) (location.getLongitude() * 1E6)));
-    }
-
-    public void setCenter(GeoPoint gPoint) {
-	if (mMeasureManager == null)
-	    return;
-
-	currentCenterGPoint = gPoint;
-
-	// Calculate thresholds for request of data
-	double meterPerPixel = MercatorProj.getGroundResolution(gPoint.getLatitudeE6() / 1E6f, Settings.ZOOM_AR);
-	int pixelRadius = (int) (Settings.SIZE_AR_INTERPOLATION / meterPerPixel);
-	int pixelReloadDist = (int) (Settings.RELOAD_DIST_AR / meterPerPixel);
-
-	// Calculate new center point in world coordinates
-	int centerPixelX = (int) MercatorProj.transformLonToPixelX(gPoint.getLongitudeE6() / 1E6f, Settings.ZOOM_AR);
-	int centerPixelY = (int) MercatorProj.transformLatToPixelY(gPoint.getLatitudeE6() / 1E6f, Settings.ZOOM_AR);
-	currentCenterMercator = new MercatorPoint(centerPixelX, centerPixelY, Settings.ZOOM_AR);
-
-	currentGroundResolution = (float) MercatorProj.getGroundResolution(currentCenterGPoint.getLatitudeE6() / 1E6f,
-		Settings.ZOOM_AR);
-
-	// determination if data request is needed or if just a simple shift is
-	// enough
-	boolean requestInterpolation = false;
-	if (currentInterpolationRect == null) {
-	    // Get new data if there were none before
-	    requestInterpolation = true;
-	} else {
-	    MercatorPoint interpolationCenter = currentInterpolationRect.getCenter();
-	    if (currentCenterMercator.zoom != currentInterpolationRect.zoom
-		    || currentCenterMercator.distanceTo(interpolationCenter) > pixelReloadDist) {
-		// request data if new center offsets more than
-		// Settings.RELOAD_DIST_AR meters
-		requestInterpolation = true;
-	    }
+	public void setInfoHandler(InfoView infoHandler) {
+		this.mInfoHandler = infoHandler;
 	}
 
-	if (requestInterpolation) {
-	    // if new data is needed
-	    if (currentRequest != null) {
-		// cancel currently running data request
-		currentRequest.cancel();
-	    }
-	    // trigger data request
-	    currentRequest = mMeasureManager.getMeasurementCallback(new MercatorRect(currentCenterMercator.x
-		    - pixelRadius, currentCenterMercator.y - pixelRadius, currentCenterMercator.x + pixelRadius,
-		    currentCenterMercator.y + pixelRadius, Settings.ZOOM_AR), callback, false, currentMeasurement);
+	@Override
+	public void close() throws IOException {
+		// TODO Auto-generated method stub
+
 	}
 
-	for (GeoLocationUpdateListener r : geoLocationUpdateListener) {
-	    r.onGeoLocationUpdate(currentCenterGPoint);
+	@Override
+	public void onDrawFrame(GL10 glUnused) {
+		// GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+		// GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT |
+		// GLES20.GL_COLOR_BUFFER_BIT);
+		int clearMask = GLES20.GL_COLOR_BUFFER_BIT;
+		if (enableDepthBuffer) {
+			clearMask |= GLES20.GL_DEPTH_BUFFER_BIT;
+			GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+			GLES20.glDepthFunc(GLES20.GL_LESS);
+			GLES20.glDepthMask(true);
+			GLES20.glClearDepthf(1.f);
+		}
+		GLES20.glClear(clearMask);
+
+		for (int i = 0; i < numChildren; i++) {
+			children.get(i).onRender(GLESCamera.projectionMatrix,
+					GLESCamera.viewMatrix,
+					mRotationProvider.getRotationMatrix());
+		}
+
 	}
 
-    }
+	@Override
+	public void onSurfaceChanged(GL10 glUnused, int width, int height) {
+		GLES20.glViewport(0, 0, width, height);
+		GLESCamera.createProjectionMatrix(width, height);
+	}
 
-    public void showCalibration(boolean show) {
-	showCalibration = show;
-    }
+	@Override
+	public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
 
-    public void showInterpolation(boolean show) {
-	showInterpolation = show;
-    }
+		// set the background color to transparent
+		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-    public boolean showsCalibration() {
-	return this.showCalibration;
-    }
+		// set up the view matrix
+		GLESCamera.createViewMatrix();
 
-    public boolean showsInterpolation() {
-	return this.showInterpolation;
-    }
+		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+		GLES20.glClearDepthf(1.0f);
+		GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+		GLES20.glDepthMask(true);
 
-    /**
-     * Ask renderer to reload its interpolation
-     */
-    public void reload() {
-	if (currentCenterGPoint != null)
-	    setCenter(currentCenterGPoint);
-    }
+		// No culling of back faces
+		GLES20.glDisable(GLES20.GL_CULL_FACE);
 
-    public void checkPOI() {
-	// if (mRenderObjects.size() == 0) {
-	//
-	// }
-    }
+		// No depth testing
+		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+
+		// Enable blending
+		GLES20.glEnable(GLES20.GL_BLEND);
+		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
+
+		// backface culling
+		// GLES20.glEnable(GLES20.GL_CULL_FACE);
+		// GLES20.glCullFace(GLES20.GL_BACK);
+		initScene();
+
+	}
+
+	private void initScene() {
+		// Grid grid = new Grid();
+		// grid.setRenderer(SimpleColorRenderer.getInstance());
+		// addRenderNode(grid);
+
+		// PointsOfInteresst poi = new
+		// PointsOfInteresst(SimpleColorRenderer.getInstance(), glSurfaceView );
+		// poi.onGeoLocationUpdate(currentCenterGPoint);
+		// addRenderNode(poi);
+
+		// Sphere sphere = new Sphere(1, 10, 10);
+		// sphere.setPosition(new float[] {0,0,5});
+		// addRenderNode(sphere);
+		//
+		// Cube cube = new Cube(1);
+		// cube.setPosition(new float[] {0,5,10});
+		// addRenderNode(cube);
+
+		HeightMap map = new HeightMap();
+		addRenderNode(map);
+
+		ReferencedHeightMap hMap = new ReferencedHeightMap();
+		addRenderNode(hMap);
+
+		// Cube cube = new Cube(1);
+		// cube.setPosition(new float[] {0,0,5});
+		// cube.setRenderer(SimpleColorRenderer.getInstance());
+		// addRenderNode(cube);
+		//
+		// Cube cube2 = new Cube(1);
+		// cube2.setPosition(new float[] {0,2,5});
+		// cube2.setRenderer(SimpleColorRenderer.getInstance());
+		// cube.addChild(cube2);
+
+		// GLESItemizedRenderer p = new GLESItemizedRenderer(mRotationProvider);
+		// p.onLocationUpdate(currentCenterGPoint);
+		// mRenderObjects.add(p);
+
+		// GridRenderer g = new GridRenderer(mRotationProvider);
+		// mRenderObjects.add(g);
+	}
+
+	private void addRenderNode(RenderNode renderNode) {
+		if (renderNode instanceof GeoLocationUpdateListener)
+			this.geoLocationUpdateListener
+					.add((GeoLocationUpdateListener) renderNode);
+		if (renderNode instanceof OnObservationUpdateListener)
+			this.observationUpdateListener
+					.add((OnObservationUpdateListener) renderNode);
+		this.children.add(renderNode);
+		this.numChildren++;
+	}
+
+	@Override
+	public void onCameraUpdate() {
+		resetProjection = true;
+
+	}
+
+	public void setCenter(Location location) {
+		setCenter(new GeoPoint((int) (location.getLatitude() * 1E6),
+				(int) (location.getLongitude() * 1E6)));
+	}
+
+	public void setCenter(GeoPoint gPoint) {
+
+		currentCenterGPoint = gPoint;
+
+		// Calculate thresholds for request of data
+		double meterPerPixel = MercatorProj.getGroundResolution(
+				gPoint.getLatitudeE6() / 1E6f, Settings.ZOOM_AR);
+		int pixelRadius = (int) (Settings.SIZE_AR_INTERPOLATION / meterPerPixel);
+		int pixelReloadDist = (int) (Settings.RELOAD_DIST_AR / meterPerPixel);
+
+		// Calculate new center point in world coordinates
+		int centerPixelX = (int) MercatorProj.transformLonToPixelX(
+				gPoint.getLongitudeE6() / 1E6f, Settings.ZOOM_AR);
+		int centerPixelY = (int) MercatorProj.transformLatToPixelY(
+				gPoint.getLatitudeE6() / 1E6f, Settings.ZOOM_AR);
+		currentCenterMercator = new MercatorPoint(centerPixelX, centerPixelY,
+				Settings.ZOOM_AR);
+
+		currentGroundResolution = (float) MercatorProj.getGroundResolution(
+				currentCenterGPoint.getLatitudeE6() / 1E6f, Settings.ZOOM_AR);
+
+		// determination if data request is needed or if just a simple shift is
+		// enough
+		boolean requestInterpolation = false;
+		if (currentInterpolationRect == null) {
+			// Get new data if there were none before
+			requestInterpolation = true;
+		} else {
+			MercatorPoint interpolationCenter = currentInterpolationRect
+					.getCenter();
+			if (currentCenterMercator.zoom != currentInterpolationRect.zoom
+					|| currentCenterMercator.distanceTo(interpolationCenter) > pixelReloadDist) {
+				// request data if new center offsets more than
+				// Settings.RELOAD_DIST_AR meters
+				requestInterpolation = true;
+			}
+		}
+
+		if (requestInterpolation) {
+			// if new data is needed
+			if (currentRequest != null) {
+				// cancel currently running data request
+				currentRequest.cancel();
+			}
+			// trigger data request
+			currentRequest = dataSource.getDataCache().getDataByBBox(
+					new MercatorRect(currentCenterMercator.x - pixelRadius,
+							currentCenterMercator.y - pixelRadius,
+							currentCenterMercator.x + pixelRadius,
+							currentCenterMercator.y + pixelRadius,
+							Settings.ZOOM_AR), callback, false);
+		}
+
+		for (GeoLocationUpdateListener r : geoLocationUpdateListener) {
+			r.onGeoLocationUpdate(currentCenterGPoint);
+		}
+
+	}
+
+	public void showCalibration(boolean show) {
+		showCalibration = show;
+	}
+
+	public void showInterpolation(boolean show) {
+		showInterpolation = show;
+	}
+
+	public boolean showsCalibration() {
+		return this.showCalibration;
+	}
+
+	public boolean showsInterpolation() {
+		return this.showInterpolation;
+	}
+
+	/**
+	 * Ask renderer to reload its interpolation
+	 */
+	public void reload() {
+		if (currentCenterGPoint != null)
+			setCenter(currentCenterGPoint);
+	}
+
+	public void checkPOI() {
+		// if (mRenderObjects.size() == 0) {
+		//
+		// }
+	}
 }

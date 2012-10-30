@@ -15,17 +15,11 @@
  */
 package org.n52.android.view.map;
 
-import java.util.ArrayList;
-
-import org.n52.android.GeoARView;
-import org.n52.android.data.MeasurementManager;
 import org.n52.android.geoar.R;
 import org.n52.android.tracking.location.LocationHandler;
-import org.n52.android.view.GeoARFragment;
 import org.n52.android.view.GeoARFragment2;
 import org.n52.android.view.InfoView;
 import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.MapController;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -42,14 +36,16 @@ import android.view.ViewGroup;
 public class GeoMapFragment2 extends GeoARFragment2 {
 
 	private GeoMapView2 geoMapView;
-	private ManualPositionView positionView;
+
+	// TODO
+	// private ManualPositionView positionView;
 
 	// public GeoMapFragment2(){
 	// geoARViews = new ArrayList<GeoARView2>();
 	// }
-	
+
 	public GeoMapFragment2(LocationHandler locationHandler, InfoView infoView) {
-		//this();
+		// this();
 		this.mInfoHandler = infoView;
 		this.mLocationHandler = locationHandler;
 		setRetainInstance(true);
@@ -81,11 +77,11 @@ public class GeoMapFragment2 extends GeoARFragment2 {
 			geoMapView.setCenterAndZoom(new GeoPoint(lat, lon), zoom);
 		}
 
-//		positionView = (ManualPositionView) getView().findViewById(
-//				R.id.manual_position_view);
-//		positionView.setLocationHandler(mLocationHandler);
-//		positionView.setMapView(geoMapView);
-//		geoARViews.add(positionView);
+		// positionView = (ManualPositionView) getView().findViewById(
+		// R.id.manual_position_view);
+		// positionView.setLocationHandler(mLocationHandler);
+		// positionView.setMapView(geoMapView);
+		// geoARViews.add(positionView);
 	}
 
 	@Override

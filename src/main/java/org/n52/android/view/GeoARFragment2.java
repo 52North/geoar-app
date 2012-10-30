@@ -18,9 +18,7 @@ package org.n52.android.view;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.n52.android.GeoARView;
 import org.n52.android.GeoARView2;
-import org.n52.android.data.MeasurementManager;
 import org.n52.android.tracking.location.LocationHandler;
 
 import android.os.Bundle;
