@@ -132,7 +132,7 @@ public class DataCache {
 		this.dataSource = dataSource;
 		tileZoom = dataSource.getPreferredZoomLevel();
 		// TODO Filter
-		dataFilter = new Filter();// DataSourceAdapter.createMeasurementFilter();//
+		//dataFilter = new Filter();// DataSourceAdapter.createMeasurementFilter();//
 		// new MeasurementFilter();
 		fetchingThreadPool = (ThreadPoolExecutor) Executors
 				.newFixedThreadPool(3); // TODO make size changeable
