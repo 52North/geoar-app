@@ -18,21 +18,13 @@ package org.n52.android;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.n52.android.data.DataSourceAdapter;
-import org.n52.android.data.MeasurementFilter;
-import org.n52.android.data.MeasurementManager;
-import org.n52.android.dialog.DataSourceDialog;
-import org.n52.android.dialog.FilterDialog;
 import org.n52.android.ext.actionbar.ActionBarActivity;
 import org.n52.android.geoar.R;
 import org.n52.android.tracking.camera.RealityCamera;
 import org.n52.android.tracking.location.LocationHandler;
-import org.n52.android.view.GeoARFragment;
 import org.n52.android.view.GeoARFragment2;
 import org.n52.android.view.InfoView;
-import org.n52.android.view.geoar.ARFragment;
 import org.n52.android.view.geoar.ARFragment2;
-import org.n52.android.view.map.GeoMapFragment;
 import org.n52.android.view.map.GeoMapFragment2;
 import org.osmdroid.views.MapView;
 
@@ -67,26 +59,26 @@ import android.widget.ImageButton;
  */
 public class GeoARActivity3 extends ActionBarActivity {
 
-	private List<GeoARView> noiseARViews = new ArrayList<GeoARView>();
+	private List<GeoARView2> noiseARViews = new ArrayList<GeoARView2>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-//		// Get MeasurementManager from previous instance or create new one
-//		Object lastMeasureManager = getLastCustomNonConfigurationInstance();
-//		if (lastMeasureManager != null) {
-//			measurementManager = (MeasurementManager) lastMeasureManager;
-//		} else {
-//			measurementManager = DataSourceAdapter.createMeasurementManager();
-//		}
+		// // Get MeasurementManager from previous instance or create new one
+		// Object lastMeasureManager = getLastCustomNonConfigurationInstance();
+		// if (lastMeasureManager != null) {
+		// measurementManager = (MeasurementManager) lastMeasureManager;
+		// } else {
+		// measurementManager = DataSourceAdapter.createMeasurementManager();
+		// }
 
 		// First time init, create the UI.
 		if (savedInstanceState == null) {
 			Fragment newFragment = ViewFragment.newInstance();
 			getSupportFragmentManager().beginTransaction()
 					.add(android.R.id.content, newFragment).commit();
-			
+
 			Builder builder = new AlertDialog.Builder(this);
 			builder.setMessage(R.string.info_use);
 			builder.setCancelable(true);
@@ -99,26 +91,26 @@ public class GeoARActivity3 extends ActionBarActivity {
 		SharedPreferences prefs = getSharedPreferences("NoiseAR", MODE_PRIVATE);
 		RealityCamera.setHeight(prefs.getFloat("cameraHeight", 1.6f));
 
-//		if (savedInstanceState != null) {
-//
-//			// restore manual positioning
-//			// locationHandler.onRestoreInstanceState(savedInstanceState);
-//		} else {
-//			Builder builder = new AlertDialog.Builder(this);
-//			builder.setMessage(R.string.info_use);
-//			builder.setCancelable(true);
-//			builder.setPositiveButton(R.string.ok, null);
-//			builder.setTitle(R.string.advice);
-//			builder.show();
-//		}
+		// if (savedInstanceState != null) {
+		//
+		// // restore manual positioning
+		// // locationHandler.onRestoreInstanceState(savedInstanceState);
+		// } else {
+		// Builder builder = new AlertDialog.Builder(this);
+		// builder.setMessage(R.string.info_use);
+		// builder.setCancelable(true);
+		// builder.setPositiveButton(R.string.ok, null);
+		// builder.setTitle(R.string.advice);
+		// builder.show();
+		// }
 	}
 
-//	@Override
-//	public Object onRetainCustomNonConfigurationInstance() {
-//		// Lets measurementManager survive a screen orientation change, so that
-//		// no measurements need to get recached
-//		return measurementManager;
-//	}
+	// @Override
+	// public Object onRetainCustomNonConfigurationInstance() {
+	// // Lets measurementManager survive a screen orientation change, so that
+	// // no measurements need to get recached
+	// return measurementManager;
+	// }
 
 	@Override
 	public void onAttachedToWindow() {
@@ -175,7 +167,7 @@ public class GeoARActivity3 extends ActionBarActivity {
 		if (item.getGroupId() != Menu.NONE) {
 			// Delegate selection event to all child views to allow them to
 			// react.
-			for (GeoARView view : noiseARViews) {
+			for (GeoARView2 view : noiseARViews) {
 				if (view.onOptionsItemSelected(item)) {
 					// Event consumed
 					return true;
@@ -185,21 +177,21 @@ public class GeoARActivity3 extends ActionBarActivity {
 			// Item does not belong to any child view
 			switch (item.getItemId()) {
 			// TODO
-//			case R.id.item_filter:
-//				// Get current measurement filter
-//				MeasurementFilter filter = measurementManager
-//						.getMeasurementFilter();
-//				if (filter == null) {
-//					filter = new MeasurementFilter();
-//				}
-//				new FilterDialog(this, filter, measurementManager).show();
-//				break;
-//			case R.id.item_source:
-//				// show data sources dialog
-//				// TODO
-//				// new DataSourceDialog(this, dataSources, measurementManager)
-//				new DataSourceDialog(this, null, measurementManager).show();
-//				break;
+			// case R.id.item_filter:
+			// // Get current measurement filter
+			// MeasurementFilter filter = measurementManager
+			// .getMeasurementFilter();
+			// if (filter == null) {
+			// filter = new MeasurementFilter();
+			// }
+			// new FilterDialog(this, filter, measurementManager).show();
+			// break;
+			// case R.id.item_source:
+			// // show data sources dialog
+			// // TODO
+			// // new DataSourceDialog(this, dataSources, measurementManager)
+			// new DataSourceDialog(this, null, measurementManager).show();
+			// break;
 			case R.id.map_item_camera:
 				ViewFragment.instance.updateFragmentView();
 				break;
@@ -213,7 +205,7 @@ public class GeoARActivity3 extends ActionBarActivity {
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		// Update visibility of menu items according to visiblity of the child
 		// views
-		for (GeoARView view : noiseARViews) {
+		for (GeoARView2 view : noiseARViews) {
 			if (view.getMenuGroupId() != null) {
 				menu.setGroupVisible(view.getMenuGroupId(), view.isVisible());
 			}
@@ -228,7 +220,7 @@ public class GeoARActivity3 extends ActionBarActivity {
 
 		private static ViewFragment instance;
 
-		//private MeasurementManager measureManager;
+		// private MeasurementManager measureManager;
 		private LocationHandler locationHandler;
 		private InfoView infoView;
 
@@ -239,7 +231,7 @@ public class GeoARActivity3 extends ActionBarActivity {
 		static ViewFragment newInstance() {
 			instance = new ViewFragment();
 			instance.setRetainInstance(true);
-			//instance.measureManager = measurementManager;
+			// instance.measureManager = measurementManager;
 			return instance;
 		}
 
@@ -278,8 +270,7 @@ public class GeoARActivity3 extends ActionBarActivity {
 
 			if (arFragment == null) {
 				// AugmentedReality Fragment
-				arFragment = new ARFragment2(locationHandler,
-						infoView);
+				arFragment = new ARFragment2(locationHandler, infoView);
 
 				arFragment.setLocationHandler(locationHandler);
 				arFragment.setInfoHandler(infoView);
