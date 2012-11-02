@@ -15,13 +15,18 @@
  */
 package org.n52.android.newdata;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.n52.android.newdata.Annotations.Filterable;
 import org.n52.android.newdata.Annotations.SupportedVisualization;
+import org.n52.android.newdata.filter.FilterDialogActivity;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
@@ -32,8 +37,6 @@ public class DataSourceHolder implements Parcelable {
 	private static int nextId = 0;
 	private DataSource<? super Filter> dataSource;
 	private CheckList<Visualization> visualizations = new CheckList<Visualization>();
-	private Class<? extends Filter> filterClass;
-	private Filter currentFilter;
 
 	private String name;
 	private long minReloadInterval;
@@ -58,6 +61,8 @@ public class DataSourceHolder implements Parcelable {
 			return false;
 		}
 	});
+	private Class<? extends Filter> filterClass;
+	private Filter currentFilter;
 
 	@SuppressWarnings("unchecked")
 	public DataSourceHolder(
@@ -123,10 +128,10 @@ public class DataSourceHolder implements Parcelable {
 				continue;
 			}
 
-			filterClass = (Class<? extends Filter>) type
+			this.filterClass = (Class<? extends Filter>) type
 					.getActualTypeArguments()[0];
 			try {
-				currentFilter = filterClass.newInstance();
+				this.currentFilter = filterClass.newInstance();
 			} catch (InstantiationException e) {
 				throw new RuntimeException(
 						"Referenced filter has no appropriate constructor");
@@ -134,6 +139,7 @@ public class DataSourceHolder implements Parcelable {
 				throw new RuntimeException(
 						"Referenced filter has no appropriate constructor");
 			}
+
 		}
 
 		dataCache = new DataCache(this);
@@ -187,6 +193,16 @@ public class DataSourceHolder implements Parcelable {
 
 	public DataCache getDataCache() {
 		return dataCache;
+	}
+
+	public Class<?> getFilterClass() {
+		return filterClass;
+	}
+
+	public void createFilterDialog(Context context) {
+		Intent intent = new Intent(context, FilterDialogActivity.class);
+		intent.putExtra("dataSource", this);
+		context.startActivity(intent);
 	}
 
 	// Parcelable

@@ -18,4 +18,9 @@
 	    android:title="@string/map_item_camera"
 	    android:showAsAction="always"
 	    android:icon="@drawable/ic_menu_phone"/>
+	
+	<item 
+	    android:id="@+id/edit_filter"
+	    android:title="Filter Test"
+	    android:showAsAction="always"/>
 </menu>

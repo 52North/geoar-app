@@ -13,8 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.android.view.geoar.gl.model.primitives;
+package org.n52.android.newdata.filter;
 
-public class nix {
+import android.content.Context;
+import android.view.View;
+import android.widget.EditText;
 
+public abstract class NumberFilterView<T extends Number> extends EditText
+		implements FilterView<T> {
+
+	public NumberFilterView(Context context, int inputType) {
+		super(context);
+
+		setInputType(inputType);
+	}
+
+	@Override
+	public boolean validate() {
+		try {
+			getValue();
+			return true;
+		} catch (NumberFormatException e) {
+			setError("Invalid Number");
+			return false;
+		}
+	}
+
+	@Override
+	public View getView() {
+		return this;
+	}
 }

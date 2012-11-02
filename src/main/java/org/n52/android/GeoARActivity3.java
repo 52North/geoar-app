@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.n52.android.ext.actionbar.ActionBarActivity;
 import org.n52.android.geoar.R;
+import org.n52.android.newdata.DataSourceLoader;
 import org.n52.android.tracking.camera.RealityCamera;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.view.GeoARFragment2;
@@ -194,6 +195,10 @@ public class GeoARActivity3 extends ActionBarActivity {
 			// break;
 			case R.id.map_item_camera:
 				ViewFragment.instance.updateFragmentView();
+				break;
+				
+			case R.id.edit_filter: 
+				DataSourceLoader.getInstance().getDataSources().iterator().next().createFilterDialog(this);
 				break;
 			}
 		}

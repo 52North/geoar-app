@@ -13,8 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.android.view.geoar.gl.model.primitives;
+package org.n52.android.newdata.filter;
 
-public class nix {
+import android.view.View;
 
+public interface FilterView<T> {
+
+	boolean validate();
+
+	T getValue();
+
+	void setValue(T value);
+
+	View getView();
+
+	void setValueObject(Object object);
 }
