@@ -15,20 +15,16 @@
  */
 package org.n52.android.view.map;
 
-import org.n52.android.GeoARView;
-import org.n52.android.data.MeasurementManager;
-import org.n52.android.geoar.R;
+import org.n52.android.GeoARView2;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.view.InfoView;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.LinearLayout;
 
 /**
@@ -38,74 +34,74 @@ import android.widget.LinearLayout;
  * @author Holger Hopmann
  * 
  */
-public class ManualPositionView extends LinearLayout implements GeoARView,
+public class ManualPositionView extends LinearLayout implements GeoARView2,
 		OnClickListener {
 
-	private GeoMapView mapView;
+//	private GeoMapView mapView;
 	private LocationHandler locationHandler;
-
+//
 	public ManualPositionView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		LayoutInflater.from(context).inflate(R.layout.manual_position_views,
-				this, true);
-
-		// Find child views
-		Button okButton = (Button) findViewById(R.id.buttonOk);
-		Button removeButton = (Button) findViewById(R.id.buttonRemove);
-
-		// Set click listeners
-		removeButton.setOnClickListener(this);
-		okButton.setOnClickListener(this);
+//		LayoutInflater.from(context).inflate(R.layout.manual_position_views,
+//				this, true);
+//
+//		// Find child views
+//		Button okButton = (Button) findViewById(R.id.buttonOk);
+//		Button removeButton = (Button) findViewById(R.id.buttonRemove);
+//
+//		// Set click listeners
+//		removeButton.setOnClickListener(this);
+//		okButton.setOnClickListener(this);
 	}
-
-	public void setMapView(GeoMapView mapView) {
-		this.mapView = mapView;
-	}
-
+//
+//	public void setMapView(GeoMapView mapView) {
+//		this.mapView = mapView;
+//	}
+//
 	public void setLocationHandler(LocationHandler locationHandler) {
 		this.locationHandler = locationHandler;
 	}
-
+//
 	@Override
 	protected void onVisibilityChanged(View changedView, int visibility) {
-		if (mapView != null) {
-			if (isShown()) {
-				// If view is really shown, set mapview into manual positioning
-				// mode
-				mapView.setManualPositioning(true);
-			} else {
-				mapView.setManualPositioning(false);
-			}
-		}
-		super.onVisibilityChanged(changedView, visibility);
+//		if (mapView != null) {
+//			if (isShown()) {
+//				// If view is really shown, set mapview into manual positioning
+//				// mode
+//				mapView.setManualPositioning(true);
+//			} else {
+//				mapView.setManualPositioning(false);
+//			}
+//		}
+//		super.onVisibilityChanged(changedView, visibility);
 	}
-
+//
 	public void onClick(View v) {
-		switch (v.getId()) {
-		case R.id.buttonOk:
-			setVisibility(GONE);
-			break;
-		case R.id.buttonRemove:
-			locationHandler.disableManualLocation();
-			setVisibility(GONE);
-			break;
-
-		}
+//		switch (v.getId()) {
+//		case R.id.buttonOk:
+//			setVisibility(GONE);
+//			break;
+//		case R.id.buttonRemove:
+//			locationHandler.disableManualLocation();
+//			setVisibility(GONE);
+//			break;
+//
+//		}
 	}
-
+//
 	public boolean isVisible() {
 		return isShown();
 	}
-
+//
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.item_set_location:
-			setVisibility(VISIBLE);
-			return true;
-		}
+//		switch (item.getItemId()) {
+//		case R.id.item_set_location:
+//			setVisibility(VISIBLE);
+//			return true;
+//		}
 		return false;
 	}
-
+//
 	public Integer getMenuGroupId() {
 		return null;
 	}
@@ -122,11 +118,11 @@ public class ManualPositionView extends LinearLayout implements GeoARView,
 		// TODO Auto-generated method stub
 
 	}
-
-	@Override
-	public void setMeasureManager(MeasurementManager measureManager) {
-		// TODO Auto-generated method stub
-		
-	}
+//
+//	@Override
+//	public void setMeasureManager(MeasurementManager measureManager) {
+//		// TODO Auto-generated method stub
+//		
+//	}
 
 }
