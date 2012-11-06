@@ -16,6 +16,7 @@
 package org.n52.android;
 
 import java.util.ArrayList;
+import java.util.zip.Inflater;
 
 import org.n52.android.geoar.R;
 import org.n52.android.newdata.DataSourceGridFragment;
@@ -30,16 +31,14 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 
-import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 
 /**
  * 
@@ -98,41 +97,32 @@ public class MainActivity2 extends SherlockFragmentActivity {
 		outState.putString("tabState", tabHost.getCurrentTabTag());
 	}
 
-//	/*
-//	 * (non-Javadoc)
-//	 * 
-//	 * @see
-//	 * org.n52.android.ext.actionbar.ActionBarActivity#onCreateOptionsMenu(android
-//	 * .view.Menu)
-//	 */
-//	@Override
-//	public boolean onCreateOptionsMenu(Menu menu) {
-//		MenuInflater menuInflater = getMenuInflater();
-//		menuInflater.inflate(R.menu.cb_main_menu, menu);
-//		return super.onCreateOptionsMenu(menu);
-//	}
-//
-//	/*
-//	 * (non-Javadoc)
-//	 * 
-//	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
-//	 */
-//	@Override
-//	public boolean onOptionsItemSelected(MenuItem item) {
-//		switch (item.getItemId()) {
-//		case R.id.cb_menu_about:
-//			AboutDialog aboutDialog = new AboutDialog(this);
-//			aboutDialog.setTitle(R.string.about_titel);
-//			aboutDialog.show();
-//			return true;
-//		case R.id.cb_menu_refresh:
-//			DataSourceLoader.getInstance().reloadPlugins();
-//			return true;
-//		default:
-//			return super.onOptionsItemSelected(item);
-//		}
-//
-//	}
+
+	@Override
+	public boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu) {
+		MenuInflater inflater = getSupportMenuInflater();
+		inflater.inflate(R.menu.cb_main_menu, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.cb_menu_about:
+			AboutDialog aboutDialog = new AboutDialog(this);
+			aboutDialog.setTitle(R.string.about_titel);
+			aboutDialog.show();
+			return true;
+		case R.id.cb_menu_refresh:
+			DataSourceLoader.getInstance().reloadPlugins();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
+
+
 
 	/**
 	 * It relies on a trick presented on

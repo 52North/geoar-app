@@ -18,7 +18,6 @@ package org.n52.android;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.n52.android.ext.actionbar.ActionBarActivity;
 import org.n52.android.geoar.R;
 import org.n52.android.newdata.DataSourceLoader;
 import org.n52.android.tracking.camera.RealityCamera;
@@ -40,13 +39,15 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageButton;
+
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 
 /**
  * Core and only {@link Activity} in this application. Coordinates all its child
@@ -58,7 +59,7 @@ import android.widget.ImageButton;
  * @author Arne de Wall
  * 
  */
-public class GeoARActivity3 extends ActionBarActivity {
+public class GeoARActivity3 extends SherlockFragmentActivity {
 
 	private List<GeoARView2> noiseARViews = new ArrayList<GeoARView2>();
 
@@ -154,10 +155,11 @@ public class GeoARActivity3 extends ActionBarActivity {
 		editor.commit();
 	}
 
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// inflate common general menu definition
-		MenuInflater inflater = getMenuInflater();
+		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.general, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -169,10 +171,10 @@ public class GeoARActivity3 extends ActionBarActivity {
 			// Delegate selection event to all child views to allow them to
 			// react.
 			for (GeoARView2 view : noiseARViews) {
-				if (view.onOptionsItemSelected(item)) {
-					// Event consumed
-					return true;
-				}
+				// if (view.onOptionsItemSelected(item)) {
+				// // Event consumed
+				// return true;
+				// }
 			}
 		} else {
 			// Item does not belong to any child view
@@ -218,6 +220,9 @@ public class GeoARActivity3 extends ActionBarActivity {
 		}
 		return super.onPrepareOptionsMenu(menu);
 	}
+
+
+
 
 	private static class ViewFragment extends Fragment {
 		GeoARFragment2 mapFragment;
