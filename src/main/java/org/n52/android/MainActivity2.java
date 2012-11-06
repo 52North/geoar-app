@@ -17,7 +17,6 @@ package org.n52.android;
 
 import java.util.ArrayList;
 
-import org.n52.android.ext.actionbar.ActionBarActivity;
 import org.n52.android.geoar.R;
 import org.n52.android.newdata.DataSourceGridFragment;
 import org.n52.android.newdata.DataSourceLoader;
@@ -39,12 +38,15 @@ import android.view.ViewGroup;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+
 /**
  * 
  * @author Arne de Wall
  * 
  */
-public class MainActivity2 extends ActionBarActivity {
+public class MainActivity2 extends SherlockFragmentActivity {
 
 	TabHost tabHost;
 	ViewPager viewPager;
@@ -75,7 +77,7 @@ public class MainActivity2 extends ActionBarActivity {
 
 		if (savedInstanceState != null)
 			tabHost.setCurrentTabByTag(savedInstanceState.getString("tabState"));
-		else
+//		else
 			//DataSourceAdapter.initFactoryLoader(getClassLoader(), this);
 
 		// Test!
@@ -96,41 +98,41 @@ public class MainActivity2 extends ActionBarActivity {
 		outState.putString("tabState", tabHost.getCurrentTabTag());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.n52.android.ext.actionbar.ActionBarActivity#onCreateOptionsMenu(android
-	 * .view.Menu)
-	 */
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater menuInflater = getMenuInflater();
-		menuInflater.inflate(R.menu.cb_main_menu, menu);
-		return super.onCreateOptionsMenu(menu);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
-	 */
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.cb_menu_about:
-			AboutDialog aboutDialog = new AboutDialog(this);
-			aboutDialog.setTitle(R.string.about_titel);
-			aboutDialog.show();
-			return true;
-		case R.id.cb_menu_refresh:
-			DataSourceLoader.getInstance().reloadPlugins();
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-
-	}
+//	/*
+//	 * (non-Javadoc)
+//	 * 
+//	 * @see
+//	 * org.n52.android.ext.actionbar.ActionBarActivity#onCreateOptionsMenu(android
+//	 * .view.Menu)
+//	 */
+//	@Override
+//	public boolean onCreateOptionsMenu(Menu menu) {
+//		MenuInflater menuInflater = getMenuInflater();
+//		menuInflater.inflate(R.menu.cb_main_menu, menu);
+//		return super.onCreateOptionsMenu(menu);
+//	}
+//
+//	/*
+//	 * (non-Javadoc)
+//	 * 
+//	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+//	 */
+//	@Override
+//	public boolean onOptionsItemSelected(MenuItem item) {
+//		switch (item.getItemId()) {
+//		case R.id.cb_menu_about:
+//			AboutDialog aboutDialog = new AboutDialog(this);
+//			aboutDialog.setTitle(R.string.about_titel);
+//			aboutDialog.show();
+//			return true;
+//		case R.id.cb_menu_refresh:
+//			DataSourceLoader.getInstance().reloadPlugins();
+//			return true;
+//		default:
+//			return super.onOptionsItemSelected(item);
+//		}
+//
+//	}
 
 	/**
 	 * It relies on a trick presented on
