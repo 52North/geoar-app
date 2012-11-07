@@ -28,6 +28,7 @@ import java.util.Set;
 import org.n52.android.GeoARApplication;
 
 import android.content.Context;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Environment;
 import android.util.Log;
 import dalvik.system.DexClassLoader;
@@ -135,8 +136,7 @@ public class DataSourceLoader {
 				.list(pluginFilenameFilter);
 
 		if (apksInDirectory.length == 0)
-			throw new RuntimeException(
-					"No Datasource APKs Found in GeoAR directory");
+			return;
 
 		try {
 			for (String pluginFileName : apksInDirectory) {
@@ -160,8 +160,8 @@ public class DataSourceLoader {
 				// create separate ClassLoader for each plugin
 				DexClassLoader dexClassLoader = new DexClassLoader(pluginPath,
 						tmpDir.getAbsolutePath(), null, this.getClass()
-								.getClassLoader());
-
+								.getClassLoader());			
+				
 				while (entries.hasMoreElements()) {
 					// Check each classname for annotations
 					String entry = entries.nextElement();
