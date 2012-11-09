@@ -102,4 +102,28 @@ public class Grid extends RenderNode {
 	protected void onPreRender() {
 	    GLES20.glLineWidth(thickness);
 	}
+
+	@Override
+	public void setOpenGLPreRenderingSettings() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setColor(int androidColor) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setColor(float[] colorArray) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onCreateInGLESThread() {
+		// TODO Auto-generated method stub
+		
+	}
 }

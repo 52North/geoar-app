@@ -17,13 +17,16 @@ package org.n52.android.view.geoar.gl.model;
 
 import java.util.ArrayList;
 
+import org.n52.android.newdata.gl.primitives.DataSourceRenderable;
 import org.n52.android.view.geoar.gl.model.shader.Renderer;
 import org.n52.android.view.geoar.gl.model.shader.SimpleColorRenderer;
 
+import android.annotation.SuppressLint;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 
-public abstract class RenderNode extends Spatial {
+@SuppressLint("NewApi")
+public abstract class RenderNode extends Spatial implements DataSourceRenderable {
 
 	protected String name;
 
@@ -37,8 +40,8 @@ public abstract class RenderNode extends Spatial {
 
 	protected float[] tmpMatrix = new float[16];
 
-	protected ArrayList<RenderNode> children;
-	protected Geometry geometry;
+	protected ArrayList<RenderNode> children = new ArrayList<RenderNode>();
+	protected Geometry geometry = new Geometry();
 	protected Renderer renderer;
 
 	protected int drawingMode = GLES20.GL_TRIANGLES;
@@ -52,12 +55,28 @@ public abstract class RenderNode extends Spatial {
 	protected boolean isComposition = false;
 
 	public RenderNode() {
-		children = new ArrayList<RenderNode>();
-		geometry = new Geometry();
 	}
 
+	/*************************************
+	 * Abstract methods
+	 *************************************/
 	protected abstract void onPreRender();
 
+	public abstract void onCreateInGLESThread();
+
+	/*************************************
+	 * General Methods
+	 *************************************/
+
+	/**
+	 * This method should be called in the OpenGL rendering thread. It renders
+	 * the specific Object according to position and view.
+	 * 
+	 * @param projectionMatrix
+	 *            the projection Matrix
+	 * @param viewMatrix
+	 *            the OpenGL view Matrix
+	 */
 	public void onRender(float[] projectionMatrix, float[] viewMatrix) {
 		onRender(projectionMatrix, viewMatrix, null);
 	}
@@ -131,8 +150,8 @@ public abstract class RenderNode extends Spatial {
 			// WTF! FU OPENGLES 2.0
 			// GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0,
 			// geometry.getVerticesCount());
-			// GLES20.glDrawElements(drawingMode, geometry.getIndicesCount(),
-			// GLES20.GL_UNSIGNED_INT, 0);
+			GLES20.glDrawElements(drawingMode, geometry.getIndicesCount(),
+					GLES20.GL_UNSIGNED_INT, 0);
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
 			GLES20.glDisable(GLES20.GL_CULL_FACE);
@@ -254,6 +273,30 @@ public abstract class RenderNode extends Spatial {
 	 */
 	public void setGeometry(Geometry geometry) {
 		this.geometry = geometry;
+	}
+
+	@Override
+	public void enableCullface(boolean cullface) {
+		this.enableCullFace = cullface;
+	}
+
+	@Override
+	public void enableBlending(boolean blending, float alpha) {
+		this.enableBlending = blending;
+		// TODO alpha richtig setzen mit dem color array
+	}
+
+	@Override
+	public void enableDepthtest(boolean depthTest) {
+		this.enableDepthTest = depthTest;
+	}
+
+	/**
+	 * 
+	 */
+	@Override
+	public void setDrawingMode(int drawingMode) {
+		this.drawingMode = drawingMode;
 	}
 
 }

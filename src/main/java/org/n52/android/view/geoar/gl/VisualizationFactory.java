@@ -15,29 +15,62 @@
  */
 package org.n52.android.view.geoar.gl;
 
+import org.n52.android.newdata.RenderingFactory;
+import org.n52.android.newdata.gl.primitives.RenderLoader;
+import org.n52.android.newdata.gl.primitives.DataSourceRenderable;
+import org.n52.android.view.geoar.gl.model.RenderNode;
+import org.n52.android.view.geoar.gl.model.primitives.Cube;
 
-public class VisualizationFactory {
-	
-//	public enum ARVisualizationType{
-//		Single, Collection, Area;
-//		
-//		public enum ARVisualizationModel{
-//			SingleCube, CollectionCube, 
-//			SingleSphere, CollectionSpehere;
-//		}
-//		
-//		
-////		public enum
+import android.opengl.GLSurfaceView;
 
-	
-	/*
+public class VisualizationFactory implements RenderingFactory {
+
+	private GLSurfaceView glSurfaceView;
+
+	/**
 	 * Static Methods
 	 */
 	public static VisualizationFactory INSTANCE;
+
 	/**
 	 * Constructor
 	 */
-	private VisualizationFactory(){
+	private VisualizationFactory() {
 		this.INSTANCE = new VisualizationFactory();
-	}	
+	}
+
+	/**
+	 * Enqueues runnable to be run on the GL rendering thread of the
+	 * {@link GLSurfaceView}. It is not possible to allocate GPU-memory for the
+	 * rendering objectives in any thread.
+	 * 
+	 * @param renderNode
+	 *            The node that has to allocate memory on the GPU.
+	 */
+	private void queueRenderable(final RenderNode renderNode) {
+		this.glSurfaceView.queueEvent(new Runnable() {
+			@Override
+			public void run() {
+				renderNode.onCreateInGLESThread();
+			}
+		});
+	}
+
+	@Override
+	public DataSourceRenderable createCube() {
+		return new Cube();
+	}
+
+	@Override
+	public DataSourceRenderable createSphere() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DataSourceRenderable createRenderable(RenderLoader renderLoader) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -21,7 +21,12 @@ import java.util.WeakHashMap;
 
 import org.n52.android.view.geoar.gl.model.RenderNode;
 
-
+/**
+ * 
+ * @author Arne de Wall
+ *
+ */
+@Deprecated
 public class Sphere extends RenderNode{
     
     	private class SphereKey{
@@ -206,6 +211,34 @@ public class Sphere extends RenderNode{
 
 	@Override
 	protected void onPreRender() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void setOpenGLPreRenderingSettings() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void setColor(int androidColor) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void setColor(float[] colorArray) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void onCreateInGLESThread() {
 		// TODO Auto-generated method stub
 		
 	}

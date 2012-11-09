@@ -17,13 +17,37 @@ package org.n52.android.view.geoar.gl.model.rendering;
 
 import org.n52.android.view.geoar.gl.model.RenderNode;
 
-public class PointsOfInteresst extends RenderNode{
+public class PointsOfInteresst extends RenderNode {
+
+	@Override
+	public void setOpenGLPreRenderingSettings() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setColor(int androidColor) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setColor(float[] colorArray) {
+		// TODO Auto-generated method stub
+		
+	}
 
 	@Override
 	protected void onPreRender() {
 		// TODO Auto-generated method stub
 		
-	} 
+	}
+
+	@Override
+	public void onCreateInGLESThread() {
+		// TODO Auto-generated method stub
+		
+	}
 //implements
 //		OnObservationUpdateListener, GeoLocationUpdateListener {
 //

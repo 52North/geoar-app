@@ -17,6 +17,12 @@ package org.n52.android.view.geoar.gl.model.primitives;
 
 import org.n52.android.view.geoar.gl.model.RenderNode;
 
+/**
+ * 
+ * @author Arne de Wall
+ *
+ */
+@Deprecated
 public class Flat extends RenderNode {
 
 	float width, height;
@@ -74,5 +80,33 @@ public class Flat extends RenderNode {
 		}
 		
 		setRenderObjectives(vertices, colors, normals, indices);
+	}
+
+
+	@Override
+	public void setOpenGLPreRenderingSettings() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void setColor(int androidColor) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void setColor(float[] colorArray) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void onCreateInGLESThread() {
+		// TODO Auto-generated method stub
+		
 	}
 }
