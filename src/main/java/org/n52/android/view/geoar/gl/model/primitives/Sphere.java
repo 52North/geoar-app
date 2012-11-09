@@ -210,7 +210,7 @@ public class Sphere extends RenderNode{
 
 
 	@Override
-	protected void onPreRender() {
+	public void onPreRender() {
 		// TODO Auto-generated method stub
 		
 	}

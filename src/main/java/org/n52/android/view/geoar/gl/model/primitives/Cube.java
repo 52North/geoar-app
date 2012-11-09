@@ -15,7 +15,6 @@
  */
 package org.n52.android.view.geoar.gl.model.primitives;
 
-import org.n52.android.newdata.gl.primitives.DataSourceRenderable;
 import org.n52.android.view.geoar.gl.model.RenderNode;
 
 import android.graphics.Color;
@@ -79,9 +78,8 @@ public class Cube extends RenderNode{
 		super();
 	}
 
-
 	@Override
-	protected void onPreRender() {
+	public void onPreRender() {
 		GLES20.glDisable(GLES20.GL_CULL_FACE);
 	}
 	

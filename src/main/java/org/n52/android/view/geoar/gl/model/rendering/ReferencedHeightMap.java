@@ -16,7 +16,6 @@
 package org.n52.android.view.geoar.gl.model.rendering;
 
 import org.n52.android.view.geoar.gl.model.RenderNode;
-import org.n52.android.view.geoar.gl.model.primitives.HeightMap;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
@@ -34,7 +33,7 @@ public class ReferencedHeightMap extends RenderNode {
 	static final float POSITION_RANGE = 20f;
 
 	@Override
-	protected void onPreRender() {
+	public void onPreRender() {
 		GLES20.glLineWidth(2f);
 
 	}

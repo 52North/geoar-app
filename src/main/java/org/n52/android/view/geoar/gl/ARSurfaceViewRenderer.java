@@ -54,6 +54,19 @@ import android.opengl.GLSurfaceView;
 public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		CameraUpdateListener, Closeable {
 
+	/**
+	 * Interface for the Methods which are called inside the OpenGL specific
+	 * thread.
+	 */
+	public interface OpenGLCallable {
+		void onPreRender();
+
+		void onRender(float[] projectionMatrix, float[] viewMatrix,
+				final float[] parentMatrix);
+
+		void onCreateInGLESThread();
+	}
+
 	public interface OnObservationUpdateListener {
 		public void onObservationUpdate(List<? extends SpatialEntity> m);
 	}

@@ -15,9 +15,14 @@
  */
 package org.n52.android.view.geoar.gl;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.n52.android.newdata.RenderingFactory;
-import org.n52.android.newdata.gl.primitives.RenderLoader;
 import org.n52.android.newdata.gl.primitives.DataSourceRenderable;
+import org.n52.android.newdata.gl.primitives.RenderLoader;
+import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OpenGLCallable;
 import org.n52.android.view.geoar.gl.model.RenderNode;
 import org.n52.android.view.geoar.gl.model.primitives.Cube;
 
@@ -25,6 +30,8 @@ import android.opengl.GLSurfaceView;
 
 public class VisualizationFactory implements RenderingFactory {
 
+	private static final Map<Class<?>, RenderNode> set = Collections
+			.synchronizedMap(new HashMap<Class<?>, RenderNode>());
 	private GLSurfaceView glSurfaceView;
 
 	/**
@@ -38,7 +45,7 @@ public class VisualizationFactory implements RenderingFactory {
 	private VisualizationFactory() {
 		this.INSTANCE = new VisualizationFactory();
 	}
-
+	
 	/**
 	 * Enqueues runnable to be run on the GL rendering thread of the
 	 * {@link GLSurfaceView}. It is not possible to allocate GPU-memory for the
@@ -47,7 +54,7 @@ public class VisualizationFactory implements RenderingFactory {
 	 * @param renderNode
 	 *            The node that has to allocate memory on the GPU.
 	 */
-	private void queueRenderable(final RenderNode renderNode) {
+	private void enqueueRenderable(final OpenGLCallable renderNode) {
 		this.glSurfaceView.queueEvent(new Runnable() {
 			@Override
 			public void run() {

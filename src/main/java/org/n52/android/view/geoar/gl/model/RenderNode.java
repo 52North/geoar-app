@@ -18,6 +18,7 @@ package org.n52.android.view.geoar.gl.model;
 import java.util.ArrayList;
 
 import org.n52.android.newdata.gl.primitives.DataSourceRenderable;
+import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OpenGLCallable;
 import org.n52.android.view.geoar.gl.model.shader.Renderer;
 import org.n52.android.view.geoar.gl.model.shader.SimpleColorRenderer;
 
@@ -26,7 +27,7 @@ import android.opengl.GLES20;
 import android.opengl.Matrix;
 
 @SuppressLint("NewApi")
-public abstract class RenderNode extends Spatial implements DataSourceRenderable {
+public abstract class RenderNode extends Spatial implements DataSourceRenderable, OpenGLCallable {
 
 	protected String name;
 
@@ -56,13 +57,6 @@ public abstract class RenderNode extends Spatial implements DataSourceRenderable
 
 	public RenderNode() {
 	}
-
-	/*************************************
-	 * Abstract methods
-	 *************************************/
-	protected abstract void onPreRender();
-
-	public abstract void onCreateInGLESThread();
 
 	/*************************************
 	 * General Methods

@@ -99,7 +99,7 @@ public class Grid extends RenderNode {
 	}
 
 	@Override
-	protected void onPreRender() {
+	public void onPreRender() {
 	    GLES20.glLineWidth(thickness);
 	}
 

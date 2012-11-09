@@ -25,10 +25,11 @@ import java.nio.ShortBuffer;
 import android.opengl.GLES20;
 
 /**
+ * Represents the geometric representation of a {@link RenderNode}. It creates,
+ * compiles, and handles the specific Buffers for vertices, normals, colors and
+ * indices representation.
  * 
- * @author Arne de Wall Represents the geometric representation of a
- *         {@link RenderNode}. It creates, compiles, and handles the specific
- *         Buffers for vertices, normals, colors and indices representation.
+ * @author Arne de Wall
  * 
  */
 public class Geometry {
@@ -38,9 +39,10 @@ public class Geometry {
 	private static final int COLOR_DATA_SIZE = 4;
 
 	/**
+	 * Holds the details of different VBOs (vertices, normals, colors...) for
+	 * the rendering process.
 	 * 
-	 * @author Arne de Wall Holds the details of different VBOs (vertices,
-	 *         normals, colors...) for the rendering process.
+	 * @author Arne de Wall
 	 * 
 	 */
 	public class BufferDetailsHolder {
@@ -77,24 +79,10 @@ public class Geometry {
 	protected int verticesCount;
 	protected int indicesCount;
 
-	/**
-	 * @return the indicesCount
-	 */
-	public int getIndicesCount() {
-		return indicesCount;
-	}
-
-	protected BufferDetailsHolder vertexDetails;
-	protected BufferDetailsHolder colorDetails;
-	protected BufferDetailsHolder normalDetails;
-	protected BufferDetailsHolder indicesDetails;
-
-	public Geometry() {
-		vertexDetails = new BufferDetailsHolder();
-		colorDetails = new BufferDetailsHolder();
-		normalDetails = new BufferDetailsHolder();
-		indicesDetails = new BufferDetailsHolder();
-	}
+	protected BufferDetailsHolder vertexDetails = new BufferDetailsHolder();;
+	protected BufferDetailsHolder colorDetails = new BufferDetailsHolder();;
+	protected BufferDetailsHolder normalDetails = new BufferDetailsHolder();;
+	protected BufferDetailsHolder indicesDetails = new BufferDetailsHolder();;
 
 	/**
      * 
@@ -330,4 +318,12 @@ public class Geometry {
 	public void setIndicesDetails(BufferDetailsHolder indicesDetails) {
 		this.indicesDetails = indicesDetails;
 	}
+
+	/**
+	 * @return the indicesCount
+	 */
+	public int getIndicesCount() {
+		return indicesCount;
+	}
+
 }

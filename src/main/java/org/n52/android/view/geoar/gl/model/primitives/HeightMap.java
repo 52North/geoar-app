@@ -40,7 +40,7 @@ public class HeightMap extends RenderNode {
 	private static final int COLOR_DATA_SIZE_IN_ELEMENTS = 4;
 
 	@Override
-	protected void onPreRender() {
+	public void onPreRender() {
 		// TODO Auto-generated method stub
 		int x = 2;
 	}
