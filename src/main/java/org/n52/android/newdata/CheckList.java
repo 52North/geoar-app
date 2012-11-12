@@ -17,12 +17,20 @@ package org.n52.android.newdata;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CheckList<T> extends ArrayList<T> {
+
+	public interface OnCheckedChangedListener<T> {
+		void onCheckedChanged(T item, boolean newState);
+	}
+
 	private static final long serialVersionUID = 1L;
 
-	BitSet checkSet = new BitSet();
+	private BitSet checkSet = new BitSet();
+	private Set<OnCheckedChangedListener<T>> changeListeners = new HashSet<OnCheckedChangedListener<T>>();
 
 	public List<T> getCheckedItems() {
 		List<T> resultList = new ArrayList<T>();
@@ -49,10 +57,40 @@ public class CheckList<T> extends ArrayList<T> {
 
 	public void checkItem(int index, boolean state) {
 		checkSet.set(index, state);
+		notifyCheckedChanged(get(index), state);
 	}
 
 	public void checkItem(T item, boolean state) {
 		checkSet.set(this.indexOf(item), state);
+		notifyCheckedChanged(item, state);
+	}
+
+	public void checkItem(T item) {
+		checkItem(item, true);
+	}
+
+	private void notifyCheckedChanged(T item, boolean newState) {
+		for (OnCheckedChangedListener<T> listener : changeListeners) {
+			listener.onCheckedChanged(item, newState);
+		}
+	}
+
+	public void addOnCheckedChangeListener(OnCheckedChangedListener<T> listener) {
+		changeListeners.add(listener);
+	}
+
+	public void removeOnCheckedChangeListener(
+			OnCheckedChangedListener<T> listener) {
+		changeListeners.remove(listener);
+	}
+
+	public boolean isChecked(T item) {
+		int index = indexOf(item);
+		if (index >= 0) {
+			return checkSet.get(index);
+		} else {
+			return false;
+		}
 	}
 
 }

@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.n52.android.data.ImageLoader;
 import org.n52.android.geoar.R;
-import org.n52.android.newdata.DataSourceLoader.OnAvailableDataSourcesUpdateListener;
+import org.n52.android.newdata.DataSourceLoader.OnDataSourcesChangeListener;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -79,7 +79,7 @@ public class DataSourceGridFragment extends Fragment {
 	}
 
 	private class GridAdapter extends BaseAdapter implements
-			OnAvailableDataSourcesUpdateListener {
+			OnDataSourcesChangeListener {
 
 		private class ViewHolder {
 			public ImageView imageView;
@@ -91,11 +91,12 @@ public class DataSourceGridFragment extends Fragment {
 
 		public GridAdapter(Context context) {
 			dataSources = DataSourceLoader.getInstance()
-					.getAvailableDataSources();
+					.getDataSources();
 			inflater = (LayoutInflater) context
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-			DataSourceLoader.getInstance().addOnAvailableDataSourcesUpdateListener(this);
+			DataSourceLoader.getInstance()
+					.addOnAvailableDataSourcesUpdateListener(this);
 			// TODO remove..Listener?
 		}
 
@@ -145,7 +146,7 @@ public class DataSourceGridFragment extends Fragment {
 		}
 
 		@Override
-		public void onAvailableDataSourcesUpdate() {
+		public void onDataSourcesChange() {
 			notifyDataSetChanged();
 		}
 	}

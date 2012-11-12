@@ -22,7 +22,6 @@ import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.Projection;
 import org.mapsforge.android.maps.overlay.OverlayItem;
 import org.mapsforge.core.GeoPoint;
-import org.n52.android.GeoARApplication;
 import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.geoar.R;
 import org.n52.android.newdata.DataCache.GetDataBoundsCallback;
@@ -33,9 +32,7 @@ import org.n52.android.newdata.Visualization.MapVisualization.ItemVisualization;
 import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.Settings;
 
-import android.graphics.Bitmap;
 import android.graphics.Point;
-import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -110,9 +107,8 @@ public class DataSourceOverlayHandler {
 			@Override
 			public void onReceiveDataUpdate(MercatorRect bounds,
 					List<? extends SpatialEntity> data) {
-
-				if (!canceled) {
-					synchronized (interpolationLock) {
+				synchronized (updateLock) {
+					if (!canceled) {
 						List<OverlayItem> overlayItems = new ArrayList<OverlayItem>();
 						List<ItemVisualization> visualizations = dataSource
 								.getVisualizations().getCheckedItems(
@@ -131,14 +127,12 @@ public class DataSourceOverlayHandler {
 								overlayItems.add(overlayItem);
 							}
 						}
-						overlay.setOverlayItems(overlayItems,
-								dataSource.getDataSource());
-						// itemizedOverlay.setOverlayItems(overlayerItems);
+						overlay.setOverlayItems(overlayItems, dataSource);
+
+						// interpolation received, now this object represents
+						// the current interpolation
+						currentUpdate = UpdateHolder.this;
 					}
-					// interpolation received, now this object represents the
-					// current interpolation
-					currentUpdate = UpdateHolder.this;
-					// mapView.postInvalidate();
 				}
 
 			}
@@ -150,23 +144,26 @@ public class DataSourceOverlayHandler {
 		}
 
 		public void cancel() {
-			if (requestHolder != null) {
-				requestHolder.cancel();
+			synchronized (updateLock) {
+				if (requestHolder != null) {
+					requestHolder.cancel();
+				}
+				canceled = true;
 			}
-			canceled = true;
 		}
 
 		@Override
 		public void run() {
-			if (!canceled) {
-				if (bounds.zoom >= Settings.MIN_ZOOM_MAPINTERPOLATION) {
-					// Just runs if zoom is in range
-					synchronized (interpolationLock) {
+			synchronized (updateLock) {
+				if (!canceled) {
+					if (bounds.zoom >= Settings.MIN_ZOOM_MAPINTERPOLATION) {
+						// Just runs if zoom is in range
 						requestHolder = dataSource.getDataCache()
 								.getDataByBBox(bounds, callback, false);
+					} else {
+						infoHandler.setStatus(R.string.not_zoomed_in, 5000,
+								this);
 					}
-				} else {
-					infoHandler.setStatus(R.string.not_zoomed_in, 5000, this);
 				}
 			}
 
@@ -176,7 +173,7 @@ public class DataSourceOverlayHandler {
 	protected UpdateHolder currentUpdate;
 	protected UpdateHolder nextUpdate;
 
-	protected Object interpolationLock = new Object();
+	protected Object updateLock = new Object();
 
 	protected DataSourcesOverlay overlay;
 	// protected ItemizedDataOverlay<OverlayItem> itemizedOverlay;
@@ -188,99 +185,17 @@ public class DataSourceOverlayHandler {
 	// protected Drawable itemizedDrawable;
 
 	// private MapView mapView;
-	private Drawable drawable;
-	private Bitmap interpolationBmp;
-
-	private final int INTERPOLATION = 0;
-	private final int POI = 1;
 	private DataSourceHolder dataSource;
 
 	public DataSourceOverlayHandler(DataSourcesOverlay overlay,
 			DataSourceHolder dataSource) {
 		this.overlay = overlay;
 		this.dataSource = dataSource;
-		// paint = new Paint();
-		// paint.setAlpha(200);
-
-		// this.mapView = mapView;
-
-		// itemizedOverlay = new ItemizedDataOverlay<OverlayItem>(
-		// new ArrayList<OverlayItem>(), mapView.getResources()
-		// .getDrawable(R.drawable.mapmarker),
-		// new ItemizedDataOverlay.OnItemGestureListener<OverlayItem>() {
-		//
-		// @Override
-		// public boolean onItemSingleTapUp(final int index,
-		// final OverlayItem item) {
-		// // Toast.makeText( mapView.getContext(),
-		// // "Description: \n" +
-		// // "value: " + item.mTitle + "\n" + "" +
-		// // item.mDescription, Toast.LENGTH_LONG).show();
-		// itemizedOverlay.setBubbleItem(mapView, item, index);
-		// return true;
-		// }
-		//
-		// @Override
-		// public boolean onItemLongPress(final int index,
-		// final OverlayItem item) {
-		// // Toast.makeText( mapView.getContext(),
-		// // "Overlay Titled: " +
-		// // item.mTitle + " Long pressed" + "\n" +
-		// // "Description: " + item.mDescription
-		// // ,Toast.LENGTH_LONG).show();
-		// itemizedOverlay.setBubbleItem(mapView, item, index);
-		// return false;
-		// }
-		//
-		// }, mapView.getResourceProxy());
-		// this.mapView.getOverlays().add(this.itemizedOverlay);
 	}
 
-	// public MapOverlayHandler2(final MapView mapView, int cacheWidth,
-	// int cacheHeight, Drawable drawable) {
-	// this.cacheHeight = cacheHeight;
-	// this.cacheWidth = cacheWidth;
-	// this.itemizedDrawable = drawable;
-	// this.mapView = mapView;
-	// paint = new Paint();
-	// paint.setAlpha(200);
-	//
-	// interpolationOverlay = new InterpolationOverlay(mapView.getContext(),
-	// cacheWidth, cacheHeight);
-	// this.mapView.getOverlays().add(this.interpolationOverlay);
-	//
-	// itemizedOverlay = new ItemizedDataOverlay<OverlayItem>(
-	// new ArrayList<OverlayItem>(), mapView.getResources()
-	// .getDrawable(R.drawable.mapmarker),
-	// new ItemizedDataOverlay.OnItemGestureListener<OverlayItem>() {
-	//
-	// @Override
-	// public boolean onItemSingleTapUp(final int index,
-	// final OverlayItem item) {
-	// Toast.makeText(
-	// mapView.getContext(),
-	// "Overlay Titled: " + item.mTitle
-	// + " Single Tapped" + "\n"
-	// + "Description: " + item.mDescription,
-	// Toast.LENGTH_LONG).show();
-	// return true;
-	// }
-	//
-	// @Override
-	// public boolean onItemLongPress(final int index,
-	// final OverlayItem item) {
-	// Toast.makeText(
-	// mapView.getContext(),
-	// "Overlay Titled: " + item.mTitle
-	// + " Long pressed" + "\n"
-	// + "Description: " + item.mDescription,
-	// Toast.LENGTH_LONG).show();
-	// return false;
-	// }
-	//
-	// }, mapView.getResourceProxy());
-	// this.mapView.getOverlays().add(this.itemizedOverlay);
-	// }
+	public DataSourceHolder getDataSource() {
+		return dataSource;
+	}
 
 	public void onTouchEvent(android.view.MotionEvent e, MapView mapView) {
 		if (e.getAction() == MotionEvent.ACTION_UP
@@ -293,14 +208,19 @@ public class DataSourceOverlayHandler {
 		this.infoHandler = infoHandler;
 	}
 
-	public void abort() {
-		if (currentUpdate != null) {
-			currentUpdate.cancel();
+	public void clear() {
+		synchronized (updateLock) {
+			cancel();
+			overlay.clear(dataSource);
 		}
 	}
 
-	public void setDrawable(Drawable drawable) {
-		this.drawable = drawable;
+	public void cancel() {
+		synchronized (updateLock) {
+			if (currentUpdate != null) {
+				currentUpdate.cancel();
+			}
+		}
 	}
 
 	/**
@@ -327,7 +247,7 @@ public class DataSourceOverlayHandler {
 		// int y = (int) MercatorProj.transformLatToPixelY(
 		// gPoint.getLatitudeE6() / 1E6f, zoom);
 
-		synchronized (interpolationLock) {
+		synchronized (updateLock) {
 			MercatorRect newBounds = new MercatorRect(point.x, point.y, point.x
 					+ mapView.getWidth(), point.y + mapView.getHeight(), zoom);
 

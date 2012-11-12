@@ -16,12 +16,12 @@
 package org.n52.android;
 
 import java.util.ArrayList;
-import java.util.zip.Inflater;
 
 import org.n52.android.geoar.R;
+import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceGridFragment;
+import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.DataSourceLoader;
-import org.n52.android.newdata.DataSourceLoader.OnDataSourcesUpdateListener;
 
 import android.content.Context;
 import android.content.Intent;
@@ -54,6 +54,7 @@ public class MainActivity2 extends SherlockFragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		setContentView(R.layout.fragment_tabs_pager);
 
 		viewPager = (ViewPager) findViewById(R.id.pager);
@@ -67,28 +68,39 @@ public class MainActivity2 extends SherlockFragmentActivity {
 				tabHost.newTabSpec("Installed New").setIndicator(
 						"Installed new"), DataSourceGridFragment.class, null);
 
-//		tabsAdapter.addtab(
-//				tabHost.newTabSpec("Codebase").setIndicator("Codebase"),
-//				CodebaseGridFragment.class, null);
-//		tabsAdapter.addtab(
-//				tabHost.newTabSpec("Installed").setIndicator("Installed"),
-//				DatasourceGridFragment.class, null);
+		// tabsAdapter.addtab(
+		// tabHost.newTabSpec("Codebase").setIndicator("Codebase"),
+		// CodebaseGridFragment.class, null);
+		// tabsAdapter.addtab(
+		// tabHost.newTabSpec("Installed").setIndicator("Installed"),
+		// DatasourceGridFragment.class, null);
 
 		if (savedInstanceState != null)
 			tabHost.setCurrentTabByTag(savedInstanceState.getString("tabState"));
-//		else
-			//DataSourceAdapter.initFactoryLoader(getClassLoader(), this);
+		// else
+		// DataSourceAdapter.initFactoryLoader(getClassLoader(), this);
 
 		// Test!
-		DataSourceLoader.getInstance().addOnDataSourcesUpdateListener(
-				new OnDataSourcesUpdateListener() {
-					@Override
-					public void onDataSourcesUpdate() {
-						Intent intent = new Intent(MainActivity2.this
-								.getApplicationContext(), GeoARActivity3.class);
-						MainActivity2.this.startActivity(intent);
-					}
-				});
+		// DataSourceLoader
+		// .getInstance()
+		// .getDataSources()
+		// .addOnCheckedChangeListener(
+		// new OnCheckedChangedListener<DataSourceHolder>() {
+		// @Override
+		// public void onCheckedChanged(DataSourceHolder item,
+		// boolean state) {
+		// // TODO nur zum test
+		// if (DataSourceLoader.getInstance()
+		// .getDataSources().getCheckedItems()
+		// .size() == 1) {
+		// Intent intent = new Intent(
+		// MainActivity2.this
+		// .getApplicationContext(),
+		// GeoARActivity3.class);
+		// MainActivity2.this.startActivity(intent);
+		// }
+		// }
+		// });
 	}
 
 	@Override
@@ -97,11 +109,11 @@ public class MainActivity2 extends SherlockFragmentActivity {
 		outState.putString("tabState", tabHost.getCurrentTabTag());
 	}
 
-
 	@Override
 	public boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu) {
 		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.cb_main_menu, menu);
+
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -120,9 +132,6 @@ public class MainActivity2 extends SherlockFragmentActivity {
 			return super.onOptionsItemSelected(item);
 		}
 	}
-
-
-
 
 	/**
 	 * It relies on a trick presented on

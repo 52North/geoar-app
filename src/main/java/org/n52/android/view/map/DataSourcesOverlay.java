@@ -21,11 +21,14 @@ import java.util.Map;
 
 import org.mapsforge.android.maps.overlay.ItemizedOverlay;
 import org.mapsforge.android.maps.overlay.OverlayItem;
-import org.n52.android.GeoARApplication;
-import org.n52.android.geoar.R;
 
 import android.graphics.drawable.Drawable;
 
+/**
+ * Special {@link ItemizedOverlay} based on a {@link Map}. This allows to
+ * efficiently add and remove {@link OverlayItem}s from different sources to and
+ * from the same overlay.
+ */
 public class DataSourcesOverlay extends ItemizedOverlay<OverlayItem> {
 
 	private Map<Object, List<OverlayItem>> overlayItemMap = new HashMap<Object, List<OverlayItem>>();
@@ -47,6 +50,13 @@ public class DataSourcesOverlay extends ItemizedOverlay<OverlayItem> {
 				itemList.clear();
 			}
 			overlayItemMap.clear();
+		}
+		populate();
+	}
+
+	public void clear(Object key) {
+		synchronized (this.overlayItemMap) {
+			overlayItemMap.remove(key);
 		}
 		populate();
 	}

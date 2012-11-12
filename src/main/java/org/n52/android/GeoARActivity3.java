@@ -18,8 +18,14 @@ package org.n52.android;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.mapsforge.android.maps.MapActivity;
 import org.n52.android.geoar.R;
+import org.n52.android.newdata.CheckList;
+import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
+import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.DataSourceLoader;
+import org.n52.android.newdata.DataSourceLoader.OnDataSourcesChangeListener;
+import org.n52.android.newdata.Visualization;
 import org.n52.android.tracking.camera.RealityCamera;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.view.GeoARFragment2;
@@ -32,6 +38,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
@@ -48,6 +55,8 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.MenuItem.OnMenuItemClickListener;
+import com.actionbarsherlock.view.SubMenu;
 
 /**
  * Core and only {@link Activity} in this application. Coordinates all its child
@@ -61,7 +70,27 @@ import com.actionbarsherlock.view.MenuItem;
  */
 public class GeoARActivity3 extends SherlockFragmentActivity {
 
+	private static final int ITEM_REMOVE_DATASOURCE = 0;
+	private static final int GROUP_DATASOURCES = 1;
+
+	private class DataSourceChangeListener implements
+			OnDataSourcesChangeListener,
+			OnCheckedChangedListener<DataSourceHolder> {
+
+		@Override
+		public void onCheckedChanged(DataSourceHolder item, boolean newState) {
+			invalidateOptionsMenu();
+		}
+
+		@Override
+		public void onDataSourcesChange() {
+			invalidateOptionsMenu();
+		}
+
+	}
+
 	private List<GeoARView2> noiseARViews = new ArrayList<GeoARView2>();
+	private DataSourceChangeListener dataSourceListener = new DataSourceChangeListener();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -105,6 +134,12 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		// builder.setTitle(R.string.advice);
 		// builder.show();
 		// }
+
+		DataSourceLoader.getInstance().addOnAvailableDataSourcesUpdateListener(
+				dataSourceListener);
+		DataSourceLoader.getInstance().getDataSources()
+				.addOnCheckedChangeListener(dataSourceListener);
+
 	}
 
 	// @Override
@@ -155,6 +190,14 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		editor.commit();
 	}
 
+	@Override
+	protected void onDestroy() {
+		DataSourceLoader.getInstance()
+				.removeOnAvailableDataSourcesUpdateListener(dataSourceListener);
+		DataSourceLoader.getInstance().getDataSources()
+				.removeOnCheckedChangeListener(dataSourceListener);
+		super.onDestroy();
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -198,9 +241,16 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 			case R.id.map_item_camera:
 				ViewFragment.instance.updateFragmentView();
 				break;
-				
-			case R.id.edit_filter: 
-				DataSourceLoader.getInstance().getDataSources().iterator().next().createFilterDialog(this);
+
+			case R.id.edit_filter:
+				DataSourceLoader.getInstance().getDataSources().iterator()
+						.next().createFilterDialog(this);
+				break;
+
+			case R.id.item_selectsources:
+				Intent intent = new Intent(getApplicationContext(),
+						MainActivity2.class);
+				startActivity(intent);
 				break;
 			}
 		}
@@ -210,6 +260,53 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
+		MenuItem dataSouceItem = menu.findItem(R.id.item_datasource);
+
+		SubMenu subMenu = dataSouceItem.getSubMenu();
+		subMenu.removeGroup(GROUP_DATASOURCES);
+
+		final CheckList<DataSourceHolder> dataSources = DataSourceLoader
+				.getInstance().getDataSources();
+		for (final DataSourceHolder dataSource : dataSources) {
+			SubMenu sourceMenu = subMenu.addSubMenu(GROUP_DATASOURCES,
+					Menu.NONE, Menu.NONE, dataSource.getName());
+
+			MenuItem menuItem = sourceMenu.getItem();
+			menuItem.setCheckable(true);
+			menuItem.setChecked(dataSources.isChecked(dataSource));
+			menuItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+
+				@Override
+				public boolean onMenuItemClick(MenuItem item) {
+					if (!item.isChecked()) {
+						// source not enabled -> enable it and consume event
+						item.setChecked(true);
+						dataSources.checkItem(dataSource, true);
+						return true;	// TODO ...?
+					} else {
+						// source already enabled -> default behavior, show
+						// submenu
+						return false;
+					}
+				}
+			});
+
+			for (Visualization visualization : dataSource.getVisualizations()) {
+				sourceMenu.add(visualization.getClass().getSimpleName()); // TODO
+			}
+			sourceMenu.add(Menu.NONE, ITEM_REMOVE_DATASOURCE, Menu.NONE,
+					"Disable Data Source").setOnMenuItemClickListener(
+					new OnMenuItemClickListener() {
+						@Override
+						public boolean onMenuItemClick(MenuItem item) {
+							dataSources.checkItem(dataSource, false);
+							return true;
+						}
+					});
+
+		}
+		subMenu.setGroupCheckable(GROUP_DATASOURCES, true, false);
+
 		// Update visibility of menu items according to visiblity of the child
 		// views
 		for (GeoARView2 view : noiseARViews) {
@@ -220,9 +317,6 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		}
 		return super.onPrepareOptionsMenu(menu);
 	}
-
-
-
 
 	private static class ViewFragment extends Fragment {
 		GeoARFragment2 mapFragment;

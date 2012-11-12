@@ -15,40 +15,31 @@
  */
 package org.n52.android.view.map;
 
-import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.mapsforge.android.maps.MapController;
 import org.mapsforge.android.maps.MapView;
-import org.mapsforge.android.maps.MapViewPosition;
-import org.mapsforge.android.maps.mapgenerator.MapGenerator;
 import org.mapsforge.android.maps.mapgenerator.tiledownloader.MapnikTileDownloader;
-import org.mapsforge.android.maps.overlay.ArrayItemizedOverlay;
-import org.mapsforge.android.maps.overlay.OverlayItem;
 import org.mapsforge.core.GeoPoint;
-
-import org.n52.android.GeoARApplication;
 import org.n52.android.GeoARView2;
 import org.n52.android.geoar.R;
+import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.DataSourceLoader;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.tracking.location.LocationHandler.OnLocationUpdateListener;
 import org.n52.android.view.InfoView;
-import org.n52.android.view.map.overlay.MapOverlayHandler2;
+import org.n52.android.view.map.overlay.InterpolationOverlay;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Message;
 import android.os.Parcelable;
 import android.util.AttributeSet;
-import android.view.GestureDetector;
-import android.view.GestureDetector.OnGestureListener;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -139,6 +130,31 @@ public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
 	private boolean showInterpolationOverlay;
 	private DataSourcesOverlay dataSourcesOverlay;
 
+	private OnCheckedChangedListener<DataSourceHolder> dataSourceListener = new OnCheckedChangedListener<DataSourceHolder>() {
+
+		@Override
+		public void onCheckedChanged(DataSourceHolder item, boolean newState) {
+			if (newState == true) {
+				// new data source selected -> add new overlay handler
+				DataSourceOverlayHandler overlayHandler = new DataSourceOverlayHandler(
+						dataSourcesOverlay, item);
+				overlayHandler.updateOverlay(GeoMapView3.this, true);
+				overlayHandlers.add(overlayHandler);
+			} else {
+				// data source disabled -> find overlay holder and remove it
+				for (Iterator<DataSourceOverlayHandler> it = overlayHandlers
+						.iterator(); it.hasNext();) {
+					DataSourceOverlayHandler current = it.next();
+					if (current.getDataSource() == item) {
+						current.clear();
+						it.remove();
+						break;
+					}
+				}
+			}
+		}
+	};
+
 	public GeoMapView3(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init(context);
@@ -153,14 +169,14 @@ public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
 		if (isInEditMode())
 			return;
 
-		// this.gesture = new GestureDetector(getContext(), this);
-
+		// TODO own location
 		locationIndicator = new ImageView(context);
 		locationIndicator
 				.setImageResource(R.drawable.ic_maps_indicator_current_position_anim);
 		locationIndicator.setVisibility(View.GONE);
 		this.addView(locationIndicator);
 
+		// Offline rendering here
 		// setMapFile(new File(Environment.getExternalStorageDirectory()
 		// + "/GeoAR/map.map"));
 		setClickable(true);
@@ -169,31 +185,34 @@ public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
 		setMapGenerator(new MapnikTileDownloader());
 		setBuiltInZoomControls(true);
 
+		// Center and zoom TODO move to fragment
 		MapController controller = this.getController();
 		controller.setZoom(15);
 		controller.setCenter(new org.mapsforge.core.GeoPoint(51.965344,
 				7.600003));
 
+		// Data source handling
 		dataSourcesOverlay = new DataSourcesOverlay();
 		getOverlays().add(dataSourcesOverlay);
 
+		// add overlay handler for each enabled data source
 		for (DataSourceHolder dataSource : DataSourceLoader.getInstance()
-				.getDataSources()) {
-			overlayHandlers.add(new DataSourceOverlayHandler(
-					dataSourcesOverlay, dataSource));
-			// mapOverlayHandlers.add(new MapOverlayHandler2(this, dataSource));
+				.getDataSources().getCheckedItems()) {
+			DataSourceOverlayHandler overlayHandler = new DataSourceOverlayHandler(
+					dataSourcesOverlay, dataSource);
+			overlayHandler.updateOverlay(this, true);
+			overlayHandlers.add(overlayHandler);
 		}
 
-		// mapOverlayHandler = new MapOverlayHandler2(this, null);
-		// mapOverlayHandler.setDrawable(this.getResources().getDrawable(
-		// R.drawable.icon));
-		// if (infoHandler != null) {
-		// mapOverlayHandler.setInfoHandler(infoHandler);
-		// }
+		// register for update events
+		DataSourceLoader.getInstance().getDataSources()
+				.addOnCheckedChangeListener(dataSourceListener);
 	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent motionEvent) {
+		// Use motion event to inform overlay handlers that they should update
+		// their data if needed
 		for (DataSourceOverlayHandler handler : overlayHandlers) {
 			handler.onTouchEvent(motionEvent, this);
 		}
@@ -205,32 +224,6 @@ public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
 		this.locationHandler = locationHandler;
 	}
 
-	// /**
-	// * Sets {@link MeasurementManager} and initializes
-	// * {@link InterpolationOverlay}
-	// *
-	// * @param measureManager
-	// */
-	// @Override
-	// public void setMeasureManager(MeasurementManager measureManager) {
-	//
-	// if (mapOverlayHandler == null) {
-	// mapOverlayHandler = new MapOverlayHandler(this, measureManager,
-	// getWidth(), getHeight());
-	// mapOverlayHandler.setDrawable(this.getResources().getDrawable(R.drawable.icon));
-	// if (infoHandler != null) {
-	// mapOverlayHandler.setInfoHandler(infoHandler);
-	// }
-	// // getOverlays().clear();
-	// // getOverlays().addAll(mapOverlayHandler.getOverlays());
-	//
-	// mapOverlayHandler.updateOverlay(this, true);
-	// } else {
-	// mapOverlayHandler.setMeasureManager(measureManager);
-	// mapOverlayHandler.updateOverlay(this, true);
-	// }
-	// }
-
 	@Override
 	public void setInfoHandler(InfoView infoHandler) {
 		this.infoHandler = infoHandler;
@@ -240,21 +233,13 @@ public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
 
 	}
 
-	// @Override
-	// protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-	// if (mapOverlayHandler != null) {
-	// mapOverlayHandler.setInterpolationPixelSize(w, h);
-	// }
-	// super.onSizeChanged(w, h, oldw, oldh);
-	// }
-
 	@Override
 	protected void onVisibilityChanged(View changedView, int visibility) {
 		super.onVisibilityChanged(changedView, visibility);
 		if (!isShown()) {
 			// Cancel overlay updates if view gets invisible
 			for (DataSourceOverlayHandler handler : overlayHandlers) {
-				handler.abort();
+				handler.cancel();
 			}
 		}
 	}
@@ -287,35 +272,27 @@ public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
 		return locationIndicator.getVisibility() == View.VISIBLE;
 	}
 
-	// @Override
-	// public boolean onTouchEvent(MotionEvent ev) {
-	// gesture.onTouchEvent(ev);
-	// for (MapOverlayHandler2 handler : mapOverlayHandlers) {
-	// handler.onTouchEvent(ev, this);
-	// }
-	// return super.onTouchEvent(ev); // TODO correct return value
-	// }
-
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.item_own_location:
-			if (!manualPositionMode) {
-				showOwnLocation(!showsLocation(), true);
-			}
-			// Event konsumieren
-			return true;
-		case R.id.item_select_map_overlay:
-			new MapOverlayDialog().show();
-
-			// Event konsumieren
-			return true;
-		case R.id.item_reload_map:
-			// for (MapOverlayHandler2 handler : mapOverlayHandlers) {
-			// handler.updateOverlay(this, true);
-			// }
-			// Event konsumieren
-			return true;
-		}
+		// TODO
+		// switch (item.getItemId()) {
+		// case R.id.item_own_location:
+		// if (!manualPositionMode) {
+		// showOwnLocation(!showsLocation(), true);
+		// }
+		// // Event konsumieren
+		// return true;
+		// case R.id.item_select_map_overlay:
+		// new MapOverlayDialog().show();
+		//
+		// // Event konsumieren
+		// return true;
+		// case R.id.item_reload_map:
+		// // for (MapOverlayHandler2 handler : mapOverlayHandlers) {
+		// // handler.updateOverlay(this, true);
+		// // }
+		// // Event konsumieren
+		// return true;
+		// }
 		return false;
 	}
 
@@ -350,9 +327,10 @@ public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
 	protected Parcelable onSaveInstanceState() {
 		Bundle outState = new Bundle();
 		outState.putParcelable("instanceState", super.onSaveInstanceState());
-		// outState.putInt("lat", getMapCenter().getLatitudeE6());
-		// outState.putInt("lon", getMapCenter().getLongitudeE6());
-		// outState.putInt("zoom", getZoomLevel());
+		outState.putDouble("lon", getMapPosition().getMapCenter()
+				.getLongitude());
+		outState.putDouble("lat", getMapPosition().getMapCenter().getLatitude());
+		outState.putByte("zoom", getMapPosition().getZoomLevel());
 		return outState;
 	}
 
@@ -360,14 +338,16 @@ public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
 	protected void onRestoreInstanceState(Parcelable state) {
 		if (state instanceof Bundle) {
 			Bundle bundle = (Bundle) state;
-			int lat = bundle.getInt("lat");
-			int lon = bundle.getInt("lon");
-			// getController().setZoom(bundle.getInt("zoom"));
-			// getController().setCenter(new GeoPoint(lat, lon));
+			getController().setCenter(
+					new GeoPoint(bundle.getDouble("lat"), bundle
+							.getDouble("lon")));
+
+			getController().setZoom(bundle.getByte("zoom"));
+
 			super.onRestoreInstanceState(bundle.getParcelable("instanceState"));
-			return;
+		} else {
+			super.onRestoreInstanceState(state);
 		}
-		super.onRestoreInstanceState(state);
 	}
 
 	public void setManualPositioning(boolean enabled) {

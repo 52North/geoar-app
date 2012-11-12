@@ -66,8 +66,8 @@ public class DataSourceDialogFragment extends DialogFragment {
 							@Override
 							public void onClick(DialogInterface dialog,
 									int which) {
-								DataSourceLoader.getInstance().addDataSource(
-										dataSource);
+								DataSourceLoader.getInstance().getDataSources()
+										.checkItem(dataSource);
 							}
 						}).setNegativeButton("Cancel", null).setView(v)
 				.create();

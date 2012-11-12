@@ -15,13 +15,11 @@
  */
 package org.n52.android.newdata;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.n52.android.newdata.Annotations.Filterable;
 import org.n52.android.newdata.Annotations.SupportedVisualization;
 import org.n52.android.newdata.filter.FilterDialogActivity;
 
@@ -205,6 +203,7 @@ public class DataSourceHolder implements Parcelable {
 		context.startActivity(intent);
 	}
 
+
 	// Parcelable
 
 	@Override
@@ -223,7 +222,7 @@ public class DataSourceHolder implements Parcelable {
 			int id = in.readInt();
 			// Find DataSourceHolder with provided id
 			for (DataSourceHolder holder : DataSourceLoader.getInstance()
-					.getAvailableDataSources()) {
+					.getDataSources()) {
 				if (holder.id == id) {
 					return holder;
 				}

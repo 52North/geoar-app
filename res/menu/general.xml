@@ -35,5 +35,18 @@
     <item
         android:id="@+id/item_source"
         android:title="@string/data_source"/>
+    <item
+        android:id="@+id/item_datasource"
+        android:title="Data Sources"
+        android:showAsAction="always">
+        <menu>
+
+            <!-- placeholder for all data sources -->
+            <item
+                android:id="@+id/item_selectsources" 
+                android:orderInCategory="-1"
+                android:title="More..."/>
+        </menu>
+    </item>
 
 </menu>
