@@ -19,6 +19,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -30,6 +31,7 @@ import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.geoar.R;
 import org.n52.android.newdata.DataCache;
 import org.n52.android.newdata.DataCache.GetDataBoundsCallback;
+import org.n52.android.newdata.DataSource;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.DataSourceLoader;
 import org.n52.android.newdata.SpatialEntity;
@@ -52,7 +54,7 @@ import android.opengl.GLSurfaceView;
  * 
  */
 public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
-		CameraUpdateListener, Closeable {
+		CameraUpdateListener {
 
 	/**
 	 * Interface for the Methods which are called inside the OpenGL specific
@@ -213,12 +215,6 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	}
 
 	@Override
-	public void close() throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void onDrawFrame(GL10 glUnused) {
 		// GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 		// GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT |
@@ -279,6 +275,12 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	}
 
 	private void initScene() {
+		
+//		Set<DataSourceHolder> list = DataSourceLoader.getInstance().getDataSources();
+////		DataSourceLoader.getInstance().
+//		for(DataSourceHolder holder : list){
+//			ARVisualizationFactory fac = new ARVisualizationFactory();
+//		}
 		// Grid grid = new Grid();
 		// grid.setRenderer(SimpleColorRenderer.getInstance());
 		// addRenderNode(grid);

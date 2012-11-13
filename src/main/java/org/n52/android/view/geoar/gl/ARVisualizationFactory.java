@@ -28,23 +28,13 @@ import org.n52.android.view.geoar.gl.model.primitives.Cube;
 
 import android.opengl.GLSurfaceView;
 
-public class VisualizationFactory implements RenderingFactory {
+public class ARVisualizationFactory implements RenderingFactory {
 
 	private static final Map<Class<?>, RenderNode> set = Collections
 			.synchronizedMap(new HashMap<Class<?>, RenderNode>());
+	
 	private GLSurfaceView glSurfaceView;
 
-	/**
-	 * Static Methods
-	 */
-	public static VisualizationFactory INSTANCE;
-
-	/**
-	 * Constructor
-	 */
-	private VisualizationFactory() {
-		this.INSTANCE = new VisualizationFactory();
-	}
 	
 	/**
 	 * Enqueues runnable to be run on the GL rendering thread of the
@@ -77,6 +67,11 @@ public class VisualizationFactory implements RenderingFactory {
 	@Override
 	public DataSourceRenderable createRenderable(RenderLoader renderLoader) {
 		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public DataSourceRenderable createGird(){
+//		return new Grid();
 		return null;
 	}
 
