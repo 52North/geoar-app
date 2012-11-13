@@ -23,7 +23,6 @@ import org.mapsforge.android.maps.MapController;
 import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.mapgenerator.tiledownloader.MapnikTileDownloader;
 import org.mapsforge.core.GeoPoint;
-import org.n52.android.GeoARView2;
 import org.n52.android.geoar.R;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceHolder;
@@ -58,7 +57,7 @@ import android.widget.ToggleButton;
  * 
  */
 public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
-		GeoARView2, OnLocationUpdateListener {
+		OnLocationUpdateListener {
 
 	/**
 	 * Dialog to allow users to choose overlays. Nested class makes modification
@@ -220,17 +219,9 @@ public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
 		return super.onTouchEvent(motionEvent);
 	}
 
+	@Deprecated
 	public void setLocationHandler(LocationHandler locationHandler) {
 		this.locationHandler = locationHandler;
-	}
-
-	@Override
-	public void setInfoHandler(InfoView infoHandler) {
-		this.infoHandler = infoHandler;
-		for (DataSourceOverlayHandler handler : overlayHandlers) {
-			handler.setInfoHandler(infoHandler);
-		}
-
 	}
 
 	@Override
@@ -365,13 +356,6 @@ public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
 		controller.setZoom(zoomLevel);
 	}
 
-	public Integer getMenuGroupId() {
-		return R.id.group_mapview;
-	}
-
-	public boolean isVisible() {
-		return isShown();
-	}
 
 	// public boolean onSingleTapUp(MotionEvent e) {
 	// if (manualPositionMode) {
@@ -386,18 +370,6 @@ public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
 
 	public void onLocationChanged(Location location) {
 		showLocation(location);
-	}
-
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onRestoreInstanceState(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
-
 	}
 
 }

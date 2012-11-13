@@ -29,6 +29,7 @@ import android.view.View;
  * @author Holger Hopmann
  * 
  */
+@Deprecated
 public interface GeoARView2 {
 
 	public boolean onOptionsItemSelected(MenuItem item);
@@ -36,8 +37,7 @@ public interface GeoARView2 {
 	public Integer getMenuGroupId();
 
 	public void setInfoHandler(InfoView infoHandler);
-	
-	
+
 	public void setLocationHandler(LocationHandler locationHandler);
 
 	public boolean isVisible();

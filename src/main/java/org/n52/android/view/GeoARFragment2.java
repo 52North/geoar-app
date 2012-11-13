@@ -26,67 +26,69 @@ import android.support.v4.app.Fragment;
 import android.view.MenuItem;
 import android.view.View;
 
+@Deprecated
 public abstract class GeoARFragment2 extends Fragment {
 
-    protected InfoView mInfoHandler;
-    protected LocationHandler mLocationHandler;
+	protected InfoView mInfoHandler;
+	protected LocationHandler mLocationHandler;
 
-    protected List<GeoARView2> geoARViews = new ArrayList<GeoARView2>();
+	protected List<GeoARView2> geoARViews = new ArrayList<GeoARView2>();
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-	super.onCreate(savedInstanceState);
-	setHasOptionsMenu(true);
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setHasOptionsMenu(true);
 
-	if (savedInstanceState != null)
-	    for (GeoARView2 arView : geoARViews) {
-		arView.onRestoreInstanceState(savedInstanceState);
-		if (arView instanceof View) {
-		    View view = (View) arView;
-		    String key = arView.getClass().getName() + "visibility";
-		    if (savedInstanceState.get(key) != null) {
-			view.setVisibility(savedInstanceState.getInt(key));
-		    }
+		if (savedInstanceState != null)
+			for (GeoARView2 arView : geoARViews) {
+				arView.onRestoreInstanceState(savedInstanceState);
+				if (arView instanceof View) {
+					View view = (View) arView;
+					String key = arView.getClass().getName() + "visibility";
+					if (savedInstanceState.get(key) != null) {
+						view.setVisibility(savedInstanceState.getInt(key));
+					}
+				}
+			}
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Delegate selection event to all child views to allow them to react.
+		for (GeoARView2 v : geoARViews)
+			if (v.onOptionsItemSelected(item))
+				return true;
+
+		return super.onOptionsItemSelected(item);
+	}
+
+	public void setInfoHandler(InfoView infoHandler) {
+		this.mInfoHandler = infoHandler;
+		for (GeoARView2 v : geoARViews) {
+			v.setInfoHandler(infoHandler);
 		}
-	    }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-	// Delegate selection event to all child views to allow them to react.
-	for (GeoARView2 v : geoARViews)
-	    if (v.onOptionsItemSelected(item))
-		return true;
-
-	return super.onOptionsItemSelected(item);
-    }
-
-    public void setInfoHandler(InfoView infoHandler) {
-	this.mInfoHandler = infoHandler;
-	for (GeoARView2 v : geoARViews) {
-	    v.setInfoHandler(infoHandler);
 	}
-    }
 
-    public void setLocationHandler(LocationHandler locationHandler) {
-	this.mLocationHandler = locationHandler;
-	for (GeoARView2 v : geoARViews) {
-	    v.setLocationHandler(locationHandler);
+	public void setLocationHandler(LocationHandler locationHandler) {
+		this.mLocationHandler = locationHandler;
+		for (GeoARView2 v : geoARViews) {
+			v.setLocationHandler(locationHandler);
+		}
 	}
-    }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-	super.onSaveInstanceState(outState);
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
 
-	for (GeoARView2 arView : geoARViews) {
-	    arView.onSaveInstanceState(outState);
+		for (GeoARView2 arView : geoARViews) {
+			arView.onSaveInstanceState(outState);
 
-	    if (arView instanceof View) {
-		// if there is a real View, save its visibility
-		View view = (View) arView;
-		outState.putInt(arView.getClass().getName() + "visibility", view.getVisibility());
-	    }
+			if (arView instanceof View) {
+				// if there is a real View, save its visibility
+				View view = (View) arView;
+				outState.putInt(arView.getClass().getName() + "visibility",
+						view.getVisibility());
+			}
+		}
 	}
-    }
 }

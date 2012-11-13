@@ -15,9 +15,6 @@
  */
 package org.n52.android;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.mapsforge.android.maps.MapActivity;
 import org.n52.android.geoar.R;
 import org.n52.android.newdata.CheckList;
@@ -65,7 +62,6 @@ import com.actionbarsherlock.view.SubMenu;
  * 
  * Uses an icon from www.androidicons.com
  * 
- * @author Arne de Wall
  * 
  */
 public class GeoARActivity3 extends SherlockFragmentActivity {
@@ -89,7 +85,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 
 	}
 
-	private List<GeoARView2> noiseARViews = new ArrayList<GeoARView2>();
+	// private List<GeoARView2> noiseARViews = new ArrayList<GeoARView2>();
 	private DataSourceChangeListener dataSourceListener = new DataSourceChangeListener();
 
 	@Override
@@ -210,56 +206,58 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
-		if (item.getGroupId() != Menu.NONE) {
-			// Delegate selection event to all child views to allow them to
-			// react.
-			for (GeoARView2 view : noiseARViews) {
-				// if (view.onOptionsItemSelected(item)) {
-				// // Event consumed
-				// return true;
-				// }
-			}
-		} else {
-			// Item does not belong to any child view
-			switch (item.getItemId()) {
-			// TODO
-			// case R.id.item_filter:
-			// // Get current measurement filter
-			// MeasurementFilter filter = measurementManager
-			// .getMeasurementFilter();
-			// if (filter == null) {
-			// filter = new MeasurementFilter();
-			// }
-			// new FilterDialog(this, filter, measurementManager).show();
-			// break;
-			// case R.id.item_source:
-			// // show data sources dialog
-			// // TODO
-			// // new DataSourceDialog(this, dataSources, measurementManager)
-			// new DataSourceDialog(this, null, measurementManager).show();
-			// break;
-			case R.id.map_item_camera:
-				ViewFragment.instance.updateFragmentView();
-				break;
+		// if (item.getGroupId() != Menu.NONE) {
+		// // Delegate selection event to all child views to allow them to
+		// // react.
+		// for (GeoARView2 view : noiseARViews) {
+		// // if (view.onOptionsItemSelected(item)) {
+		// // // Event consumed
+		// // return true;
+		// // }
+		// }
+		// } else {
+		// Item does not belong to any child view
+		switch (item.getItemId()) {
+		// TODO
+		// case R.id.item_filter:
+		// // Get current measurement filter
+		// MeasurementFilter filter = measurementManager
+		// .getMeasurementFilter();
+		// if (filter == null) {
+		// filter = new MeasurementFilter();
+		// }
+		// new FilterDialog(this, filter, measurementManager).show();
+		// break;
+		// case R.id.item_source:
+		// // show data sources dialog
+		// // TODO
+		// // new DataSourceDialog(this, dataSources, measurementManager)
+		// new DataSourceDialog(this, null, measurementManager).show();
+		// break;
+		case R.id.map_item_camera:
+			ViewFragment.instance.updateFragmentView();
+			return true;
 
-			case R.id.edit_filter:
-				DataSourceLoader.getInstance().getDataSources().iterator()
-						.next().createFilterDialog(this);
-				break;
+		case R.id.item_filter:
+			DataSourceLoader.getInstance().getDataSources().iterator().next()
+					.createFilterDialog(this);
+			return true;
 
-			case R.id.item_selectsources:
-				Intent intent = new Intent(getApplicationContext(),
-						MainActivity2.class);
-				startActivity(intent);
-				break;
-			}
+		case R.id.item_selectsources:
+			Intent intent = new Intent(getApplicationContext(),
+					MainActivity2.class);
+			startActivity(intent);
+			return true;
 		}
+		// }
 
 		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
+
+		// Create data source selection menu
 		MenuItem dataSouceItem = menu.findItem(R.id.item_datasource);
 
 		SubMenu subMenu = dataSouceItem.getSubMenu();
@@ -282,7 +280,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 						// source not enabled -> enable it and consume event
 						item.setChecked(true);
 						dataSources.checkItem(dataSource, true);
-						return true;	// TODO ...?
+						return true; // TODO ...?
 					} else {
 						// source already enabled -> default behavior, show
 						// submenu
@@ -309,17 +307,17 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 
 		// Update visibility of menu items according to visiblity of the child
 		// views
-		for (GeoARView2 view : noiseARViews) {
-			if (view.getMenuGroupId() != null) {
-				menu.setGroupVisible(view.getMenuGroupId(), view.isVisible());
-			}
-
-		}
+		// for (GeoARView2 view : noiseARViews) {
+		// if (view.getMenuGroupId() != null) {
+		// menu.setGroupVisible(view.getMenuGroupId(), view.isVisible());
+		// }
+		//
+		// }
 		return super.onPrepareOptionsMenu(menu);
 	}
 
 	private static class ViewFragment extends Fragment {
-		GeoARFragment2 mapFragment;
+		GeoMapFragment2 mapFragment;
 		GeoARFragment2 arFragment;
 
 		private static ViewFragment instance;
@@ -363,7 +361,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 			FragmentManager fm = getFragmentManager();
 
 			// find fragments
-			mapFragment = (GeoARFragment2) fm
+			mapFragment = (GeoMapFragment2) fm
 					.findFragmentById(R.id.fragment_view);
 			arFragment = (GeoARFragment2) fm
 					.findFragmentById(R.id.fragment_view2);
@@ -386,14 +384,14 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 
 			if (mapFragment == null) {
 				// Map Fragment
-				mapFragment = new GeoMapFragment2(locationHandler, infoView);
+				mapFragment = new GeoMapFragment2();
 
-				mapFragment.setLocationHandler(locationHandler);
-				mapFragment.setInfoHandler(infoView);
+				// mapFragment.setLocationHandler(locationHandler);
+				// mapFragment.setInfoHandler(infoView);
 
 				f.add(R.id.fragment_view, mapFragment);
 			} else {
-				mapFragment.setInfoHandler(infoView);
+				// mapFragment.setInfoHandler(infoView);
 			}
 
 			f.commit();

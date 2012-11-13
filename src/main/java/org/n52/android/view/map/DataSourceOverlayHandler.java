@@ -204,6 +204,7 @@ public class DataSourceOverlayHandler {
 		}
 	};
 
+	@Deprecated
 	public void setInfoHandler(InfoView infoHandler) {
 		this.infoHandler = infoHandler;
 	}
