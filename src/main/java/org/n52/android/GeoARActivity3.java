@@ -24,14 +24,10 @@ import org.n52.android.newdata.DataSourceLoader;
 import org.n52.android.newdata.DataSourceLoader.OnDataSourcesChangeListener;
 import org.n52.android.newdata.Visualization;
 import org.n52.android.tracking.camera.RealityCamera;
-import org.n52.android.tracking.location.LocationHandler;
-import org.n52.android.view.GeoARFragment2;
-import org.n52.android.view.InfoView;
-import org.n52.android.view.geoar.ARFragment2;
+import org.n52.android.view.GeoARViewPager;
 import org.n52.android.view.map.GeoMapFragment2;
 import org.osmdroid.views.MapView;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -39,14 +35,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.ImageButton;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
@@ -85,12 +74,18 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 
 	}
 
+	private GeoMapFragment2 mapFragment = new GeoMapFragment2();
+	private GeoMapFragment2 arFragment = new GeoMapFragment2();
+	private CBFragment cbFragment = new CBFragment();
+
 	// private List<GeoARView2> noiseARViews = new ArrayList<GeoARView2>();
 	private DataSourceChangeListener dataSourceListener = new DataSourceChangeListener();
+	private GeoARViewPager mPager;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setContentView(R.layout.main);
 
 		// // Get MeasurementManager from previous instance or create new one
 		// Object lastMeasureManager = getLastCustomNonConfigurationInstance();
@@ -102,9 +97,9 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 
 		// First time init, create the UI.
 		if (savedInstanceState == null) {
-			Fragment newFragment = ViewFragment.newInstance();
-			getSupportFragmentManager().beginTransaction()
-					.add(android.R.id.content, newFragment).commit();
+			// Fragment newFragment = ViewFragment.newInstance();
+			// getSupportFragmentManager().beginTransaction()
+			// .add(android.R.id.content, newFragment).commit();
 
 			Builder builder = new AlertDialog.Builder(this);
 			builder.setMessage(R.string.info_use);
@@ -113,6 +108,13 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 			builder.setTitle(R.string.advice);
 			builder.show();
 		}
+
+		mPager = (GeoARViewPager) findViewById(R.id.pager);
+		mPager.setFragmentManager(getSupportFragmentManager());
+		mPager.addFragment(mapFragment);
+		mPager.addFragment(arFragment);
+		mPager.addFragment(cbFragment);
+		mPager.showFragment(mapFragment);
 
 		// Reset camera height if set
 		SharedPreferences prefs = getSharedPreferences("NoiseAR", MODE_PRIVATE);
@@ -160,23 +162,6 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 	}
 
 	@Override
-	protected void onResume() {
-		// delegate to locationHandler
-		// TODO locationhandler ist in UIFragment gewandert => onResume Fragment
-		// later!
-		// if(locationHandler != null)
-		// locationHandler.onResume();
-		super.onResume();
-	}
-
-	@Override
-	protected void onPause() {
-		// delegate to locationHandler
-		// locationHandler.onPause();
-		super.onPause();
-	}
-
-	@Override
 	protected void onStop() {
 		super.onStop();
 
@@ -199,24 +184,13 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// inflate common general menu definition
 		MenuInflater inflater = getSupportMenuInflater();
-		inflater.inflate(R.menu.general, menu);
+		inflater.inflate(R.menu.menu_general, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
-		// if (item.getGroupId() != Menu.NONE) {
-		// // Delegate selection event to all child views to allow them to
-		// // react.
-		// for (GeoARView2 view : noiseARViews) {
-		// // if (view.onOptionsItemSelected(item)) {
-		// // // Event consumed
-		// // return true;
-		// // }
-		// }
-		// } else {
-		// Item does not belong to any child view
 		switch (item.getItemId()) {
 		// TODO
 		// case R.id.item_filter:
@@ -234,8 +208,8 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		// // new DataSourceDialog(this, dataSources, measurementManager)
 		// new DataSourceDialog(this, null, measurementManager).show();
 		// break;
-		case R.id.map_item_camera:
-			ViewFragment.instance.updateFragmentView();
+		case R.id.map_item_ar:
+			mPager.showFragment(arFragment);
 			return true;
 
 		case R.id.item_filter:
@@ -244,12 +218,15 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 			return true;
 
 		case R.id.item_selectsources:
-			Intent intent = new Intent(getApplicationContext(),
-					MainActivity2.class);
-			startActivity(intent);
+			mPager.showFragment(cbFragment);
+			return true;
+
+		case R.id.item_about:
+			AboutDialog aboutDialog = new AboutDialog(this);
+			aboutDialog.setTitle(R.string.about_titel);
+			aboutDialog.show();
 			return true;
 		}
-		// }
 
 		return super.onOptionsItemSelected(item);
 	}
@@ -278,6 +255,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 				public boolean onMenuItemClick(MenuItem item) {
 					if (!item.isChecked()) {
 						// source not enabled -> enable it and consume event
+						item.setCheckable(true);
 						item.setChecked(true);
 						dataSources.checkItem(dataSource, true);
 						return true; // TODO ...?
@@ -303,122 +281,114 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 					});
 
 		}
-		subMenu.setGroupCheckable(GROUP_DATASOURCES, true, false);
+		// subMenu.setGroupCheckable(GROUP_DATASOURCES, true, false);
 
-		// Update visibility of menu items according to visiblity of the child
-		// views
-		// for (GeoARView2 view : noiseARViews) {
-		// if (view.getMenuGroupId() != null) {
-		// menu.setGroupVisible(view.getMenuGroupId(), view.isVisible());
-		// }
-		//
-		// }
 		return super.onPrepareOptionsMenu(menu);
 	}
 
-	private static class ViewFragment extends Fragment {
-		GeoMapFragment2 mapFragment;
-		GeoARFragment2 arFragment;
+	// private static class ViewFragment extends Fragment {
+	// GeoMapFragment2 mapFragment;
+	// GeoARFragment2 arFragment;
+	//
+	// private static ViewFragment instance;
+	//
+	// private LocationHandler locationHandler;
+	// private InfoView infoView;
+	//
+	// private ImageButton mapARSwitcherButton;
+	//
+	// private boolean showMap = false;
+	//
+	// static ViewFragment newInstance() {
+	// instance = new ViewFragment();
+	// instance.setRetainInstance(true);
+	// // instance.measureManager = measurementManager;
+	// return instance;
+	// }
+	//
+	// @Override
+	// public View onCreateView(LayoutInflater inflater, ViewGroup container,
+	// Bundle savedInstanceState) {
+	// View v = inflater.inflate(R.layout.main, container, false);
+	//
+	// // AR / Map switcher Button
+	// mapARSwitcherButton = (ImageButton) v
+	// .findViewById(R.id.imageButtonMapARSwitcher);
+	// mapARSwitcherButton.setOnClickListener(new View.OnClickListener() {
+	// public void onClick(View v) {
+	// // showMap = (showMap == true) ? false : true;
+	// updateFragmentView();
+	// }
+	// });
+	// return v;
+	// }
+	//
+	// @Override
+	// public void onActivityCreated(Bundle savedInstanceState) {
+	// super.onActivityCreated(savedInstanceState);
+	//
+	// FragmentManager fm = getFragmentManager();
+	//
+	// // find fragments
+	// mapFragment = (GeoMapFragment2) fm
+	// .findFragmentById(R.id.fragment_view);
+	// arFragment = (GeoARFragment2) fm
+	// .findFragmentById(R.id.fragment_view2);
+	//
+	// infoView = (InfoView) getView().findViewById(R.id.infoView);
+	// locationHandler = new LocationHandler(getActivity(), infoView);
+	// FragmentTransaction f = fm.beginTransaction();
+	//
+	// if (arFragment == null) {
+	// // AugmentedReality Fragment
+	// arFragment = new ARFragment2(locationHandler, infoView);
+	//
+	// arFragment.setLocationHandler(locationHandler);
+	// arFragment.setInfoHandler(infoView);
+	//
+	// f.add(R.id.fragment_view2, arFragment);
+	// } else {
+	// arFragment.setInfoHandler(infoView);
+	// }
+	//
+	// if (mapFragment == null) {
+	// // Map Fragment
+	// mapFragment = new GeoMapFragment2();
+	//
+	// // mapFragment.setLocationHandler(locationHandler);
+	// // mapFragment.setInfoHandler(infoView);
+	//
+	// f.add(R.id.fragment_view, mapFragment);
+	// } else {
+	// // mapFragment.setInfoHandler(infoView);
+	// }
+	//
+	// f.commit();
+	// updateFragmentView();
+	// }
+	//
+	// /**
+	// * Sets correct drawable for map/AR switching button
+	// */
+	// @TargetApi(11)
+	// private void updateFragmentView() {
+	// showMap = (showMap == true) ? false : true;
+	// FragmentTransaction fragmentTransaction = getFragmentManager()
+	// .beginTransaction();
+	// if (showMap) {
+	// getActivity().getActionBar().show();
+	// mapARSwitcherButton.setImageResource(R.drawable.ic_menu_phone);
+	// fragmentTransaction.hide(arFragment);
+	// fragmentTransaction.show(mapFragment);
+	// } else {
+	// getActivity().getActionBar().hide();
+	// mapARSwitcherButton
+	// .setImageResource(R.drawable.ic_menu_mapmode);
+	// fragmentTransaction.hide(mapFragment);
+	// fragmentTransaction.show(arFragment);
+	// }
+	// fragmentTransaction.commit();
+	// }
+	// }
 
-		private static ViewFragment instance;
-
-		// private MeasurementManager measureManager;
-		private LocationHandler locationHandler;
-		private InfoView infoView;
-
-		private ImageButton mapARSwitcherButton;
-
-		private boolean showMap = false;
-
-		static ViewFragment newInstance() {
-			instance = new ViewFragment();
-			instance.setRetainInstance(true);
-			// instance.measureManager = measurementManager;
-			return instance;
-		}
-
-		@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container,
-				Bundle savedInstanceState) {
-			View v = inflater.inflate(R.layout.main, container, false);
-
-			// AR / Map switcher Button
-			mapARSwitcherButton = (ImageButton) v
-					.findViewById(R.id.imageButtonMapARSwitcher);
-			mapARSwitcherButton.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					// showMap = (showMap == true) ? false : true;
-					updateFragmentView();
-				}
-			});
-			return v;
-		}
-
-		@Override
-		public void onActivityCreated(Bundle savedInstanceState) {
-			super.onActivityCreated(savedInstanceState);
-
-			FragmentManager fm = getFragmentManager();
-
-			// find fragments
-			mapFragment = (GeoMapFragment2) fm
-					.findFragmentById(R.id.fragment_view);
-			arFragment = (GeoARFragment2) fm
-					.findFragmentById(R.id.fragment_view2);
-
-			infoView = (InfoView) getView().findViewById(R.id.infoView);
-			locationHandler = new LocationHandler(getActivity(), infoView);
-			FragmentTransaction f = fm.beginTransaction();
-
-			if (arFragment == null) {
-				// AugmentedReality Fragment
-				arFragment = new ARFragment2(locationHandler, infoView);
-
-				arFragment.setLocationHandler(locationHandler);
-				arFragment.setInfoHandler(infoView);
-
-				f.add(R.id.fragment_view2, arFragment);
-			} else {
-				arFragment.setInfoHandler(infoView);
-			}
-
-			if (mapFragment == null) {
-				// Map Fragment
-				mapFragment = new GeoMapFragment2();
-
-				// mapFragment.setLocationHandler(locationHandler);
-				// mapFragment.setInfoHandler(infoView);
-
-				f.add(R.id.fragment_view, mapFragment);
-			} else {
-				// mapFragment.setInfoHandler(infoView);
-			}
-
-			f.commit();
-			updateFragmentView();
-		}
-
-		/**
-		 * Sets correct drawable for map/AR switching button
-		 */
-		@TargetApi(11)
-		private void updateFragmentView() {
-			showMap = (showMap == true) ? false : true;
-			FragmentTransaction fragmentTransaction = getFragmentManager()
-					.beginTransaction();
-			if (showMap) {
-				getActivity().getActionBar().show();
-				mapARSwitcherButton.setImageResource(R.drawable.ic_menu_phone);
-				fragmentTransaction.hide(arFragment);
-				fragmentTransaction.show(mapFragment);
-			} else {
-				getActivity().getActionBar().hide();
-				mapARSwitcherButton
-						.setImageResource(R.drawable.ic_menu_mapmode);
-				fragmentTransaction.hide(mapFragment);
-				fragmentTransaction.show(arFragment);
-			}
-			fragmentTransaction.commit();
-		}
-	}
 }

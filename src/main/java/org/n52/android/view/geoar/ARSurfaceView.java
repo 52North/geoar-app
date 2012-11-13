@@ -230,7 +230,8 @@ public class ARSurfaceView extends GLSurfaceView implements
 
 
 	public Integer getMenuGroupId() {
-		return R.id.group_noiseview;
+		return 0;
+		//return R.id.group_noiseview;
 	}
 
 	public boolean isVisible() {

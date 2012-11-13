@@ -19,7 +19,11 @@ import java.lang.reflect.Field;
 
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.core.GeoPoint;
+import org.n52.android.GeoARActivity3;
 import org.n52.android.geoar.R;
+
+import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.MenuItem;
 
 import android.app.Activity;
 import android.content.Context;
@@ -44,7 +48,7 @@ import android.widget.FrameLayout.LayoutParams;
  * @author Arne de Wall
  * 
  */
-public class GeoMapFragment2 extends Fragment {
+public class GeoMapFragment2 extends SherlockFragment {
 
 	private GeoMapView3 geoMapView;
 
@@ -141,16 +145,21 @@ public class GeoMapFragment2 extends Fragment {
 	}
 
 	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		setHasOptionsMenu(true);
+		super.onCreate(savedInstanceState);
+	}
+
+	@Override
 	public View onCreateView(final LayoutInflater inflater,
 			final ViewGroup container, final Bundle savedInstanceState) {
 		// super.onCreate(savedInstanceState);
 
-		return inflater.inflate(R.layout.map_fragment3, container, false);
+		return inflater.inflate(R.layout.map_fragment, container, false);
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
-
 		super.onActivityCreated(savedInstanceState);
 
 		// Get Layout root to add mapview programmatically
@@ -189,10 +198,12 @@ public class GeoMapFragment2 extends Fragment {
 	 * 
 	 */
 	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+	public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu,
+			com.actionbarsherlock.view.MenuInflater inflater) {
 		inflater.inflate(R.menu.menu_map, menu);
 		super.onCreateOptionsMenu(menu, inflater);
 	}
+
 
 	/**
 	 * Cleares the tileprovider and indicates to the VM that it would be a good

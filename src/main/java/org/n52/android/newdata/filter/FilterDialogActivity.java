@@ -48,7 +48,7 @@ public class FilterDialogActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.filter_dialog2);
+		setContentView(R.layout.filter_dialog);
 
 		Button cancelButton = (Button) findViewById(R.id.negativeButton);
 		cancelButton.setOnClickListener(new OnClickListener() {

@@ -65,56 +65,56 @@ public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
 	 * 
 	 * @author Holger Hopmann
 	 */
-	private class MapOverlayDialog extends AlertDialog implements
-			OnCheckedChangeListener {
-
-		private ToggleButton buttonInterpolationOverlay;
-		private ToggleButton buttonItemizedOverlay;
-
-		public MapOverlayDialog() {
-			super(GeoMapView3.this.getContext());
-			// Inflate Layout
-			View layout = LayoutInflater.from(getContext()).inflate(
-					R.layout.map_overlay_dialog, null);
-
-			// // Find Button Views
-			buttonInterpolationOverlay = (ToggleButton) layout
-					.findViewById(R.id.ToggleButtonInterpolation);
-			buttonInterpolationOverlay.setChecked(showInterpolationOverlay);
-
-			buttonItemizedOverlay = (ToggleButton) layout
-					.findViewById(R.id.ToggleButtonItemizedOverlay);
-			buttonItemizedOverlay.setChecked(showItemizedOverlay);
-
-			buttonInterpolationOverlay.setOnCheckedChangeListener(this);
-			buttonItemizedOverlay.setOnCheckedChangeListener(this);
-
-			// Set Dialog Options
-			setView(layout);
-			setCancelable(true);
-
-			setTitle(R.string.select_map);
-			setButton(BUTTON_NEUTRAL, getContext().getString(R.string.ok),
-					(Message) null);
-		}
-
-		@Override
-		public void onCheckedChanged(CompoundButton buttonView,
-				boolean isChecked) {
-			// switch (buttonView.getId()){
-			// case R.id.ToggleButtonInterpolation:
-			// mapOverlayHandler.showInterpolationOverlay(isChecked);
-			// showInterpolationOverlay = isChecked;
-			// invalidate();
-			// break;
-			// case R.id.ToggleButtonItemizedOverlay:
-			// mapOverlayHandler.showItemizedOverlay(isChecked);
-			// showItemizedOverlay = isChecked;
-			// invalidate();
-			// break;
-			// }
-		}
-	}
+//	private class MapOverlayDialog extends AlertDialog implements
+//			OnCheckedChangeListener {
+//
+//		private ToggleButton buttonInterpolationOverlay;
+//		private ToggleButton buttonItemizedOverlay;
+//
+//		public MapOverlayDialog() {
+//			super(GeoMapView3.this.getContext());
+//			// Inflate Layout
+//			View layout = LayoutInflater.from(getContext()).inflate(
+//					R.layout.map_overlay_dialog, null);
+//
+//			// // Find Button Views
+//			buttonInterpolationOverlay = (ToggleButton) layout
+//					.findViewById(R.id.ToggleButtonInterpolation);
+//			buttonInterpolationOverlay.setChecked(showInterpolationOverlay);
+//
+//			buttonItemizedOverlay = (ToggleButton) layout
+//					.findViewById(R.id.ToggleButtonItemizedOverlay);
+//			buttonItemizedOverlay.setChecked(showItemizedOverlay);
+//
+//			buttonInterpolationOverlay.setOnCheckedChangeListener(this);
+//			buttonItemizedOverlay.setOnCheckedChangeListener(this);
+//
+//			// Set Dialog Options
+//			setView(layout);
+//			setCancelable(true);
+//
+//			setTitle(R.string.select_map);
+//			setButton(BUTTON_NEUTRAL, getContext().getString(R.string.ok),
+//					(Message) null);
+//		}
+//
+//		@Override
+//		public void onCheckedChanged(CompoundButton buttonView,
+//				boolean isChecked) {
+//			// switch (buttonView.getId()){
+//			// case R.id.ToggleButtonInterpolation:
+//			// mapOverlayHandler.showInterpolationOverlay(isChecked);
+//			// showInterpolationOverlay = isChecked;
+//			// invalidate();
+//			// break;
+//			// case R.id.ToggleButtonItemizedOverlay:
+//			// mapOverlayHandler.showItemizedOverlay(isChecked);
+//			// showItemizedOverlay = isChecked;
+//			// invalidate();
+//			// break;
+//			// }
+//		}
+//	}
 
 	private InfoView infoHandler;
 	private List<DataSourceOverlayHandler> overlayHandlers = new ArrayList<DataSourceOverlayHandler>();

@@ -28,12 +28,14 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
@@ -42,29 +44,32 @@ import com.actionbarsherlock.view.MenuItem;
  * @author Arne de Wall
  * 
  */
-public class MainActivity2 extends SherlockFragmentActivity {
+public class CBFragment extends SherlockFragment {
 
 	TabHost tabHost;
 	ViewPager viewPager;
 	CBTabsAdapter tabsAdapter;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	public View onCreateView(final LayoutInflater inflater,
+			final ViewGroup container, final Bundle savedInstanceState) {
+		return inflater.inflate(R.layout.fragment_cb, container, false);
+	}
 
-		setContentView(R.layout.fragment_tabs_pager);
-
-		viewPager = (ViewPager) findViewById(R.id.pager);
+	public void onActivityCreated(Bundle savedInstanceState) {
+		viewPager = (ViewPager) getView().findViewById(R.id.pager);
 		viewPager.setDrawingCacheEnabled(true);
 
-		tabHost = (TabHost) findViewById(android.R.id.tabhost);
+		tabHost = (TabHost) getView().findViewById(android.R.id.tabhost);
+		
+		
 		tabHost.setup();
-
-		tabsAdapter = new CBTabsAdapter(this, viewPager, tabHost);
-		tabsAdapter.addtab(
-				tabHost.newTabSpec("Installed New").setIndicator(
-						"Installed new"), DataSourceGridFragment.class, null);
-
+		tabsAdapter = new CBTabsAdapter(this.getActivity(), viewPager, tabHost);
+		// TODO
+//		tabsAdapter.addtab(
+//				tabHost.newTabSpec("Installed New").setIndicator(
+//						"Installed new"), DataSourceGridFragment.class, null);
+	
 		// tabsAdapter.addtab(
 		// tabHost.newTabSpec("Codebase").setIndicator("Codebase"),
 		// CodebaseGridFragment.class, null);
@@ -98,36 +103,36 @@ public class MainActivity2 extends SherlockFragmentActivity {
 		// }
 		// }
 		// });
+
+		super.onActivityCreated(savedInstanceState);
 	}
 
 	@Override
-	protected void onSaveInstanceState(Bundle outState) {
+	public void onStart() {
+		// TODO Auto-generated method stub
+		super.onStart();
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putString("tabState", tabHost.getCurrentTabTag());
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu) {
-		MenuInflater inflater = getSupportMenuInflater();
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.cb_main_menu, menu);
-
-		return super.onCreateOptionsMenu(menu);
+		super.onCreateOptionsMenu(menu, inflater);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.cb_menu_about:
-			AboutDialog aboutDialog = new AboutDialog(this);
-			aboutDialog.setTitle(R.string.about_titel);
-			aboutDialog.show();
-			return true;
 		case R.id.cb_menu_refresh:
 			DataSourceLoader.getInstance().reloadPlugins();
 			return true;
-		default:
-			return super.onOptionsItemSelected(item);
 		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	/**
