@@ -17,8 +17,11 @@ package org.n52.android.view.geoar.gl;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
+import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.RenderingFactory;
 import org.n52.android.newdata.gl.primitives.DataSourceRenderable;
 import org.n52.android.newdata.gl.primitives.RenderLoader;
@@ -32,10 +35,21 @@ public class ARVisualizationFactory implements RenderingFactory {
 
 	private static final Map<Class<?>, RenderNode> set = Collections
 			.synchronizedMap(new HashMap<Class<?>, RenderNode>());
-	
-	private GLSurfaceView glSurfaceView;
 
-	
+	private final Set<RenderNode> renderables = Collections
+			.synchronizedSet(new HashSet<RenderNode>());
+
+	private GLSurfaceView glSurfaceView;
+	private DataSourceHolder dataSourceHolder;
+
+	protected Object mutexVariable = new Object();
+
+	public ARVisualizationFactory(GLSurfaceView glSurfaceView,
+			DataSourceHolder holder) {
+		this.glSurfaceView = glSurfaceView;
+		this.dataSourceHolder = holder;
+	}
+
 	/**
 	 * Enqueues runnable to be run on the GL rendering thread of the
 	 * {@link GLSurfaceView}. It is not possible to allocate GPU-memory for the
@@ -55,7 +69,9 @@ public class ARVisualizationFactory implements RenderingFactory {
 
 	@Override
 	public DataSourceRenderable createCube() {
-		return new Cube();
+		Cube cube = new Cube();
+		renderables.add(cube);
+		return cube;
 	}
 
 	@Override
@@ -69,10 +85,18 @@ public class ARVisualizationFactory implements RenderingFactory {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
-	public DataSourceRenderable createGird(){
-//		return new Grid();
+
+	public DataSourceRenderable createGird() {
+		// return new Grid();
 		return null;
+	}
+
+	public DataSourceHolder getDataSourceHolder() {
+		return dataSourceHolder;
+	}
+
+	public void clear() {
+		set.clear();
 	}
 
 }

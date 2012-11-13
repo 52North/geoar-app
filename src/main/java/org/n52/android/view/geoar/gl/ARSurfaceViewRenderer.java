@@ -15,11 +15,9 @@
  */
 package org.n52.android.view.geoar.gl;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.Stack;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -29,9 +27,9 @@ import org.n52.android.alg.proj.MercatorPoint;
 import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.geoar.R;
+import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataCache;
 import org.n52.android.newdata.DataCache.GetDataBoundsCallback;
-import org.n52.android.newdata.DataSource;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.DataSourceLoader;
 import org.n52.android.newdata.SpatialEntity;
@@ -163,11 +161,6 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		}
 	};
 
-	private boolean showPointsOfInterest;
-	private boolean showInterpolation;
-	private boolean showCalibration;
-	private boolean resetProjection;
-
 	// TODO what do we need
 	private List<? extends SpatialEntity> currentMeasurement;
 	private MercatorRect currentInterpolationRect;
@@ -192,22 +185,43 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 	private boolean enableDepthBuffer;
 
-	private DataSourceHolder dataSource;
+	private List<ARVisualizationFactory> visualizationFactorys = new ArrayList<ARVisualizationFactory>();
 
-	public ARSurfaceViewRenderer(Context context, GLSurfaceView glSurfaceView) {
+	private OnCheckedChangedListener<DataSourceHolder> dataSourceListener = new OnCheckedChangedListener<DataSourceHolder>() {
+
+		@Override
+		public void onCheckedChanged(DataSourceHolder item, boolean newState) {
+			if (newState = true) {
+				ARVisualizationFactory factory = new ARVisualizationFactory(
+						ARSurfaceViewRenderer.this.glSurfaceView, item);
+				visualizationFactorys.add(factory);
+			}
+			for (Iterator<ARVisualizationFactory> it = visualizationFactorys
+					.iterator(); it.hasNext();) {
+				ARVisualizationFactory current = it.next();
+				if (current.getDataSourceHolder() == item) {
+					current.clear();
+					it.remove();
+					break;
+				}
+			}
+		}
+	};
+
+	public ARSurfaceViewRenderer(Context context,
+			final GLSurfaceView glSurfaceView) {
 		this.mContext = context;
 		this.mRotationProvider = (IRotationMatrixProvider) glSurfaceView;
 		this.glSurfaceView = glSurfaceView;
 
-		this.observationUpdateListener = new ArrayList<OnObservationUpdateListener>();
+		// this.observationUpdateListener = new
+		// ArrayList<OnObservationUpdateListener>();
 		children = new Stack<RenderNode>();
 
-		this.geoLocationUpdateListener = new ArrayList<ARSurfaceViewRenderer.GeoLocationUpdateListener>();
-
-		if (DataSourceLoader.getInstance().getDataSources().size() > 0) {
-			dataSource = DataSourceLoader.getInstance().getDataSources()
-					.iterator().next();
-		}
+		// this.geoLocationUpdateListener = new
+		// ArrayList<ARSurfaceViewRenderer.GeoLocationUpdateListener>();
+		DataSourceLoader.getInstance().getDataSources()
+				.addOnCheckedChangeListener(dataSourceListener);
 	}
 
 	public void setInfoHandler(InfoView infoHandler) {
@@ -275,12 +289,13 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	}
 
 	private void initScene() {
-		
-//		Set<DataSourceHolder> list = DataSourceLoader.getInstance().getDataSources();
-////		DataSourceLoader.getInstance().
-//		for(DataSourceHolder holder : list){
-//			ARVisualizationFactory fac = new ARVisualizationFactory();
-//		}
+
+		// Set<DataSourceHolder> list =
+		// DataSourceLoader.getInstance().getDataSources();
+		// // DataSourceLoader.getInstance().
+		// for(DataSourceHolder holder : list){
+		// ARVisualizationFactory fac = new ARVisualizationFactory();
+		// }
 		// Grid grid = new Grid();
 		// grid.setRenderer(SimpleColorRenderer.getInstance());
 		// addRenderNode(grid);
@@ -335,7 +350,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 	@Override
 	public void onCameraUpdate() {
-		resetProjection = true;
+//		resetProjection = true;
 
 	}
 
@@ -346,78 +361,68 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 	public void setCenter(GeoPoint gPoint) {
 
-		currentCenterGPoint = gPoint;
-
-		// Calculate thresholds for request of data
-		double meterPerPixel = MercatorProj.getGroundResolution(
-				gPoint.getLatitudeE6() / 1E6f, Settings.ZOOM_AR);
-		int pixelRadius = (int) (Settings.SIZE_AR_INTERPOLATION / meterPerPixel);
-		int pixelReloadDist = (int) (Settings.RELOAD_DIST_AR / meterPerPixel);
-
-		// Calculate new center point in world coordinates
-		int centerPixelX = (int) MercatorProj.transformLonToPixelX(
-				gPoint.getLongitudeE6() / 1E6f, Settings.ZOOM_AR);
-		int centerPixelY = (int) MercatorProj.transformLatToPixelY(
-				gPoint.getLatitudeE6() / 1E6f, Settings.ZOOM_AR);
-		currentCenterMercator = new MercatorPoint(centerPixelX, centerPixelY,
-				Settings.ZOOM_AR);
-
-		currentGroundResolution = (float) MercatorProj.getGroundResolution(
-				currentCenterGPoint.getLatitudeE6() / 1E6f, Settings.ZOOM_AR);
-
-		// determination if data request is needed or if just a simple shift is
-		// enough
-		boolean requestInterpolation = false;
-		if (currentInterpolationRect == null) {
-			// Get new data if there were none before
-			requestInterpolation = true;
-		} else {
-			MercatorPoint interpolationCenter = currentInterpolationRect
-					.getCenter();
-			if (currentCenterMercator.zoom != currentInterpolationRect.zoom
-					|| currentCenterMercator.distanceTo(interpolationCenter) > pixelReloadDist) {
-				// request data if new center offsets more than
-				// Settings.RELOAD_DIST_AR meters
-				requestInterpolation = true;
-			}
-		}
-
-		if (requestInterpolation) {
-			// if new data is needed
-			if (currentRequest != null) {
-				// cancel currently running data request
-				currentRequest.cancel();
-			}
-			// trigger data request
-			currentRequest = dataSource.getDataCache().getDataByBBox(
-					new MercatorRect(currentCenterMercator.x - pixelRadius,
-							currentCenterMercator.y - pixelRadius,
-							currentCenterMercator.x + pixelRadius,
-							currentCenterMercator.y + pixelRadius,
-							Settings.ZOOM_AR), callback, false);
-		}
-
-		for (GeoLocationUpdateListener r : geoLocationUpdateListener) {
-			r.onGeoLocationUpdate(currentCenterGPoint);
-		}
+		// currentCenterGPoint = gPoint;
+		//
+		// // Calculate thresholds for request of data
+		// double meterPerPixel = MercatorProj.getGroundResolution(
+		// gPoint.getLatitudeE6() / 1E6f, Settings.ZOOM_AR);
+		// int pixelRadius = (int) (Settings.SIZE_AR_INTERPOLATION /
+		// meterPerPixel);
+		// int pixelReloadDist = (int) (Settings.RELOAD_DIST_AR /
+		// meterPerPixel);
+		//
+		// // Calculate new center point in world coordinates
+		// int centerPixelX = (int) MercatorProj.transformLonToPixelX(
+		// gPoint.getLongitudeE6() / 1E6f, Settings.ZOOM_AR);
+		// int centerPixelY = (int) MercatorProj.transformLatToPixelY(
+		// gPoint.getLatitudeE6() / 1E6f, Settings.ZOOM_AR);
+		// currentCenterMercator = new MercatorPoint(centerPixelX, centerPixelY,
+		// Settings.ZOOM_AR);
+		//
+		// currentGroundResolution = (float) MercatorProj.getGroundResolution(
+		// currentCenterGPoint.getLatitudeE6() / 1E6f, Settings.ZOOM_AR);
+		//
+		// // determination if data request is needed or if just a simple shift
+		// is
+		// // enough
+		// boolean requestInterpolation = false;
+		// if (currentInterpolationRect == null) {
+		// // Get new data if there were none before
+		// requestInterpolation = true;
+		// } else {
+		// MercatorPoint interpolationCenter = currentInterpolationRect
+		// .getCenter();
+		// if (currentCenterMercator.zoom != currentInterpolationRect.zoom
+		// || currentCenterMercator.distanceTo(interpolationCenter) >
+		// pixelReloadDist) {
+		// // request data if new center offsets more than
+		// // Settings.RELOAD_DIST_AR meters
+		// requestInterpolation = true;
+		// }
+		// }
+		//
+		// if (requestInterpolation) {
+		// // if new data is needed
+		// if (currentRequest != null) {
+		// // cancel currently running data request
+		// currentRequest.cancel();
+		// }
+		// // trigger data request
+		// currentRequest = dataSource.getDataCache().getDataByBBox(
+		// new MercatorRect(currentCenterMercator.x - pixelRadius,
+		// currentCenterMercator.y - pixelRadius,
+		// currentCenterMercator.x + pixelRadius,
+		// currentCenterMercator.y + pixelRadius,
+		// Settings.ZOOM_AR), callback, false);
+		// }
+		//
+		// for (GeoLocationUpdateListener r : geoLocationUpdateListener) {
+		// r.onGeoLocationUpdate(currentCenterGPoint);
+		// }
 
 	}
 
-	public void showCalibration(boolean show) {
-		showCalibration = show;
-	}
 
-	public void showInterpolation(boolean show) {
-		showInterpolation = show;
-	}
-
-	public boolean showsCalibration() {
-		return this.showCalibration;
-	}
-
-	public boolean showsInterpolation() {
-		return this.showInterpolation;
-	}
 
 	/**
 	 * Ask renderer to reload its interpolation

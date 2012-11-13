@@ -15,11 +15,8 @@
  */
 package org.n52.android.view.geoar;
 
-import org.n52.android.GeoARView2;
 import org.n52.android.geoar.R;
 import org.n52.android.tracking.camera.RealityCamera;
-import org.n52.android.tracking.location.LocationHandler;
-import org.n52.android.tracking.location.LocationHandler.OnLocationUpdateListener;
 import org.n52.android.tracking.location.LowPassSensorBuffer;
 import org.n52.android.tracking.location.SensorBuffer;
 import org.n52.android.view.InfoView;
@@ -36,7 +33,6 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
-import android.os.Bundle;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.view.Display;
@@ -53,15 +49,14 @@ import android.widget.ToggleButton;
  * View to show virtual information based on the camera's settings. It also
  * performs sensor based tracking
  * 
- * @author Holger Hopmann
+ * @author Arne de Wall
  */
 public class ARSurfaceView extends GLSurfaceView implements
-		SensorEventListener, OnLocationUpdateListener, GeoARView2,
-		IRotationMatrixProvider {
+		SensorEventListener, IRotationMatrixProvider {
 
 	/**
-	 * Dialog to allow users to choose overlays. Nested class makes modification
-	 * of renderer easier and it is only used here.
+	 * s Dialog to allow users to choose overlays. Nested class makes
+	 * modification of renderer easier and it is only used here.
 	 * 
 	 * @author Holger Hopmann
 	 */
@@ -79,11 +74,11 @@ public class ARSurfaceView extends GLSurfaceView implements
 			// Find Button Views
 			ToggleButton buttonCalibration = (ToggleButton) layout
 					.findViewById(R.id.toggleButtonOverlayCalib);
-			buttonCalibration.setChecked(renderer.showsCalibration());
+			// buttonCalibration.setChecked(renderer.showsCalibration());
 
 			buttonOverlayNoise = (ToggleButton) layout
 					.findViewById(R.id.toggleButtonOverlayNoise);
-			buttonOverlayNoise.setChecked(renderer.showsInterpolation());
+			// buttonOverlayNoise.setChecked(renderer.showsInterpolation());
 
 			// buttonOverlayNoiseGrid = (ToggleButton) layout
 			// .findViewById(R.id.toggleButtonOverlayNoiseGrid);
@@ -107,21 +102,21 @@ public class ARSurfaceView extends GLSurfaceView implements
 				boolean isChecked) {
 			// Change renderer state based on user check input
 			switch (buttonView.getId()) {
-			case R.id.toggleButtonOverlayCalib:
-				renderer.showCalibration(isChecked);
-				break;
-			case R.id.toggleButtonOverlayNoise:
-				renderer.showInterpolation(isChecked);
-				// if (isChecked) {
-				// buttonOverlayNoiseGrid.setChecked(false);
-				// }
-				break;
-			// case R.id.toggleButtonOverlayNoiseGrid:
-			// renderer.showInterpolationGrid(isChecked);
-			// if (isChecked) {
-			// buttonOverlayNoise.setChecked(false);
-			// }
+			// case R.id.toggleButtonOverlayCalib:
+			// renderer.showCalibration(isChecked);
 			// break;
+			// case R.id.toggleButtonOverlayNoise:
+			// renderer.showInterpolation(isChecked);
+			// // if (isChecked) {
+			// // buttonOverlayNoiseGrid.setChecked(false);
+			// // }
+			// break;
+			// // case R.id.toggleButtonOverlayNoiseGrid:
+			// // renderer.showInterpolationGrid(isChecked);
+			// // if (isChecked) {
+			// // buttonOverlayNoise.setChecked(false);
+			// // }
+			// // break;
 			}
 		}
 	}
@@ -139,7 +134,7 @@ public class ARSurfaceView extends GLSurfaceView implements
 
 	private ARSurfaceViewRenderer renderer;
 	private InfoView infoHandler;
-	private LocationHandler locationHandler;
+
 	private boolean updateMagneticVector = true;
 	private boolean sensorValuesChanged;
 
@@ -253,9 +248,9 @@ public class ARSurfaceView extends GLSurfaceView implements
 	public void onPause() {
 		RealityCamera.removeCameraUpdateListener(renderer);
 		mSensorManager.unregisterListener(this);
-		if (locationHandler != null) {
-			locationHandler.removeLocationUpdateListener(this);
-		}
+		// if (locationHandler != null) {
+		// locationHandler.removeLocationUpdateListener(this);
+		// }
 		super.onPause();
 	}
 
@@ -271,9 +266,9 @@ public class ARSurfaceView extends GLSurfaceView implements
 				SensorManager.SENSOR_DELAY_GAME)) {
 			infoHandler.setStatus(R.string.accel_not_started, 5000, accel);
 		}
-		if (locationHandler != null) {
-			locationHandler.addLocationUpdateListener(this);
-		}
+		// if (locationHandler != null) {
+		// locationHandler.addLocationUpdateListener(this);
+		// }
 		super.onResume();
 	}
 
@@ -300,15 +295,9 @@ public class ARSurfaceView extends GLSurfaceView implements
 		sensorValuesChanged = true;
 	}
 
-	public void setLocationHandler(LocationHandler locationHandler) {
-		this.locationHandler = locationHandler;
-		locationHandler.addLocationUpdateListener(this);
-	}
-
 	// //
 
 	public void onLocationChanged(Location location) {
-
 		renderer.setCenter(location);
 	}
 
@@ -320,7 +309,7 @@ public class ARSurfaceView extends GLSurfaceView implements
 			renderer.reload();
 			return true;
 		} else if (item.getItemId() == R.id.item_calibrate) {
-			renderer.showCalibration(true);
+			// renderer.showCalibration(true);
 		}
 		return false;
 	}
@@ -333,24 +322,5 @@ public class ARSurfaceView extends GLSurfaceView implements
 		return isShown();
 	}
 
-	public boolean showsInterpolation() {
-		return renderer.showsInterpolation();
-	}
-
-	public boolean showsCalibration() {
-		return renderer.showsCalibration();
-	}
-
-	public void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean("ARNoiseViewCalibration", showsCalibration());
-		outState.putBoolean("ARNoiseViewInterpolation", showsInterpolation());
-	}
-
-	public void onRestoreInstanceState(Bundle savedInstanceState) {
-		renderer.showCalibration(savedInstanceState.getBoolean(
-				"ARNoiseViewCalibration", false));
-		renderer.showInterpolation(savedInstanceState.getBoolean(
-				"ARNoiseViewInterpolation", true));
-	}
 
 }
