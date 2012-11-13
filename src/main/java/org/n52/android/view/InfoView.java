@@ -37,6 +37,7 @@ import android.widget.TextView;
  * @author Holger Hopmann, Arne de Wall
  * 
  */
+@Deprecated
 public class InfoView extends LinearLayout  {
 	
 	public static final int STEP_CLUSTERING = 1;

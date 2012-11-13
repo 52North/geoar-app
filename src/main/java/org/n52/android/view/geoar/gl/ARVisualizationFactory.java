@@ -44,10 +44,8 @@ public class ARVisualizationFactory implements RenderingFactory {
 
 	protected Object mutexVariable = new Object();
 
-	public ARVisualizationFactory(GLSurfaceView glSurfaceView,
-			DataSourceHolder holder) {
+	public ARVisualizationFactory(GLSurfaceView glSurfaceView) {
 		this.glSurfaceView = glSurfaceView;
-		this.dataSourceHolder = holder;
 	}
 
 	/**

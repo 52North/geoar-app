@@ -23,7 +23,6 @@ import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.IRotationMatrixProvider;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.hardware.Sensor;
@@ -33,17 +32,11 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
-import android.os.Message;
 import android.util.AttributeSet;
 import android.view.Display;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.ToggleButton;
 
 /**
  * View to show virtual information based on the camera's settings. It also
@@ -53,73 +46,6 @@ import android.widget.ToggleButton;
  */
 public class ARSurfaceView extends GLSurfaceView implements
 		SensorEventListener, IRotationMatrixProvider {
-
-	/**
-	 * s Dialog to allow users to choose overlays. Nested class makes
-	 * modification of renderer easier and it is only used here.
-	 * 
-	 * @author Holger Hopmann
-	 */
-	private class AROverlayDialog extends AlertDialog implements
-			OnCheckedChangeListener {
-
-		private ToggleButton buttonOverlayNoise;
-
-		public AROverlayDialog() {
-			super(ARSurfaceView.this.getContext());
-			// Inflate Layout
-			View layout = LayoutInflater.from(getContext()).inflate(
-					R.layout.ar_overlay_dialog, null);
-
-			// Find Button Views
-			ToggleButton buttonCalibration = (ToggleButton) layout
-					.findViewById(R.id.toggleButtonOverlayCalib);
-			// buttonCalibration.setChecked(renderer.showsCalibration());
-
-			buttonOverlayNoise = (ToggleButton) layout
-					.findViewById(R.id.toggleButtonOverlayNoise);
-			// buttonOverlayNoise.setChecked(renderer.showsInterpolation());
-
-			// buttonOverlayNoiseGrid = (ToggleButton) layout
-			// .findViewById(R.id.toggleButtonOverlayNoiseGrid);
-			// buttonOverlayNoiseGrid
-			// .setChecked(renderer.showsInterpolationGrid());
-
-			// Bind Check Listeners
-			buttonCalibration.setOnCheckedChangeListener(this);
-			buttonOverlayNoise.setOnCheckedChangeListener(this);
-			// buttonOverlayNoiseGrid.setOnCheckedChangeListener(this);
-
-			// Set Dialog Options
-			setView(layout);
-			setCancelable(true);
-			setTitle(R.string.choose_overlay);
-			setButton(BUTTON_NEUTRAL, getContext().getString(R.string.ok),
-					(Message) null);
-		}
-
-		public void onCheckedChanged(CompoundButton buttonView,
-				boolean isChecked) {
-			// Change renderer state based on user check input
-			switch (buttonView.getId()) {
-			// case R.id.toggleButtonOverlayCalib:
-			// renderer.showCalibration(isChecked);
-			// break;
-			// case R.id.toggleButtonOverlayNoise:
-			// renderer.showInterpolation(isChecked);
-			// // if (isChecked) {
-			// // buttonOverlayNoiseGrid.setChecked(false);
-			// // }
-			// break;
-			// // case R.id.toggleButtonOverlayNoiseGrid:
-			// // renderer.showInterpolationGrid(isChecked);
-			// // if (isChecked) {
-			// // buttonOverlayNoise.setChecked(false);
-			// // }
-			// // break;
-			}
-		}
-	}
 
 	// Sensor related
 	private SensorBuffer magnetValues = new LowPassSensorBuffer(3, 0.05f);
@@ -301,18 +227,7 @@ public class ARSurfaceView extends GLSurfaceView implements
 		renderer.setCenter(location);
 	}
 
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.item_select_ar_overlay) {
-			new AROverlayDialog().show();
-			return true;
-		} else if (item.getItemId() == R.id.item_reload_ar) {
-			renderer.reload();
-			return true;
-		} else if (item.getItemId() == R.id.item_calibrate) {
-			// renderer.showCalibration(true);
-		}
-		return false;
-	}
+
 
 	public Integer getMenuGroupId() {
 		return R.id.group_noiseview;
