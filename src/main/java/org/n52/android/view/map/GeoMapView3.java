@@ -189,7 +189,7 @@ public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
 
 		// add overlay handler for each enabled data source
 		for (DataSourceHolder dataSource : DataSourceLoader
-				.getDataSources().getCheckedItems()) {
+				.getSelectedDataSources().getCheckedItems()) {
 			DataSourceOverlayHandler overlayHandler = new DataSourceOverlayHandler(
 					dataSourcesOverlay, dataSource);
 			overlayHandler.updateOverlay(this, true);
@@ -197,7 +197,7 @@ public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
 		}
 
 		// register for update events
-		DataSourceLoader.getDataSources()
+		DataSourceLoader.getSelectedDataSources()
 				.addOnCheckedChangeListener(dataSourceListener);
 	}
 

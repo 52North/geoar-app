@@ -61,8 +61,10 @@ public class CheckList<T> extends ArrayList<T> {
 	}
 
 	public void checkItem(T item, boolean state) {
-		checkSet.set(this.indexOf(item), state);
-		notifyCheckedChanged(item, state);
+		if (contains(item)) {
+			checkSet.set(this.indexOf(item), state);
+			notifyCheckedChanged(item, state);
+		}
 	}
 
 	public void checkItem(T item) {

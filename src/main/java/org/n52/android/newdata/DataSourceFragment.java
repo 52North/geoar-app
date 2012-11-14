@@ -31,6 +31,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -50,6 +53,12 @@ public class DataSourceFragment extends SherlockFragment {
 
 	private GridView mGridViewInstalled;
 	private GridView mGridViewDownload;
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		setHasOptionsMenu(true);
+		super.onCreate(savedInstanceState);
+	}
 
 	@Override
 	public View onCreateView(final LayoutInflater inflater,
@@ -97,14 +106,14 @@ public class DataSourceFragment extends SherlockFragment {
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		inflater.inflate(R.menu.cb_main_menu, menu);
+		inflater.inflate(R.menu.menu_datasources, menu);
 		super.onCreateOptionsMenu(menu, inflater);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.cb_menu_refresh:
+		case R.id.item_reload:
 			DataSourceLoader.reloadPlugins();
 			return true;
 		}
@@ -117,18 +126,19 @@ public class DataSourceFragment extends SherlockFragment {
 		private class ViewHolder {
 			public ImageView imageView;
 			public TextView textView;
+			public CheckBox checkBox;
 		}
 
 		private List<DataSourceHolder> dataSources;
 		private LayoutInflater inflater;
 
 		public GridAdapterInstalled() {
-			dataSources = DataSourceLoader.getDataSources();
+			dataSources = DataSourceLoader.getInstalledDataSources();
 			inflater = (LayoutInflater) getActivity().getSystemService(
 					Context.LAYOUT_INFLATER_SERVICE);
 
-			DataSourceLoader
-					.addOnAvailableDataSourcesUpdateListener(this);
+			DataSourceLoader.addOnInstalledDataSourcesUpdateListener(this);
+			DataSourceLoader.addOnSelectedDataSourcesUpdateListener(this);
 			// TODO remove..Listener?
 		}
 
@@ -162,17 +172,32 @@ public class DataSourceFragment extends SherlockFragment {
 						.findViewById(R.id.cb_grid_image);
 				viewHolder.textView = (TextView) view
 						.findViewById(R.id.cb_grid_label);
+				viewHolder.checkBox = (CheckBox) view
+						.findViewById(R.id.checkBox);
 
 				view.setTag(viewHolder);
 			} else {
 				viewHolder = (ViewHolder) view.getTag();
 			}
 
-			DataSourceHolder dataSource = dataSources.get(position);
+			final DataSourceHolder dataSource = dataSources.get(position);
 			// load image via imageCache
 			ImageLoader.getInstance().displayImage("", viewHolder.imageView); // TODO?
 			viewHolder.textView.setText(dataSource.getName());
+			viewHolder.checkBox.setChecked(dataSource.isSelected());
 
+			viewHolder.checkBox
+					.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+						@Override
+						public void onCheckedChanged(CompoundButton buttonView,
+								boolean isChecked) {
+							if(isChecked) 
+								dataSource.select();
+							else 
+								dataSource.unselect();
+						}
+					});
 			return view;
 		}
 

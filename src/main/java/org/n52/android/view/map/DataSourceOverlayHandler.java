@@ -65,25 +65,25 @@ public class DataSourceOverlayHandler {
 
 			@Override
 			public void onProgressUpdate(int progress, int maxProgress, int step) {
-				if (infoHandler != null) {
-					String stepTitle = "";
-					// switch(step){
-					// case InfoView.STEP_CLUSTERING:
-					// stepTitle = "Clustering";
-					// break;
-					// case InfoView.STEP_INTERPOLATION:
-					// stepTitle = "Interpolation";
-					// break;
-					// case MeasurementManager.STEP_REQUEST:
-					// stepTitle = "Messungsabfrage";
-					// break;
-					//
-					// }
+				// if (infoHandler != null) {
+				// String stepTitle = "";
+				// switch(step){
+				// case InfoView.STEP_CLUSTERING:
+				// stepTitle = "Clustering";
+				// break;
+				// case InfoView.STEP_INTERPOLATION:
+				// stepTitle = "Interpolation";
+				// break;
+				// case MeasurementManager.STEP_REQUEST:
+				// stepTitle = "Messungsabfrage";
+				// break;
+				//
+				// }
 
-					infoHandler.setProgressTitle(stepTitle, UpdateHolder.this);
-					infoHandler.setProgress(progress, maxProgress,
-							UpdateHolder.this);
-				}
+				// infoHandler.setProgressTitle(stepTitle, UpdateHolder.this);
+				// infoHandler.setProgress(progress, maxProgress,
+				// UpdateHolder.this);
+				// }
 
 			}
 
@@ -91,17 +91,17 @@ public class DataSourceOverlayHandler {
 			public void onAbort(MercatorRect bounds, int reason) {
 				canceled = true;
 
-				if (infoHandler != null) {
-					// // inform user of aborting reason
-					// infoHandler.clearProgress(UpdateHolder.this);
-					// if (reason == MeasurementManager.ABORT_NO_CONNECTION) {
-					// infoHandler.setStatus(R.string.connection_error, 5000,
-					// UpdateHolder.this);
-					// } else if (reason == MeasurementManager.ABORT_UNKOWN) {
-					// infoHandler.setStatus(R.string.unkown_error, 5000,
-					// UpdateHolder.this);
-					// }
-				}
+				// if (infoHandler != null) {
+				// // inform user of aborting reason
+				// infoHandler.clearProgress(UpdateHolder.this);
+				// if (reason == MeasurementManager.ABORT_NO_CONNECTION) {
+				// infoHandler.setStatus(R.string.connection_error, 5000,
+				// UpdateHolder.this);
+				// } else if (reason == MeasurementManager.ABORT_UNKOWN) {
+				// infoHandler.setStatus(R.string.unkown_error, 5000,
+				// UpdateHolder.this);
+				// }
+				// }
 			}
 
 			@Override
@@ -161,8 +161,8 @@ public class DataSourceOverlayHandler {
 						requestHolder = dataSource.getDataCache()
 								.getDataByBBox(bounds, callback, false);
 					} else {
-						infoHandler.setStatus(R.string.not_zoomed_in, 5000,
-								this);
+						// infoHandler.setStatus(R.string.not_zoomed_in, 5000,
+						// this);
 					}
 				}
 			}
@@ -180,7 +180,7 @@ public class DataSourceOverlayHandler {
 
 	// protected int cacheWidth;
 	// protected int cacheHeight;
-	protected InfoView infoHandler;
+	// protected InfoView infoHandler;
 	// protected Paint paint;
 	// protected Drawable itemizedDrawable;
 
@@ -204,10 +204,6 @@ public class DataSourceOverlayHandler {
 		}
 	};
 
-	@Deprecated
-	public void setInfoHandler(InfoView infoHandler) {
-		this.infoHandler = infoHandler;
-	}
 
 	public void clear() {
 		synchronized (updateLock) {
@@ -241,8 +237,8 @@ public class DataSourceOverlayHandler {
 
 		GeoPoint gPoint = (GeoPoint) proj.fromPixels(0, 0);
 		if (gPoint == null)
-			return;	// mapview not yet displayed
-		
+			return; // mapview not yet displayed
+
 		Point point = proj.toPoint(gPoint, null, zoom);
 
 		// int x = (int) MercatorProj.transformLonToPixelX(

@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/map_item_ar"
+        android:id="@+id/item_ar"
         android:icon="@drawable/ic_menu_phone"
         android:showAsAction="always"
         android:title="@string/map_item_camera"/>

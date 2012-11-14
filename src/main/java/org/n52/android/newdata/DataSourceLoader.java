@@ -21,12 +21,15 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.n52.android.GeoARApplication;
+import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Environment;
 import android.util.Log;
 import dalvik.system.DexClassLoader;
@@ -49,35 +52,145 @@ public class DataSourceLoader {
 		}
 	};
 
+	private static final String SELECTION_PREF = "selected_datasources";
 	private static final String PLUGIN_PATH = Environment
 			.getExternalStorageDirectory() + "/GeoAR/";
-	private static CheckList<DataSourceHolder> dataSources = new CheckList<DataSourceHolder>();
-	private static Set<OnDataSourcesChangeListener> dataSourcesChangeListeners = new HashSet<OnDataSourcesChangeListener>();
+	private static CheckList<DataSourceHolder> mInstalledDataSources = new CheckList<DataSourceHolder>();
+	private static CheckList<DataSourceHolder> mSelectedDataSources = new CheckList<DataSourceHolder>();
+	private static Set<OnDataSourcesChangeListener> mSelectedDataSourcesChangeListeners = new HashSet<OnDataSourcesChangeListener>();
+	private static Set<OnDataSourcesChangeListener> mInstalledDataSourcesChangeListeners = new HashSet<OnDataSourcesChangeListener>();
 
 	static {
 		loadPlugins();
+
+		// Ensure activating and deactivating of selected data sources
+		mSelectedDataSources
+				.addOnCheckedChangeListener(new OnCheckedChangedListener<DataSourceHolder>() {
+					@Override
+					public void onCheckedChanged(DataSourceHolder item,
+							boolean newState) {
+						if (newState == true) {
+							item.activate();
+						} else {
+							item.deactivate();
+						}
+					}
+				});
+
+		restoreDataSourceSelection();
 	}
 
 	public static void reloadPlugins() {
-		dataSources.clear();
+		mInstalledDataSources.clear();
 		loadPlugins();
-		for (OnDataSourcesChangeListener listener : dataSourcesChangeListeners) {
+
+		// Check if a selected data source got removed
+		DataSourceHolder dataSource;
+		Iterator<DataSourceHolder> it = mSelectedDataSources.iterator();
+		while (it.hasNext()) {
+			dataSource = it.next();
+			if (!mInstalledDataSources.contains(dataSource)) {
+				dataSource.deactivate();
+				it.remove();
+			}
+		}
+		notifyInstalledDataSourceListeners();
+		notifySelectedDataSourceListeners();
+	}
+
+	private static void restoreDataSourceSelection() {
+		SharedPreferences preferences = GeoARApplication.applicationContext
+				.getSharedPreferences(GeoARApplication.PREFERENCES_FILE,
+						Context.MODE_PRIVATE);
+
+		String[] identifierArray = preferences.getString(SELECTION_PREF, "")
+				.split(";");
+		for (String identifier : identifierArray) {
+			DataSourceHolder dataSource = getDataSourceByIdentifier(identifier);
+			if (dataSource != null) {
+				selectDataSource(dataSource);
+			}
+		}
+	}
+
+	public static void saveDataSourceSelection() {
+		String identifierPref = "";
+		for (DataSourceHolder dataSource : mSelectedDataSources) {
+			if (identifierPref.length() != 0)
+				identifierPref += ";";
+			identifierPref += dataSource.getIdentifier();
+		}
+
+		SharedPreferences preferences = GeoARApplication.applicationContext
+				.getSharedPreferences(GeoARApplication.PREFERENCES_FILE,
+						Context.MODE_PRIVATE);
+		Editor editor = preferences.edit();
+		editor.putString(SELECTION_PREF, identifierPref);
+		editor.commit();
+	}
+
+	private static DataSourceHolder getDataSourceByIdentifier(String identifier) {
+		for (DataSourceHolder dataSource : mInstalledDataSources) {
+			if (dataSource.getIdentifier().equals(identifier))
+				return dataSource;
+		}
+		return null;
+	}
+
+	public static void selectDataSource(DataSourceHolder dataSource) {
+		if (!mSelectedDataSources.contains(dataSource)) {
+			mSelectedDataSources.add(dataSource);
+			notifySelectedDataSourceListeners();
+		}
+	}
+
+	public static void unselectDataSource(DataSourceHolder dataSource) {
+		if (mSelectedDataSources.contains(dataSource)) {
+			dataSource.deactivate();
+			mSelectedDataSources.remove(dataSource);
+			notifySelectedDataSourceListeners();
+		}
+
+	}
+
+	private static void notifySelectedDataSourceListeners() {
+		for (OnDataSourcesChangeListener listener : mSelectedDataSourcesChangeListeners) {
 			listener.onDataSourcesChange();
 		}
 	}
 
-	public static CheckList<DataSourceHolder> getDataSources() {
-		return dataSources;
+	private static void notifyInstalledDataSourceListeners() {
+		for (OnDataSourcesChangeListener listener : mInstalledDataSourcesChangeListeners) {
+			listener.onDataSourcesChange();
+		}
 	}
 
-	public static void addOnAvailableDataSourcesUpdateListener(
-			OnDataSourcesChangeListener listener) {
-		dataSourcesChangeListeners.add(listener);
+	public static CheckList<DataSourceHolder> getSelectedDataSources() {
+		return mSelectedDataSources;
 	}
 
-	public static void removeOnAvailableDataSourcesUpdateListener(
+	public static CheckList<DataSourceHolder> getInstalledDataSources() {
+		return mInstalledDataSources;
+	}
+
+	public static void addOnSelectedDataSourcesUpdateListener(
 			OnDataSourcesChangeListener listener) {
-		dataSourcesChangeListeners.remove(listener);
+		mSelectedDataSourcesChangeListeners.add(listener);
+	}
+
+	public static void removeOnSelectedDataSourcesUpdateListener(
+			OnDataSourcesChangeListener listener) {
+		mSelectedDataSourcesChangeListeners.remove(listener);
+	}
+
+	public static void addOnInstalledDataSourcesUpdateListener(
+			OnDataSourcesChangeListener listener) {
+		mSelectedDataSourcesChangeListeners.add(listener);
+	}
+
+	public static void removeOnInstalledDataSourcesUpdateListener(
+			OnDataSourcesChangeListener listener) {
+		mSelectedDataSourcesChangeListeners.remove(listener);
 	}
 
 	private static void loadPlugins() {
@@ -127,7 +240,7 @@ public class DataSourceLoader {
 							@SuppressWarnings("unchecked")
 							DataSourceHolder dataSourceHolder = new DataSourceHolder(
 									(Class<? extends DataSource<? super Filter>>) entryClass);
-							dataSources.add(dataSourceHolder);
+							mInstalledDataSources.add(dataSourceHolder);
 						} else {
 							Log.e("GeoAR",
 									"Datasource "

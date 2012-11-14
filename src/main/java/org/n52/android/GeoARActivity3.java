@@ -134,8 +134,8 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		// }
 
 		DataSourceLoader
-				.addOnAvailableDataSourcesUpdateListener(dataSourceListener);
-		DataSourceLoader.getDataSources().addOnCheckedChangeListener(
+				.addOnSelectedDataSourcesUpdateListener(dataSourceListener);
+		DataSourceLoader.getSelectedDataSources().addOnCheckedChangeListener(
 				dataSourceListener);
 
 	}
@@ -169,13 +169,15 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.putFloat("cameraHeight", RealityCamera.height);
 		editor.commit();
+		
+		DataSourceLoader.saveDataSourceSelection();
 	}
 
 	@Override
 	protected void onDestroy() {
 		DataSourceLoader
-				.removeOnAvailableDataSourcesUpdateListener(dataSourceListener);
-		DataSourceLoader.getDataSources().removeOnCheckedChangeListener(
+				.removeOnSelectedDataSourcesUpdateListener(dataSourceListener);
+		DataSourceLoader.getSelectedDataSources().removeOnCheckedChangeListener(
 				dataSourceListener);
 		super.onDestroy();
 	}
@@ -208,12 +210,16 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		// // new DataSourceDialog(this, dataSources, measurementManager)
 		// new DataSourceDialog(this, null, measurementManager).show();
 		// break;
-		case R.id.map_item_ar:
+		case R.id.item_ar:
 			mPager.showFragment(arFragment);
+			return true;
+			
+		case R.id.item_map:
+			mPager.showFragment(mapFragment);
 			return true;
 
 		case R.id.item_filter:
-			DataSourceLoader.getDataSources().iterator().next()
+			DataSourceLoader.getSelectedDataSources().iterator().next()
 					.createFilterDialog(this);
 			return true;
 
@@ -241,7 +247,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		subMenu.removeGroup(GROUP_DATASOURCES);
 
 		final CheckList<DataSourceHolder> dataSources = DataSourceLoader
-				.getDataSources();
+				.getSelectedDataSources();
 		for (final DataSourceHolder dataSource : dataSources) {
 			SubMenu sourceMenu = subMenu.addSubMenu(GROUP_DATASOURCES,
 					Menu.NONE, Menu.NONE, dataSource.getName());

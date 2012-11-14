@@ -2,25 +2,35 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="100dp" >
-    
-    <ImageView 
+
+    <ImageView
         android:id="@+id/cb_grid_image"
-        android:background="@android:color/white"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
-    
-    <TextView 
+        android:layout_height="fill_parent"
+        android:background="@android:color/white" />
+
+    <TextView
         android:id="@+id/cb_grid_label"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:textColor="#ffffff"
-        android:background="#90000000"
-        android:gravity="center"
         android:layout_alignBottom="@+id/cb_grid_image"
-        android:textSize="10dp"
+        android:background="#90000000"
+        android:ellipsize="marquee"
+        android:gravity="center"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp"
         android:singleLine="true"
-        android:ellipsize="marquee" />
+        android:textColor="#ffffff"
+        android:textSize="10dp" />
+
+    <CheckBox
+        android:id="@+id/checkBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignTop="@+id/cb_grid_label"
+        android:focusable="false"
+        android:focusableInTouchMode="false" />
 
 </RelativeLayout>

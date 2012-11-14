@@ -22,6 +22,8 @@ public class GeoARApplication extends Application {
 
 	public static Context applicationContext;
 
+	public static final String PREFERENCES_FILE = "GeoAR";
+
 	@Override
 	public void onCreate() {
 		applicationContext = getApplicationContext();

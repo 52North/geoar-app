@@ -235,7 +235,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 		// this.geoLocationUpdateListener = new
 		// ArrayList<ARSurfaceViewRenderer.GeoLocationUpdateListener>();
-		DataSourceLoader.getDataSources()
+		DataSourceLoader.getSelectedDataSources()
 				.addOnCheckedChangeListener(dataSourceListener);
 
 		factory = new ARVisualizationFactory(glSurfaceView);

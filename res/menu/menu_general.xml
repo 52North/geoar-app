@@ -18,7 +18,7 @@
        <item
         android:id="@+id/item_filter"
         android:showAsAction="always"
-        android:title="Filter Test"/>
+        android:title="Test"/>
 
      <item android:id="@+id/item_about"
         android:title="@string/cb_menu_about"

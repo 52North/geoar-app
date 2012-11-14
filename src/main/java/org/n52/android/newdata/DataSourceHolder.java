@@ -203,7 +203,6 @@ public class DataSourceHolder implements Parcelable {
 		context.startActivity(intent);
 	}
 
-
 	// Parcelable
 
 	@Override
@@ -222,7 +221,7 @@ public class DataSourceHolder implements Parcelable {
 			int id = in.readInt();
 			// Find DataSourceHolder with provided id
 			for (DataSourceHolder holder : DataSourceLoader
-					.getDataSources()) {
+					.getSelectedDataSources()) {
 				if (holder.id == id) {
 					return holder;
 				}
@@ -235,5 +234,22 @@ public class DataSourceHolder implements Parcelable {
 			return new DataSourceHolder[size];
 		}
 	};
+
+	public String getIdentifier() {
+		// TODO ?
+		return dataSource.getClass().getSimpleName();
+	}
+
+	public void select() {
+		DataSourceLoader.selectDataSource(this);
+	}
+	
+	public boolean isSelected() {
+		return DataSourceLoader.getSelectedDataSources().contains(this);
+	}
+
+	public void unselect() {
+		DataSourceLoader.unselectDataSource(this);
+	}
 
 }
