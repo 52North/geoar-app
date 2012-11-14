@@ -30,7 +30,7 @@ import android.widget.TextView;
 
 public class DataSourceDialogFragment extends DialogFragment {
 
-	static DataSourceDialogFragment newInstance(
+	public static DataSourceDialogFragment newInstance(
 			DataSourceHolder dataSourceHolder) {
 		DataSourceDialogFragment df = new DataSourceDialogFragment();
 		Bundle args = new Bundle();

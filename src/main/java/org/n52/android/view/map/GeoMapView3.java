@@ -30,24 +30,17 @@ import org.n52.android.newdata.DataSourceLoader;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.tracking.location.LocationHandler.OnLocationUpdateListener;
 import org.n52.android.view.InfoView;
-import org.n52.android.view.map.overlay.InterpolationOverlay;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Message;
 import android.os.Parcelable;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 /**
  * The overall {@link MapView}. Maintains {@link InterpolationOverlay} and

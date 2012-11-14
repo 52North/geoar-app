@@ -16,9 +16,11 @@
 package org.n52.android;
 
 import org.mapsforge.android.maps.MapActivity;
+import org.mapsforge.android.maps.MapView;
 import org.n52.android.geoar.R;
 import org.n52.android.newdata.CheckList;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
+import org.n52.android.newdata.DataSourceFragment;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.DataSourceLoader;
 import org.n52.android.newdata.DataSourceLoader.OnDataSourcesChangeListener;
@@ -26,12 +28,10 @@ import org.n52.android.newdata.Visualization;
 import org.n52.android.tracking.camera.RealityCamera;
 import org.n52.android.view.GeoARViewPager;
 import org.n52.android.view.map.GeoMapFragment2;
-import org.osmdroid.views.MapView;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
@@ -76,7 +76,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 
 	private GeoMapFragment2 mapFragment = new GeoMapFragment2();
 	private GeoMapFragment2 arFragment = new GeoMapFragment2();
-	private CBFragment cbFragment = new CBFragment();
+	private DataSourceFragment cbFragment = new DataSourceFragment();
 
 	// private List<GeoARView2> noiseARViews = new ArrayList<GeoARView2>();
 	private DataSourceChangeListener dataSourceListener = new DataSourceChangeListener();
