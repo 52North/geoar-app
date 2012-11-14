@@ -133,10 +133,10 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		// builder.show();
 		// }
 
-		DataSourceLoader.getInstance().addOnAvailableDataSourcesUpdateListener(
+		DataSourceLoader
+				.addOnAvailableDataSourcesUpdateListener(dataSourceListener);
+		DataSourceLoader.getDataSources().addOnCheckedChangeListener(
 				dataSourceListener);
-		DataSourceLoader.getInstance().getDataSources()
-				.addOnCheckedChangeListener(dataSourceListener);
 
 	}
 
@@ -173,10 +173,10 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 
 	@Override
 	protected void onDestroy() {
-		DataSourceLoader.getInstance()
+		DataSourceLoader
 				.removeOnAvailableDataSourcesUpdateListener(dataSourceListener);
-		DataSourceLoader.getInstance().getDataSources()
-				.removeOnCheckedChangeListener(dataSourceListener);
+		DataSourceLoader.getDataSources().removeOnCheckedChangeListener(
+				dataSourceListener);
 		super.onDestroy();
 	}
 
@@ -213,7 +213,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 			return true;
 
 		case R.id.item_filter:
-			DataSourceLoader.getInstance().getDataSources().iterator().next()
+			DataSourceLoader.getDataSources().iterator().next()
 					.createFilterDialog(this);
 			return true;
 
@@ -241,7 +241,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		subMenu.removeGroup(GROUP_DATASOURCES);
 
 		final CheckList<DataSourceHolder> dataSources = DataSourceLoader
-				.getInstance().getDataSources();
+				.getDataSources();
 		for (final DataSourceHolder dataSource : dataSources) {
 			SubMenu sourceMenu = subMenu.addSubMenu(GROUP_DATASOURCES,
 					Menu.NONE, Menu.NONE, dataSource.getName());

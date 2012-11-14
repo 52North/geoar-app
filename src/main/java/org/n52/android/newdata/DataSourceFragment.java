@@ -105,7 +105,7 @@ public class DataSourceFragment extends SherlockFragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.cb_menu_refresh:
-			DataSourceLoader.getInstance().reloadPlugins();
+			DataSourceLoader.reloadPlugins();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -123,11 +123,11 @@ public class DataSourceFragment extends SherlockFragment {
 		private LayoutInflater inflater;
 
 		public GridAdapterInstalled() {
-			dataSources = DataSourceLoader.getInstance().getDataSources();
+			dataSources = DataSourceLoader.getDataSources();
 			inflater = (LayoutInflater) getActivity().getSystemService(
 					Context.LAYOUT_INFLATER_SERVICE);
 
-			DataSourceLoader.getInstance()
+			DataSourceLoader
 					.addOnAvailableDataSourcesUpdateListener(this);
 			// TODO remove..Listener?
 		}

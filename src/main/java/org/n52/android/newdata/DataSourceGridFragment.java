@@ -90,12 +90,12 @@ public class DataSourceGridFragment extends Fragment {
 		private LayoutInflater inflater;
 
 		public GridAdapter(Context context) {
-			dataSources = DataSourceLoader.getInstance()
+			dataSources = DataSourceLoader
 					.getDataSources();
 			inflater = (LayoutInflater) context
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-			DataSourceLoader.getInstance()
+			DataSourceLoader
 					.addOnAvailableDataSourcesUpdateListener(this);
 			// TODO remove..Listener?
 		}

@@ -240,7 +240,9 @@ public class DataSourceOverlayHandler {
 		Projection proj = mapView.getProjection();
 
 		GeoPoint gPoint = (GeoPoint) proj.fromPixels(0, 0);
-
+		if (gPoint == null)
+			return;	// mapview not yet displayed
+		
 		Point point = proj.toPoint(gPoint, null, zoom);
 
 		// int x = (int) MercatorProj.transformLonToPixelX(

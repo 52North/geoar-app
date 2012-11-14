@@ -188,7 +188,7 @@ public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
 		getOverlays().add(dataSourcesOverlay);
 
 		// add overlay handler for each enabled data source
-		for (DataSourceHolder dataSource : DataSourceLoader.getInstance()
+		for (DataSourceHolder dataSource : DataSourceLoader
 				.getDataSources().getCheckedItems()) {
 			DataSourceOverlayHandler overlayHandler = new DataSourceOverlayHandler(
 					dataSourcesOverlay, dataSource);
@@ -197,7 +197,7 @@ public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
 		}
 
 		// register for update events
-		DataSourceLoader.getInstance().getDataSources()
+		DataSourceLoader.getDataSources()
 				.addOnCheckedChangeListener(dataSourceListener);
 	}
 
@@ -256,29 +256,6 @@ public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
 		return locationIndicator.getVisibility() == View.VISIBLE;
 	}
 
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// TODO
-		// switch (item.getItemId()) {
-		// case R.id.item_own_location:
-		// if (!manualPositionMode) {
-		// showOwnLocation(!showsLocation(), true);
-		// }
-		// // Event konsumieren
-		// return true;
-		// case R.id.item_select_map_overlay:
-		// new MapOverlayDialog().show();
-		//
-		// // Event konsumieren
-		// return true;
-		// case R.id.item_reload_map:
-		// // for (MapOverlayHandler2 handler : mapOverlayHandlers) {
-		// // handler.updateOverlay(this, true);
-		// // }
-		// // Event konsumieren
-		// return true;
-		// }
-		return false;
-	}
 
 	public void showOwnLocation(boolean show, boolean pan) {
 		if (show) {

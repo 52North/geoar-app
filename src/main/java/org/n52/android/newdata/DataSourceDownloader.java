@@ -41,6 +41,7 @@ import org.apache.http.params.HttpParams;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.n52.android.newdata.DataSourceDownloader.DataSourceDownloadHolder;
 
 import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
@@ -52,18 +53,67 @@ public class DataSourceDownloader {
 	}
 
 	public static class DataSourceDownloadHolder {
-		// TODO
-		String identification;
+		private String identification;
 		private String name;
-		protected long version;
-		protected String description;
-		protected String downloadLink;
-		protected String imageLink;
+		private Long version;
+		private String description;
+		private String downloadLink;
+		private String imageLink;
 
 		public String getName() {
 			return name;
 		}
 
+		public String getDescription() {
+			return description;
+		}
+
+		public String getDownloadLink() {
+			return downloadLink;
+		}
+
+		public String getIdentification() {
+			return identification;
+		}
+
+		public String getImageLink() {
+			return imageLink;
+		}
+
+		public Long getVersion() {
+			return version;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (o instanceof DataSourceDownloadHolder) {
+				DataSourceDownloadHolder other = (DataSourceDownloadHolder) o;
+				if (identification == null)
+					return false;
+
+				if ((version == null && other.version == null)
+						|| (version != null && version.equals(other.version))) {
+					return identification.equals(other.identification);
+				} else {
+					return false;
+				}
+			}
+
+			return super.equals(o);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = prime;
+			result = prime
+					* result
+					+ ((identification == null) ? 0 : identification.hashCode());
+			result = prime * result
+					+ ((version == null) ? 0 : version.hashCode());
+
+			return result;
+		}
 	}
 
 	private static DefaultHttpClient mHttpClient;
@@ -94,21 +144,23 @@ public class DataSourceDownloader {
 
 	private static Set<OnDataSourceResultListener> mCurrentListeners = new HashSet<OnDataSourceResultListener>();
 
-	private static List<DataSourceDownloadHolder> mDownloadableDataSources = new ArrayList<DataSourceDownloadHolder>();
+	private static Set<DataSourceDownloadHolder> mDownloadableDataSources = new HashSet<DataSourceDownloadHolder>();
 
 	private static AsyncTask<Void, Void, Void> mDownloadTask = new AsyncTask<Void, Void, Void>() {
 
 		@Override
 		protected void onPostExecute(Void result) {
+			List<DataSourceDownloadHolder> resultList = new ArrayList<DataSourceDownloadHolder>();
+			resultList.addAll(mDownloadableDataSources);
 			for (OnDataSourceResultListener listener : mCurrentListeners) {
-				listener.onDataSourceResult(mDownloadableDataSources);
+				listener.onDataSourceResult(resultList);
 			}
 			mCurrentListeners.clear();
 		}
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			mDownloadableDataSources = new ArrayList<DataSourceDownloadHolder>();
+			// TODO will not reflect removal of remote data sources
 
 			HttpGet request = new HttpGet(SERVER_URL);
 			request.setHeader("Accept", "application/json");
@@ -174,16 +226,22 @@ public class DataSourceDownloader {
 		return sb.toString();
 	}
 
-	public static void getDataSources(OnDataSourceResultListener listener) {
-		if (mDownloadTask.getStatus() != Status.FINISHED) {
+	public static void getDataSources(OnDataSourceResultListener listener,
+			boolean force) {
+		if (mDownloadTask.getStatus() != Status.FINISHED || force) {
 			mCurrentListeners.add(listener);
 
 			if (mDownloadTask.getStatus() != Status.RUNNING) {
 				mDownloadTask.execute((Void) null);
 			}
 		} else {
-			listener.onDataSourceResult(mDownloadableDataSources);
+			listener.onDataSourceResult(new ArrayList<DataSourceDownloadHolder>(
+					mDownloadableDataSources));
 		}
+	}
+
+	public static void getDataSources(OnDataSourceResultListener listener) {
+		getDataSources(listener, false);
 	}
 
 }

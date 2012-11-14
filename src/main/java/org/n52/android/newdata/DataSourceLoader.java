@@ -41,7 +41,7 @@ public class DataSourceLoader {
 		void onDataSourcesChange();
 	}
 
-	private FilenameFilter pluginFilenameFilter = new FilenameFilter() {
+	private static FilenameFilter pluginFilenameFilter = new FilenameFilter() {
 		@Override
 		public boolean accept(File dir, String fileName) {
 			return fileName.endsWith(".apk") || fileName.endsWith(".zip")
@@ -51,25 +51,14 @@ public class DataSourceLoader {
 
 	private static final String PLUGIN_PATH = Environment
 			.getExternalStorageDirectory() + "/GeoAR/";
-	private Context context;
-	private CheckList<DataSourceHolder> dataSources = new CheckList<DataSourceHolder>();
-	private static DataSourceLoader instance;
-	private Set<OnDataSourcesChangeListener> dataSourcesChangeListeners = new HashSet<OnDataSourcesChangeListener>();
+	private static CheckList<DataSourceHolder> dataSources = new CheckList<DataSourceHolder>();
+	private static Set<OnDataSourcesChangeListener> dataSourcesChangeListeners = new HashSet<OnDataSourcesChangeListener>();
 
-	public static DataSourceLoader getInstance() {
-		if (instance == null) {
-			instance = new DataSourceLoader(GeoARApplication.applicationContext);
-		}
-
-		return instance;
-	}
-	
-	private DataSourceLoader(Context context) {
-		this.context = context;
+	static {
 		loadPlugins();
 	}
 
-	public void reloadPlugins() {
+	public static void reloadPlugins() {
 		dataSources.clear();
 		loadPlugins();
 		for (OnDataSourcesChangeListener listener : dataSourcesChangeListeners) {
@@ -77,21 +66,21 @@ public class DataSourceLoader {
 		}
 	}
 
-	public CheckList<DataSourceHolder> getDataSources() {
+	public static CheckList<DataSourceHolder> getDataSources() {
 		return dataSources;
 	}
 
-	public void addOnAvailableDataSourcesUpdateListener(
+	public static void addOnAvailableDataSourcesUpdateListener(
 			OnDataSourcesChangeListener listener) {
 		dataSourcesChangeListeners.add(listener);
 	}
 
-	public void removeOnAvailableDataSourcesUpdateListener(
+	public static void removeOnAvailableDataSourcesUpdateListener(
 			OnDataSourcesChangeListener listener) {
 		dataSourcesChangeListeners.remove(listener);
 	}
 
-	private void loadPlugins() {
+	private static void loadPlugins() {
 
 		String[] apksInDirectory = new File(PLUGIN_PATH)
 				.list(pluginFilenameFilter);
@@ -109,7 +98,8 @@ public class DataSourceLoader {
 					throw new FileNotFoundException("Directory not found: "
 							+ pluginPath);
 
-				File tmpDir = context.getDir(pluginBaseFileName, 0);
+				File tmpDir = GeoARApplication.applicationContext.getDir(
+						pluginBaseFileName, 0);
 
 				Enumeration<String> entries = DexFile.loadDex(
 						pluginPath,
@@ -120,8 +110,8 @@ public class DataSourceLoader {
 
 				// create separate ClassLoader for each plugin
 				DexClassLoader dexClassLoader = new DexClassLoader(pluginPath,
-						tmpDir.getAbsolutePath(), null, this.getClass()
-								.getClassLoader());
+						tmpDir.getAbsolutePath(), null,
+						GeoARApplication.applicationContext.getClassLoader());
 
 				while (entries.hasMoreElements()) {
 					// Check each classname for annotations
@@ -157,6 +147,4 @@ public class DataSourceLoader {
 		}
 
 	}
-
-
 }

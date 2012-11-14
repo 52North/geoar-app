@@ -221,7 +221,7 @@ public class DataSourceHolder implements Parcelable {
 		public DataSourceHolder createFromParcel(Parcel in) {
 			int id = in.readInt();
 			// Find DataSourceHolder with provided id
-			for (DataSourceHolder holder : DataSourceLoader.getInstance()
+			for (DataSourceHolder holder : DataSourceLoader
 					.getDataSources()) {
 				if (holder.id == id) {
 					return holder;

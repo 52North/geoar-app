@@ -235,7 +235,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 		// this.geoLocationUpdateListener = new
 		// ArrayList<ARSurfaceViewRenderer.GeoLocationUpdateListener>();
-		DataSourceLoader.getInstance().getDataSources()
+		DataSourceLoader.getDataSources()
 				.addOnCheckedChangeListener(dataSourceListener);
 
 		factory = new ARVisualizationFactory(glSurfaceView);
@@ -308,8 +308,8 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	private void initScene() {
 
 		// Set<DataSourceHolder> list =
-		// DataSourceLoader.getInstance().getDataSources();
-		// // DataSourceLoader.getInstance().
+		// DataSourceLoader.getDataSources();
+		// // DataSourceLoader.
 		// for(DataSourceHolder holder : list){
 		// ARVisualizationFactory fac = new ARVisualizationFactory();
 		// }
