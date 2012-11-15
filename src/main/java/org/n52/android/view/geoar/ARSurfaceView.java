@@ -103,10 +103,7 @@ public class ARSurfaceView extends GLSurfaceView implements
 	// return null;
 	// }
 
-	public void setInfoHandler(InfoView infoHandler) {
-		this.infoHandler = infoHandler;
-		// renderer.setInfoHandler(infoHandler);
-	}
+
 
 	public float[] getRotationMatrix() {
 		if (sensorValuesChanged) {

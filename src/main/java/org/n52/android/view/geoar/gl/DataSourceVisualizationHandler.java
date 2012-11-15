@@ -18,8 +18,6 @@ package org.n52.android.view.geoar.gl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.n52.android.alg.proj.MercatorPoint;
-import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.newdata.DataCache.GetDataBoundsCallback;
 import org.n52.android.newdata.DataCache.RequestHolder;
@@ -27,7 +25,6 @@ import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.SpatialEntity;
 import org.n52.android.newdata.Visualization.ARVisualization.ItemVisualization;
 import org.n52.android.view.InfoView;
-import org.n52.android.view.geoar.Settings;
 import org.n52.android.view.geoar.gl.model.RenderNode;
 import org.osmdroid.util.GeoPoint;
 

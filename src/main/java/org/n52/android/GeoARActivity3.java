@@ -27,6 +27,7 @@ import org.n52.android.newdata.DataSourceLoader.OnDataSourcesChangeListener;
 import org.n52.android.newdata.Visualization;
 import org.n52.android.tracking.camera.RealityCamera;
 import org.n52.android.view.GeoARViewPager;
+import org.n52.android.view.geoar.ARFragment2;
 import org.n52.android.view.map.GeoMapFragment2;
 
 import android.app.Activity;
@@ -75,7 +76,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 	}
 
 	private GeoMapFragment2 mapFragment = new GeoMapFragment2();
-	private GeoMapFragment2 arFragment = new GeoMapFragment2();
+	private ARFragment2 arFragment = new ARFragment2();
 	private DataSourceFragment cbFragment = new DataSourceFragment();
 
 	// private List<GeoARView2> noiseARViews = new ArrayList<GeoARView2>();
@@ -169,7 +170,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.putFloat("cameraHeight", RealityCamera.height);
 		editor.commit();
-		
+
 		DataSourceLoader.saveDataSourceSelection();
 	}
 
@@ -177,8 +178,8 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 	protected void onDestroy() {
 		DataSourceLoader
 				.removeOnSelectedDataSourcesUpdateListener(dataSourceListener);
-		DataSourceLoader.getSelectedDataSources().removeOnCheckedChangeListener(
-				dataSourceListener);
+		DataSourceLoader.getSelectedDataSources()
+				.removeOnCheckedChangeListener(dataSourceListener);
 		super.onDestroy();
 	}
 
@@ -213,7 +214,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		case R.id.item_ar:
 			mPager.showFragment(arFragment);
 			return true;
-			
+
 		case R.id.item_map:
 			mPager.showFragment(mapFragment);
 			return true;

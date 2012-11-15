@@ -16,31 +16,54 @@
 package org.n52.android.view.geoar;
 
 import org.n52.android.geoar.R;
-import org.n52.android.tracking.location.LocationHandler;
-import org.n52.android.view.GeoARFragment2;
-import org.n52.android.view.InfoView;
 
+import android.app.ActivityManager;
+import android.content.Context;
+import android.content.pm.ConfigurationInfo;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class ARFragment2 extends GeoARFragment2 {
+import com.actionbarsherlock.app.SherlockFragment;
 
-	// TODO
-	// private ARSurfaceView augmentedView;
+public class ARFragment2 extends SherlockFragment {
 
-	// public ARFragment2() {
-	// geoARViews = new ArrayList<GeoARView2>();
-	// }
+	private ARSurfaceView augmentedView;
 
-	public ARFragment2(LocationHandler locationHandler, InfoView infoView) {
-		// this();
-		this.mInfoHandler = infoView;
-		this.mLocationHandler = locationHandler;
+	public ARFragment2() {
 		this.setRetainInstance(true);
+	}
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		// FrameLayout layout = (FrameLayout) getView().findViewById(
+		// R.id.frameLayout);
+		//
+		// augmentedView = new ARSurfaceView(getActivity());
+		// layout.addView(augmentedView, LayoutParams.MATCH_PARENT,
+		// LayoutParams.MATCH_PARENT);
+		super.onActivityCreated(savedInstanceState);
+	}
+	
+	
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		final ActivityManager activityManager = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
+		final ConfigurationInfo config = activityManager.getDeviceConfigurationInfo();
+
+		if(config.reqGlEsVersion >= 0x20000){
+			augmentedView = new ARSurfaceView(getActivity());
+			
+			final DisplayMetrics displayMetrics = new DisplayMetrics();
+			getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+			
+			
+		}
+		
+		super.onCreate(savedInstanceState);
 	}
 
 	@Override
@@ -48,6 +71,7 @@ public class ARFragment2 extends GeoARFragment2 {
 			Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.fragment_ar, container,
 				false);
+
 
 		// // When working with the camera, it's useful to stick to one
 		// orientation.
@@ -85,19 +109,28 @@ public class ARFragment2 extends GeoARFragment2 {
 	}
 
 	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+	public void onPause() {
+		super.onPause();
+		augmentedView.onPause();
+	}
+
+	@Override
+	public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu,
+			com.actionbarsherlock.view.MenuInflater inflater) {
 		inflater.inflate(R.menu.menu_ar, menu);
 		super.onCreateOptionsMenu(menu, inflater);
 	}
 
 	@Override
-	public void onPause() {
-		super.onPause();
+	public void onResume() {
+		super.onResume();
+		augmentedView.onResume();
 	}
 
 	@Override
-	public void onResume() {
-		super.onResume();
+	public void onDestroy() {
+		super.onDestroy();
+		augmentedView.destroyDrawingCache();
 	}
 
 }
