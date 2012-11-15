@@ -46,23 +46,23 @@ public class ARFragment2 extends SherlockFragment {
 		// LayoutParams.MATCH_PARENT);
 		super.onActivityCreated(savedInstanceState);
 	}
-	
-	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		final ActivityManager activityManager = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
-		final ConfigurationInfo config = activityManager.getDeviceConfigurationInfo();
+		final ActivityManager activityManager = (ActivityManager) getActivity()
+				.getSystemService(Context.ACTIVITY_SERVICE);
+		final ConfigurationInfo config = activityManager
+				.getDeviceConfigurationInfo();
 
-		if(config.reqGlEsVersion >= 0x20000){
+		if (config.reqGlEsVersion >= 0x20000) {
 			augmentedView = new ARSurfaceView(getActivity());
-			
+
 			final DisplayMetrics displayMetrics = new DisplayMetrics();
-			getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-			
-			
+			getActivity().getWindowManager().getDefaultDisplay()
+					.getMetrics(displayMetrics);
+
 		}
-		
+
 		super.onCreate(savedInstanceState);
 	}
 
@@ -71,7 +71,6 @@ public class ARFragment2 extends SherlockFragment {
 			Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.fragment_ar, container,
 				false);
-
 
 		// // When working with the camera, it's useful to stick to one
 		// orientation.
@@ -111,7 +110,8 @@ public class ARFragment2 extends SherlockFragment {
 	@Override
 	public void onPause() {
 		super.onPause();
-		augmentedView.onPause();
+		if (augmentedView != null)
+			augmentedView.onPause();
 	}
 
 	@Override
@@ -124,13 +124,15 @@ public class ARFragment2 extends SherlockFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		augmentedView.onResume();
+		if (augmentedView != null)
+			augmentedView.onResume();
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		augmentedView.destroyDrawingCache();
+		if (augmentedView != null)
+			augmentedView.destroyDrawingCache();
 	}
 
 }

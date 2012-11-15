@@ -23,7 +23,9 @@ import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.IRotationMatrixProvider;
 
+import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.ConfigurationInfo;
 import android.graphics.PixelFormat;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -102,8 +104,6 @@ public class ARSurfaceView extends GLSurfaceView implements
 	// // return renderer;
 	// return null;
 	// }
-
-
 
 	public float[] getRotationMatrix() {
 		if (sensorValuesChanged) {
@@ -224,16 +224,13 @@ public class ARSurfaceView extends GLSurfaceView implements
 		renderer.setCenter(location);
 	}
 
-
-
 	public Integer getMenuGroupId() {
 		return 0;
-		//return R.id.group_noiseview;
+		// return R.id.group_noiseview;
 	}
 
 	public boolean isVisible() {
 		return isShown();
 	}
-
 
 }
