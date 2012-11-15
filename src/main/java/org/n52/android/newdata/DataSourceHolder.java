@@ -30,13 +30,12 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class DataSourceHolder implements Parcelable {
+public class DataSourceHolder extends PluginHolder implements Parcelable {
 	private static Map<Class<? extends Visualization>, Visualization> visualizationMap = new HashMap<Class<? extends Visualization>, Visualization>();
 	private static int nextId = 0;
 	private DataSource<? super Filter> dataSource;
 	private CheckList<Visualization> visualizations = new CheckList<Visualization>();
 
-	private String name;
 	private long minReloadInterval;
 	private byte preferredZoomLevel;
 	private final int id = nextId++;
@@ -61,6 +60,7 @@ public class DataSourceHolder implements Parcelable {
 	});
 	private Class<? extends Filter> filterClass;
 	private Filter currentFilter;
+	private String name;
 
 	@SuppressWarnings("unchecked")
 	public DataSourceHolder(
@@ -155,6 +155,11 @@ public class DataSourceHolder implements Parcelable {
 		return name;
 	}
 
+	@Override
+	public Long getVersion() {
+		return null; // TODO
+	}
+
 	public String getDescription() {
 		return description;
 	}
@@ -236,14 +241,13 @@ public class DataSourceHolder implements Parcelable {
 	};
 
 	public String getIdentifier() {
-		// TODO ?
 		return dataSource.getClass().getSimpleName();
 	}
 
 	public void select() {
 		DataSourceLoader.selectDataSource(this);
 	}
-	
+
 	public boolean isSelected() {
 		return DataSourceLoader.getSelectedDataSources().contains(this);
 	}

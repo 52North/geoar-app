@@ -41,7 +41,6 @@ import org.apache.http.params.HttpParams;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.n52.android.newdata.DataSourceDownloader.DataSourceDownloadHolder;
 
 import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
@@ -50,70 +49,6 @@ public class DataSourceDownloader {
 
 	public interface OnDataSourceResultListener {
 		void onDataSourceResult(List<DataSourceDownloadHolder> dataSources);
-	}
-
-	public static class DataSourceDownloadHolder {
-		private String identification;
-		private String name;
-		private Long version;
-		private String description;
-		private String downloadLink;
-		private String imageLink;
-
-		public String getName() {
-			return name;
-		}
-
-		public String getDescription() {
-			return description;
-		}
-
-		public String getDownloadLink() {
-			return downloadLink;
-		}
-
-		public String getIdentification() {
-			return identification;
-		}
-
-		public String getImageLink() {
-			return imageLink;
-		}
-
-		public Long getVersion() {
-			return version;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (o instanceof DataSourceDownloadHolder) {
-				DataSourceDownloadHolder other = (DataSourceDownloadHolder) o;
-				if (identification == null)
-					return false;
-
-				if ((version == null && other.version == null)
-						|| (version != null && version.equals(other.version))) {
-					return identification.equals(other.identification);
-				} else {
-					return false;
-				}
-			}
-
-			return super.equals(o);
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = prime;
-			result = prime
-					* result
-					+ ((identification == null) ? 0 : identification.hashCode());
-			result = prime * result
-					+ ((version == null) ? 0 : version.hashCode());
-
-			return result;
-		}
 	}
 
 	private static DefaultHttpClient mHttpClient;
@@ -183,17 +118,17 @@ public class DataSourceDownloader {
 						JSONObject currentObject = datasourceArray
 								.getJSONObject(i);
 
-						holder.identification = currentObject
-								.getString(CODEBASE_ID);
-						holder.name = currentObject.getString(CODEBASE_NAME);
-						holder.version = currentObject
-								.getLong(CODEBASE_VERSION);
-						holder.description = currentObject
-								.getString(CODEBASE_DESCRIPTION);
-						holder.downloadLink = currentObject
-								.getString(CODEBASE_DOWNLOADLINK);
-						holder.imageLink = currentObject
-								.getString(CODEBASE_IMAGELINK);
+						holder.setIdentifier(currentObject
+								.getString(CODEBASE_ID));
+						holder.setName(currentObject.getString(CODEBASE_NAME));
+						holder.setVersion(currentObject
+								.getLong(CODEBASE_VERSION));
+						holder.setDescription(currentObject
+								.getString(CODEBASE_DESCRIPTION));
+						holder.setDownloadLink(currentObject
+								.getString(CODEBASE_DOWNLOADLINK));
+						holder.setImageLink(currentObject
+								.getString(CODEBASE_IMAGELINK));
 
 						mDownloadableDataSources.add(holder);
 					}

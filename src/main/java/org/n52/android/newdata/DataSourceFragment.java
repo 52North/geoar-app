@@ -17,11 +17,10 @@ package org.n52.android.newdata;
 
 import java.util.List;
 
-import org.n52.android.data.ImageLoader;
 import org.n52.android.geoar.R;
-import org.n52.android.newdata.DataSourceDownloader.DataSourceDownloadHolder;
 import org.n52.android.newdata.DataSourceDownloader.OnDataSourceResultListener;
 import org.n52.android.newdata.DataSourceLoader.OnDataSourcesChangeListener;
+import org.n52.android.newdata.PluginGridAdapter.OnItemCheckedListener;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -30,15 +29,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TabHost;
-import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
@@ -74,7 +67,8 @@ public class DataSourceFragment extends SherlockFragment {
 		mGridViewDownload = (GridView) getView().findViewById(
 				R.id.gridViewDownload);
 
-		final GridAdapterInstalled gridAdapterInstalled = new GridAdapterInstalled();
+		final DataSourceAdapter gridAdapterInstalled = new DataSourceAdapter(
+				getActivity());
 		mGridViewInstalled.setAdapter(gridAdapterInstalled);
 		mGridViewInstalled.setOnItemClickListener(new OnItemClickListener() {
 			@Override
@@ -89,8 +83,24 @@ public class DataSourceFragment extends SherlockFragment {
 				}
 			}
 		});
+		gridAdapterInstalled
+				.setOnItemCheckedListener(new OnItemCheckedListener() {
 
-		final GridAdapterDownload gridAdapterDownload = new GridAdapterDownload();
+					@Override
+					public void onItemChecked(boolean newState, int position,
+							long id) {
+						DataSourceHolder dataSource = gridAdapterInstalled
+								.getItem(position);
+						if (newState)
+							dataSource.select();
+						else
+							dataSource.unselect();
+					}
+				});
+		gridAdapterInstalled.setShowCheckBox(true);
+
+		final DataSourceDownloadAdapter gridAdapterDownload = new DataSourceDownloadAdapter(
+				getActivity());
 		mGridViewDownload.setAdapter(gridAdapterDownload);
 
 		TabHost tabHost = (TabHost) getView()
@@ -120,142 +130,56 @@ public class DataSourceFragment extends SherlockFragment {
 		return super.onOptionsItemSelected(item);
 	}
 
-	private class GridAdapterInstalled extends BaseAdapter implements
-			OnDataSourcesChangeListener {
+	private class DataSourceAdapter extends PluginGridAdapter<DataSourceHolder>
+			implements OnDataSourcesChangeListener {
 
-		private class ViewHolder {
-			public ImageView imageView;
-			public TextView textView;
-			public CheckBox checkBox;
-		}
-
-		private List<DataSourceHolder> dataSources;
-		private LayoutInflater inflater;
-
-		public GridAdapterInstalled() {
+		public DataSourceAdapter(Context context) {
+			super(context);
 			dataSources = DataSourceLoader.getInstalledDataSources();
-			inflater = (LayoutInflater) getActivity().getSystemService(
-					Context.LAYOUT_INFLATER_SERVICE);
-
 			DataSourceLoader.addOnInstalledDataSourcesUpdateListener(this);
 			DataSourceLoader.addOnSelectedDataSourcesUpdateListener(this);
 			// TODO remove..Listener?
 		}
 
 		@Override
-		public int getCount() {
-			if (dataSources != null)
-				return dataSources.size();
-			return 0;
-		}
-
-		@Override
-		public DataSourceHolder getItem(int position) {
-			if (dataSources != null && position < getCount() && position >= 0)
-				return dataSources.get(position);
-			return null;
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return 0;
-		}
-
-		@Override
-		public View getView(int position, View view, ViewGroup parent) {
-			ViewHolder viewHolder;
-
-			if (view == null) {
-				view = inflater.inflate(R.layout.cb_grid_item, parent, false);
-				viewHolder = new ViewHolder();
-				viewHolder.imageView = (ImageView) view
-						.findViewById(R.id.cb_grid_image);
-				viewHolder.textView = (TextView) view
-						.findViewById(R.id.cb_grid_label);
-				viewHolder.checkBox = (CheckBox) view
-						.findViewById(R.id.checkBox);
-
-				view.setTag(viewHolder);
-			} else {
-				viewHolder = (ViewHolder) view.getTag();
-			}
-
-			final DataSourceHolder dataSource = dataSources.get(position);
-			// load image via imageCache
-			ImageLoader.getInstance().displayImage("", viewHolder.imageView); // TODO?
-			viewHolder.textView.setText(dataSource.getName());
-			viewHolder.checkBox.setChecked(dataSource.isSelected());
-
-			viewHolder.checkBox
-					.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-						@Override
-						public void onCheckedChanged(CompoundButton buttonView,
-								boolean isChecked) {
-							if(isChecked) 
-								dataSource.select();
-							else 
-								dataSource.unselect();
-						}
-					});
-			return view;
-		}
-
-		@Override
 		public void onDataSourcesChange() {
 			notifyDataSetChanged();
 		}
+
+		@Override
+		protected boolean getItemChecked(int position) {
+			return getItem(position).isSelected();
+		}
 	}
 
-	private class GridAdapterDownload extends BaseAdapter implements
+	private class DataSourceDownloadAdapter extends
+			PluginGridAdapter<DataSourceDownloadHolder> implements
 			OnDataSourceResultListener {
-
-		private class ViewHolder {
-			public ImageView imageView;
-			public TextView textView;
-		}
 
 		@Override
 		public int getViewTypeCount() {
-			return 2; // Normal and Progress
+			return super.getViewTypeCount() + 1; // Normal + Progress
 		}
 
-		private List<DataSourceDownloadHolder> dataSources;
-		private LayoutInflater inflater;
-
-		public GridAdapterDownload() {
-			inflater = (LayoutInflater) getActivity().getSystemService(
-					Context.LAYOUT_INFLATER_SERVICE);
-
+		public DataSourceDownloadAdapter(Context context) {
+			super(context);
 			DataSourceDownloader.getDataSources(this);
 		}
 
 		@Override
 		public int getItemViewType(int position) {
 			if (dataSources == null && position == 0) {
-				return 1;
+				return super.getViewTypeCount() + 1;
 			} else {
-				return 0;
+				return super.getItemViewType(position);
 			}
 		}
 
 		@Override
 		public int getCount() {
 			if (dataSources != null)
-				return dataSources.size();
+				return super.getCount();
 			return 1; // The loading view
-		}
-
-		@Override
-		public DataSourceDownloadHolder getItem(int position) {
-			if (dataSources != null && position < getCount() && position >= 0)
-				return dataSources.get(position);
-			return null;
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return 0;
 		}
 
 		@Override
@@ -264,27 +188,7 @@ public class DataSourceFragment extends SherlockFragment {
 				return new ProgressBar(getActivity());
 			}
 
-			ViewHolder viewHolder;
-
-			if (view == null) {
-				view = inflater.inflate(R.layout.cb_grid_item, parent, false);
-				viewHolder = new ViewHolder();
-				viewHolder.imageView = (ImageView) view
-						.findViewById(R.id.cb_grid_image);
-				viewHolder.textView = (TextView) view
-						.findViewById(R.id.cb_grid_label);
-
-				view.setTag(viewHolder);
-			} else {
-				viewHolder = (ViewHolder) view.getTag();
-			}
-
-			DataSourceDownloadHolder dataSource = dataSources.get(position);
-			// load image via imageCache
-			ImageLoader.getInstance().displayImage("", viewHolder.imageView); // TODO
-			viewHolder.textView.setText(dataSource.getName());
-
-			return view;
+			return super.getView(position, view, parent);
 		}
 
 		@Override
