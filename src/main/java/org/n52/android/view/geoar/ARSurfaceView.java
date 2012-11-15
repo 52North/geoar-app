@@ -106,7 +106,6 @@ public class ARSurfaceView extends GLSurfaceView implements
 	// }
 
 	public float[] getRotationMatrix() {
-		sensorValuesChanged = true;
 		if (sensorValuesChanged) {
 			computeRotationMatrix();
 			sensorValuesChanged = false;
