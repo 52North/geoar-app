@@ -180,12 +180,12 @@ public class GeoMapFragment2 extends SherlockFragment {
 		layout.addView(geoMapView, LayoutParams.MATCH_PARENT,
 				LayoutParams.MATCH_PARENT);
 
-		if (savedInstanceState != null) {
-			int lat = savedInstanceState.getInt("lat");
-			int lon = savedInstanceState.getInt("lon");
-			byte zoom = savedInstanceState.getByte("zoom");
-			geoMapView.setCenterAndZoom(new GeoPoint(lat, lon), zoom);
-		}
+//		if (savedInstanceState != null) {
+//			int lat = savedInstanceState.getInt("lat");
+//			int lon = savedInstanceState.getInt("lon");
+//			byte zoom = savedInstanceState.getByte("zoom");
+//			geoMapView.setCenterAndZoom(new GeoPoint(lat, lon), zoom);
+//		}
 
 		// positionView = (ManualPositionView) getView().findViewById(
 		// R.id.manual_position_view);
