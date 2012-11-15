@@ -154,8 +154,8 @@ public abstract class RenderNode extends Spatial implements
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER,
 					geometry.getIndicesDetails().bufferHandle);
 			// WTF! FU OPENGLES 2.0
-			// GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0,
-			// geometry.getVerticesCount());
+//			 GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0,
+//			 geometry.getVerticesCount());
 			GLES20.glDrawElements(drawingMode, geometry.getIndicesCount(),
 					GLES20.GL_UNSIGNED_INT, 0);
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);

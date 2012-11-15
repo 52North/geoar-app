@@ -33,8 +33,10 @@ import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.gl.model.RenderNode;
 import org.n52.android.view.geoar.gl.model.primitives.Cube;
+import org.n52.android.view.geoar.gl.model.primitives.Grid;
 import org.n52.android.view.geoar.gl.model.primitives.HeightMap;
 import org.n52.android.view.geoar.gl.model.rendering.ReferencedHeightMap;
+import org.n52.android.view.geoar.gl.model.shader.SimpleColorRenderer;
 import org.osmdroid.util.GeoPoint;
 
 import android.content.Context;
@@ -260,10 +262,12 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		}
 		GLES20.glClear(clearMask);
 
-		for (int i = 0; i < numChildren; i++) {
+		for (int i = 0; i < children.size(); i++) {
 			children.get(i).onRender(GLESCamera.projectionMatrix,
 					GLESCamera.viewMatrix,
-					mRotationProvider.getRotationMatrix());
+					mRotationProvider.getRotationMatrix()
+//					null
+					);
 		}
 
 	}
@@ -313,9 +317,10 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		// for(DataSourceHolder holder : list){
 		// ARVisualizationFactory fac = new ARVisualizationFactory();
 		// }
-		// Grid grid = new Grid();
-		// grid.setRenderer(SimpleColorRenderer.getInstance());
-		// addRenderNode(grid);
+		 Grid grid = new Grid();
+		 grid.setRenderer(SimpleColorRenderer.getInstance());
+		 addRenderNode(grid);
+		 this.children.add(grid);
 
 		// PointsOfInteresst poi = new
 		// PointsOfInteresst(SimpleColorRenderer.getInstance(), glSurfaceView );
@@ -326,10 +331,11 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		// sphere.setPosition(new float[] {0,0,5});
 		// addRenderNode(sphere);
 		//
-		 Cube cube = new Cube();
-		 cube.setPosition(new float[] {0,5,10});
-		 addRenderNode(cube);
-		 this.children.add(cube);
+//		 Cube cube = new Cube();
+//		 cube.setPosition(new float[] {0,5,10});
+//		 addRenderNode(cube);
+//		 cube.onCreateInGLESThread();
+//		 this.children.add(cube);
 
 		// HeightMap map = new HeightMap();
 		// addRenderNode(map);
