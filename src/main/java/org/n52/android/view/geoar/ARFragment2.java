@@ -25,6 +25,8 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.FrameLayout.LayoutParams;
 
 import com.actionbarsherlock.app.SherlockFragment;
 
@@ -38,17 +40,8 @@ public class ARFragment2 extends SherlockFragment {
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
-		// FrameLayout layout = (FrameLayout) getView().findViewById(
-		// R.id.frameLayout);
-		//
-		// augmentedView = new ARSurfaceView(getActivity());
-		// layout.addView(augmentedView, LayoutParams.MATCH_PARENT,
-		// LayoutParams.MATCH_PARENT);
-		super.onActivityCreated(savedInstanceState);
-	}
+		FrameLayout layout = (FrameLayout) getView().findViewById(R.id.layout);
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
 		final ActivityManager activityManager = (ActivityManager) getActivity()
 				.getSystemService(Context.ACTIVITY_SERVICE);
 		final ConfigurationInfo config = activityManager
@@ -56,14 +49,21 @@ public class ARFragment2 extends SherlockFragment {
 
 		if (config.reqGlEsVersion >= 0x20000) {
 			augmentedView = new ARSurfaceView(getActivity());
-
+			layout.addView(augmentedView, 0, new FrameLayout.LayoutParams(
+					LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 			final DisplayMetrics displayMetrics = new DisplayMetrics();
 			getActivity().getWindowManager().getDefaultDisplay()
 					.getMetrics(displayMetrics);
 
 		}
 
-		super.onCreate(savedInstanceState);
+		// FrameLayout layout = (FrameLayout) getView().findViewById(
+		// R.id.frameLayout);
+		//
+		// augmentedView = new ARSurfaceView(getActivity());
+		// layout.addView(augmentedView, LayoutParams.MATCH_PARENT,
+		// LayoutParams.MATCH_PARENT);
+		super.onActivityCreated(savedInstanceState);
 	}
 
 	@Override
