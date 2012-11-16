@@ -17,7 +17,6 @@ package org.n52.android;
 
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
-import org.n52.android.R;
 import org.n52.android.newdata.CheckList;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceFragment;
@@ -35,12 +34,28 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.FrameLayout;
+import android.widget.BaseExpandableListAdapter;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ExpandableListView;
+import android.widget.FrameLayout.LayoutParams;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.ActionProvider;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
@@ -190,6 +205,9 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		// inflate common general menu definition
 		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.menu_general, menu);
+
+		menu.findItem(R.id.item_datasource).setActionProvider(
+				new DataSourcesActionProvider());
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -240,164 +258,268 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
+	public class DataSourcesActionProvider extends ActionProvider {
 
-		// Create data source selection menu
-		MenuItem dataSouceItem = menu.findItem(R.id.item_datasource);
-		ProgressBar progressBar = new ProgressBar(this);
-		
-		SubMenu subMenu = dataSouceItem.getSubMenu();
-		subMenu.removeGroup(GROUP_DATASOURCES);
+		private PopupWindow mPopup;
+		private LayoutInflater mInflater;
+		private ExpandableListView mListView;
 
-		final CheckList<DataSourceHolder> dataSources = DataSourceLoader
-				.getSelectedDataSources();
-		for (final DataSourceHolder dataSource : dataSources) {
-			SubMenu sourceMenu = subMenu.addSubMenu(GROUP_DATASOURCES,
-					Menu.NONE, Menu.NONE, dataSource.getName());
+		public DataSourcesActionProvider() {
+			super(GeoARActivity3.this);
+			mInflater = LayoutInflater.from(GeoARActivity3.this);
+		}
 
-			MenuItem menuItem = sourceMenu.getItem();
-			menuItem.setCheckable(true);
-			menuItem.setChecked(dataSources.isChecked(dataSource));
-			menuItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+		@Override
+		public View onCreateActionView() {
+			// Inflate the action view to be shown on the action bar.
+
+			final View actionView = mInflater.inflate(
+					R.layout.datasource_list_actionitem, null);
+			actionView.setOnClickListener(new OnClickListener() {
 
 				@Override
-				public boolean onMenuItemClick(MenuItem item) {
-					if (!item.isChecked()) {
-						// source not enabled -> enable it and consume event
-						item.setCheckable(true);
-						item.setChecked(true);
-						dataSources.checkItem(dataSource, true);
-						return true; // TODO ...?
+				public void onClick(View arg0) {
+					if (getPopup().isShowing()) {
+						mPopup.dismiss();
 					} else {
-						// source already enabled -> default behavior, show
-						// submenu
-						return false;
+						mPopup.showAsDropDown(actionView);
 					}
 				}
 			});
 
-			for (Visualization visualization : dataSource.getVisualizations()) {
-				sourceMenu.add(visualization.getClass().getSimpleName()); // TODO
+			return actionView;
+		}
+
+		private PopupWindow getPopup() {
+			if (mPopup == null) {
+				ViewGroup layout = (ViewGroup) mInflater.inflate(
+						R.layout.datasource_list_window, null);
+
+				mListView = (ExpandableListView) layout
+						.findViewById(R.id.expandableListView);
+
+				Button moreButton = (Button) layout
+						.findViewById(R.id.buttonMore);
+
+				DataSourceListAdapter sourceListAdapter = new DataSourceListAdapter();
+				mListView.setAdapter(sourceListAdapter);
+
+				moreButton.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View arg0) {
+						mPager.showFragment(cbFragment);
+						mPopup.dismiss();
+					}
+				});
+
+				mPopup = new PopupWindow(layout);
+				mPopup.setTouchable(true);
+				mPopup.setOutsideTouchable(true);
+				mPopup.setBackgroundDrawable(new BitmapDrawable(getResources()));
+				mPopup.setWindowLayoutMode(0, LayoutParams.WRAP_CONTENT);
+				mPopup.setWidth(150); // Sets width of menu
 			}
-			sourceMenu.add(Menu.NONE, ITEM_REMOVE_DATASOURCE, Menu.NONE,
-					"Disable Data Source").setOnMenuItemClickListener(
-					new OnMenuItemClickListener() {
-						@Override
-						public boolean onMenuItemClick(MenuItem item) {
-							dataSources.checkItem(dataSource, false);
-							return true;
-						}
-					});
+			return mPopup;
+		}
+
+		private class DataSourceListAdapter extends BaseExpandableListAdapter
+				implements OnDataSourcesChangeListener {
+
+			private class OnDataSourceCheckedChangeListener implements
+					OnCheckedChangeListener {
+
+				private int position;
+
+				public void setPosition(int position) {
+					this.position = position;
+				}
+
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView,
+						boolean isChecked) {
+					DataSourceHolder dataSource = selectedDataSources
+							.get(position);
+
+					selectedDataSources.checkItem(dataSource, isChecked);
+				}
+
+			}
+
+			private class OnDataSourceClickListener implements OnClickListener {
+
+				private int position;
+
+				public void setPosition(int position) {
+					this.position = position;
+				}
+
+				@Override
+				public void onClick(View v) {
+					if (!mListView.isGroupExpanded(position))
+						mListView.expandGroup(position);
+					else
+						mListView.collapseGroup(position);
+				}
+
+			}
+
+			private class DataSourceViewHolder {
+				public ImageView imageView;
+				public TextView textView;
+				public CheckBox checkBox;
+				public OnDataSourceCheckedChangeListener checkListener;
+				public OnDataSourceClickListener clickListener;
+			}
+
+			private class VisualizationViewHolder {
+				public TextView textView;
+				public CheckBox checkBox;
+			}
+
+			private CheckList<DataSourceHolder> selectedDataSources;
+
+			public DataSourceListAdapter() {
+
+				selectedDataSources = DataSourceLoader.getSelectedDataSources();
+
+				DataSourceLoader.addOnSelectedDataSourcesUpdateListener(this);
+				// TODO remove listener somehow
+			}
+
+			@Override
+			public boolean areAllItemsEnabled() {
+				return true;
+			}
+
+			@Override
+			public Object getChild(int groupPosition, int childPosition) {
+				return null;
+			}
+
+			@Override
+			public long getChildId(int groupPosition, int childPosition) {
+				return childPosition;
+			}
+
+			@Override
+			public View getChildView(int groupPosition, int childPosition,
+					boolean isLastChild, View view, ViewGroup parent) {
+				VisualizationViewHolder viewHolder;
+
+				if (view == null) {
+					view = mInflater.inflate(
+							R.layout.datasource_list_visualization_item,
+							parent, false);
+					viewHolder = new VisualizationViewHolder();
+					viewHolder.textView = (TextView) view
+							.findViewById(R.id.textView);
+
+					viewHolder.checkBox = (CheckBox) view
+							.findViewById(R.id.checkBox);
+
+					view.setTag(viewHolder);
+				} else {
+					viewHolder = (VisualizationViewHolder) view.getTag();
+				}
+
+				DataSourceHolder dataSource = selectedDataSources
+						.get(groupPosition);
+				Visualization visualization = dataSource.getVisualizations()
+						.get(childPosition);
+				viewHolder.textView.setText(visualization.getClass()
+						.getSimpleName());
+				viewHolder.checkBox.setChecked(dataSource.getVisualizations()
+						.isChecked(visualization));
+				return view;
+			}
+
+			@Override
+			public int getChildrenCount(int groupPosition) {
+				return selectedDataSources.get(groupPosition)
+						.getVisualizations().size();
+			}
+
+			@Override
+			public Object getGroup(int groupPosition) {
+				return selectedDataSources.get(groupPosition);
+			}
+
+			@Override
+			public int getGroupCount() {
+				return selectedDataSources.size();
+			}
+
+			@Override
+			public long getGroupId(int groupPosition) {
+				return groupPosition;
+			}
+
+			@Override
+			public View getGroupView(int groupPosition, boolean isExpanded,
+					View view, ViewGroup parent) {
+				DataSourceViewHolder viewHolder;
+
+				if (view == null) {
+					view = mInflater.inflate(
+							R.layout.datasource_list_datasource_item, parent,
+							false);
+					viewHolder = new DataSourceViewHolder();
+					viewHolder.imageView = (ImageView) view
+							.findViewById(R.id.imageView);
+					viewHolder.textView = (TextView) view
+							.findViewById(R.id.textView);
+
+					viewHolder.clickListener = new OnDataSourceClickListener();
+					viewHolder.textView
+							.setOnClickListener(viewHolder.clickListener);
+
+					viewHolder.checkBox = (CheckBox) view
+							.findViewById(R.id.checkBox);
+
+					viewHolder.checkListener = new OnDataSourceCheckedChangeListener();
+					viewHolder.checkBox
+							.setOnCheckedChangeListener(viewHolder.checkListener);
+
+					view.setTag(viewHolder);
+				} else {
+					viewHolder = (DataSourceViewHolder) view.getTag();
+				}
+
+				viewHolder.checkListener.setPosition(groupPosition);
+				viewHolder.clickListener.setPosition(groupPosition);
+				DataSourceHolder dataSource = selectedDataSources
+						.get(groupPosition);
+
+				viewHolder.textView.setText(dataSource.getName());
+				viewHolder.checkBox.setChecked(selectedDataSources
+						.isChecked(dataSource));
+
+				return view;
+			}
+
+			@Override
+			public boolean hasStableIds() {
+				return false;
+			}
+
+			@Override
+			public boolean isChildSelectable(int groupPosition,
+					int childPosition) {
+				return true;
+			}
+
+			@Override
+			public boolean isEmpty() {
+				return selectedDataSources.isEmpty();
+			}
+
+			@Override
+			public void onDataSourcesChange() {
+				notifyDataSetChanged();
+			}
 
 		}
-		// subMenu.setGroupCheckable(GROUP_DATASOURCES, true, false);
-
-		return super.onPrepareOptionsMenu(menu);
 	}
-	// private static class ViewFragment extends Fragment {
-	// GeoMapFragment2 mapFragment;
-	// GeoARFragment2 arFragment;
-	//
-	// private static ViewFragment instance;
-	//
-	// private LocationHandler locationHandler;
-	// private InfoView infoView;
-	//
-	// private ImageButton mapARSwitcherButton;
-	//
-	// private boolean showMap = false;
-	//
-	// static ViewFragment newInstance() {
-	// instance = new ViewFragment();
-	// instance.setRetainInstance(true);
-	// // instance.measureManager = measurementManager;
-	// return instance;
-	// }
-	//
-	// @Override
-	// public View onCreateView(LayoutInflater inflater, ViewGroup container,
-	// Bundle savedInstanceState) {
-	// View v = inflater.inflate(R.layout.main, container, false);
-	//
-	// // AR / Map switcher Button
-	// mapARSwitcherButton = (ImageButton) v
-	// .findViewById(R.id.imageButtonMapARSwitcher);
-	// mapARSwitcherButton.setOnClickListener(new View.OnClickListener() {
-	// public void onClick(View v) {
-	// // showMap = (showMap == true) ? false : true;
-	// updateFragmentView();
-	// }
-	// });
-	// return v;
-	// }
-	//
-	// @Override
-	// public void onActivityCreated(Bundle savedInstanceState) {
-	// super.onActivityCreated(savedInstanceState);
-	//
-	// FragmentManager fm = getFragmentManager();
-	//
-	// // find fragments
-	// mapFragment = (GeoMapFragment2) fm
-	// .findFragmentById(R.id.fragment_view);
-	// arFragment = (GeoARFragment2) fm
-	// .findFragmentById(R.id.fragment_view2);
-	//
-	// infoView = (InfoView) getView().findViewById(R.id.infoView);
-	// locationHandler = new LocationHandler(getActivity(), infoView);
-	// FragmentTransaction f = fm.beginTransaction();
-	//
-	// if (arFragment == null) {
-	// // AugmentedReality Fragment
-	// arFragment = new ARFragment2(locationHandler, infoView);
-	//
-	// arFragment.setLocationHandler(locationHandler);
-	// arFragment.setInfoHandler(infoView);
-	//
-	// f.add(R.id.fragment_view2, arFragment);
-	// } else {
-	// arFragment.setInfoHandler(infoView);
-	// }
-	//
-	// if (mapFragment == null) {
-	// // Map Fragment
-	// mapFragment = new GeoMapFragment2();
-	//
-	// // mapFragment.setLocationHandler(locationHandler);
-	// // mapFragment.setInfoHandler(infoView);
-	//
-	// f.add(R.id.fragment_view, mapFragment);
-	// } else {
-	// // mapFragment.setInfoHandler(infoView);
-	// }
-	//
-	// f.commit();
-	// updateFragmentView();
-	// }
-	//
-	// /**
-	// * Sets correct drawable for map/AR switching button
-	// */
-	// @TargetApi(11)
-	// private void updateFragmentView() {
-	// showMap = (showMap == true) ? false : true;
-	// FragmentTransaction fragmentTransaction = getFragmentManager()
-	// .beginTransaction();
-	// if (showMap) {
-	// getActivity().getActionBar().show();
-	// mapARSwitcherButton.setImageResource(R.drawable.ic_menu_phone);
-	// fragmentTransaction.hide(arFragment);
-	// fragmentTransaction.show(mapFragment);
-	// } else {
-	// getActivity().getActionBar().hide();
-	// mapARSwitcherButton
-	// .setImageResource(R.drawable.ic_menu_mapmode);
-	// fragmentTransaction.hide(mapFragment);
-	// fragmentTransaction.show(arFragment);
-	// }
-	// fragmentTransaction.commit();
-	// }
-	// }
 
 }
