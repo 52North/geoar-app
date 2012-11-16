@@ -18,7 +18,7 @@ package org.n52.android.newdata;
 import java.util.List;
 
 import org.n52.android.data.ImageLoader;
-import org.n52.android.geoar.R;
+import org.n52.android.R;
 import org.n52.android.newdata.DataSourceLoader.OnDataSourcesChangeListener;
 
 import android.content.Context;

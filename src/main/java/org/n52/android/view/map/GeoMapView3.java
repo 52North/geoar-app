@@ -23,7 +23,7 @@ import org.mapsforge.android.maps.MapController;
 import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.mapgenerator.tiledownloader.MapnikTileDownloader;
 import org.mapsforge.core.GeoPoint;
-import org.n52.android.geoar.R;
+import org.n52.android.R;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.DataSourceLoader;

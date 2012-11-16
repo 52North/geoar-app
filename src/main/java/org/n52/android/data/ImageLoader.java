@@ -23,7 +23,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.n52.android.geoar.R;
+import org.n52.android.R;
 
 import android.app.Activity;
 import android.graphics.Bitmap;

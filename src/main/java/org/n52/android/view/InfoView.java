@@ -20,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.n52.android.geoar.R;
+import org.n52.android.R;
 
 import android.content.Context;
 import android.util.AttributeSet;

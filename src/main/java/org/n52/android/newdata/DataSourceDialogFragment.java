@@ -16,7 +16,7 @@
 package org.n52.android.newdata;
 
 import org.n52.android.data.ImageLoader;
-import org.n52.android.geoar.R;
+import org.n52.android.R;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

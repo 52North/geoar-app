@@ -14,14 +14,14 @@
                 android:title="More..."/>
         </menu>
     </item>
-    
-       <item
+    <item
         android:id="@+id/item_filter"
         android:showAsAction="always"
         android:title="Test"/>
-
-     <item android:id="@+id/item_about"
-        android:title="@string/cb_menu_about"
+    <item
+        android:id="@+id/item_about"
         android:orderInCategory="2"
-        android:showAsAction="ifRoom|withText" />
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/cb_menu_about"/>
+
 </menu>

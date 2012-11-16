@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.n52.android.geoar.R;
+import org.n52.android.R;
 import org.n52.android.newdata.Annotations.Filterable;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.Filter;

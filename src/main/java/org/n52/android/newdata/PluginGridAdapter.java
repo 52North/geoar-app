@@ -2,8 +2,8 @@ package org.n52.android.newdata;
 
 import java.util.List;
 
+import org.n52.android.R;
 import org.n52.android.data.ImageLoader;
-import org.n52.android.geoar.R;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -19,7 +19,7 @@ import android.widget.TextView;
 public class PluginGridAdapter<T extends PluginHolder> extends BaseAdapter {
 
 	interface OnItemCheckedListener {
-		void onItemChecked(boolean newState, int position, long id);
+		void onItemChecked(boolean newState, int position);
 	}
 
 	private boolean showCheckBox = false;
@@ -28,19 +28,23 @@ public class PluginGridAdapter<T extends PluginHolder> extends BaseAdapter {
 		public ImageView imageView;
 		public TextView textView;
 		public CheckBox checkBox;
+		public OnGridCheckedChangeListener checkedListener;
 	}
 
 	private class OnGridCheckedChangeListener implements
 			OnCheckedChangeListener {
 
 		private int position;
-		private int id;
+
+		public void setPosition(int position) {
+			this.position = position;
+		}
 
 		@Override
 		public void onCheckedChanged(CompoundButton buttonView,
 				boolean isChecked) {
 			if (itemCheckedListener != null) {
-				itemCheckedListener.onItemChecked(isChecked, position, id);
+				itemCheckedListener.onItemChecked(isChecked, position);
 			}
 		}
 
@@ -93,8 +97,9 @@ public class PluginGridAdapter<T extends PluginHolder> extends BaseAdapter {
 					.findViewById(R.id.cb_grid_label);
 			viewHolder.checkBox = (CheckBox) view.findViewById(R.id.checkBox);
 			if (showCheckBox) {
+				viewHolder.checkedListener = new OnGridCheckedChangeListener();
 				viewHolder.checkBox
-						.setOnCheckedChangeListener(new OnGridCheckedChangeListener());
+						.setOnCheckedChangeListener(viewHolder.checkedListener);
 				viewHolder.checkBox.setVisibility(View.VISIBLE);
 			} else {
 				viewHolder.checkBox.setVisibility(View.GONE);
@@ -104,6 +109,10 @@ public class PluginGridAdapter<T extends PluginHolder> extends BaseAdapter {
 			viewHolder = (ViewHolder) view.getTag();
 		}
 
+		if (viewHolder.checkedListener != null) {
+			viewHolder.checkedListener.setPosition(position);
+		}
+		
 		final T dataSource = dataSources.get(position);
 		// load image via imageCache
 		ImageLoader.getInstance().displayImage("", viewHolder.imageView); // TODO?

@@ -19,7 +19,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.n52.android.geoar.R;
+import org.n52.android.R;
 import org.n52.android.view.InfoView;
 import org.osmdroid.util.GeoPoint;
 

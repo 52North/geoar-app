@@ -17,7 +17,7 @@ package org.n52.android.newdata;
 
 import java.util.List;
 
-import org.n52.android.geoar.R;
+import org.n52.android.R;
 import org.n52.android.newdata.DataSourceDownloader.OnDataSourceResultListener;
 import org.n52.android.newdata.DataSourceLoader.OnDataSourcesChangeListener;
 import org.n52.android.newdata.PluginGridAdapter.OnItemCheckedListener;
@@ -87,8 +87,7 @@ public class DataSourceFragment extends SherlockFragment {
 				.setOnItemCheckedListener(new OnItemCheckedListener() {
 
 					@Override
-					public void onItemChecked(boolean newState, int position,
-							long id) {
+					public void onItemChecked(boolean newState, int position) {
 						DataSourceHolder dataSource = gridAdapterInstalled
 								.getItem(position);
 						if (newState)

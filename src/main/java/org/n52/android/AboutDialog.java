@@ -15,7 +15,7 @@
  */
 package org.n52.android;
 
-import org.n52.android.geoar.R;
+import org.n52.android.R;
 
 import android.app.Dialog;
 import android.content.Context;

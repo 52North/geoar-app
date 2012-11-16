@@ -23,7 +23,7 @@ import org.mapsforge.android.maps.Projection;
 import org.mapsforge.android.maps.overlay.OverlayItem;
 import org.mapsforge.core.GeoPoint;
 import org.n52.android.alg.proj.MercatorRect;
-import org.n52.android.geoar.R;
+import org.n52.android.R;
 import org.n52.android.newdata.DataCache.GetDataBoundsCallback;
 import org.n52.android.newdata.DataCache.RequestHolder;
 import org.n52.android.newdata.DataSourceHolder;

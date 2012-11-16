@@ -15,7 +15,7 @@
  */
 package org.n52.android.view.geoar;
 
-import org.n52.android.geoar.R;
+import org.n52.android.R;
 import org.n52.android.tracking.camera.RealityCamera;
 import org.n52.android.tracking.location.LowPassSensorBuffer;
 import org.n52.android.tracking.location.SensorBuffer;

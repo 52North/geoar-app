@@ -17,7 +17,7 @@ package org.n52.android;
 
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
-import org.n52.android.geoar.R;
+import org.n52.android.R;
 import org.n52.android.newdata.CheckList;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceFragment;
@@ -37,6 +37,8 @@ import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.view.Window;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
@@ -243,7 +245,8 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 
 		// Create data source selection menu
 		MenuItem dataSouceItem = menu.findItem(R.id.item_datasource);
-
+		ProgressBar progressBar = new ProgressBar(this);
+		
 		SubMenu subMenu = dataSouceItem.getSubMenu();
 		subMenu.removeGroup(GROUP_DATASOURCES);
 
@@ -292,7 +295,6 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 
 		return super.onPrepareOptionsMenu(menu);
 	}
-
 	// private static class ViewFragment extends Fragment {
 	// GeoMapFragment2 mapFragment;
 	// GeoARFragment2 arFragment;

@@ -18,7 +18,7 @@ package org.n52.android.tracking.camera;
 import java.io.IOException;
 import java.util.List;
 
-import org.n52.android.geoar.R;
+import org.n52.android.R;
 
 import android.app.AlertDialog;
 import android.content.Context;

@@ -20,7 +20,7 @@ import java.lang.reflect.Field;
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.core.GeoPoint;
 import org.n52.android.GeoARActivity3;
-import org.n52.android.geoar.R;
+import org.n52.android.R;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.MenuItem;
