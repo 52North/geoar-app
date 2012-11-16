@@ -173,7 +173,7 @@ public class CameraView extends SurfaceView implements Callback {
 			camera = Camera.open();
 
 			camera.setPreviewDisplay(this.holder);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			new AlertDialog.Builder(getContext()).setTitle(R.string.error)
 					.setMessage(R.string.camera_not_available).show();
 		}
