@@ -48,9 +48,9 @@ import android.widget.FrameLayout.LayoutParams;
  * @author Arne de Wall
  * 
  */
-public class GeoMapFragment2 extends SherlockFragment {
+public class GeoMapFragment extends SherlockFragment {
 
-	private GeoMapView3 geoMapView;
+	private GeoMapView geoMapView;
 
 	// "Hack", create DummyMapActivity which passes all relevant
 	// Context calls to the implementations of the activity of this
@@ -65,7 +65,7 @@ public class GeoMapFragment2 extends SherlockFragment {
 				Field applicationField = Activity.class
 						.getDeclaredField("mApplication"); // Could change...
 				applicationField.setAccessible(true);
-				applicationField.set(this, GeoMapFragment2.this.getActivity()
+				applicationField.set(this, GeoMapFragment.this.getActivity()
 						.getApplication());
 
 			} catch (NoSuchFieldException e) {
@@ -96,32 +96,32 @@ public class GeoMapFragment2 extends SherlockFragment {
 
 		@Override
 		public Resources getResources() {
-			return GeoMapFragment2.this.getActivity().getResources();
+			return GeoMapFragment.this.getActivity().getResources();
 		}
 
 		@Override
 		public ApplicationInfo getApplicationInfo() {
-			return GeoMapFragment2.this.getActivity().getApplicationInfo();
+			return GeoMapFragment.this.getActivity().getApplicationInfo();
 		}
 
 		@Override
 		public Theme getTheme() {
-			return GeoMapFragment2.this.getActivity().getTheme();
+			return GeoMapFragment.this.getActivity().getTheme();
 		}
 
 		@Override
 		public Context getBaseContext() {
-			return GeoMapFragment2.this.getActivity().getBaseContext();
+			return GeoMapFragment.this.getActivity().getBaseContext();
 		}
 
 		@Override
 		public Object getSystemService(String name) {
-			return GeoMapFragment2.this.getActivity().getSystemService(name);
+			return GeoMapFragment.this.getActivity().getSystemService(name);
 		}
 
 		@Override
 		public SharedPreferences getSharedPreferences(String name, int mode) {
-			return GeoMapFragment2.this.getActivity().getSharedPreferences(
+			return GeoMapFragment.this.getActivity().getSharedPreferences(
 					name, mode);
 		}
 	};
@@ -137,7 +137,7 @@ public class GeoMapFragment2 extends SherlockFragment {
 
 	// public GeoMapFragment2(LocationHandler locationHandler, InfoView
 	// infoView) {
-	public GeoMapFragment2() {
+	public GeoMapFragment() {
 		// this();
 		// this.mInfoHandler = infoView;
 		// this.mLocationHandler = locationHandler;
@@ -172,7 +172,7 @@ public class GeoMapFragment2 extends SherlockFragment {
 		// Create Dummy here because it needs the underlying activity
 
 		mapActivity = new DummyMapActivity();
-		geoMapView = new GeoMapView3(mapActivity);
+		geoMapView = new GeoMapView(mapActivity);
 		// geoMapView = (GeoMapView3) getView().findViewById(R.id.mapview);
 		// geoMapView.setLocationHandler(mLocationHandler);
 		// geoMapView.setInfoHandler(mInfoHandler);

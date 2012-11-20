@@ -27,7 +27,7 @@ import org.n52.android.newdata.Visualization;
 import org.n52.android.tracking.camera.RealityCamera;
 import org.n52.android.view.GeoARViewPager;
 import org.n52.android.view.geoar.ARFragment2;
-import org.n52.android.view.map.GeoMapFragment2;
+import org.n52.android.view.map.GeoMapFragment;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -36,6 +36,8 @@ import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -92,13 +94,13 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 
 	}
 
-	private GeoMapFragment2 mapFragment = new GeoMapFragment2();
+	private GeoMapFragment mapFragment = new GeoMapFragment();
 	private ARFragment2 arFragment = new ARFragment2();
 	private DataSourceFragment cbFragment = new DataSourceFragment();
 
 	// private List<GeoARView2> noiseARViews = new ArrayList<GeoARView2>();
 	private DataSourceChangeListener dataSourceListener = new DataSourceChangeListener();
-	private GeoARViewPager mPager;
+	//private GeoARViewPager mPager;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -126,14 +128,16 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 			builder.setTitle(R.string.advice);
 			builder.show();
 		}
+//
+//		mPager = (GeoARViewPager) findViewById(R.id.pager);
+//		mPager.setFragmentManager(getSupportFragmentManager());
+//		mPager.addFragment(mapFragment);
+//		mPager.addFragment(arFragment);
+//		mPager.addFragment(cbFragment);
+//		mPager.showFragment(mapFragment);
 
-		mPager = (GeoARViewPager) findViewById(R.id.pager);
-		mPager.setFragmentManager(getSupportFragmentManager());
-		mPager.addFragment(mapFragment);
-		mPager.addFragment(arFragment);
-		mPager.addFragment(cbFragment);
-		mPager.showFragment(mapFragment);
-
+		showFragment(mapFragment);
+		
 		// Reset camera height if set
 		SharedPreferences prefs = getSharedPreferences("NoiseAR", MODE_PRIVATE);
 		RealityCamera.setHeight(prefs.getFloat("cameraHeight", 1.6f));
@@ -158,6 +162,14 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 
 	}
 
+	
+	private void showFragment(Fragment fragment) {
+		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+		transaction.replace(R.id.fragmentContainer, fragment);
+		transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+		transaction.commit();
+	}
+	
 	// @Override
 	// public Object onRetainCustomNonConfigurationInstance() {
 	// // Lets measurementManager survive a screen orientation change, so that
@@ -232,11 +244,11 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		// new DataSourceDialog(this, null, measurementManager).show();
 		// break;
 		case R.id.item_ar:
-			mPager.showFragment(arFragment);
+			showFragment(arFragment);
 			return true;
 
 		case R.id.item_map:
-			mPager.showFragment(mapFragment);
+			showFragment(mapFragment);
 			return true;
 
 		case R.id.item_filter:
@@ -245,7 +257,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 			return true;
 
 		case R.id.item_selectsources:
-			mPager.showFragment(cbFragment);
+			showFragment(cbFragment);
 			return true;
 
 		case R.id.item_about:
@@ -308,7 +320,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 
 					@Override
 					public void onClick(View arg0) {
-						mPager.showFragment(cbFragment);
+						showFragment(cbFragment);
 						mPopup.dismiss();
 					}
 				});

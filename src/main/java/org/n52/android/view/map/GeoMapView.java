@@ -49,7 +49,7 @@ import android.widget.Toast;
  * @author Holger Hopmann
  * 
  */
-public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
+public class GeoMapView extends org.mapsforge.android.maps.MapView implements
 		OnLocationUpdateListener {
 
 	/**
@@ -130,7 +130,7 @@ public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
 				// new data source selected -> add new overlay handler
 				DataSourceOverlayHandler overlayHandler = new DataSourceOverlayHandler(
 						dataSourcesOverlay, item);
-				overlayHandler.updateOverlay(GeoMapView3.this, true);
+				overlayHandler.updateOverlay(GeoMapView.this, true);
 				overlayHandlers.add(overlayHandler);
 			} else {
 				// data source disabled -> find overlay holder and remove it
@@ -147,12 +147,12 @@ public class GeoMapView3 extends org.mapsforge.android.maps.MapView implements
 		}
 	};
 
-	public GeoMapView3(Context context, AttributeSet attrs) {
+	public GeoMapView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init(context);
 	}
 
-	public GeoMapView3(Context context) {
+	public GeoMapView(Context context) {
 		super(context);
 		init(context);
 	}
