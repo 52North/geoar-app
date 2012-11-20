@@ -46,7 +46,7 @@
         <activity
             android:name="org.n52.android.newdata.filter.FilterDialogActivity"
             android:label="Filter Settings"
-            android:theme="@android:style/Theme.Holo.Light.Dialog" >
+            android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
             android:name="org.n52.android.MainActivity2"
