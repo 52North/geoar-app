@@ -34,7 +34,7 @@ public class ARFragment2 extends SherlockFragment {
 
 	private ARSurfaceView augmentedView;
 
-	public ARFragment2() {
+	public ARFragment2() { 
 		this.setRetainInstance(true);
 	}
 

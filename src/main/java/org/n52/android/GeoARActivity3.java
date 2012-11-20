@@ -26,6 +26,7 @@ import org.n52.android.newdata.DataSourceLoader.OnDataSourcesChangeListener;
 import org.n52.android.newdata.Visualization;
 import org.n52.android.tracking.camera.RealityCamera;
 import org.n52.android.view.GeoARViewPager;
+import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.ARFragment2;
 import org.n52.android.view.map.GeoMapFragment;
 
@@ -137,6 +138,8 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 //		mPager.showFragment(mapFragment);
 
 		showFragment(mapFragment);
+		
+		InfoView.setStatus("Info View!", 10000, this);
 		
 		// Reset camera height if set
 		SharedPreferences prefs = getSharedPreferences("NoiseAR", MODE_PRIVATE);

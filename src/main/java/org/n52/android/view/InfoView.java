@@ -15,8 +15,10 @@
  */
 package org.n52.android.view;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -37,32 +39,44 @@ import android.widget.TextView;
  * @author Holger Hopmann, Arne de Wall
  * 
  */
-@Deprecated
-public class InfoView extends LinearLayout  {
-	
+public class InfoView extends LinearLayout {
+
 	public static final int STEP_CLUSTERING = 1;
 	public static final int STEP_INTERPOLATION = 2;
 	public static final int STEP_REQUEST = 3;
 
-
-	private class ProgressHolder {
+	private static class ProgressHolder {
 		private int progress, maxProgress;
 		private String title = "";
 	}
 
-	private class StatusHolder {
+	private static class StatusHolder {
 		private long clearTime;
 		private String status = "";
 		private Object id;
 	}
 
+	private interface OnChangeListener {
+		void onChange();
+	}
+
+	private OnChangeListener changeListener = new OnChangeListener() {
+
+		@Override
+		public void onChange() {
+			refresh();
+		}
+	};
+
 	private ProgressBar infoProgressBar;
 
 	// HashMaps of all identifiers and their information to show
-	LinkedHashMap<Object, ProgressHolder> progressHolderMap = new LinkedHashMap<Object, ProgressHolder>();
-	LinkedHashMap<Object, StatusHolder> statusHolderMap = new LinkedHashMap<Object, StatusHolder>(
+	private static LinkedHashMap<Object, ProgressHolder> progressHolderMap = new LinkedHashMap<Object, ProgressHolder>();
+	private static LinkedHashMap<Object, StatusHolder> statusHolderMap = new LinkedHashMap<Object, StatusHolder>(
 			0, 1, true);
-	StatusHolder currentStatus;
+	private StatusHolder currentStatus;
+
+	private static Set<OnChangeListener> changeListeners = new HashSet<InfoView.OnChangeListener>();
 
 	private TextView infoProgressTextView;
 	private TextView infoStatusTextView;
@@ -79,7 +93,7 @@ public class InfoView extends LinearLayout  {
 		setOrientation(VERTICAL);
 
 		// inflate layout
-		LayoutInflater.from(context).inflate(R.layout.info_views, this, true);
+		LayoutInflater.from(context).inflate(R.layout.infoviews, this, true);
 
 		infoStatusTextView = (TextView) findViewById(R.id.textViewStatusInfo);
 		infoProgressTextView = (TextView) findViewById(R.id.textViewProgressInfo);
@@ -125,6 +139,13 @@ public class InfoView extends LinearLayout  {
 		t.scheduleAtFixedRate(statusUpdateTask, 0, 3000);
 
 		updateViews();
+
+		changeListeners.add(changeListener);
+	}
+
+	private static void notifyChangeListeners() {
+		for (OnChangeListener listener : changeListeners)
+			listener.onChange();
 	}
 
 	/**
@@ -145,7 +166,7 @@ public class InfoView extends LinearLayout  {
 	 * @param maxProgress
 	 * @param id
 	 */
-	public void setProgress(int progress, int maxProgress, Object id) {
+	public static void setProgress(int progress, int maxProgress, Object id) {
 		synchronized (progressHolderMap) {
 			if (progress < maxProgress) {
 				ProgressHolder holder = progressHolderMap.get(id);
@@ -159,7 +180,7 @@ public class InfoView extends LinearLayout  {
 				progressHolderMap.remove(id);
 			}
 		}
-		refresh();
+		notifyChangeListeners();
 	}
 
 	/**
@@ -168,7 +189,7 @@ public class InfoView extends LinearLayout  {
 	 * @param title
 	 * @param id
 	 */
-	public void setProgressTitle(String title, Object id) {
+	public static void setProgressTitle(String title, Object id) {
 		synchronized (progressHolderMap) {
 			ProgressHolder holder = progressHolderMap.get(id);
 			if (holder == null) {
@@ -177,7 +198,7 @@ public class InfoView extends LinearLayout  {
 			}
 			holder.title = title;
 		}
-		refresh();
+		notifyChangeListeners();
 	}
 
 	/**
@@ -198,7 +219,7 @@ public class InfoView extends LinearLayout  {
 	 * @param maxDuration
 	 * @param id
 	 */
-	public void setStatus(String status, int maxDuration, Object id) {
+	public static void setStatus(String status, int maxDuration, Object id) {
 		synchronized (statusHolderMap) {
 			StatusHolder holder = statusHolderMap.get(id);
 			if (holder == null) {
@@ -213,18 +234,19 @@ public class InfoView extends LinearLayout  {
 				holder.clearTime = Long.MAX_VALUE;
 			}
 		}
-		refresh();
+		notifyChangeListeners();
 	}
 
 	/**
 	 * Clears status text for id
+	 * 
 	 * @param id
 	 */
-	public void clearStatus(Object id) {
+	public static void clearStatus(Object id) {
 		synchronized (statusHolderMap) {
 			statusHolderMap.remove(id);
 		}
-		refresh();
+		notifyChangeListeners();
 	}
 
 	/**
@@ -270,7 +292,7 @@ public class InfoView extends LinearLayout  {
 	 * 
 	 * @param id
 	 */
-	public void clearProgress(Object id) {
+	public static void clearProgress(Object id) {
 		setProgress(0, 0, id);
 	}
 
