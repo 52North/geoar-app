@@ -23,17 +23,17 @@ import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.mapgenerator.tiledownloader.MapnikTileDownloader;
 import org.mapsforge.core.GeoPoint;
 import org.n52.android.R;
+import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.DataSourceLoader;
-import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 
 import com.actionbarsherlock.app.SherlockFragment;
@@ -47,11 +47,11 @@ public class MapFragment extends SherlockFragment {
 
 	private MapView mapView;
 
-	private MapActivityContext mapActivity; // Special ontext to use MapView
+	private MapActivityContext mapActivity; // Special context to use MapView
 											// without MapActivity
 
 	// Overlay fields
-	private Map<DataSourceHolder, DataSourceOverlayHandler> overlayHandlerMap = new HashMap<DataSourceHolder, DataSourceOverlayHandler>();
+	private Map<DataSourceHolder, DataSourceOverlayHandler> overlayHandlerMap;
 	private DataSourcesOverlay dataSourcesOverlay;
 
 	// Listener for data source enabled state
@@ -76,10 +76,6 @@ public class MapFragment extends SherlockFragment {
 		}
 	};
 
-	public MapFragment() {
-		setRetainInstance(true);
-	}
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		setHasOptionsMenu(true);
@@ -95,17 +91,13 @@ public class MapFragment extends SherlockFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		// Get Layout root to add mapview programmatically
-		FrameLayout layout = (FrameLayout) getView().findViewById(
-				R.id.frameLayout);
 
-		// Use special map activity as context since it is required by
-		// mapsforge's mapview
+		// Add MapView programmatically, since it needs a special context
+		// depending on a call to getActivity, so it happens here and not in
+		// onCreateView.
+
 		mapActivity = new MapActivityContext(getActivity());
 		mapView = new MapView(mapActivity);
-
-		layout.addView(mapView, LayoutParams.MATCH_PARENT,
-				LayoutParams.MATCH_PARENT);
 
 		// Offline rendering here
 		// setMapFile(new File(Environment.getExternalStorageDirectory()
@@ -123,12 +115,14 @@ public class MapFragment extends SherlockFragment {
 																	// Kreuz
 
 		// Data source handling
+		overlayHandlerMap = new HashMap<DataSourceHolder, DataSourceOverlayHandler>();
 		dataSourcesOverlay = new DataSourcesOverlay();
 		mapView.getOverlays().add(dataSourcesOverlay);
 		mapView.setOnTouchListener(new OnTouchListener() {
 			@Override
 			public boolean onTouch(View arg0, MotionEvent motionEvent) {
-				// Use motion event to inform overlay handlers that they should
+				// Use motion event to inform overlay handlers that they
+				// should
 				// update their data if needed
 				for (DataSourceOverlayHandler handler : overlayHandlerMap
 						.values()) {
@@ -137,19 +131,34 @@ public class MapFragment extends SherlockFragment {
 				return false;
 			}
 		});
+		
+		new Handler().post(new Runnable() {
+			@Override
+			public void run() {
+				for (DataSourceOverlayHandler handler : overlayHandlerMap
+						.values()) {
+					handler.updateOverlay(mapView, true);
+				}
+			}
+		});
+		// Get Layout root
+		ViewGroup layout = (ViewGroup) getView();
+		layout.addView(mapView, LayoutParams.MATCH_PARENT,
+				LayoutParams.MATCH_PARENT);
+		layout.requestLayout();
 
 		// add overlay handler for each enabled data source
 		for (DataSourceHolder dataSource : DataSourceLoader
 				.getSelectedDataSources().getCheckedItems()) {
 			DataSourceOverlayHandler overlayHandler = new DataSourceOverlayHandler(
 					dataSourcesOverlay, dataSource);
-			overlayHandler.updateOverlay(mapView, true);
 			overlayHandlerMap.put(dataSource, overlayHandler);
 		}
 
 		// register for update events
 		DataSourceLoader.getSelectedDataSources().addOnCheckedChangeListener(
 				dataSourceListener);
+
 	}
 
 	@Override
@@ -163,6 +172,7 @@ public class MapFragment extends SherlockFragment {
 	public void onDestroy() {
 		DataSourceLoader.getSelectedDataSources()
 				.removeOnCheckedChangeListener(dataSourceListener);
+		overlayHandlerMap.clear();
 		mapActivity.destroy();
 		super.onDestroy();
 	}
