@@ -208,6 +208,45 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 		context.startActivity(intent);
 	}
 
+	public String getIdentifier() {
+		return dataSource.getClass().getSimpleName();
+	}
+
+	/**
+	 * Selects a data source, i.e. makes it available for the user
+	 * 
+	 */
+	public void select() {
+		DataSourceLoader.selectDataSource(this);
+	}
+
+	/**
+	 * Checks whether the data source is selected
+	 * 
+	 * @return
+	 */
+	public boolean isSelected() {
+		return DataSourceLoader.getSelectedDataSources().contains(this);
+	}
+
+	/**
+	 * Hides the data source from the application
+	 */
+	public void unselect() {
+		DataSourceLoader.unselectDataSource(this);
+	}
+
+	/**
+	 * Selects a data source, i.e. makes it available
+	 * 
+	 * @param enabled
+	 *            Set the enabled state of the data source
+	 */
+	public void select(boolean enabled) {
+		select();
+		DataSourceLoader.getSelectedDataSources().checkItem(this, enabled);
+	}
+
 	// Parcelable
 
 	@Override
@@ -239,21 +278,5 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 			return new DataSourceHolder[size];
 		}
 	};
-
-	public String getIdentifier() {
-		return dataSource.getClass().getSimpleName();
-	}
-
-	public void select() {
-		DataSourceLoader.selectDataSource(this);
-	}
-
-	public boolean isSelected() {
-		return DataSourceLoader.getSelectedDataSources().contains(this);
-	}
-
-	public void unselect() {
-		DataSourceLoader.unselectDataSource(this);
-	}
 
 }

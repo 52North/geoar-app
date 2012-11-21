@@ -18,7 +18,6 @@ package org.n52.android;
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
 import org.n52.android.newdata.CheckList;
-import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceFragment;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.DataSourceLoader;
@@ -70,32 +69,10 @@ import com.actionbarsherlock.view.MenuItem;
  */
 public class GeoARActivity3 extends SherlockFragmentActivity {
 
-	private static final int ITEM_REMOVE_DATASOURCE = 0;
-	private static final int GROUP_DATASOURCES = 1;
-
-	private class DataSourceChangeListener implements
-			OnDataSourcesChangeListener,
-			OnCheckedChangedListener<DataSourceHolder> {
-
-		@Override
-		public void onCheckedChanged(DataSourceHolder item, boolean newState) {
-			invalidateOptionsMenu();
-		}
-
-		@Override
-		public void onDataSourcesChange() {
-			invalidateOptionsMenu();
-		}
-
-	}
 
 	private MapFragment mapFragment = new MapFragment();
 	private ARFragment2 arFragment = new ARFragment2();
 	private DataSourceFragment cbFragment = new DataSourceFragment();
-
-	// private List<GeoARView2> noiseARViews = new ArrayList<GeoARView2>();
-	private DataSourceChangeListener dataSourceListener = new DataSourceChangeListener();
-	//private GeoARViewPager mPager;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -122,17 +99,17 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 			builder.setPositiveButton(R.string.ok, null);
 			builder.setTitle(R.string.advice);
 			builder.show();
-		} 
-//
-//		mPager = (GeoARViewPager) findViewById(R.id.pager);
-//		mPager.setFragmentManager(getSupportFragmentManager());
-//		mPager.addFragment(mapFragment);
-//		mPager.addFragment(arFragment);
-//		mPager.addFragment(cbFragment);
-//		mPager.showFragment(mapFragment);
+		}
+		//
+		// mPager = (GeoARViewPager) findViewById(R.id.pager);
+		// mPager.setFragmentManager(getSupportFragmentManager());
+		// mPager.addFragment(mapFragment);
+		// mPager.addFragment(arFragment);
+		// mPager.addFragment(cbFragment);
+		// mPager.showFragment(mapFragment);
 
 		showFragment(mapFragment);
-		
+
 		// Reset camera height if set
 		SharedPreferences prefs = getSharedPreferences("NoiseAR", MODE_PRIVATE);
 		RealityCamera.setHeight(prefs.getFloat("cameraHeight", 1.6f));
@@ -150,21 +127,16 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		// builder.show();
 		// }
 
-		DataSourceLoader
-				.addOnSelectedDataSourcesUpdateListener(dataSourceListener);
-		DataSourceLoader.getSelectedDataSources().addOnCheckedChangeListener(
-				dataSourceListener);
-
 	}
 
-	
 	private void showFragment(Fragment fragment) {
-		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+		FragmentTransaction transaction = getSupportFragmentManager()
+				.beginTransaction();
 		transaction.replace(R.id.fragmentContainer, fragment);
 		transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
 		transaction.commit();
 	}
-	
+
 	// @Override
 	// public Object onRetainCustomNonConfigurationInstance() {
 	// // Lets measurementManager survive a screen orientation change, so that
@@ -196,15 +168,6 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		editor.commit();
 
 		DataSourceLoader.saveDataSourceSelection();
-	}
-
-	@Override
-	protected void onDestroy() {
-		DataSourceLoader
-				.removeOnSelectedDataSourcesUpdateListener(dataSourceListener);
-		DataSourceLoader.getSelectedDataSources()
-				.removeOnCheckedChangeListener(dataSourceListener);
-		super.onDestroy();
 	}
 
 	@Override
@@ -265,6 +228,11 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	/**
+	 * Reusable {@link ActionProvider} for data sources ActionBar menu. Shows a
+	 * {@link PopupWindow} with options to enable/diable data sources and their
+	 * visualizations
+	 */
 	public class DataSourcesActionProvider extends ActionProvider {
 
 		private PopupWindow mPopup;
@@ -283,7 +251,6 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 			final View actionView = mInflater.inflate(
 					R.layout.datasource_list_actionitem, null);
 			actionView.setOnClickListener(new OnClickListener() {
-
 				@Override
 				public void onClick(View arg0) {
 					if (getPopup().isShowing()) {
@@ -311,8 +278,8 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 				DataSourceListAdapter sourceListAdapter = new DataSourceListAdapter();
 				mListView.setAdapter(sourceListAdapter);
 
+				// Click event for "More" button
 				moreButton.setOnClickListener(new OnClickListener() {
-
 					@Override
 					public void onClick(View arg0) {
 						showFragment(cbFragment);
@@ -348,7 +315,10 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 					DataSourceHolder dataSource = selectedDataSources
 							.get(position);
 
-					selectedDataSources.checkItem(dataSource, isChecked);
+					if (selectedDataSources.isChecked(dataSource) != isChecked) {
+						selectedDataSources.checkItem(dataSource, isChecked);
+						notifyDataSetChanged();
+					}
 				}
 
 			}
@@ -436,8 +406,13 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 						.get(childPosition);
 				viewHolder.textView.setText(visualization.getClass()
 						.getSimpleName());
+
 				viewHolder.checkBox.setChecked(dataSource.getVisualizations()
 						.isChecked(visualization));
+
+				viewHolder.textView.setEnabled(selectedDataSources
+						.isChecked(dataSource));
+
 				return view;
 			}
 

@@ -39,7 +39,8 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
 /**
- * 
+ * Fragment for managing and downloading data sources to use within the
+ * application
  * 
  */
 public class DataSourceFragment extends SherlockFragment {
@@ -90,10 +91,13 @@ public class DataSourceFragment extends SherlockFragment {
 					public void onItemChecked(boolean newState, int position) {
 						DataSourceHolder dataSource = gridAdapterInstalled
 								.getItem(position);
-						if (newState)
-							dataSource.select();
-						else
-							dataSource.unselect();
+						if (dataSource.isSelected() != newState) {
+							if (newState) {
+								dataSource.select(true);
+							} else {
+								dataSource.unselect();
+							}
+						}
 					}
 				});
 		gridAdapterInstalled.setShowCheckBox(true);
