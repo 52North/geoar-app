@@ -99,17 +99,25 @@ public class DataSourceLoader {
 	}
 
 	private static void restoreDataSourceSelection() {
-		SharedPreferences preferences = GeoARApplication.applicationContext
-				.getSharedPreferences(GeoARApplication.PREFERENCES_FILE,
-						Context.MODE_PRIVATE);
+		try {
+			SharedPreferences preferences = GeoARApplication.applicationContext
+					.getSharedPreferences(GeoARApplication.PREFERENCES_FILE,
+							Context.MODE_PRIVATE);
 
-		String[] identifierArray = preferences.getString(SELECTION_PREF, "")
-				.split(";");
-		for (String identifier : identifierArray) {
-			DataSourceHolder dataSource = getDataSourceByIdentifier(identifier);
-			if (dataSource != null) {
-				selectDataSource(dataSource);
+			String[] identifierStateArray = preferences.getString(
+					SELECTION_PREF, "").split(";");
+			for (String identifierState : identifierStateArray) {
+				String[] split = identifierState.split("~");
+				String identifier = split[0];
+				DataSourceHolder dataSource = getDataSourceByIdentifier(identifier);
+				if (dataSource != null) {
+					selectDataSource(dataSource);
+					mSelectedDataSources.checkItem(dataSource,
+							Boolean.parseBoolean(split[1]));
+				}
 			}
+		} catch (Exception e) {
+			// TODO
 		}
 	}
 
@@ -118,7 +126,8 @@ public class DataSourceLoader {
 		for (DataSourceHolder dataSource : mSelectedDataSources) {
 			if (identifierPref.length() != 0)
 				identifierPref += ";";
-			identifierPref += dataSource.getIdentifier();
+			identifierPref += dataSource.getIdentifier() + "~"
+					+ mSelectedDataSources.isChecked(dataSource);
 		}
 
 		SharedPreferences preferences = GeoARApplication.applicationContext
