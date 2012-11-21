@@ -23,7 +23,7 @@
     <application
         android:name="org.n52.android.GeoARApplication"
         android:icon="@drawable/icon"
-        android:label="@string/app_name" >
+        android:label="@string/app_name">
         <activity
             android:name="org.n52.android.GeoARActivity3"
             android:configChanges="orientation"

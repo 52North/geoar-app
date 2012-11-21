@@ -15,9 +15,11 @@
  */
 package org.n52.android.view;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -25,6 +27,9 @@ import java.util.TimerTask;
 import org.n52.android.R;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,9 +50,10 @@ public class InfoView extends LinearLayout {
 	public static final int STEP_INTERPOLATION = 2;
 	public static final int STEP_REQUEST = 3;
 
+	public static final int MESSAGE_REFRESH = 1;
+
 	private static class ProgressHolder {
 		private int progress, maxProgress;
-		private String title = "";
 	}
 
 	private static class StatusHolder {
@@ -60,27 +66,43 @@ public class InfoView extends LinearLayout {
 		void onChange();
 	}
 
-	private OnChangeListener changeListener = new OnChangeListener() {
+	private static Handler updatehandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			if (msg.what == MESSAGE_REFRESH) {
+				notifyStatusChangeListeners();
+			}
+		}
+	};
 
+	private OnChangeListener statusChangeListener = new OnChangeListener() {
 		@Override
 		public void onChange() {
-			refresh();
+			statusUpdate();
+		}
+	};
+
+	private OnChangeListener progressChangeListener = new OnChangeListener() {
+		@Override
+		public void onChange() {
+			progressUpdate();
 		}
 	};
 
 	private ProgressBar infoProgressBar;
 
 	// HashMaps of all identifiers and their information to show
-	private static LinkedHashMap<Object, ProgressHolder> progressHolderMap = new LinkedHashMap<Object, ProgressHolder>();
+	private static Map<Object, ProgressHolder> progressHolderMap = new HashMap<Object, ProgressHolder>();
 	private static LinkedHashMap<Object, StatusHolder> statusHolderMap = new LinkedHashMap<Object, StatusHolder>(
 			0, 1, true);
+	private static Set<OnChangeListener> statusChangeListeners = new HashSet<InfoView.OnChangeListener>();
+	private static Set<OnChangeListener> progressChangeListeners = new HashSet<InfoView.OnChangeListener>();
+
 	private StatusHolder currentStatus;
+	private ProgressHolder currentProgress = new ProgressHolder();
 
-	private static Set<OnChangeListener> changeListeners = new HashSet<InfoView.OnChangeListener>();
-
-	private TextView infoProgressTextView;
 	private TextView infoStatusTextView;
-	Runnable updateViewsRunnable = new Runnable() {
+	private Runnable updateViewsRunnable = new Runnable() {
 		public void run() {
 			updateRunnableQueued = false;
 			updateViews();
@@ -96,55 +118,80 @@ public class InfoView extends LinearLayout {
 		LayoutInflater.from(context).inflate(R.layout.infoviews, this, true);
 
 		infoStatusTextView = (TextView) findViewById(R.id.textViewStatusInfo);
-		infoProgressTextView = (TextView) findViewById(R.id.textViewProgressInfo);
 		infoProgressBar = (ProgressBar) findViewById(R.id.progressBar);
 
-		// Task continuously updates the status text
-		TimerTask statusUpdateTask = new TimerTask() {
+		statusChangeListeners.add(statusChangeListener);
+		progressChangeListeners.add(progressChangeListener);
+
+		Timer timer = new Timer(true);
+		timer.scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
-				synchronized (statusHolderMap) {
-					if (statusHolderMap.size() != 0) {
-						// get next status to show
-						Iterator<StatusHolder> iterator = statusHolderMap
-								.values().iterator();
-						long now = System.currentTimeMillis();
-						currentStatus = null;
-						// try to get the very first one which is not outdated
-						while (iterator.hasNext()) {
-							StatusHolder holder = iterator.next();
-							if (holder.clearTime <= now) {
-								iterator.remove();
-							} else {
-								currentStatus = holder;
-								break;
-							}
-						}
-						if (currentStatus != null) {
-							// just get the object which we already have, to
-							// update the internal access order so that that
-							// element gets biased against the others.
-							statusHolderMap.get(currentStatus.id);
-						}
-						refresh();
-					} else if (currentStatus != null) {
-						currentStatus = null;
-					}
-				}
+				statusUpdate();
 			}
-		};
+		}, 0, 3000);
 
-		Timer t = new Timer(true);
-		// Schedule status update thread
-		t.scheduleAtFixedRate(statusUpdateTask, 0, 3000);
-
+		statusUpdate();
 		updateViews();
-
-		changeListeners.add(changeListener);
 	}
 
-	private static void notifyChangeListeners() {
-		for (OnChangeListener listener : changeListeners)
+	private void statusUpdate() {
+		synchronized (statusHolderMap) {
+			if (statusHolderMap.size() != 0) {
+				// get next status to show
+				Iterator<StatusHolder> iterator = statusHolderMap.values()
+						.iterator();
+				long now = SystemClock.uptimeMillis();
+				currentStatus = null;
+				// try to get the very first one which is not outdated
+				while (iterator.hasNext()) {
+					StatusHolder holder = iterator.next();
+					if (holder.clearTime <= now) {
+						iterator.remove();
+					} else {
+						currentStatus = holder;
+						break;
+					}
+				}
+				if (currentStatus != null) {
+					// just get the object which we already have, to
+					// update the internal access order so that that
+					// element gets biased against the others.
+					statusHolderMap.get(currentStatus.id);
+				}
+				refresh();
+			} else if (currentStatus != null) {
+				currentStatus = null;
+			}
+		}
+	}
+
+	private void progressUpdate() {
+		synchronized (progressHolderMap) {
+			currentProgress.progress = 0;
+			currentProgress.maxProgress = 0;
+			for (ProgressHolder holder : progressHolderMap.values()) {
+				currentProgress.progress += holder.progress;
+				currentProgress.maxProgress += holder.maxProgress;
+			}
+
+			if (currentProgress.progress >= currentProgress.maxProgress) {
+				for (ProgressHolder holder : progressHolderMap.values()) {
+					clearStatus(holder);
+				}
+				progressHolderMap.clear();
+			}
+			refresh();
+		}
+	}
+
+	private static void notifyStatusChangeListeners() {
+		for (OnChangeListener listener : statusChangeListeners)
+			listener.onChange();
+	}
+
+	private static void notifyProgressChangeListeners() {
+		for (OnChangeListener listener : progressChangeListeners)
 			listener.onChange();
 	}
 
@@ -155,7 +202,6 @@ public class InfoView extends LinearLayout {
 		if (!updateRunnableQueued) {
 			updateRunnableQueued = true;
 			post(updateViewsRunnable);
-
 		}
 	}
 
@@ -168,19 +214,19 @@ public class InfoView extends LinearLayout {
 	 */
 	public static void setProgress(int progress, int maxProgress, Object id) {
 		synchronized (progressHolderMap) {
-			if (progress < maxProgress) {
-				ProgressHolder holder = progressHolderMap.get(id);
-				if (holder == null) {
-					holder = new ProgressHolder();
-					progressHolderMap.put(id, holder);
-				}
-				holder.maxProgress = maxProgress;
-				holder.progress = progress;
-			} else {
-				progressHolderMap.remove(id);
+
+			ProgressHolder holder = progressHolderMap.get(id);
+			if (holder == null) {
+				holder = new ProgressHolder();
+				progressHolderMap.put(id, holder);
+			}
+			holder.maxProgress = maxProgress;
+			holder.progress = progress;
+			if (holder.progress >= holder.maxProgress) {
+				clearStatus(holder);
 			}
 		}
-		notifyChangeListeners();
+		notifyProgressChangeListeners();
 	}
 
 	/**
@@ -196,9 +242,8 @@ public class InfoView extends LinearLayout {
 				holder = new ProgressHolder();
 				progressHolderMap.put(id, holder);
 			}
-			holder.title = title;
+			setStatus(title, -1, holder);
 		}
-		notifyChangeListeners();
 	}
 
 	/**
@@ -229,12 +274,15 @@ public class InfoView extends LinearLayout {
 			}
 			holder.status = status;
 			if (maxDuration != -1) {
-				holder.clearTime = System.currentTimeMillis() + maxDuration;
+				holder.clearTime = SystemClock.uptimeMillis() + maxDuration;
 			} else {
 				holder.clearTime = Long.MAX_VALUE;
 			}
+			updatehandler.sendMessageAtTime(
+					updatehandler.obtainMessage(MESSAGE_REFRESH),
+					holder.clearTime);
 		}
-		notifyChangeListeners();
+		notifyStatusChangeListeners();
 	}
 
 	/**
@@ -246,7 +294,7 @@ public class InfoView extends LinearLayout {
 		synchronized (statusHolderMap) {
 			statusHolderMap.remove(id);
 		}
-		notifyChangeListeners();
+		notifyStatusChangeListeners();
 	}
 
 	/**
@@ -255,18 +303,13 @@ public class InfoView extends LinearLayout {
 	private void updateViews() {
 		boolean isVisible = false;
 		synchronized (progressHolderMap) {
-			if (progressHolderMap.size() != 0) {
-				ProgressHolder progressHolder = progressHolderMap.values()
-						.iterator().next();
-				infoProgressBar.setMax(progressHolder.maxProgress);
-				infoProgressBar.setProgress(progressHolder.progress);
-				infoProgressTextView.setText(progressHolder.title);
+			if (currentProgress.progress < currentProgress.maxProgress) {
+				infoProgressBar.setMax(currentProgress.maxProgress);
+				infoProgressBar.setProgress(currentProgress.progress);
 
-				infoProgressTextView.setVisibility(View.VISIBLE);
 				infoProgressBar.setVisibility(View.VISIBLE);
 				isVisible = true;
 			} else {
-				infoProgressTextView.setVisibility(View.GONE);
 				infoProgressBar.setVisibility(View.GONE);
 			}
 		}

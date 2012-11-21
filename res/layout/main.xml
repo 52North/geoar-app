@@ -23,10 +23,12 @@
 		android:layout_height="match_parent" > </org.n52.android.view.GeoARViewPager> -->
 	<!-- Info Panel -->
 
-	<org.n52.android.view.InfoView
-		android:id="@+id/infoView" android:layout_width="match_parent"
+	<org.n52.android.view.InfoView 
+		android:id="@+id/infoView" android:layout_width="match_parent" 
 		android:layout_height="wrap_content" android:layout_alignParentLeft="true"
-		android:layout_alignParentTop="true" android:background="@android:drawable/toast_frame" />
+		android:layout_alignParentBottom="true"  android:background="@android:color/background_dark" />
+	
+	<!--   android:background="@android:drawable/toast_frame"  -->
 
 	<!-- Map / AR Switching Button -->
 

@@ -55,7 +55,7 @@ public class DataCache {
 	public interface RequestHolder {
 		void cancel();
 	}
-	
+
 	public interface OnProgressUpdateListener {
 		void onProgressUpdate(int progress, int size, int stepRequest);
 	}
@@ -68,7 +68,8 @@ public class DataCache {
 
 	public abstract interface GetDataBoundsCallback extends
 			OnProgressUpdateListener {
-		void onReceiveDataUpdate(MercatorRect bbox, List<? extends SpatialEntity> data);
+		void onReceiveDataUpdate(MercatorRect bbox,
+				List<? extends SpatialEntity> data);
 
 		void onAbort(MercatorRect bbox, int reason);
 	}
@@ -216,7 +217,7 @@ public class DataCache {
 
 					dataTile.setMeasurements(dataSource.getDataSource()
 							.getMeasurements(filter));
-					
+
 					// }
 					// catch (RequestException e) {
 					// Log.i("NoiseAR", "RequestException" + e.getMessage());
@@ -307,6 +308,8 @@ public class DataCache {
 			}
 
 		};
+
+		callback.onProgressUpdate(0, tileDataList.size(), STEP_REQUEST);
 
 		// Actually request data
 		for (int y = tileTopY; y <= tileBottomY; y++)

@@ -25,10 +25,8 @@ import org.n52.android.newdata.DataSourceLoader;
 import org.n52.android.newdata.DataSourceLoader.OnDataSourcesChangeListener;
 import org.n52.android.newdata.Visualization;
 import org.n52.android.tracking.camera.RealityCamera;
-import org.n52.android.view.GeoARViewPager;
-import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.ARFragment2;
-import org.n52.android.view.map.GeoMapFragment;
+import org.n52.android.view.map.MapFragment;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -51,10 +49,8 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ExpandableListView;
 import android.widget.FrameLayout.LayoutParams;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -62,8 +58,6 @@ import com.actionbarsherlock.view.ActionProvider;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.MenuItem.OnMenuItemClickListener;
-import com.actionbarsherlock.view.SubMenu;
 
 /**
  * Core and only {@link Activity} in this application. Coordinates all its child
@@ -95,7 +89,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 
 	}
 
-	private GeoMapFragment mapFragment = new GeoMapFragment();
+	private MapFragment mapFragment = new MapFragment();
 	private ARFragment2 arFragment = new ARFragment2();
 	private DataSourceFragment cbFragment = new DataSourceFragment();
 
@@ -128,7 +122,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 			builder.setPositiveButton(R.string.ok, null);
 			builder.setTitle(R.string.advice);
 			builder.show();
-		}
+		} 
 //
 //		mPager = (GeoARViewPager) findViewById(R.id.pager);
 //		mPager.setFragmentManager(getSupportFragmentManager());
@@ -138,8 +132,6 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 //		mPager.showFragment(mapFragment);
 
 		showFragment(mapFragment);
-		
-		InfoView.setStatus("Info View!", 10000, this);
 		
 		// Reset camera height if set
 		SharedPreferences prefs = getSharedPreferences("NoiseAR", MODE_PRIVATE);

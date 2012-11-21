@@ -22,8 +22,8 @@ import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.Projection;
 import org.mapsforge.android.maps.overlay.OverlayItem;
 import org.mapsforge.core.GeoPoint;
+import org.metalev.multitouch.controller.MultiTouchController.PositionAndScale;
 import org.n52.android.alg.proj.MercatorRect;
-import org.n52.android.R;
 import org.n52.android.newdata.DataCache.GetDataBoundsCallback;
 import org.n52.android.newdata.DataCache.RequestHolder;
 import org.n52.android.newdata.DataSourceHolder;
@@ -33,6 +33,7 @@ import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.Settings;
 
 import android.graphics.Point;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -65,6 +66,11 @@ public class DataSourceOverlayHandler {
 
 			@Override
 			public void onProgressUpdate(int progress, int maxProgress, int step) {
+
+				InfoView.setProgressTitle("Requesting " + dataSource.getName(),
+						UpdateHolder.this); // TODO
+				InfoView.setProgress(progress, maxProgress, UpdateHolder.this);
+
 				// if (infoHandler != null) {
 				// String stepTitle = "";
 				// switch(step){
@@ -90,6 +96,8 @@ public class DataSourceOverlayHandler {
 			@Override
 			public void onAbort(MercatorRect bounds, int reason) {
 				canceled = true;
+
+				InfoView.clearProgress(UpdateHolder.this);
 
 				// if (infoHandler != null) {
 				// // inform user of aborting reason
@@ -132,6 +140,7 @@ public class DataSourceOverlayHandler {
 						// interpolation received, now this object represents
 						// the current interpolation
 						currentUpdate = UpdateHolder.this;
+						nextUpdate = null;
 					}
 				}
 
@@ -161,6 +170,8 @@ public class DataSourceOverlayHandler {
 						requestHolder = dataSource.getDataCache()
 								.getDataByBBox(bounds, callback, false);
 					} else {
+						InfoView.setStatus("Daten erfordern höhere Zoomstufe",
+								5000, this);
 						// infoHandler.setStatus(R.string.not_zoomed_in, 5000,
 						// this);
 					}
@@ -172,6 +183,7 @@ public class DataSourceOverlayHandler {
 
 	protected UpdateHolder currentUpdate;
 	protected UpdateHolder nextUpdate;
+	protected Handler updateHandler = new Handler();
 
 	protected Object updateLock = new Object();
 
@@ -204,9 +216,9 @@ public class DataSourceOverlayHandler {
 		}
 	};
 
-
 	public void clear() {
 		synchronized (updateLock) {
+			Log.d("GeoAR", dataSource.getName() + " clearing map overlay");
 			cancel();
 			overlay.clear(dataSource);
 		}
@@ -214,9 +226,12 @@ public class DataSourceOverlayHandler {
 
 	public void cancel() {
 		synchronized (updateLock) {
-			if (currentUpdate != null) {
-				currentUpdate.cancel();
+			if (nextUpdate != null) {
+				updateHandler.removeCallbacks(nextUpdate);
+				nextUpdate.cancel();
+				Log.d("GeoAR", dataSource.getName() + " map overlay canceled");
 			}
+
 		}
 	}
 
@@ -270,9 +285,10 @@ public class DataSourceOverlayHandler {
 						Settings.BUFFER_MAPINTERPOLATION);
 				if (nextUpdate != null) {
 					nextUpdate.cancel();
+					updateHandler.removeCallbacks(nextUpdate);
 				}
 				nextUpdate = new UpdateHolder(newBounds);
-				mapView.postDelayed(nextUpdate, Math.max(0, updateDelay));
+				updateHandler.postDelayed(nextUpdate, Math.max(0, updateDelay));
 				Log.i("GeoAR", "Overlay Update in " + updateDelay / 1000 + " s");
 			}
 		}
