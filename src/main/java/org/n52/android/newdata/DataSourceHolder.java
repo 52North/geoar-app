@@ -37,7 +37,7 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 	private CheckList<Visualization> visualizations = new CheckList<Visualization>();
 
 	private long minReloadInterval;
-	private byte preferredZoomLevel;
+	private byte cacheZoomLevel;
 	private final int id = nextId++;
 	private String description;
 
@@ -61,6 +61,8 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 	private Class<? extends Filter> filterClass;
 	private Filter currentFilter;
 	private String name;
+	private byte minZoomLevel;
+	private byte maxZoomLevel;
 
 	@SuppressWarnings("unchecked")
 	public DataSourceHolder(
@@ -75,7 +77,9 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 		name = dataSourceAnnotation.name();
 		description = dataSourceAnnotation.description();
 		minReloadInterval = dataSourceAnnotation.minReloadInterval();
-		preferredZoomLevel = dataSourceAnnotation.preferredZoomLevel();
+		cacheZoomLevel = dataSourceAnnotation.cacheZoomLevel();
+		minZoomLevel = dataSourceAnnotation.minZoomLevel();
+		maxZoomLevel = dataSourceAnnotation.maxZoomLevel();
 		try {
 			dataSource = dataSourceClass.newInstance();
 		} catch (InstantiationException e) {
@@ -164,8 +168,16 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 		return description;
 	}
 
-	public byte getPreferredZoomLevel() {
-		return preferredZoomLevel;
+	public byte getCacheZoomLevel() {
+		return cacheZoomLevel;
+	}
+
+	public byte getMinZoomLevel() {
+		return minZoomLevel;
+	}
+
+	public byte getMaxZoomLevel() {
+		return maxZoomLevel;
 	}
 
 	public CheckList<Visualization> getVisualizations() {

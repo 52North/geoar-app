@@ -165,7 +165,7 @@ public class DataSourceOverlayHandler {
 		public void run() {
 			synchronized (updateLock) {
 				if (!canceled) {
-					if (bounds.zoom >= Settings.MIN_ZOOM_MAPINTERPOLATION) {
+					if (bounds.zoom >= dataSource.getMinZoomLevel()) {
 						// Just runs if zoom is in range
 						requestHolder = dataSource.getDataCache()
 								.getDataByBBox(bounds, callback, false);
@@ -247,7 +247,7 @@ public class DataSourceOverlayHandler {
 	public void updateOverlay(MapView mapView, boolean force) {
 		byte zoom = (byte) (mapView.getMapPosition().getZoomLevel() - 1);
 
-		zoom = (byte) Math.min(zoom, Settings.MAX_ZOOM_MAPINTERPOLATION);
+		zoom = (byte) Math.min(zoom, dataSource.getMaxZoomLevel());
 		Projection proj = mapView.getProjection();
 
 		GeoPoint gPoint = (GeoPoint) proj.fromPixels(0, 0);

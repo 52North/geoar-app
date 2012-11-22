@@ -134,7 +134,7 @@ public class DataCache {
 
 	public DataCache(DataSourceHolder dataSource) {
 		this.dataSource = dataSource;
-		tileZoom = dataSource.getPreferredZoomLevel();
+		tileZoom = dataSource.getCacheZoomLevel();
 		// TODO Filter
 		dataFilter = dataSource.getCurrentFilter();// DataSourceAdapter.createMeasurementFilter();//
 		// new MeasurementFilter();
