@@ -181,7 +181,7 @@ public class MapFragment extends SherlockFragment {
 	@Override
 	public void onDestroyView() {
 		mapActivity.destroy();
-		
+
 		((ViewGroup) getView()).removeView(mapView);
 		super.onDestroyView();
 	}

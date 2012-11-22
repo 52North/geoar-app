@@ -35,6 +35,7 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -68,7 +69,6 @@ import com.actionbarsherlock.view.MenuItem;
  * 
  */
 public class GeoARActivity3 extends SherlockFragmentActivity {
-
 
 	private MapFragment mapFragment = new MapFragment();
 	private ARFragment2 arFragment = new ARFragment2();
@@ -130,6 +130,9 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 	}
 
 	private void showFragment(Fragment fragment) {
+		if (fragment.isAdded()) {
+			return;
+		}
 		FragmentTransaction transaction = getSupportFragmentManager()
 				.beginTransaction();
 		transaction.replace(R.id.fragmentContainer, fragment);
@@ -277,6 +280,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 
 				DataSourceListAdapter sourceListAdapter = new DataSourceListAdapter();
 				mListView.setAdapter(sourceListAdapter);
+				mListView.setGroupIndicator(null);
 
 				// Click event for "More" button
 				moreButton.setOnClickListener(new OnClickListener() {
@@ -412,7 +416,9 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 
 				viewHolder.textView.setEnabled(selectedDataSources
 						.isChecked(dataSource));
-
+				viewHolder.checkBox.setEnabled(selectedDataSources
+						.isChecked(dataSource));
+				
 				return view;
 			}
 
