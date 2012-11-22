@@ -27,6 +27,7 @@ import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.DataSourceLoader;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -131,7 +132,7 @@ public class MapFragment extends SherlockFragment {
 				return false;
 			}
 		});
-		
+
 		new Handler().post(new Runnable() {
 			@Override
 			public void run() {
@@ -173,8 +174,16 @@ public class MapFragment extends SherlockFragment {
 		DataSourceLoader.getSelectedDataSources()
 				.removeOnCheckedChangeListener(dataSourceListener);
 		overlayHandlerMap.clear();
-		mapActivity.destroy();
 		super.onDestroy();
+	}
+
+	
+	@Override
+	public void onDestroyView() {
+		mapActivity.destroy();
+		
+		((ViewGroup) getView()).removeView(mapView);
+		super.onDestroyView();
 	}
 
 	@Override
