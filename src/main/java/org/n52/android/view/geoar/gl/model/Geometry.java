@@ -106,7 +106,7 @@ public class Geometry {
 		if (indicesBuffer != null) {
 			indicesBuffer.compact().position(0);
 			createBuffer(indicesBuffer, BufferType.INT_BUFFER, indicesDetails,
-					GLES20.GL_ARRAY_BUFFER);
+					GLES20.GL_ELEMENT_ARRAY_BUFFER);
 		}
 
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
@@ -131,7 +131,7 @@ public class Geometry {
 		int byteSize = BYTES_PER_FLOAT;
 
 		GLES20.glBindBuffer(target, handle);
-		GLES20.glBufferData(target, buffer.limit() * byteSize, buffer,
+		GLES20.glBufferData(target, buffer.capacity() * byteSize, buffer,
 				GLES20.GL_STATIC_DRAW);
 		GLES20.glBindBuffer(target, 0);
 
@@ -176,11 +176,11 @@ public class Geometry {
 			this.verticesBuffer.put(vertices);
 		}
 	}
-
+ 
 	public FloatBuffer getVerticesBuffer() {
 		return this.verticesBuffer;
 	}
-
+ 
 	public void setNormals(float[] normals) {
 		if (this.normalsBuffer == null) {
 			this.normalsBuffer = allocateFloatMemory(normals, BYTES_PER_FLOAT);
@@ -217,12 +217,12 @@ public class Geometry {
 	}
 
 	public void setIndices(short[] indices) {
-		// if (indicesBuffer == null) {
-		// indicesBuffer = allocateShortMemory(indices, 2);
-		// indicesCount = indices.length;
-		// } else {
-		// indicesBuffer.put(indices);
-		// }
+//		if (indicesBuffer == null) {
+//			indicesBuffer = allocateShortMemory(indices, 2);
+//			indicesCount = indices.length;
+//		} else {
+//			indicesBuffer.put(indices);
+//		}
 	}
 
 	public IntBuffer getIndicesBuffer() {

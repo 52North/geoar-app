@@ -28,14 +28,12 @@ import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.DataSourceLoader;
-import org.n52.android.newdata.SpatialEntity;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.n52.android.view.InfoView;
+import org.n52.android.view.geoar.gl.model.GLESGridRenderer;
 import org.n52.android.view.geoar.gl.model.RenderNode;
-import org.n52.android.view.geoar.gl.model.primitives.Cube;
+import org.n52.android.view.geoar.gl.model.Renderding;
 import org.n52.android.view.geoar.gl.model.primitives.Grid;
-import org.n52.android.view.geoar.gl.model.primitives.HeightMap;
-import org.n52.android.view.geoar.gl.model.rendering.ReferencedHeightMap;
 import org.n52.android.view.geoar.gl.model.shader.SimpleColorRenderer;
 import org.osmdroid.util.GeoPoint;
 
@@ -179,6 +177,8 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	//
 	// }
 
+	Renderding renderding;
+	GLESGridRenderer renderer;
 	// TODO what do we need
 	private MercatorRect currentInterpolationRect;
 	private GeoPoint currentCenterGPoint;
@@ -237,8 +237,8 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 		// this.geoLocationUpdateListener = new
 		// ArrayList<ARSurfaceViewRenderer.GeoLocationUpdateListener>();
-		DataSourceLoader.getSelectedDataSources()
-				.addOnCheckedChangeListener(dataSourceListener);
+		DataSourceLoader.getSelectedDataSources().addOnCheckedChangeListener(
+				dataSourceListener);
 
 		factory = new ARVisualizationFactory(glSurfaceView);
 	}
@@ -249,9 +249,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
-		// GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-		// GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT |
-		// GLES20.GL_COLOR_BUFFER_BIT);
+
 		int clearMask = GLES20.GL_COLOR_BUFFER_BIT;
 		if (enableDepthBuffer) {
 			clearMask |= GLES20.GL_DEPTH_BUFFER_BIT;
@@ -262,14 +260,16 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		}
 		GLES20.glClear(clearMask);
 
+		renderding.onDrawFrame(glUnused);
 		for (int i = 0; i < children.size(); i++) {
 			children.get(i).onRender(GLESCamera.projectionMatrix,
 					GLESCamera.viewMatrix,
 					mRotationProvider.getRotationMatrix()
-//					null
+//			 null
 					);
 		}
 
+//		renderer.onDrawFrame();
 	}
 
 	@Override
@@ -303,8 +303,8 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
 
 		// backface culling
-		// GLES20.glEnable(GLES20.GL_CULL_FACE);
-		// GLES20.glCullFace(GLES20.GL_BACK);
+		 GLES20.glEnable(GLES20.GL_CULL_FACE);
+		 GLES20.glCullFace(GLES20.GL_BACK);
 		initScene();
 
 	}
@@ -319,8 +319,15 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		// }
 		 Grid grid = new Grid();
 		 grid.setRenderer(SimpleColorRenderer.getInstance());
-		 addRenderNode(grid);
-		 this.children.add(grid);
+		 grid.onCreateInGLESThread();
+		 this.children.add(grid); 
+		 renderding = new Renderding();
+//		 Cube cube = new Cube();
+//		 cube.setPosition(new float[]{0.0f, 0.0f, 3.0f});
+//		 cube.onCreateInGLESThread();
+//		 this.children.add(cube);
+
+//		renderer = new GLESGridRenderer(mRotationProvider);
 
 		// PointsOfInteresst poi = new
 		// PointsOfInteresst(SimpleColorRenderer.getInstance(), glSurfaceView );
@@ -331,17 +338,19 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		// sphere.setPosition(new float[] {0,0,5});
 		// addRenderNode(sphere);
 		//
-//		 Cube cube = new Cube();
-//		 cube.setPosition(new float[] {0,5,10});
-//		 addRenderNode(cube);
-//		 cube.onCreateInGLESThread();
-//		 this.children.add(cube);
-
+		// Cube cube = new Cube();
+		// cube.setPosition(new float[] {0,5,10});
+		// addRenderNode(cube);
+		// cube.onCreateInGLESThread();
+		// this.children.add(cube);
+		//
 		// HeightMap map = new HeightMap();
 		// addRenderNode(map);
-		//
+		// this.children.add(map);
+		// //
 		// ReferencedHeightMap hMap = new ReferencedHeightMap();
 		// addRenderNode(hMap);
+		// this.children.add(hMap);
 
 		// Cube cube = new Cube(1);
 		// cube.setPosition(new float[] {0,0,5});
@@ -395,9 +404,4 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 				handler.setCenter(currentCenterGPoint);
 	}
 
-	public void checkPOI() {
-		// if (mRenderObjects.size() == 0) {
-		//
-		// }
-	}
 }

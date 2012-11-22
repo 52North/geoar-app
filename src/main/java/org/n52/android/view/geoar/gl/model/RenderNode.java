@@ -62,7 +62,7 @@ public abstract class RenderNode extends Spatial implements
 	public RenderNode() {
 	}
 
-	public RenderNode(SpatialEntity entity){
+	public RenderNode(SpatialEntity entity) {
 		this.entity = entity;
 	}
 
@@ -102,8 +102,8 @@ public abstract class RenderNode extends Spatial implements
 		Matrix.translateM(modelMatrix, 0, position[0], position[1], position[2]);
 		Matrix.translateM(modelMatrix, 0, 0.f, -1.6f, 0.f);
 		// do we really need this step FIXME
-		Matrix.multiplyMM(tmpMatrix, 0, modelMatrix, 0, scaleMatrix, 0);
-		Matrix.multiplyMM(modelMatrix, 0, tmpMatrix, 0, rotateMatrix, 0);
+//		Matrix.multiplyMM(tmpMatrix, 0, modelMatrix, 0, scaleMatrix, 0);
+//		Matrix.multiplyMM(modelMatrix, 0, tmpMatrix, 0, rotateMatrix, 0);
 
 		if (parentMatrix != null) {
 			Matrix.multiplyMM(tmpMatrix, 0, parentMatrix, 0, modelMatrix, 0);
@@ -126,17 +126,17 @@ public abstract class RenderNode extends Spatial implements
 				GLES20.glDisable(GLES20.GL_BLEND);
 			}
 
-			// double sided rendering
-			if (enableCullFace)
-				GLES20.glEnable(GLES20.GL_CULL_FACE);
-			else
-				GLES20.glDisable(GLES20.GL_CULL_FACE);
-
-			// depth Test
-			if (enableDepthTest)
-				GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-			else
-				GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+//			// double sided rendering
+//			if (enableCullFace)
+//				GLES20.glEnable(GLES20.GL_CULL_FACE);
+//			else
+//				GLES20.glDisable(GLES20.GL_CULL_FACE);
+//
+//			// depth Test
+//			if (enableDepthTest)
+//				GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+//			else
+//				GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 
 			GLES20.glDepthMask(enableDepthMask);
 
@@ -146,7 +146,8 @@ public abstract class RenderNode extends Spatial implements
 			renderer.useProgram();
 			renderer.setNormals(geometry.getNormalDetails().bufferHandle);
 			renderer.setVertices(geometry.getVertexDetails().bufferHandle);
-			renderer.setColors(geometry.getColorDetails().bufferHandle);
+			renderer.setColors(geometry.getColorDetails().bufferHandle,
+					geometry.getColorDetails().buffer);
 
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 			renderer.setRenderMatrices(mvpMatrix, modelMatrix, viewMatrix);
@@ -154,15 +155,15 @@ public abstract class RenderNode extends Spatial implements
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER,
 					geometry.getIndicesDetails().bufferHandle);
 			// WTF! FU OPENGLES 2.0
-//			 GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0,
-//			 geometry.getVerticesCount());
+//			GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0,
+//					geometry.getVerticesCount());
 			GLES20.glDrawElements(drawingMode, geometry.getIndicesCount(),
 					GLES20.GL_UNSIGNED_INT, 0);
-			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0); 
 
-			GLES20.glDisable(GLES20.GL_CULL_FACE);
-			GLES20.glDisable(GLES20.GL_BLEND);
-			GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+//			GLES20.glDisable(GLES20.GL_CULL_FACE);
+//			GLES20.glDisable(GLES20.GL_BLEND);
+//			GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 		}
 
 		for (RenderNode child : children) {

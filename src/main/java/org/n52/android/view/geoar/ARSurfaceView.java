@@ -91,7 +91,7 @@ public class ARSurfaceView extends GLSurfaceView implements
 		// drawing available
 		getHolder().setFormat(PixelFormat.TRANSLUCENT);
 		setRenderer(renderer);
-
+		
 	}
 
 	/**

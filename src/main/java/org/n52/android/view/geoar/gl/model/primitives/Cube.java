@@ -76,6 +76,7 @@ public class Cube extends RenderNode{
 	 ***************************/
 	public Cube() {
 		super();
+//		setRenderObjectives(vertices, colors, normals, indices);
 	}
 
 	@Override
