@@ -61,7 +61,7 @@ public class Grid extends RenderNode {
 		try {
 			throw new MethodNotSupportedException(
 					"Setting Color array is not supported atm");
-		} catch (MethodNotSupportedException e) {
+		} catch (MethodNotSupportedException e) {	// Lol...
 			Log.d(this.getClass().getSimpleName(),
 					"setColor array is not supported atm");
 			e.printStackTrace();

@@ -31,12 +31,14 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -296,7 +298,12 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 				mPopup.setOutsideTouchable(true);
 				mPopup.setBackgroundDrawable(new BitmapDrawable(getResources()));
 				mPopup.setWindowLayoutMode(0, LayoutParams.WRAP_CONTENT);
-				mPopup.setWidth(150); // Sets width of menu
+
+				// Set width of menu
+				mPopup.setWidth((int) TypedValue.applyDimension(
+						TypedValue.COMPLEX_UNIT_DIP, 200, getResources()
+								.getDisplayMetrics()));
+
 			}
 			return mPopup;
 		}
@@ -418,7 +425,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 						.isChecked(dataSource));
 				viewHolder.checkBox.setEnabled(selectedDataSources
 						.isChecked(dataSource));
-				
+
 				return view;
 			}
 
