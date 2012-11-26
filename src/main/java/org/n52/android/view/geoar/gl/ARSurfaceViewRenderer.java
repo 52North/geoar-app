@@ -33,6 +33,7 @@ import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.gl.model.GLESGridRenderer;
 import org.n52.android.view.geoar.gl.model.RenderNode;
 import org.n52.android.view.geoar.gl.model.Renderding;
+import org.n52.android.view.geoar.gl.model.primitives.Cube;
 import org.n52.android.view.geoar.gl.model.primitives.Grid;
 import org.n52.android.view.geoar.gl.model.shader.SimpleColorRenderer;
 import org.osmdroid.util.GeoPoint;
@@ -219,7 +220,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 					if (current.getDataSourceHolder() == item) {
 						current.clear();
 						it.remove();
-						//break;
+						// break;
 					}
 				}
 			}
@@ -244,13 +245,12 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		factory = new ARVisualizationFactory(glSurfaceView);
 	}
 
-	public void setInfoHandler(InfoView infoHandler) {
-		this.mInfoHandler = infoHandler;
-	}
+//	public void setInfoHandler(InfoView infoHandler) {
+//		this.mInfoHandler = infoHandler;
+//	}
 
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
-
 		int clearMask = GLES20.GL_COLOR_BUFFER_BIT;
 		if (enableDepthBuffer) {
 			clearMask |= GLES20.GL_DEPTH_BUFFER_BIT;
@@ -262,10 +262,11 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		GLES20.glClear(clearMask);
 
 		renderding.onDrawFrame(glUnused);
+
+		float[] rotationMatrix = mRotationProvider.getRotationMatrix();
 		for (int i = 0; i < children.size(); i++) {
 			children.get(i).onRender(GLESCamera.projectionMatrix,
-					GLESCamera.viewMatrix,
-					mRotationProvider.getRotationMatrix()
+					GLESCamera.viewMatrix, rotationMatrix
 			// null
 					);
 		}
@@ -288,20 +289,20 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		// set up the view matrix
 		GLESCamera.createViewMatrix();
 
-//		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-//		GLES20.glClearDepthf(1.0f);
-//		GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-//		GLES20.glDepthMask(true);
-//
-//		// No culling of back faces
-//		GLES20.glDisable(GLES20.GL_CULL_FACE);
+		// GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+		// GLES20.glClearDepthf(1.0f);
+		// GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+		// GLES20.glDepthMask(true);
+		//
+		// // No culling of back faces
+		// GLES20.glDisable(GLES20.GL_CULL_FACE);
 
 		// No depth testing
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 
-		// Enable blending
-		GLES20.glEnable(GLES20.GL_BLEND);
-		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
+		// // Enable blending
+		// GLES20.glEnable(GLES20.GL_BLEND);
+		// GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
 
 		// backface culling
 		GLES20.glEnable(GLES20.GL_CULL_FACE);
@@ -321,7 +322,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		Grid grid = new Grid();
 		grid.setRenderer(SimpleColorRenderer.getInstance());
 		grid.onCreateInGLESThread();
-		this.children.clear();	// onSurfaceCreated is also called for recreation 
+		this.children.clear(); // onSurfaceCreated is also called for recreation
 		this.children.add(grid);
 		renderding = new Renderding();
 		// Cube cube = new Cube();

@@ -15,12 +15,18 @@
  */
 package org.n52.android.newdata;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.n52.android.GeoARApplication;
+import org.n52.android.newdata.Annotations.PostConstruct;
 import org.n52.android.newdata.Annotations.SupportedVisualization;
+import org.n52.android.newdata.Annotations.SystemService;
 import org.n52.android.newdata.filter.FilterDialogActivity;
 
 import android.content.Context;
@@ -63,11 +69,12 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 	private String name;
 	private byte minZoomLevel;
 	private byte maxZoomLevel;
+	private Class<? extends DataSource<? super Filter>> dataSourceClass;
 
 	@SuppressWarnings("unchecked")
 	public DataSourceHolder(
 			Class<? extends DataSource<? super Filter>> dataSourceClass) {
-
+		this.dataSourceClass = dataSourceClass;
 		Annotations.DataSource dataSourceAnnotation = dataSourceClass
 				.getAnnotation(Annotations.DataSource.class);
 		if (dataSourceAnnotation == null) {
@@ -80,46 +87,6 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 		cacheZoomLevel = dataSourceAnnotation.cacheZoomLevel();
 		minZoomLevel = dataSourceAnnotation.minZoomLevel();
 		maxZoomLevel = dataSourceAnnotation.maxZoomLevel();
-		try {
-			dataSource = dataSourceClass.newInstance();
-		} catch (InstantiationException e) {
-			throw new RuntimeException("No default constructor for datasource");
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException("No valid constructor for datasource");
-		}
-
-		SupportedVisualization supportedVisualization = dataSourceClass
-				.getAnnotation(SupportedVisualization.class);
-		if (supportedVisualization != null) {
-			Class<? extends Visualization>[] visualizationClasses = supportedVisualization
-					.visualizationClasses();
-
-			try {
-				for (int i = 0; i < visualizationClasses.length; i++) {
-					// Find cached instance or create new one
-					Visualization v = visualizationMap
-							.get(visualizationClasses[i]);
-					if (v == null) {
-						// New instance needed
-						v = visualizationClasses[i].newInstance();
-						visualizationMap.put(visualizationClasses[i], v);
-					}
-
-					visualizations.add(v);
-				}
-
-				if (visualizations.size() > 0) {
-					// Set first visualization as checked
-					visualizations.checkItem(0, true);
-				}
-			} catch (InstantiationException e) {
-				throw new RuntimeException(
-						"Referenced visualization has no appropriate constructor");
-			} catch (IllegalAccessException e) {
-				throw new RuntimeException(
-						"Referenced visualization has no appropriate constructor");
-			}
-		}
 
 		// Find filter by getting the actual generic parameter type of the
 		// implemented DataSource interface
@@ -148,6 +115,10 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 	}
 
 	public DataSource<? super Filter> getDataSource() {
+		if (dataSource == null) {
+			throw new IllegalStateException(
+					"Data source is not yet initialized, activation sequence missing");
+		}
 		return dataSource;
 	}
 
@@ -188,11 +159,107 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 		return currentFilter;
 	}
 
+	public static void perfomInjection(Object target) {
+		// Field injection
+		try {
+			for (Field f : target.getClass().getDeclaredFields()) {
+				if (f.isAnnotationPresent(SystemService.class)) {
+					String serviceName = f.getAnnotation(SystemService.class)
+							.value();
+					f.setAccessible(true);
+					f.set(target, GeoARApplication.applicationContext
+							.getSystemService(serviceName));
+				}
+			}
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// Post construct
+
+		try {
+			for (Method m : target.getClass().getDeclaredMethods()) {
+				if (m.isAnnotationPresent(PostConstruct.class)) {
+					m.setAccessible(true);
+					m.invoke(target);
+				}
+			}
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private void initialize() {
+		// Construction of data source instance
+
+		try {
+			dataSource = dataSourceClass.newInstance();
+		} catch (InstantiationException e) {
+			throw new RuntimeException("No default constructor for datasource");
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException("No valid constructor for datasource");
+		}
+
+		// Field injection
+		perfomInjection(dataSource);
+
+		// Visualizations
+		SupportedVisualization supportedVisualization = dataSourceClass
+				.getAnnotation(SupportedVisualization.class);
+		if (supportedVisualization != null) {
+			Class<? extends Visualization>[] visualizationClasses = supportedVisualization
+					.visualizationClasses();
+
+			try {
+				for (int i = 0; i < visualizationClasses.length; i++) {
+					// Find cached instance or create new one
+					Visualization v = visualizationMap
+							.get(visualizationClasses[i]);
+					if (v == null) {
+						// New instance needed
+						v = visualizationClasses[i].newInstance();
+						perfomInjection(v);
+						visualizationMap.put(visualizationClasses[i], v);
+					}
+
+					visualizations.add(v);
+				}
+
+				if (visualizations.size() > 0) {
+					// Set first visualization as checked
+					visualizations.checkItem(0, true);
+				}
+			} catch (InstantiationException e) {
+				throw new RuntimeException(
+						"Referenced visualization has no appropriate constructor");
+			} catch (IllegalAccessException e) {
+				throw new RuntimeException(
+						"Referenced visualization has no appropriate constructor");
+			}
+		}
+
+	}
+
 	/**
 	 * Prevents datasource from getting unloaded. Should be called when
-	 * datasource is added to map/ar
+	 * datasource is added to map/ar.
 	 */
+	// TODO perhaps package private
 	public void activate() {
+		if (dataSource == null) {
+			initialize();
+		}
 		// prevents clearing of cache by removing messages
 		dataSourceHandler.removeMessages(CLEAR_CACHE);
 	}
@@ -221,7 +288,7 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 	}
 
 	public String getIdentifier() {
-		return dataSource.getClass().getSimpleName();
+		return dataSourceClass.getSimpleName();
 	}
 
 	/**

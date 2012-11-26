@@ -27,6 +27,7 @@ import java.util.Set;
 import org.n52.android.GeoARApplication;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -202,12 +203,13 @@ public class DataSourceLoader {
 		mSelectedDataSourcesChangeListeners.remove(listener);
 	}
 
+	@SuppressLint("NewApi")
 	private static void loadPlugins() {
 
 		String[] apksInDirectory = new File(PLUGIN_PATH)
 				.list(pluginFilenameFilter);
 
-		if (apksInDirectory.length == 0)
+		if (apksInDirectory == null || apksInDirectory.length == 0)
 			return;
 
 		try {

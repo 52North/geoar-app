@@ -57,7 +57,7 @@ public class CameraView extends SurfaceView implements Callback {
 	private void init() {
 		holder = getHolder();
 		holder.addCallback(this);
-		holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);	//TODO?
+		holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS); // TODO?
 	}
 
 	/**
@@ -110,6 +110,8 @@ public class CameraView extends SurfaceView implements Callback {
 
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
 			int height) {
+		if (camera == null)
+			return;
 		// �nderung des Surface f�r Kameravorschau ber�cksichtigen
 
 		// Bilddrehung
@@ -122,7 +124,7 @@ public class CameraView extends SurfaceView implements Callback {
 
 		// According to API Documentation
 		// http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation%28int%29
-		int degrees = 0; 
+		int degrees = 0;
 		switch (rotation) {
 		case Surface.ROTATION_0:
 			degrees = 0;
@@ -171,11 +173,15 @@ public class CameraView extends SurfaceView implements Callback {
 		try {
 			// Kameraobjekt erzeugen
 			camera = Camera.open();
+			if (camera == null) {
+				throw new RuntimeException(); // jump to exception block
+			}
 
 			camera.setPreviewDisplay(this.holder);
 		} catch (Exception e) {
 			new AlertDialog.Builder(getContext()).setTitle(R.string.error)
-					.setMessage(R.string.camera_not_available).show();
+					.setMessage(R.string.camera_not_available)
+					.setNeutralButton(R.string.ok, null).show();
 		}
 	}
 

@@ -21,6 +21,7 @@ import org.n52.android.tracking.camera.CameraView;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -48,7 +49,7 @@ public class ARFragment2 extends SherlockFragment {
 		final ConfigurationInfo config = activityManager
 				.getDeviceConfigurationInfo();
 
-		if (config.reqGlEsVersion >= 0x20000) {
+		if (config.reqGlEsVersion >= 0x20000 || Build.PRODUCT.startsWith("sdk")) {
 			augmentedView = new ARSurfaceView(getActivity());
 			augmentedView.setZOrderMediaOverlay(true);
 			layout.addView(augmentedView, 0, new FrameLayout.LayoutParams(

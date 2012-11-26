@@ -90,7 +90,7 @@ public abstract class Renderer {
 		viewMatrixHandle = GLES20.glGetUniformLocation(programHandle,
 				"u_VMatrix");
 
-		int x = 2;
+//		int x = 2;	
 	}
 
 	public void onDestroy() {
@@ -128,9 +128,9 @@ public abstract class Renderer {
 	public void setColors(final int colorBufferHandle, Buffer buf) {
 		if (colorBufferHandle >= 0) {
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, colorBufferHandle);
+			GLES20.glEnableVertexAttribArray(colorHandle);
 			GLES20.glVertexAttribPointer(colorHandle, 4, GLES20.GL_FLOAT,
 					false, 0, buf);
-			GLES20.glEnableVertexAttribArray(colorHandle);
 		} else {
 			Log.d(this.getClass().getSimpleName(),
 					"colorbufferhandle is not a valid handle");
