@@ -57,7 +57,7 @@ public class CameraView extends SurfaceView implements Callback {
 	private void init() {
 		holder = getHolder();
 		holder.addCallback(this);
-		holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);	//TODO?
 	}
 
 	/**
@@ -122,7 +122,7 @@ public class CameraView extends SurfaceView implements Callback {
 
 		// According to API Documentation
 		// http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation%28int%29
-		int degrees = 0;
+		int degrees = 0; 
 		switch (rotation) {
 		case Surface.ROTATION_0:
 			degrees = 0;
@@ -139,7 +139,7 @@ public class CameraView extends SurfaceView implements Callback {
 		}
 
 		// Annahme, dass Kamera 90� verdreht zu Standardausrichtung platziert
-		// ist. Tats�chlicher Wert erst ab Android 2.3 abrufbar.
+		// ist. Tats�chlicher Wert erst ab Android 2.3 abrufbar. TODO
 		int cameraRotation = (90 - degrees + 360) % 360;
 
 		camera.setDisplayOrientation(cameraRotation);

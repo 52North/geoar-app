@@ -90,6 +90,7 @@ public class ARSurfaceView extends GLSurfaceView implements
 		setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Forces to make translucent
 		// drawing available
 		getHolder().setFormat(PixelFormat.TRANSLUCENT);
+		
 		setRenderer(renderer);
 		
 	}
@@ -160,7 +161,7 @@ public class ARSurfaceView extends GLSurfaceView implements
 			if (isShown()) {
 				onResume();
 			} else {
-				onPause();
+				onPause(); 
 			}
 		}
 		super.onVisibilityChanged(changedView, visibility);
@@ -224,13 +225,13 @@ public class ARSurfaceView extends GLSurfaceView implements
 		renderer.setCenter(location);
 	}
 
-	public Integer getMenuGroupId() {
-		return 0;
-		// return R.id.group_noiseview;
-	}
+//	public Integer getMenuGroupId() {
+//		return 0;
+//		// return R.id.group_noiseview;
+//	}
 
-	public boolean isVisible() {
-		return isShown();
-	}
+//	public boolean isVisible() {
+//		return isShown();
+//	}
 
 }

@@ -16,6 +16,7 @@
 package org.n52.android.view.geoar;
 
 import org.n52.android.R;
+import org.n52.android.tracking.camera.CameraView;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -34,8 +35,8 @@ public class ARFragment2 extends SherlockFragment {
 
 	private ARSurfaceView augmentedView;
 
-	public ARFragment2() { 
-		this.setRetainInstance(true);
+	public ARFragment2() {
+		// this.setRetainInstance(true);
 	}
 
 	@Override
@@ -49,11 +50,12 @@ public class ARFragment2 extends SherlockFragment {
 
 		if (config.reqGlEsVersion >= 0x20000) {
 			augmentedView = new ARSurfaceView(getActivity());
+			augmentedView.setZOrderMediaOverlay(true);
 			layout.addView(augmentedView, 0, new FrameLayout.LayoutParams(
 					LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-			final DisplayMetrics displayMetrics = new DisplayMetrics();
-			getActivity().getWindowManager().getDefaultDisplay()
-					.getMetrics(displayMetrics);
+			// final DisplayMetrics displayMetrics = new DisplayMetrics();
+			// getActivity().getWindowManager().getDefaultDisplay()
+			// .getMetrics(displayMetrics);
 
 		}
 

@@ -79,8 +79,8 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	// }
 
 	/**
-	 * Public interface to create an object which can supplies the renderer with
-	 * the current extrinsic camera rotation. Ensures that matrices are just
+	 * Public interface to create an object which supplies the renderer with the
+	 * current extrinsic camera rotation. Ensures that matrices are just
 	 * computed as needed, since the renderer asks for data and does not listen
 	 * for them.
 	 */
@@ -208,18 +208,19 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 		@Override
 		public void onCheckedChanged(DataSourceHolder item, boolean newState) {
-			if (newState = true) {
+			if (newState == true) {
 				DataSourceVisualizationHandler handler = new DataSourceVisualizationHandler(
 						ARSurfaceViewRenderer.this.glSurfaceView, item, factory);
 				visualizationHandler.add(handler);
-			}
-			for (Iterator<DataSourceVisualizationHandler> it = visualizationHandler
-					.iterator(); it.hasNext();) {
-				DataSourceVisualizationHandler current = it.next();
-				if (current.getDataSourceHolder() == item) {
-					current.clear();
-					it.remove();
-					break;
+			} else {
+				for (Iterator<DataSourceVisualizationHandler> it = visualizationHandler
+						.iterator(); it.hasNext();) {
+					DataSourceVisualizationHandler current = it.next();
+					if (current.getDataSourceHolder() == item) {
+						current.clear();
+						it.remove();
+						//break;
+					}
 				}
 			}
 		}
@@ -265,11 +266,11 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 			children.get(i).onRender(GLESCamera.projectionMatrix,
 					GLESCamera.viewMatrix,
 					mRotationProvider.getRotationMatrix()
-//			 null
+			// null
 					);
 		}
 
-//		renderer.onDrawFrame();
+		// renderer.onDrawFrame();
 	}
 
 	@Override
@@ -287,13 +288,13 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		// set up the view matrix
 		GLESCamera.createViewMatrix();
 
-		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-		GLES20.glClearDepthf(1.0f);
-		GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-		GLES20.glDepthMask(true);
-
-		// No culling of back faces
-		GLES20.glDisable(GLES20.GL_CULL_FACE);
+//		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+//		GLES20.glClearDepthf(1.0f);
+//		GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+//		GLES20.glDepthMask(true);
+//
+//		// No culling of back faces
+//		GLES20.glDisable(GLES20.GL_CULL_FACE);
 
 		// No depth testing
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
@@ -303,8 +304,8 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
 
 		// backface culling
-		 GLES20.glEnable(GLES20.GL_CULL_FACE);
-		 GLES20.glCullFace(GLES20.GL_BACK);
+		GLES20.glEnable(GLES20.GL_CULL_FACE);
+		GLES20.glCullFace(GLES20.GL_BACK);
 		initScene();
 
 	}
@@ -317,17 +318,18 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		// for(DataSourceHolder holder : list){
 		// ARVisualizationFactory fac = new ARVisualizationFactory();
 		// }
-		 Grid grid = new Grid();
-		 grid.setRenderer(SimpleColorRenderer.getInstance());
-		 grid.onCreateInGLESThread();
-		 this.children.add(grid); 
-		 renderding = new Renderding();
-//		 Cube cube = new Cube();
-//		 cube.setPosition(new float[]{0.0f, 0.0f, 3.0f});
-//		 cube.onCreateInGLESThread();
-//		 this.children.add(cube);
+		Grid grid = new Grid();
+		grid.setRenderer(SimpleColorRenderer.getInstance());
+		grid.onCreateInGLESThread();
+		this.children.clear();	// onSurfaceCreated is also called for recreation 
+		this.children.add(grid);
+		renderding = new Renderding();
+		// Cube cube = new Cube();
+		// cube.setPosition(new float[]{0.0f, 0.0f, 3.0f});
+		// cube.onCreateInGLESThread();
+		// this.children.add(cube);
 
-//		renderer = new GLESGridRenderer(mRotationProvider);
+		// renderer = new GLESGridRenderer(mRotationProvider);
 
 		// PointsOfInteresst poi = new
 		// PointsOfInteresst(SimpleColorRenderer.getInstance(), glSurfaceView );
