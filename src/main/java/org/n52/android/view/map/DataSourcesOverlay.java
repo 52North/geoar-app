@@ -31,7 +31,12 @@ import android.graphics.drawable.Drawable;
  */
 public class DataSourcesOverlay extends ItemizedOverlay<OverlayItem> {
 
+	interface OnOverlayItemTapListener {
+		boolean onOverlayItemTap(OverlayItem item);
+	}
+
 	private Map<Object, List<OverlayItem>> overlayItemMap = new HashMap<Object, List<OverlayItem>>();
+	private OnOverlayItemTapListener overlayItemTapListener;
 
 	public DataSourcesOverlay() {
 		this(null);
@@ -39,6 +44,10 @@ public class DataSourcesOverlay extends ItemizedOverlay<OverlayItem> {
 
 	public DataSourcesOverlay(Drawable defaultMarker) {
 		super(defaultMarker);
+	}
+
+	public void setOverlayItemTapListener(OnOverlayItemTapListener listener) {
+		overlayItemTapListener = listener;
 	}
 
 	/**
@@ -127,4 +136,12 @@ public class DataSourcesOverlay extends ItemizedOverlay<OverlayItem> {
 		populate();
 	}
 
+	@Override
+	protected boolean onTap(int index) {
+		if (overlayItemTapListener != null
+				&& overlayItemTapListener.onOverlayItemTap(createItem(index))) {
+			return true;
+		}
+		return super.onTap(index);
+	}
 }

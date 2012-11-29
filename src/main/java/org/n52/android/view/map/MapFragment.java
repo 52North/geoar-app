@@ -21,13 +21,17 @@ import java.util.Map;
 import org.mapsforge.android.maps.MapController;
 import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.mapgenerator.tiledownloader.MapnikTileDownloader;
+import org.mapsforge.android.maps.overlay.OverlayItem;
 import org.mapsforge.core.GeoPoint;
 import org.n52.android.R;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.DataSourceLoader;
+import org.n52.android.view.map.DataSourcesOverlay.OnOverlayItemTapListener;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -118,6 +122,20 @@ public class MapFragment extends SherlockFragment {
 		// Data source handling
 		overlayHandlerMap = new HashMap<DataSourceHolder, DataSourceOverlayHandler>();
 		dataSourcesOverlay = new DataSourcesOverlay();
+		dataSourcesOverlay
+				.setOverlayItemTapListener(new OnOverlayItemTapListener() {
+
+					@Override
+					public boolean onOverlayItemTap(OverlayItem item) {
+						Builder builder = new AlertDialog.Builder(getActivity());
+						builder.setTitle(item.getTitle())
+								.setMessage(item.getSnippet())
+								.setNeutralButton(R.string.ok, null);
+						builder.show();
+						return true;
+					}
+				});
+
 		mapView.getOverlays().add(dataSourcesOverlay);
 		mapView.setOnTouchListener(new OnTouchListener() {
 			@Override
@@ -133,6 +151,7 @@ public class MapFragment extends SherlockFragment {
 			}
 		});
 
+		// Update all overlays after layouting the mapview
 		new Handler().post(new Runnable() {
 			@Override
 			public void run() {
@@ -177,7 +196,6 @@ public class MapFragment extends SherlockFragment {
 		super.onDestroy();
 	}
 
-	
 	@Override
 	public void onDestroyView() {
 		mapActivity.destroy();
