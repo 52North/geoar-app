@@ -25,7 +25,7 @@
         android:icon="@drawable/icon"
         android:label="@string/app_name" android:hardwareAccelerated="false">
         <activity
-            android:name="org.n52.android.GeoARActivity3"
+            android:name="org.n52.android.GeoARActivity"
             android:configChanges="orientation"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >
@@ -38,19 +38,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="org.n52.android.GeoARActivity"
-            android:configChanges="orientation"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" >
-        </activity>
-        <activity
             android:name="org.n52.android.newdata.filter.FilterDialogActivity"
             android:label="Filter Settings"
             android:theme="@android:style/Theme.Holo.Dialog" >
-        </activity>
-        <activity
-            android:name="org.n52.android.MainActivity2"
-            android:label="@string/app_name" >
         </activity>
 
         <service android:name="org.n52.android.data.CodebaseDownloadService" />

@@ -138,4 +138,9 @@ public class ARFragment2 extends SherlockFragment {
 			augmentedView.destroyDrawingCache();
 	}
 
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		setHasOptionsMenu(true);
+		super.onCreate(savedInstanceState);
+	}
 }

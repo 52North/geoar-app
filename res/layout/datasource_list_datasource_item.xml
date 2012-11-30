@@ -5,10 +5,12 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal" >
 
-    <ImageView
-        android:id="@+id/imageView"
+    <ImageButton
+        android:id="@+id/imageViewSettings"
+        android:background="?android:attr/selectableItemBackground"
         android:layout_width="wrap_content"
-        android:layout_height="fill_parent" />
+        android:layout_height="fill_parent"
+        android:src="@android:drawable/ic_menu_preferences" />
 
     <TextView
         android:id="@+id/textView"

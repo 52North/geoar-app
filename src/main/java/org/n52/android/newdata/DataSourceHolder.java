@@ -35,6 +35,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 public class DataSourceHolder extends PluginHolder implements Parcelable {
 	private static Map<Class<? extends Visualization>, Visualization> visualizationMap = new HashMap<Class<? extends Visualization>, Visualization>();
@@ -116,8 +117,9 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 
 	public DataSource<? super Filter> getDataSource() {
 		if (dataSource == null) {
-			throw new IllegalStateException(
-					"Data source is not yet initialized, activation sequence missing");
+			initializeDataSource();
+			Log.i("GeoAR",
+					"Data source is was not yet initialized, activation sequence missing");
 		}
 		return dataSource;
 	}
@@ -159,6 +161,15 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 		return currentFilter;
 	}
 
+	/**
+	 * Static method which injects all fields with GeoAR-{@link Annotations} and
+	 * finally calls the {@link PostConstruct} method (if available) for any
+	 * object.
+	 * 
+	 * @param target
+	 *            Any object
+	 */
+	// TODO move to a utilities package?
 	public static void perfomInjection(Object target) {
 		// Field injection
 		try {
@@ -200,7 +211,7 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 		}
 	}
 
-	private void initialize() {
+	private void initializeDataSource() {
 		// Construction of data source instance
 
 		try {
@@ -258,7 +269,7 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 	// TODO perhaps package private
 	public void activate() {
 		if (dataSource == null) {
-			initialize();
+			initializeDataSource();
 		}
 		// prevents clearing of cache by removing messages
 		dataSourceHandler.removeMessages(CLEAR_CACHE);

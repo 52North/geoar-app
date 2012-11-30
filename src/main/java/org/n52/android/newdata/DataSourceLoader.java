@@ -261,11 +261,12 @@ public class DataSourceLoader {
 		if (apksInDirectory == null || apksInDirectory.length == 0)
 			return;
 
-		// Pattern captures the plugin version string,
+		// Pattern captures the plugin version string
 		Pattern pluginVersionPattern = Pattern
 				.compile("-(\\d+(?:\\.\\d+)*)[.-]");
 
-		// Pattern captures the plugin name, ignoring the optional version
+		// Pattern captures the plugin name, ignoring the optional version and
+		// filename ending
 		Pattern pluginNamePattern = Pattern
 				.compile("^((?:.(?!-\\d+\\.))+.).*\\.[^.]+$");
 

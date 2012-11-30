@@ -70,7 +70,7 @@ import com.actionbarsherlock.view.MenuItem;
  * 
  * 
  */
-public class GeoARActivity3 extends SherlockFragmentActivity {
+public class GeoARActivity extends SherlockFragmentActivity {
 
 	private MapFragment mapFragment = new MapFragment();
 	private ARFragment2 arFragment = new ARFragment2();
@@ -175,48 +175,42 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		DataSourceLoader.saveDataSourceSelection();
 	}
 
-	@Override
+	@Override 
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// inflate common general menu definition
 		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.menu_general, menu);
 
-		menu.findItem(R.id.item_datasource).setActionProvider(
-				new DataSourcesActionProvider());
 		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		// Set data source action providers here, since it depends on this
+		// instance
+		MenuItem menuItem = menu.findItem(R.id.item_map_datasource);
+		if (menuItem != null)
+			menuItem.setActionProvider(new DataSourcesActionProvider(
+					Visualization.MapVisualization.class));
+
+		menuItem = menu.findItem(R.id.item_ar_datasource);
+		if (menuItem != null)
+			menuItem.setActionProvider(new DataSourcesActionProvider(
+					Visualization.ARVisualization.class));
+
+		return super.onPrepareOptionsMenu(menu);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		switch (item.getItemId()) {
-		// TODO
-		// case R.id.item_filter:
-		// // Get current measurement filter
-		// MeasurementFilter filter = measurementManager
-		// .getMeasurementFilter();
-		// if (filter == null) {
-		// filter = new MeasurementFilter();
-		// }
-		// new FilterDialog(this, filter, measurementManager).show();
-		// break;
-		// case R.id.item_source:
-		// // show data sources dialog
-		// // TODO
-		// // new DataSourceDialog(this, dataSources, measurementManager)
-		// new DataSourceDialog(this, null, measurementManager).show();
-		// break;
 		case R.id.item_ar:
 			showFragment(arFragment);
 			return true;
 
 		case R.id.item_map:
 			showFragment(mapFragment);
-			return true;
-
-		case R.id.item_filter:
-			DataSourceLoader.getSelectedDataSources().iterator().next()
-					.createFilterDialog(this);
 			return true;
 
 		case R.id.item_selectsources:
@@ -243,10 +237,14 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 		private PopupWindow mPopup;
 		private LayoutInflater mInflater;
 		private ExpandableListView mListView;
+		private Class<? extends Visualization> visualizationClass;
 
-		public DataSourcesActionProvider() {
-			super(GeoARActivity3.this);
-			mInflater = LayoutInflater.from(GeoARActivity3.this);
+		public <E extends Visualization> DataSourcesActionProvider(
+				Class<E> visualizationClass) {
+			super(GeoARActivity.this);
+			this.visualizationClass = visualizationClass;
+
+			mInflater = LayoutInflater.from(GeoARActivity.this);
 		}
 
 		@Override
@@ -352,14 +350,40 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 
 			}
 
+			private class OnSettingsClickListener implements OnClickListener {
+
+				private int position;
+
+				public void setPosition(int position) {
+					this.position = position;
+				}
+
+				@Override
+				public void onClick(View v) {
+					DataSourceHolder dataSource = selectedDataSources
+							.get(position);
+					dataSource.createFilterDialog(GeoARActivity.this);
+				}
+
+			}
+
+			/**
+			 * Holder for group items
+			 * 
+			 */
 			private class DataSourceViewHolder {
-				public ImageView imageView;
+				public ImageView imageViewSettings;
 				public TextView textView;
 				public CheckBox checkBox;
 				public OnDataSourceCheckedChangeListener checkListener;
 				public OnDataSourceClickListener clickListener;
+				public OnSettingsClickListener settingsClickListener;
 			}
 
+			/**
+			 * Holder for child items
+			 * 
+			 */
 			private class VisualizationViewHolder {
 				public TextView textView;
 				public CheckBox checkBox;
@@ -367,10 +391,8 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 
 			private CheckList<DataSourceHolder> selectedDataSources;
 
-			public DataSourceListAdapter() {
-
+			public <E extends Visualization> DataSourceListAdapter() {
 				selectedDataSources = DataSourceLoader.getSelectedDataSources();
-
 				DataSourceLoader.addOnSelectedDataSourcesUpdateListener(this);
 				// TODO remove listener somehow
 			}
@@ -414,7 +436,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 				DataSourceHolder dataSource = selectedDataSources
 						.get(groupPosition);
 				Visualization visualization = dataSource.getVisualizations()
-						.get(childPosition);
+						.ofType(visualizationClass).get(childPosition);
 				viewHolder.textView.setText(visualization.getClass()
 						.getSimpleName());
 
@@ -432,7 +454,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 			@Override
 			public int getChildrenCount(int groupPosition) {
 				return selectedDataSources.get(groupPosition)
-						.getVisualizations().size();
+						.getVisualizations().ofType(visualizationClass).size();
 			}
 
 			@Override
@@ -460,8 +482,12 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 							R.layout.datasource_list_datasource_item, parent,
 							false);
 					viewHolder = new DataSourceViewHolder();
-					viewHolder.imageView = (ImageView) view
-							.findViewById(R.id.imageView);
+					viewHolder.imageViewSettings = (ImageView) view
+							.findViewById(R.id.imageViewSettings);
+					viewHolder.settingsClickListener = new OnSettingsClickListener();
+					viewHolder.imageViewSettings
+							.setOnClickListener(viewHolder.settingsClickListener);
+
 					viewHolder.textView = (TextView) view
 							.findViewById(R.id.textView);
 
@@ -481,6 +507,7 @@ public class GeoARActivity3 extends SherlockFragmentActivity {
 					viewHolder = (DataSourceViewHolder) view.getTag();
 				}
 
+				viewHolder.settingsClickListener.setPosition(groupPosition);
 				viewHolder.checkListener.setPosition(groupPosition);
 				viewHolder.clickListener.setPosition(groupPosition);
 				DataSourceHolder dataSource = selectedDataSources

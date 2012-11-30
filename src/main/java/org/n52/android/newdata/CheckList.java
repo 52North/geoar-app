@@ -15,6 +15,7 @@
  */
 package org.n52.android.newdata;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashSet;
@@ -31,6 +32,19 @@ public class CheckList<T> extends ArrayList<T> {
 
 	private BitSet checkSet = new BitSet();
 	private Set<OnCheckedChangedListener<T>> changeListeners = new HashSet<OnCheckedChangedListener<T>>();
+
+	@SuppressWarnings("unchecked")
+	public <E> List<E> ofType(Class<E> clazz) {
+		List<E> resultList = new ArrayList<E>();
+
+		for (T item : this) {
+			if (clazz.isAssignableFrom(item.getClass())) {
+				resultList.add((E) item);
+			}
+		}
+
+		return resultList;
+	}
 
 	public List<T> getCheckedItems() {
 		List<T> resultList = new ArrayList<T>();

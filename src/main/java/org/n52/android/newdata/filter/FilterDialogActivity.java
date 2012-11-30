@@ -93,7 +93,7 @@ public class FilterDialogActivity extends Activity {
 				field.setAccessible(true);
 				entry.getValue().setValueObject(field.get(currentFilter));
 			} catch (Exception e) {
-
+				// TODO
 			}
 
 			row.addView(filterView, new TableRow.LayoutParams(
