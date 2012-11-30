@@ -15,6 +15,12 @@
  */
 package org.n52.android.newdata.filter;
 
+import java.lang.reflect.Field;
+
+import org.n52.android.newdata.Annotations.Settings.Max;
+import org.n52.android.newdata.Annotations.Settings.Min;
+import org.n52.android.newdata.Annotations.Settings.NotNull;
+
 import android.content.Context;
 import android.view.View;
 import android.widget.EditText;
@@ -22,21 +28,68 @@ import android.widget.EditText;
 public abstract class NumberFilterView<T extends Number> extends EditText
 		implements FilterView<T> {
 
-	public NumberFilterView(Context context, int inputType) {
+	private boolean notNull;
+	private T minValue;
+	private T maxValue;
+
+	public NumberFilterView(Context context, Field field, int inputType) {
 		super(context);
 
+		// Check annotations
+		notNull = field.isAnnotationPresent(NotNull.class);
+
+		if (field.isAnnotationPresent(Min.class)) {
+			minValue = parseString(field.getAnnotation(Min.class).value());
+		}
+		if (field.isAnnotationPresent(Max.class)) {
+			maxValue = parseString(field.getAnnotation(Max.class).value());
+		}
 		setInputType(inputType);
 	}
 
 	@Override
 	public boolean validate() {
-		try {
-			getValue();
+		if (getText().toString().isEmpty() && !notNull) {
 			return true;
+		}
+		T value;
+		try {
+			value = getValue();
 		} catch (NumberFormatException e) {
 			setError("Invalid Number");
 			return false;
 		}
+
+		if (minValue != null && minValue.doubleValue() > value.doubleValue()) {
+			setError("Must be at least " + minValue);
+			return false;
+		}
+		if (maxValue != null && maxValue.doubleValue() < value.doubleValue()) {
+			setError("Must be less than " + maxValue);
+			return false;
+		}
+		
+		return true;
+	}
+
+	@Override
+	public T getValue() {
+		if (getText().toString().isEmpty() && !notNull)
+			return null;
+
+		return parseString(getText().toString());
+	}
+
+	protected abstract T parseString(String value);
+
+	@Override
+	public void setValue(T value) {
+		setText(value != null ? value + "" : "");
+	}
+
+	@Override
+	public void setValueObject(Object object) {
+		setValue((T) object);
 	}
 
 	@Override

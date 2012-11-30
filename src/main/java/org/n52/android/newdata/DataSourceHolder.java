@@ -91,25 +91,39 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 
 		// Find filter by getting the actual generic parameter type of the
 		// implemented DataSource interface
-		Type[] interfaces = dataSourceClass.getGenericInterfaces();
-		for (Type interfaceType : interfaces) {
-			ParameterizedType type = (ParameterizedType) interfaceType;
-			if (!type.getRawType().equals(DataSource.class)) {
-				continue;
+
+		Class<?> currentClass = dataSourceClass;
+		while (currentClass != null) {
+			Type[] interfaces = currentClass.getGenericInterfaces();
+			for (Type interfaceType : interfaces) {
+				ParameterizedType type = (ParameterizedType) interfaceType;
+				if (!type.getRawType().equals(DataSource.class)) {
+					continue;
+				}
+
+				filterClass = (Class<? extends Filter>) type
+						.getActualTypeArguments()[0];
+				try {
+					this.currentFilter = filterClass.newInstance();
+				} catch (InstantiationException e) {
+					throw new RuntimeException(
+							"Referenced filter has no appropriate constructor");
+				} catch (IllegalAccessException e) {
+					throw new RuntimeException(
+							"Referenced filter has no appropriate constructor");
+				}
+
 			}
 
-			this.filterClass = (Class<? extends Filter>) type
-					.getActualTypeArguments()[0];
-			try {
-				this.currentFilter = filterClass.newInstance();
-			} catch (InstantiationException e) {
-				throw new RuntimeException(
-						"Referenced filter has no appropriate constructor");
-			} catch (IllegalAccessException e) {
-				throw new RuntimeException(
-						"Referenced filter has no appropriate constructor");
+			if (filterClass == null) {
+				currentClass = currentClass.getSuperclass();
+			} else {
+				break;
 			}
-
+		}
+		if (filterClass == null) {
+			throw new RuntimeException(
+					"Data source does not specify a filter class");
 		}
 
 		dataCache = new DataCache(this);

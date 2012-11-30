@@ -16,13 +16,13 @@
 package org.n52.android.newdata.filter;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.n52.android.R;
 import org.n52.android.newdata.Annotations.Filterable;
+import org.n52.android.newdata.Annotations.Settings.Name;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.Filter;
 
@@ -73,7 +73,11 @@ public class FilterDialogActivity extends Activity {
 		// Find fields and create views for every annotated field
 		for (Field field : dataSource.getFilterClass().getDeclaredFields()) {
 			if (field.isAnnotationPresent(Filterable.class)) {
-				fieldMap.put(field, createFilterViewFromField(field, this));
+				FilterView<?> filterView = createFilterViewFromField(field,
+						this);
+				if (filterView != null) {
+					fieldMap.put(field, filterView);
+				}
 			}
 		}
 
@@ -84,7 +88,9 @@ public class FilterDialogActivity extends Activity {
 			TableRow row = new TableRow(this);
 
 			TextView label = new TextView(this);
-			label.setText(field.getAnnotation(Filterable.class).value());
+			if (field.getAnnotation(Name.class) != null) {
+				label.setText(field.getAnnotation(Name.class).value());
+			}
 			row.addView(label, LayoutParams.WRAP_CONTENT,
 					LayoutParams.WRAP_CONTENT);
 
@@ -150,49 +156,42 @@ public class FilterDialogActivity extends Activity {
 	 * @return
 	 */
 	private FilterView<?> createFilterViewFromField(Field field, Context context) {
-		Type fieldType = field.getType();
-		if (fieldType.equals(float.class)) {
-			return new NumberFilterView<Float>(context,
+		Class<?> fieldType = field.getType();
+		if (fieldType.equals(float.class) || fieldType.equals(Float.class)) {
+			return new NumberFilterView<Float>(context, field,
 					InputType.TYPE_CLASS_NUMBER
-							| InputType.TYPE_NUMBER_FLAG_DECIMAL) {
+							| InputType.TYPE_NUMBER_FLAG_DECIMAL
+							| InputType.TYPE_NUMBER_FLAG_SIGNED) {
 
 				@Override
-				public Float getValue() {
-					return Float.parseFloat(getText().toString());
-				}
-
-				@Override
-				public void setValue(Float value) {
-					setText(value + "");
-				}
-
-				@Override
-				public void setValueObject(Object object) {
-					setValue((Float) object);
+				protected Float parseString(String value) {
+					return Float.parseFloat(value);
 				}
 
 			};
-		} else if (fieldType.equals(double.class)) {
-			return new NumberFilterView<Double>(context,
+		} else if (fieldType.equals(double.class)
+				|| fieldType.equals(Double.class)) {
+			return new NumberFilterView<Double>(context, field,
 					InputType.TYPE_CLASS_NUMBER
-							| InputType.TYPE_NUMBER_FLAG_DECIMAL) {
+							| InputType.TYPE_NUMBER_FLAG_DECIMAL
+							| InputType.TYPE_NUMBER_FLAG_SIGNED) {
 
 				@Override
-				public Double getValue() {
-					return Double.parseDouble(getText().toString());
-				}
-
-				@Override
-				public void setValue(Double value) {
-					setText(value + "");
-				}
-
-				@Override
-				public void setValueObject(Object object) {
-					setValue((Double) object);
+				protected Double parseString(String value) {
+					return Double.parseDouble(value);
 				}
 
 			};
+		} else if (Enum.class.isAssignableFrom(fieldType)) {
+			return new SpinnerFilterView<Enum<?>>(context, field, field
+					.getType().getEnumConstants()) {
+
+				@Override
+				public void setValueObject(Object object) {
+					setValue((Enum<?>) object);
+				}
+			};
+
 		}
 
 		return null;
