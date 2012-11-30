@@ -7,7 +7,7 @@
         android:showAsAction="always"/>
     <item
         android:id="@+id/item_ar"
-        android:icon="@drawable/ic_menu_phone"
+        android:icon="@drawable/ic_menu_view"
         android:showAsAction="always"
         android:title="@string/map_item_camera"/>
 

@@ -6,6 +6,11 @@
         android:id="@+id/item_ar_datasource"
         android:showAsAction="always"/>
     <item
+        android:id="@+id/item_map"
+        android:icon="@drawable/ic_menu_mapmode"
+        android:showAsAction="always"
+        android:title="Map"/>
+    <item
         android:id="@+id/item_select_ar_overlay"
         android:title="@string/choose_overlay"/>
     <item
