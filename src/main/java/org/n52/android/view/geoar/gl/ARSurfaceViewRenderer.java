@@ -28,6 +28,7 @@ import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.DataSourceLoader;
+import org.n52.android.newdata.PluginLoader;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.gl.model.GLESGridRenderer;
@@ -239,7 +240,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 		// this.geoLocationUpdateListener = new
 		// ArrayList<ARSurfaceViewRenderer.GeoLocationUpdateListener>();
-		DataSourceLoader.getSelectedDataSources().addOnCheckedChangeListener(
+		PluginLoader.getSelectedDataSources().addOnCheckedChangeListener(
 				dataSourceListener);
 
 		factory = new ARVisualizationFactory(glSurfaceView);

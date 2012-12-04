@@ -16,6 +16,7 @@
 package org.n52.android.newdata;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -41,9 +42,17 @@ import org.apache.http.params.HttpParams;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.n52.android.GeoARApplication;
 
+import android.app.DownloadManager;
+import android.app.DownloadManager.Request;
+import android.content.Context;
+import android.graphics.Path;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
+import android.provider.MediaStore.Audio.Media;
+import android.provider.MediaStore.Files;
 
 public class DataSourceDownloader {
 
@@ -125,8 +134,8 @@ public class DataSourceDownloader {
 								.getLong(CODEBASE_VERSION));
 						holder.setDescription(currentObject
 								.getString(CODEBASE_DESCRIPTION));
-						holder.setDownloadLink(currentObject
-								.getString(CODEBASE_DOWNLOADLINK));
+						holder.setDownloadLink(Uri.parse(currentObject
+								.getString(CODEBASE_DOWNLOADLINK)));
 						holder.setImageLink(currentObject
 								.getString(CODEBASE_IMAGELINK));
 
@@ -179,4 +188,17 @@ public class DataSourceDownloader {
 		getDataSources(listener, false);
 	}
 
+	public static void downloadDataSource(DataSourceDownloadHolder dataSource) {
+		DownloadManager dM = (DownloadManager) GeoARApplication.applicationContext
+				.getSystemService(Context.DOWNLOAD_SERVICE);
+		Request request = new DownloadManager.Request(
+				dataSource.getDownloadLink());
+		request.setDestinationInExternalFilesDir(
+				GeoARApplication.applicationContext, null,
+				dataSource.getIdentifier() + ".apk");
+		request.setTitle("GeoAR Data Souce Download");
+		request.setMimeType("application/vnd.52north.datasources");
+		request.setDescription(dataSource.getName());
+		dM.enqueue(request);
+	}
 }

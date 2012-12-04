@@ -26,10 +26,9 @@ import org.mapsforge.core.GeoPoint;
 import org.n52.android.R;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceHolder;
-import org.n52.android.newdata.DataSourceLoader;
+import org.n52.android.newdata.PluginLoader;
 import org.n52.android.view.map.DataSourcesOverlay.OnOverlayItemTapListener;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.os.Bundle;
@@ -168,7 +167,7 @@ public class MapFragment extends SherlockFragment {
 		layout.requestLayout();
 
 		// add overlay handler for each enabled data source
-		for (DataSourceHolder dataSource : DataSourceLoader
+		for (DataSourceHolder dataSource : PluginLoader
 				.getSelectedDataSources().getCheckedItems()) {
 			DataSourceOverlayHandler overlayHandler = new DataSourceOverlayHandler(
 					dataSourcesOverlay, dataSource);
@@ -176,7 +175,7 @@ public class MapFragment extends SherlockFragment {
 		}
 
 		// register for update events
-		DataSourceLoader.getSelectedDataSources().addOnCheckedChangeListener(
+		PluginLoader.getSelectedDataSources().addOnCheckedChangeListener(
 				dataSourceListener);
 
 	}
@@ -190,8 +189,8 @@ public class MapFragment extends SherlockFragment {
 
 	@Override
 	public void onDestroy() {
-		DataSourceLoader.getSelectedDataSources()
-				.removeOnCheckedChangeListener(dataSourceListener);
+		PluginLoader.getSelectedDataSources().removeOnCheckedChangeListener(
+				dataSourceListener);
 		overlayHandlerMap.clear();
 		super.onDestroy();
 	}

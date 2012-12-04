@@ -15,10 +15,12 @@
  */
 package org.n52.android.newdata;
 
+import android.net.Uri;
+
 public class DataSourceDownloadHolder extends PluginHolder {
 
 	private String description;
-	private String downloadLink;
+	private Uri downloadLink;
 	private String imageLink;
 	private String identifier;
 	private String name;
@@ -28,7 +30,7 @@ public class DataSourceDownloadHolder extends PluginHolder {
 		return description;
 	}
 
-	public String getDownloadLink() {
+	public Uri getDownloadLink() {
 		return downloadLink;
 	}
 
@@ -59,7 +61,7 @@ public class DataSourceDownloadHolder extends PluginHolder {
 		this.description = description;
 	}
 
-	public void setDownloadLink(String downloadLink) {
+	public void setDownloadLink(Uri downloadLink) {
 		this.downloadLink = downloadLink;
 	}
 

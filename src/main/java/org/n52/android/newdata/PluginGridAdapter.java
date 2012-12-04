@@ -65,7 +65,7 @@ public class PluginGridAdapter<T extends PluginHolder> extends BaseAdapter {
 
 	}
 
-	protected List<T> dataSources;
+	protected List<T> plugins;
 	private LayoutInflater inflater;
 
 	public PluginGridAdapter(Context context) {
@@ -81,15 +81,15 @@ public class PluginGridAdapter<T extends PluginHolder> extends BaseAdapter {
 
 	@Override
 	public int getCount() {
-		if (dataSources != null)
-			return dataSources.size();
+		if (plugins != null)
+			return plugins.size();
 		return 0;
 	}
 
 	@Override
 	public T getItem(int position) {
-		if (dataSources != null && position < getCount() && position >= 0)
-			return dataSources.get(position);
+		if (plugins != null && position < getCount() && position >= 0)
+			return plugins.get(position);
 		return null;
 	}
 
@@ -128,7 +128,7 @@ public class PluginGridAdapter<T extends PluginHolder> extends BaseAdapter {
 			viewHolder.checkedListener.setPosition(position);
 		}
 		
-		final T dataSource = dataSources.get(position);
+		final T dataSource = plugins.get(position);
 		// load image via imageCache
 		ImageLoader.getInstance().displayImage("", viewHolder.imageView); // TODO?
 		viewHolder.textView.setText(dataSource.getName());

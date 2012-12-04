@@ -18,8 +18,8 @@ package org.n52.android.newdata;
 import java.util.List;
 
 import org.n52.android.R;
+import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceDownloader.OnDataSourceResultListener;
-import org.n52.android.newdata.DataSourceLoader.OnDataSourcesChangeListener;
 import org.n52.android.newdata.PluginGridAdapter.OnItemCheckedListener;
 
 import android.content.Context;
@@ -75,13 +75,13 @@ public class DataSourceFragment extends SherlockFragment {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				if (getActivity() != null) {
-					DataSourceHolder selectedDataSource = gridAdapterInstalled
-							.getItem(position);
-
-					DataSourceDialogFragment.newInstance(selectedDataSource)
-							.show(getFragmentManager(), "DataSource");
-				}
+				// if (getActivity() != null) {
+				// DataSourceHolder selectedDataSource = gridAdapterInstalled
+				// .getItem(position);
+				//
+				// DataSourceDialogFragment.newInstance(selectedDataSource)
+				// .show(getFragmentManager(), "DataSource");
+				// }
 			}
 		});
 		gridAdapterInstalled
@@ -89,15 +89,10 @@ public class DataSourceFragment extends SherlockFragment {
 
 					@Override
 					public void onItemChecked(boolean newState, int position) {
-						DataSourceHolder dataSource = gridAdapterInstalled
+						InstalledPluginHolder plugin = gridAdapterInstalled
 								.getItem(position);
-						if (dataSource.isSelected() != newState) {
-							if (newState) {
-								dataSource.select(true);
-							} else {
-								dataSource.unselect();
-							}
-						}
+
+						plugin.setChecked(newState);
 					}
 				});
 		gridAdapterInstalled.setShowCheckBox(true);
@@ -105,6 +100,17 @@ public class DataSourceFragment extends SherlockFragment {
 		final DataSourceDownloadAdapter gridAdapterDownload = new DataSourceDownloadAdapter(
 				getActivity());
 		mGridViewDownload.setAdapter(gridAdapterDownload);
+		gridAdapterDownload
+				.setOnItemCheckedListener(new OnItemCheckedListener() {
+
+					@Override
+					public void onItemChecked(boolean newState, int position) {
+						DataSourceDownloadHolder dataSource = gridAdapterDownload
+								.getItem(position);
+						DataSourceDownloader.downloadDataSource(dataSource);
+					}
+				});
+		gridAdapterDownload.setShowCheckBox(true);
 
 		TabHost tabHost = (TabHost) getView()
 				.findViewById(android.R.id.tabhost);
@@ -127,31 +133,35 @@ public class DataSourceFragment extends SherlockFragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.item_reload:
-			DataSourceLoader.reloadPlugins();
+			PluginLoader.reloadPlugins();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
 
-	private class DataSourceAdapter extends PluginGridAdapter<DataSourceHolder>
-			implements OnDataSourcesChangeListener {
+	private class DataSourceAdapter extends
+			PluginGridAdapter<InstalledPluginHolder> {
+
+		private OnCheckedChangedListener<InstalledPluginHolder> pluginChangedListener = new OnCheckedChangedListener<InstalledPluginHolder>() {
+
+			@Override
+			public void onCheckedChanged(InstalledPluginHolder item,
+					boolean newState) {
+				notifyDataSetChanged();
+			}
+		};
 
 		public DataSourceAdapter(Context context) {
 			super(context);
-			dataSources = DataSourceLoader.getInstalledDataSources();
-			DataSourceLoader.addOnInstalledDataSourcesUpdateListener(this);
-			DataSourceLoader.addOnSelectedDataSourcesUpdateListener(this);
-			// TODO remove..Listener?
-		}
-
-		@Override
-		public void onDataSourcesChange() {
-			notifyDataSetChanged();
+			plugins = PluginLoader.getInstalledPlugins();
+			PluginLoader.getInstalledPlugins().addOnCheckedChangeListener(
+					pluginChangedListener);
+			// TODO remove listener?
 		}
 
 		@Override
 		protected boolean getItemChecked(int position) {
-			return getItem(position).isSelected();
+			return getItem(position).isChecked();
 		}
 	}
 
@@ -171,7 +181,7 @@ public class DataSourceFragment extends SherlockFragment {
 
 		@Override
 		public int getItemViewType(int position) {
-			if (dataSources == null && position == 0) {
+			if (plugins == null && position == 0) {
 				return super.getViewTypeCount() + 1;
 			} else {
 				return super.getItemViewType(position);
@@ -180,14 +190,14 @@ public class DataSourceFragment extends SherlockFragment {
 
 		@Override
 		public int getCount() {
-			if (dataSources != null)
+			if (plugins != null)
 				return super.getCount();
 			return 1; // The loading view
 		}
 
 		@Override
 		public View getView(int position, View view, ViewGroup parent) {
-			if (dataSources == null) {
+			if (plugins == null) {
 				return new ProgressBar(getActivity());
 			}
 
@@ -197,7 +207,7 @@ public class DataSourceFragment extends SherlockFragment {
 		@Override
 		public void onDataSourceResult(
 				List<DataSourceDownloadHolder> dataSources) {
-			this.dataSources = dataSources;
+			this.plugins = dataSources;
 			notifyDataSetChanged();
 		}
 	}

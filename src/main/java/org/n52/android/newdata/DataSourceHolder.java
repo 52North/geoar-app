@@ -27,6 +27,9 @@ import org.n52.android.GeoARApplication;
 import org.n52.android.newdata.Annotations.PostConstruct;
 import org.n52.android.newdata.Annotations.SupportedVisualization;
 import org.n52.android.newdata.Annotations.SystemService;
+import org.n52.android.newdata.CheckList.CheckManager;
+import org.n52.android.newdata.CheckList.CheckedChangedListener;
+import org.n52.android.newdata.CheckList.Checker;
 import org.n52.android.newdata.filter.FilterDialogActivity;
 
 import android.content.Context;
@@ -37,7 +40,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
-public class DataSourceHolder extends PluginHolder implements Parcelable {
+public class DataSourceHolder implements Parcelable {
 	private static Map<Class<? extends Visualization>, Visualization> visualizationMap = new HashMap<Class<? extends Visualization>, Visualization>();
 	private static int nextId = 0;
 	private DataSource<? super Filter> dataSource;
@@ -49,6 +52,9 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 	private String description;
 
 	private DataCache dataCache;
+
+	@CheckManager
+	private Checker mChecker;
 
 	private static final int CLEAR_CACHE = 1;
 
@@ -144,11 +150,6 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 
 	public String getName() {
 		return name;
-	}
-
-	@Override
-	public Long getVersion() {
-		return null; // TODO
 	}
 
 	public String getDescription() {
@@ -298,6 +299,23 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 				dataSourceHandler.obtainMessage(CLEAR_CACHE), 30000);
 	}
 
+	@CheckedChangedListener
+	public void checkedChanged(boolean state) {
+		if (state == true) {
+			activate();
+		} else {
+			deactivate();
+		}
+	}
+
+	public boolean isChecked() {
+		return mChecker.isChecked();
+	}
+
+	public void setChecked(boolean state) {
+		mChecker.setChecked(state);
+	}
+
 	public DataCache getDataCache() {
 		return dataCache;
 	}
@@ -314,41 +332,6 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 
 	public String getIdentifier() {
 		return dataSourceClass.getSimpleName();
-	}
-
-	/**
-	 * Selects a data source, i.e. makes it available for the user
-	 * 
-	 */
-	public void select() {
-		DataSourceLoader.selectDataSource(this);
-	}
-
-	/**
-	 * Checks whether the data source is selected
-	 * 
-	 * @return
-	 */
-	public boolean isSelected() {
-		return DataSourceLoader.getSelectedDataSources().contains(this);
-	}
-
-	/**
-	 * Hides the data source from the application
-	 */
-	public void unselect() {
-		DataSourceLoader.unselectDataSource(this);
-	}
-
-	/**
-	 * Selects a data source, i.e. makes it available
-	 * 
-	 * @param enabled
-	 *            Set the enabled state of the data source
-	 */
-	public void select(boolean enabled) {
-		select();
-		DataSourceLoader.getSelectedDataSources().checkItem(this, enabled);
 	}
 
 	// Parcelable
@@ -368,7 +351,7 @@ public class DataSourceHolder extends PluginHolder implements Parcelable {
 		public DataSourceHolder createFromParcel(Parcel in) {
 			int id = in.readInt();
 			// Find DataSourceHolder with provided id
-			for (DataSourceHolder holder : DataSourceLoader
+			for (DataSourceHolder holder : PluginLoader
 					.getSelectedDataSources()) {
 				if (holder.id == id) {
 					return holder;

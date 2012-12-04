@@ -15,13 +15,15 @@
  */
 package org.n52.android;
 
+import java.util.List;
+
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
-import org.n52.android.newdata.CheckList;
+import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceFragment;
 import org.n52.android.newdata.DataSourceHolder;
-import org.n52.android.newdata.DataSourceLoader;
-import org.n52.android.newdata.DataSourceLoader.OnDataSourcesChangeListener;
+import org.n52.android.newdata.InstalledPluginHolder;
+import org.n52.android.newdata.PluginLoader;
 import org.n52.android.newdata.Visualization;
 import org.n52.android.tracking.camera.RealityCamera;
 import org.n52.android.view.geoar.ARFragment2;
@@ -31,12 +33,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -172,10 +172,10 @@ public class GeoARActivity extends SherlockFragmentActivity {
 		editor.putFloat("cameraHeight", RealityCamera.height);
 		editor.commit();
 
-		DataSourceLoader.saveDataSourceSelection();
+		// DataSourceLoader.saveDataSourceSelection();
 	}
 
-	@Override 
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// inflate common general menu definition
 		MenuInflater inflater = getSupportMenuInflater();
@@ -306,8 +306,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 			return mPopup;
 		}
 
-		private class DataSourceListAdapter extends BaseExpandableListAdapter
-				implements OnDataSourcesChangeListener {
+		private class DataSourceListAdapter extends BaseExpandableListAdapter {
 
 			private class OnDataSourceCheckedChangeListener implements
 					OnCheckedChangeListener {
@@ -323,9 +322,8 @@ public class GeoARActivity extends SherlockFragmentActivity {
 						boolean isChecked) {
 					DataSourceHolder dataSource = selectedDataSources
 							.get(position);
-
-					if (selectedDataSources.isChecked(dataSource) != isChecked) {
-						selectedDataSources.checkItem(dataSource, isChecked);
+					if (dataSource.isChecked() != isChecked) {
+						dataSource.setChecked(isChecked);
 						notifyDataSetChanged();
 					}
 				}
@@ -389,11 +387,21 @@ public class GeoARActivity extends SherlockFragmentActivity {
 				public CheckBox checkBox;
 			}
 
-			private CheckList<DataSourceHolder> selectedDataSources;
+			private List<DataSourceHolder> selectedDataSources;
+			private OnCheckedChangedListener<InstalledPluginHolder> pluginChangedListener = new OnCheckedChangedListener<InstalledPluginHolder>() {
+
+				@Override
+				public void onCheckedChanged(InstalledPluginHolder item,
+						boolean newState) {
+					selectedDataSources = PluginLoader.getSelectedDataSources();
+					notifyDataSetChanged();
+				}
+			};
 
 			public <E extends Visualization> DataSourceListAdapter() {
-				selectedDataSources = DataSourceLoader.getSelectedDataSources();
-				DataSourceLoader.addOnSelectedDataSourcesUpdateListener(this);
+				selectedDataSources = PluginLoader.getSelectedDataSources();
+				PluginLoader.getInstalledPlugins().addOnCheckedChangeListener(
+						pluginChangedListener);
 				// TODO remove listener somehow
 			}
 
@@ -443,10 +451,8 @@ public class GeoARActivity extends SherlockFragmentActivity {
 				viewHolder.checkBox.setChecked(dataSource.getVisualizations()
 						.isChecked(visualization));
 
-				viewHolder.textView.setEnabled(selectedDataSources
-						.isChecked(dataSource));
-				viewHolder.checkBox.setEnabled(selectedDataSources
-						.isChecked(dataSource));
+				viewHolder.textView.setEnabled(dataSource.isChecked());
+				viewHolder.checkBox.setEnabled(dataSource.isChecked());
 
 				return view;
 			}
@@ -514,8 +520,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 						.get(groupPosition);
 
 				viewHolder.textView.setText(dataSource.getName());
-				viewHolder.checkBox.setChecked(selectedDataSources
-						.isChecked(dataSource));
+				viewHolder.checkBox.setChecked(dataSource.isChecked());
 
 				return view;
 			}
@@ -534,11 +539,6 @@ public class GeoARActivity extends SherlockFragmentActivity {
 			@Override
 			public boolean isEmpty() {
 				return selectedDataSources.isEmpty();
-			}
-
-			@Override
-			public void onDataSourcesChange() {
-				notifyDataSetChanged();
 			}
 
 		}
