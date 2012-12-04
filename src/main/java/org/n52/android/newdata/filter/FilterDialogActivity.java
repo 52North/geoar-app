@@ -192,6 +192,9 @@ public class FilterDialogActivity extends Activity {
 				}
 			};
 
+		} else if (String.class.isAssignableFrom(fieldType)) {
+			return new StringFilterView(context, field,
+					InputType.TYPE_CLASS_TEXT);
 		}
 
 		return null;
