@@ -16,8 +16,9 @@
 package org.n52.android.newdata;
 
 import android.net.Uri;
+import android.os.Parcel;
 
-public class DataSourceDownloadHolder extends PluginHolder {
+public class PluginDownloadHolder extends PluginHolder {
 
 	private String description;
 	private Uri downloadLink;
@@ -75,6 +76,12 @@ public class DataSourceDownloadHolder extends PluginHolder {
 
 	public void setVersion(Long version) {
 		this.version = version;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(getClass().getName());
+		super.writeToParcel(dest, flags);
 	}
 
 }

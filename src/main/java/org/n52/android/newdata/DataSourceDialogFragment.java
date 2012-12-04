@@ -30,28 +30,27 @@ import android.widget.TextView;
 
 public class DataSourceDialogFragment extends DialogFragment {
 
-	public static DataSourceDialogFragment newInstance(
-			DataSourceHolder dataSourceHolder) {
+	public static DataSourceDialogFragment newInstance(PluginHolder plugin) {
 		DataSourceDialogFragment df = new DataSourceDialogFragment();
 		Bundle args = new Bundle();
 
-		args.putParcelable("dataSource", dataSourceHolder);
+		args.putParcelable("plugin", plugin);
 		df.setArguments(args);
 		return df;
 	}
 
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
-		// get paramters
+		// get parameters
 		Bundle args = getArguments();
-		final DataSourceHolder dataSource = args.getParcelable("dataSource");
+		final PluginHolder plugin = args.getParcelable("plugin");
 
 		// inflate layout
 		LayoutInflater inflater = getActivity().getLayoutInflater();
 		View v = inflater.inflate(R.layout.cb_dialog_fragment, null);
 
 		TextView textView = (TextView) v.findViewById(R.id.cb_dialog_textview);
-		textView.setText(dataSource.getDescription() != "" ? dataSource
+		textView.setText(plugin.getDescription() != "" ? plugin
 				.getDescription() : "No Description");
 
 		ImageView imageView = (ImageView) v.findViewById(R.id.cb_dialog_image);
@@ -60,13 +59,16 @@ public class DataSourceDialogFragment extends DialogFragment {
 
 		// dialogButton.setAnimation(getActivity().findViewById(android.R.drawable.stat_sys_download));
 		Dialog dsDialog = new AlertDialog.Builder(getActivity())
-				.setTitle(dataSource.getName())
+				.setTitle(plugin.getName())
 				.setPositiveButton("Add",
 						new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog,
 									int which) {
-								//dataSource.select(true);
+								if (plugin instanceof InstalledPluginHolder) {
+									((InstalledPluginHolder) plugin)
+											.setChecked(true);
+								}
 							}
 						}).setNegativeButton("Cancel", null).setView(v)
 				.create();

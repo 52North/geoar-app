@@ -15,34 +15,12 @@
  */
 package org.n52.android.view.map;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.mapsforge.android.maps.MapController;
 import org.mapsforge.android.maps.MapView;
-import org.mapsforge.android.maps.mapgenerator.tiledownloader.MapnikTileDownloader;
-import org.mapsforge.core.GeoPoint;
-import org.n52.android.R;
-import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
-import org.n52.android.newdata.DataSourceHolder;
-import org.n52.android.newdata.DataSourceLoader;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.tracking.location.LocationHandler.OnLocationUpdateListener;
-import org.n52.android.view.InfoView;
 
 import android.content.Context;
 import android.location.Location;
-import android.os.Bundle;
-import android.os.Parcelable;
-import android.util.AttributeSet;
-import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 /**
  * The overall {@link MapView}. Maintains {@link InterpolationOverlay} and

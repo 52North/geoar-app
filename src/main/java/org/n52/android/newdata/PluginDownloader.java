@@ -16,7 +16,6 @@
 package org.n52.android.newdata;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -47,17 +46,14 @@ import org.n52.android.GeoARApplication;
 import android.app.DownloadManager;
 import android.app.DownloadManager.Request;
 import android.content.Context;
-import android.graphics.Path;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
-import android.provider.MediaStore.Audio.Media;
-import android.provider.MediaStore.Files;
 
-public class DataSourceDownloader {
+public class PluginDownloader {
 
 	public interface OnDataSourceResultListener {
-		void onDataSourceResult(List<DataSourceDownloadHolder> dataSources);
+		void onDataSourceResult(List<PluginDownloadHolder> dataSources);
 	}
 
 	private static DefaultHttpClient mHttpClient;
@@ -88,13 +84,13 @@ public class DataSourceDownloader {
 
 	private static Set<OnDataSourceResultListener> mCurrentListeners = new HashSet<OnDataSourceResultListener>();
 
-	private static Set<DataSourceDownloadHolder> mDownloadableDataSources = new HashSet<DataSourceDownloadHolder>();
+	private static Set<PluginDownloadHolder> mDownloadableDataSources = new HashSet<PluginDownloadHolder>();
 
 	private static AsyncTask<Void, Void, Void> mDownloadTask = new AsyncTask<Void, Void, Void>() {
 
 		@Override
 		protected void onPostExecute(Void result) {
-			List<DataSourceDownloadHolder> resultList = new ArrayList<DataSourceDownloadHolder>();
+			List<PluginDownloadHolder> resultList = new ArrayList<PluginDownloadHolder>();
 			resultList.addAll(mDownloadableDataSources);
 			for (OnDataSourceResultListener listener : mCurrentListeners) {
 				listener.onDataSourceResult(resultList);
@@ -123,7 +119,7 @@ public class DataSourceDownloader {
 					JSONArray datasourceArray = json
 							.getJSONArray("datasources");
 					for (int i = 0; i < datasourceArray.length(); i++) {
-						DataSourceDownloadHolder holder = new DataSourceDownloadHolder();
+						PluginDownloadHolder holder = new PluginDownloadHolder();
 						JSONObject currentObject = datasourceArray
 								.getJSONObject(i);
 
@@ -179,16 +175,25 @@ public class DataSourceDownloader {
 				mDownloadTask.execute((Void) null);
 			}
 		} else {
-			listener.onDataSourceResult(new ArrayList<DataSourceDownloadHolder>(
+			listener.onDataSourceResult(new ArrayList<PluginDownloadHolder>(
 					mDownloadableDataSources));
 		}
+	}
+
+	public static PluginHolder getPluginByIdentifier(String identifier) {
+		for (PluginDownloadHolder plugin : mDownloadableDataSources) {
+			if (plugin.getIdentifier().equals(identifier)) {
+				return plugin;
+			}
+		}
+		return null;
 	}
 
 	public static void getDataSources(OnDataSourceResultListener listener) {
 		getDataSources(listener, false);
 	}
 
-	public static void downloadDataSource(DataSourceDownloadHolder dataSource) {
+	public static void downloadDataSource(PluginDownloadHolder dataSource) {
 		DownloadManager dM = (DownloadManager) GeoARApplication.applicationContext
 				.getSystemService(Context.DOWNLOAD_SERVICE);
 		Request request = new DownloadManager.Request(
@@ -201,4 +206,5 @@ public class DataSourceDownloader {
 		request.setDescription(dataSource.getName());
 		dM.enqueue(request);
 	}
+
 }

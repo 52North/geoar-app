@@ -20,7 +20,7 @@ import java.util.List;
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
-import org.n52.android.newdata.DataSourceFragment;
+import org.n52.android.newdata.PluginFragment;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.InstalledPluginHolder;
 import org.n52.android.newdata.PluginLoader;
@@ -74,7 +74,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 
 	private MapFragment mapFragment = new MapFragment();
 	private ARFragment2 arFragment = new ARFragment2();
-	private DataSourceFragment cbFragment = new DataSourceFragment();
+	private PluginFragment cbFragment = new PluginFragment();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {

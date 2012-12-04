@@ -27,6 +27,8 @@ import org.n52.android.newdata.CheckList.CheckManager;
 import org.n52.android.newdata.CheckList.Checker;
 
 import android.annotation.SuppressLint;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 import dalvik.system.DexClassLoader;
 import dalvik.system.DexFile;
@@ -63,6 +65,10 @@ public class InstalledPluginHolder extends PluginHolder {
 	public Long getVersion() {
 		return version;
 	}
+
+	public String getDescription() {
+		return "";
+	};
 
 	List<DataSourceHolder> getDataSources() {
 		if (!loaded) {
@@ -144,6 +150,14 @@ public class InstalledPluginHolder extends PluginHolder {
 		}
 
 		loaded = true;
+	}
+
+
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(getClass().getName());
+		super.writeToParcel(dest, flags);
 	}
 
 }

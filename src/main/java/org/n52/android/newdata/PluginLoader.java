@@ -259,7 +259,7 @@ public class PluginLoader {
 		return mDataSources;
 	}
 
-	private static InstalledPluginHolder getPluginByIdentifier(String identifier) {
+	public static InstalledPluginHolder getPluginByIdentifier(String identifier) {
 		for (InstalledPluginHolder plugin : mInstalledPlugins) {
 			if (plugin.getIdentifier().equals(identifier)) {
 				return plugin;

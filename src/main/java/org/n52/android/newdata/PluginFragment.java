@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.n52.android.R;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
-import org.n52.android.newdata.DataSourceDownloader.OnDataSourceResultListener;
+import org.n52.android.newdata.PluginDownloader.OnDataSourceResultListener;
 import org.n52.android.newdata.PluginGridAdapter.OnItemCheckedListener;
 
 import android.content.Context;
@@ -43,7 +43,7 @@ import com.actionbarsherlock.view.MenuItem;
  * application
  * 
  */
-public class DataSourceFragment extends SherlockFragment {
+public class PluginFragment extends SherlockFragment {
 
 	private GridView mGridViewInstalled;
 	private GridView mGridViewDownload;
@@ -75,13 +75,13 @@ public class DataSourceFragment extends SherlockFragment {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				// if (getActivity() != null) {
-				// DataSourceHolder selectedDataSource = gridAdapterInstalled
-				// .getItem(position);
-				//
-				// DataSourceDialogFragment.newInstance(selectedDataSource)
-				// .show(getFragmentManager(), "DataSource");
-				// }
+				if (getActivity() != null) {
+					InstalledPluginHolder plugin = gridAdapterInstalled
+							.getItem(position);
+
+					DataSourceDialogFragment.newInstance(plugin).show(
+							getFragmentManager(), "Plugin");
+				}
 			}
 		});
 		gridAdapterInstalled
@@ -100,14 +100,27 @@ public class DataSourceFragment extends SherlockFragment {
 		final DataSourceDownloadAdapter gridAdapterDownload = new DataSourceDownloadAdapter(
 				getActivity());
 		mGridViewDownload.setAdapter(gridAdapterDownload);
+		mGridViewDownload.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				if (getActivity() != null) {
+					PluginDownloadHolder plugin = gridAdapterDownload
+							.getItem(position);
+
+					DataSourceDialogFragment.newInstance(plugin).show(
+							getFragmentManager(), "Plugin");
+				}
+			}
+		});
 		gridAdapterDownload
 				.setOnItemCheckedListener(new OnItemCheckedListener() {
 
 					@Override
 					public void onItemChecked(boolean newState, int position) {
-						DataSourceDownloadHolder dataSource = gridAdapterDownload
+						PluginDownloadHolder dataSource = gridAdapterDownload
 								.getItem(position);
-						DataSourceDownloader.downloadDataSource(dataSource);
+						PluginDownloader.downloadDataSource(dataSource);
 					}
 				});
 		gridAdapterDownload.setShowCheckBox(true);
@@ -166,7 +179,7 @@ public class DataSourceFragment extends SherlockFragment {
 	}
 
 	private class DataSourceDownloadAdapter extends
-			PluginGridAdapter<DataSourceDownloadHolder> implements
+			PluginGridAdapter<PluginDownloadHolder> implements
 			OnDataSourceResultListener {
 
 		@Override
@@ -176,7 +189,7 @@ public class DataSourceFragment extends SherlockFragment {
 
 		public DataSourceDownloadAdapter(Context context) {
 			super(context);
-			DataSourceDownloader.getDataSources(this);
+			PluginDownloader.getDataSources(this);
 		}
 
 		@Override
@@ -206,7 +219,7 @@ public class DataSourceFragment extends SherlockFragment {
 
 		@Override
 		public void onDataSourceResult(
-				List<DataSourceDownloadHolder> dataSources) {
+				List<PluginDownloadHolder> dataSources) {
 			this.plugins = dataSources;
 			notifyDataSetChanged();
 		}

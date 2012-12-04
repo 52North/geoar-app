@@ -15,13 +15,18 @@
  */
 package org.n52.android.newdata;
 
-public abstract class PluginHolder {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public abstract class PluginHolder implements Parcelable {
 
 	public abstract String getIdentifier();
 
 	public abstract String getName();
 
 	public abstract Long getVersion();
+
+	public abstract String getDescription();
 
 	@Override
 	public boolean equals(Object o) {
@@ -53,4 +58,33 @@ public abstract class PluginHolder {
 
 		return result;
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(getIdentifier());
+	}
+
+	public static final Parcelable.Creator<PluginHolder> CREATOR = new Parcelable.Creator<PluginHolder>() {
+		public PluginHolder createFromParcel(Parcel in) {
+			String className = in.readString();
+			String identifier = in.readString();
+			if (className.equals(InstalledPluginHolder.class.getName())) {
+				return PluginLoader.getPluginByIdentifier(identifier);
+			} else if (className.equals(PluginDownloadHolder.class.getName())) {
+				return PluginDownloader.getPluginByIdentifier(identifier);
+			} else {
+				return null;
+			}
+		}
+
+		public PluginHolder[] newArray(int size) {
+			return new InstalledPluginHolder[size];
+		}
+	};
+
 }
