@@ -238,4 +238,9 @@ public class CheckList<T> extends ArrayList<T> {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public void clear() {
+		checkSet.clear();
+		super.clear();
+	}
 }

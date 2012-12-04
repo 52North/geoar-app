@@ -17,13 +17,22 @@ package org.n52.android.newdata;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.n52.android.GeoARApplication;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -31,6 +40,24 @@ import android.content.SharedPreferences.Editor;
 import android.util.Log;
 
 public class PluginLoader {
+
+	public static class PluginInfo {
+		public PluginInfo(File pluginFile, String name, String description,
+				Long version, String identifier) {
+			this.name = name;
+			this.description = description;
+			this.version = version;
+			this.pluginFile = pluginFile;
+			this.identifier = identifier;
+		}
+
+		File pluginFile;
+		String name;
+		String description;
+		Long version;
+		String identifier;
+	}
+
 	private static final FilenameFilter PLUGIN_FILENAME_FILTER = new FilenameFilter() {
 		@Override
 		public boolean accept(File dir, String fileName) {
@@ -42,6 +69,13 @@ public class PluginLoader {
 	private static final String DATASOURCE_SELECTION_PREF = "selected_datasources";
 	private static final File PLUGIN_DIRECTORY_PATH = GeoARApplication.applicationContext
 			.getExternalFilesDir(null);
+	// Pattern captures the plugin version string
+	private static final Pattern pluginVersionPattern = Pattern
+			.compile("-(\\d+(?:\\.\\d+)*)[.-]");
+	// Pattern captures the plugin name, ignoring the optional version and
+	// filename ending
+	private static final Pattern pluginNamePattern = Pattern
+			.compile("^((?:.(?!-\\d+\\.))+.).*\\.[^.]+$");
 	private static CheckList<InstalledPluginHolder> mInstalledPlugins = new CheckList<InstalledPluginHolder>(
 			InstalledPluginHolder.class);
 	private static CheckList<DataSourceHolder> mDataSources = new CheckList<DataSourceHolder>(
@@ -144,6 +178,115 @@ public class PluginLoader {
 		return versionNumber;
 	}
 
+	private static PluginInfo readPluginInfoFromPlugin(File pluginFile) {
+		try {
+			ZipFile zipFile = new ZipFile(pluginFile);
+			ZipEntry pluginDescriptorEntry = zipFile
+					.getEntry("geoar-plugin.xml");
+			if (pluginDescriptorEntry == null) {
+				return null;
+			}
+
+			Document document = DocumentBuilderFactory.newInstance()
+					.newDocumentBuilder()
+					.parse(zipFile.getInputStream(pluginDescriptorEntry));
+			// Find name
+			String name = null;
+			NodeList nodeList = document.getElementsByTagName("name");
+			if (nodeList != null && nodeList.getLength() >= 1) {
+				name = nodeList.item(0).getTextContent();
+			} else {
+				Log.w("GeoAR", "Plugin Descriptor for " + pluginFile.getName()
+						+ " does not specify a name");
+			}
+
+			// Find description
+			String description = null;
+			nodeList = document.getElementsByTagName("description");
+			if (nodeList != null && nodeList.getLength() >= 1) {
+				description = nodeList.item(0).getTextContent();
+			} else {
+				Log.w("GeoAR", "Plugin Descriptor for " + pluginFile.getName()
+						+ " does not specify a description");
+			}
+
+			// Find identifier
+			String identifier = null;
+			nodeList = document.getElementsByTagName("identifier");
+			if (nodeList != null && nodeList.getLength() >= 1) {
+				identifier = nodeList.item(0).getTextContent();
+			} else {
+				Log.w("GeoAR", "Plugin Descriptor for " + pluginFile.getName()
+						+ " does not specify an identifier");
+			}
+
+			// Find version
+			Long version = null;
+			nodeList = document.getElementsByTagName("version");
+			if (nodeList != null && nodeList.getLength() >= 1) {
+				String versionString = "-" + nodeList.item(0).getTextContent();
+
+				Matcher matcher = pluginVersionPattern.matcher(versionString);
+				if (matcher.find() && matcher.group(1) != null) {
+					try {
+						version = parseVersionNumber(matcher.group(1));
+					} catch (NumberFormatException e) {
+						Log.e("GeoAR", "Plugin filename version invalid: "
+								+ matcher.group(1));
+					}
+				}
+			} else {
+				Log.w("GeoAR", "Plugin Descriptor for " + pluginFile.getName()
+						+ " does not specify a version");
+			}
+
+			if (identifier == null) {
+				identifier = name;
+			}
+
+			return new PluginInfo(pluginFile, name, description, version,
+					identifier);
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ZipException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private static PluginInfo readPluginInfoFromFilename(File pluginFile) {
+		String pluginFileName = pluginFile.getName();
+
+		Matcher matcher = pluginNamePattern.matcher(pluginFileName);
+		if (!matcher.matches()) {
+			Log.e("GeoAR", "Plugin filename invalid: " + pluginFileName);
+			return null;
+		}
+
+		String name = matcher.group(1);
+
+		Long version = null;
+		matcher = pluginVersionPattern.matcher(pluginFileName);
+		if (matcher.find() && matcher.group(1) != null) {
+			try {
+				version = parseVersionNumber(matcher.group(1));
+			} catch (NumberFormatException e) {
+				Log.e("GeoAR",
+						"Plugin filename version invalid: " + matcher.group(1));
+			}
+		}
+
+		return new PluginInfo(pluginFile, name, null, version, name);
+	}
+
 	/**
 	 * Loads all plugins from SD card, compares version strings for plugins with
 	 * same names and loads the most recent plugin.
@@ -154,91 +297,58 @@ public class PluginLoader {
 	 */
 	private static void loadPlugins() {
 
-		/**
-		 * Class to hold plugin version and filename information to find the
-		 * newest
-		 */
-		class PluginInfo {
-			public PluginInfo(String pluginFileName, long version) {
-				this.pluginFileName = pluginFileName;
-				this.version = version;
-			}
-
-			public String pluginFileName;
-			public long version;
-		}
-
 		String[] apksInDirectory = PLUGIN_DIRECTORY_PATH
 				.list(PLUGIN_FILENAME_FILTER);
 
 		if (apksInDirectory == null || apksInDirectory.length == 0)
 			return;
 
-		// Pattern captures the plugin version string
-		Pattern pluginVersionPattern = Pattern
-				.compile("-(\\d+(?:\\.\\d+)*)[.-]");
-
-		// Pattern captures the plugin name, ignoring the optional version and
-		// filename ending
-		Pattern pluginNamePattern = Pattern
-				.compile("^((?:.(?!-\\d+\\.))+.).*\\.[^.]+$");
-
 		// Map to store all plugins with their versions for loading only the
 		// newest
 		HashMap<String, PluginInfo> pluginVersionMap = new HashMap<String, PluginInfo>();
 
-		Matcher matcher;
 		for (String pluginFileName : apksInDirectory) {
-			matcher = pluginNamePattern.matcher(pluginFileName);
-			if (!matcher.matches()) {
-				Log.e("GeoAR", "Plugin filename invalid: " + pluginFileName);
-				continue;
-			}
 
-			String pluginName = matcher.group(1);
-			if (pluginName == null) {
-				// invalid plugin filename
-				Log.e("GeoAR", "Plugin filename invalid: " + pluginFileName);
-				continue;
-			}
-
-			long version = 0;
-			matcher = pluginVersionPattern.matcher(pluginFileName);
-			if (matcher.find() && matcher.group(1) != null) {
-				try {
-					version = parseVersionNumber(matcher.group(1));
-				} catch (NumberFormatException e) {
-					Log.e("GeoAR", "Plugin filename version invalid: "
-							+ matcher.group(1));
-				}
-			}
-			PluginInfo pluginInfo = pluginVersionMap.get(pluginName);
+			PluginInfo pluginInfo = readPluginInfoFromPlugin(new File(
+					PLUGIN_DIRECTORY_PATH, pluginFileName));
 			if (pluginInfo == null) {
-				// Plugin not yet known
-				pluginVersionMap.put(pluginName, new PluginInfo(pluginFileName,
-						version));
-			} else {
-				// Plugin already found
-				if (pluginInfo.version < version) {
-					// current plugin has a newer version
-					pluginInfo.version = version;
-					pluginInfo.pluginFileName = pluginFileName;
-				}
+				Log.i("GeoAR", "Plugin " + pluginFileName
+						+ " has no plugin descriptor");
+				pluginInfo = readPluginInfoFromFilename(new File(
+						PLUGIN_DIRECTORY_PATH, pluginFileName));
+			}
+
+			if (pluginInfo.identifier == null) {
+				Log.e("GeoAR", "Plugin " + pluginFileName
+						+ " has an invalid plugin descriptor");
+				continue;
+			}
+			if (pluginInfo.version == null) {
+				pluginInfo.version = -1L; // Set unknown version to version -1
+			}
+
+			PluginInfo pluginInfoMapping = pluginVersionMap
+					.get(pluginInfo.identifier);
+			if (pluginInfoMapping == null
+					|| pluginInfoMapping.version < pluginInfo.version) {
+				// Plugin not yet known or newer
+				pluginVersionMap.put(pluginInfo.identifier, pluginInfo);
 			}
 		}
 
-		for (Entry<String, PluginInfo> entry : pluginVersionMap.entrySet()) {
+		for (PluginInfo pluginInfo : pluginVersionMap.values()) {
 			InstalledPluginHolder pluginHolder = new InstalledPluginHolder(
-					entry.getKey(), entry.getValue().version, new File(
-							PLUGIN_DIRECTORY_PATH,
-							entry.getValue().pluginFileName));
+					pluginInfo);
 			mInstalledPlugins.add(pluginHolder);
 		}
 
 	}
 
 	public static void reloadPlugins() {
+
+		// TODO selection state
 		mInstalledPlugins.clear();
+		mDataSources.clear();
 		loadPlugins();
 	}
 

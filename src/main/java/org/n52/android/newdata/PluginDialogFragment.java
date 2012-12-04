@@ -20,6 +20,7 @@ import org.n52.android.R;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.DownloadManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -28,10 +29,10 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class DataSourceDialogFragment extends DialogFragment {
+public class PluginDialogFragment extends DialogFragment {
 
-	public static DataSourceDialogFragment newInstance(PluginHolder plugin) {
-		DataSourceDialogFragment df = new DataSourceDialogFragment();
+	public static PluginDialogFragment newInstance(PluginHolder plugin) {
+		PluginDialogFragment df = new PluginDialogFragment();
 		Bundle args = new Bundle();
 
 		args.putParcelable("plugin", plugin);
@@ -49,11 +50,26 @@ public class DataSourceDialogFragment extends DialogFragment {
 		LayoutInflater inflater = getActivity().getLayoutInflater();
 		View v = inflater.inflate(R.layout.cb_dialog_fragment, null);
 
-		TextView textView = (TextView) v.findViewById(R.id.cb_dialog_textview);
-		textView.setText(plugin.getDescription() != "" ? plugin
+		TextView textViewDescription = (TextView) v
+				.findViewById(R.id.textViewDescription);
+		textViewDescription.setText(plugin.getDescription() != "" ? plugin
 				.getDescription() : "No Description");
 
-		ImageView imageView = (ImageView) v.findViewById(R.id.cb_dialog_image);
+		if (plugin instanceof InstalledPluginHolder) {
+			TextView textViewDataSources = (TextView) v
+					.findViewById(R.id.textViewDataSources);
+
+			String dsText = "";
+			for (DataSourceHolder dataSource : ((InstalledPluginHolder) plugin)
+					.getDataSources()) {
+				if (!dsText.isEmpty())
+					dsText += "\n";
+				dsText += dataSource.getName();
+			}
+			textViewDataSources.setText(dsText);
+		}
+
+		ImageView imageView = (ImageView) v.findViewById(R.id.imageView);
 		ImageLoader.getInstance().displayImage("", imageView); // TODO
 		// imageView.setImageBitmap();
 
@@ -68,6 +84,9 @@ public class DataSourceDialogFragment extends DialogFragment {
 								if (plugin instanceof InstalledPluginHolder) {
 									((InstalledPluginHolder) plugin)
 											.setChecked(true);
+								} else if (plugin instanceof PluginDownloadHolder) {
+									PluginDownloader
+											.downloadPlugin((PluginDownloadHolder) plugin);
 								}
 							}
 						}).setNegativeButton("Cancel", null).setView(v)

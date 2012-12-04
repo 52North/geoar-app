@@ -25,10 +25,10 @@ import java.util.List;
 import org.n52.android.GeoARApplication;
 import org.n52.android.newdata.CheckList.CheckManager;
 import org.n52.android.newdata.CheckList.Checker;
+import org.n52.android.newdata.PluginLoader.PluginInfo;
 
 import android.annotation.SuppressLint;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
 import dalvik.system.DexClassLoader;
 import dalvik.system.DexFile;
@@ -40,15 +40,25 @@ public class InstalledPluginHolder extends PluginHolder {
 	private Long version;
 	private String identifier;
 	private boolean loaded = false;
+	private String description;
+	private String name;
 
 	@CheckManager
 	private Checker mChecker;
 
 	public InstalledPluginHolder(String identifier, Long version,
 			File pluginFile) {
-		this.identifier = identifier;
+		this.identifier = this.name = identifier;
 		this.version = version;
 		this.pluginFile = pluginFile;
+	}
+
+	public InstalledPluginHolder(PluginInfo pluginInfo) {
+		this.version = pluginInfo.version;
+		this.identifier = pluginInfo.identifier;
+		this.description = pluginInfo.description;
+		this.name = pluginInfo.name;
+		this.pluginFile = pluginInfo.pluginFile;
 	}
 
 	@Override
@@ -58,7 +68,7 @@ public class InstalledPluginHolder extends PluginHolder {
 
 	@Override
 	public String getName() {
-		return identifier;
+		return name;
 	}
 
 	@Override
@@ -67,7 +77,7 @@ public class InstalledPluginHolder extends PluginHolder {
 	}
 
 	public String getDescription() {
-		return "";
+		return description;
 	};
 
 	List<DataSourceHolder> getDataSources() {
@@ -151,8 +161,6 @@ public class InstalledPluginHolder extends PluginHolder {
 
 		loaded = true;
 	}
-
-
 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {

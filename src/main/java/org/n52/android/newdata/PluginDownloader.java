@@ -43,12 +43,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.n52.android.GeoARApplication;
 
+import android.R;
 import android.app.DownloadManager;
+import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
+import android.widget.ImageView;
 
 public class PluginDownloader {
 
@@ -57,6 +64,40 @@ public class PluginDownloader {
 	}
 
 	private static DefaultHttpClient mHttpClient;
+	private static DownloadManager mDownloadManager;
+	private static List<Long> currentDownloads = new ArrayList<Long>();
+	static BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			String action = intent.getAction();
+			if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
+				long downloadId = intent.getLongExtra(
+						DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+				Query query = new Query();
+
+				long[] downloads = new long[currentDownloads.size()];
+				for (int i = 0, len = currentDownloads.size(); i < len; i++) {
+					downloads[i] = currentDownloads.get(i);
+				}
+				query.setFilterById(downloads);
+				query.setFilterByStatus(DownloadManager.STATUS_SUCCESSFUL);
+				Cursor cursor = mDownloadManager.query(query);
+				boolean pluginAdded = false;
+				if (cursor.moveToFirst()) {
+					do {
+						int columnId = cursor
+								.getColumnIndex(DownloadManager.COLUMN_ID);
+						currentDownloads.remove(cursor.getLong(columnId));
+						pluginAdded = true;
+					} while (cursor.moveToNext());
+					if (pluginAdded) {
+						PluginLoader.reloadPlugins();
+					}
+				}
+
+			}
+		}
+	};
 
 	static {
 		SchemeRegistry registry = new SchemeRegistry();
@@ -71,6 +112,11 @@ public class PluginDownloader {
 		ClientConnectionManager cm = new ThreadSafeClientConnManager(
 				httpParameters, registry);
 		mHttpClient = new DefaultHttpClient(cm, httpParameters);
+
+		mDownloadManager = (DownloadManager) GeoARApplication.applicationContext
+				.getSystemService(Context.DOWNLOAD_SERVICE);
+		GeoARApplication.applicationContext.registerReceiver(broadcastReceiver,
+				new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 	}
 
 	private static final String SERVER_URL = "http://geoviqua.dev.52north.org/geoar/codebase";
@@ -193,9 +239,8 @@ public class PluginDownloader {
 		getDataSources(listener, false);
 	}
 
-	public static void downloadDataSource(PluginDownloadHolder dataSource) {
-		DownloadManager dM = (DownloadManager) GeoARApplication.applicationContext
-				.getSystemService(Context.DOWNLOAD_SERVICE);
+	public static void downloadPlugin(PluginDownloadHolder dataSource) {
+
 		Request request = new DownloadManager.Request(
 				dataSource.getDownloadLink());
 		request.setDestinationInExternalFilesDir(
@@ -204,7 +249,7 @@ public class PluginDownloader {
 		request.setTitle("GeoAR Data Souce Download");
 		request.setMimeType("application/vnd.52north.datasources");
 		request.setDescription(dataSource.getName());
-		dM.enqueue(request);
+		currentDownloads.add(mDownloadManager.enqueue(request));
 	}
 
 }
