@@ -17,9 +17,7 @@ package org.n52.android.newdata;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +25,9 @@ import java.util.regex.Pattern;
 import org.n52.android.GeoARApplication;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.util.Log;
 
 public class PluginLoader {
@@ -37,6 +38,8 @@ public class PluginLoader {
 					|| fileName.endsWith(".jar");
 		}
 	};
+	private static final String PLUGIN_SELECTION_PREF = "selected_plugins";
+	private static final String DATASOURCE_SELECTION_PREF = "selected_datasources";
 	private static final File PLUGIN_DIRECTORY_PATH = GeoARApplication.applicationContext
 			.getExternalFilesDir(null);
 	private static CheckList<InstalledPluginHolder> mInstalledPlugins = new CheckList<InstalledPluginHolder>(
@@ -61,6 +64,60 @@ public class PluginLoader {
 		mInstalledPlugins
 				.addOnCheckedChangeListener(pluginCheckedChangedListener);
 		loadPlugins();
+		restoreSelection();
+	}
+
+	private static void restoreSelection() {
+		try {
+			SharedPreferences preferences = GeoARApplication.applicationContext
+					.getSharedPreferences(GeoARApplication.PREFERENCES_FILE,
+							Context.MODE_PRIVATE);
+
+			// Restore plugin selection state
+			String[] identifierStateArray = preferences.getString(
+					PLUGIN_SELECTION_PREF, "").split(";");
+			for (String identifier : identifierStateArray) {
+				InstalledPluginHolder plugin = getPluginByIdentifier(identifier);
+				if (plugin != null) {
+					plugin.setChecked(true);
+				}
+			}
+
+			// Restore data source selection state
+			identifierStateArray = preferences.getString(
+					DATASOURCE_SELECTION_PREF, "").split(";");
+			for (String identifier : identifierStateArray) {
+				DataSourceHolder dataSource = getDataSourceByIdentifier(identifier);
+				if (dataSource != null) {
+					dataSource.setChecked(true);
+				}
+			}
+		} catch (Exception e) {
+			// TODO
+		}
+	}
+
+	public static void saveSelection() {
+		String dataSourceIdentifierPref = "";
+		for (DataSourceHolder dataSource : mDataSources.getCheckedItems()) {
+			if (dataSourceIdentifierPref.length() != 0)
+				dataSourceIdentifierPref += ";";
+			dataSourceIdentifierPref += dataSource.getIdentifier();
+		}
+		String pluginIdentifierPref = "";
+		for (InstalledPluginHolder plugin : mInstalledPlugins.getCheckedItems()) {
+			if (pluginIdentifierPref.length() != 0)
+				pluginIdentifierPref += ";";
+			pluginIdentifierPref += plugin.getIdentifier();
+		}
+
+		SharedPreferences preferences = GeoARApplication.applicationContext
+				.getSharedPreferences(GeoARApplication.PREFERENCES_FILE,
+						Context.MODE_PRIVATE);
+		Editor editor = preferences.edit();
+		editor.putString(DATASOURCE_SELECTION_PREF, dataSourceIdentifierPref);
+		editor.putString(PLUGIN_SELECTION_PREF, pluginIdentifierPref);
+		editor.commit();
 	}
 
 	/**
@@ -202,4 +259,21 @@ public class PluginLoader {
 		return mDataSources;
 	}
 
+	private static InstalledPluginHolder getPluginByIdentifier(String identifier) {
+		for (InstalledPluginHolder plugin : mInstalledPlugins) {
+			if (plugin.getIdentifier().equals(identifier)) {
+				return plugin;
+			}
+		}
+		return null;
+	}
+
+	private static DataSourceHolder getDataSourceByIdentifier(String identifier) {
+		for (DataSourceHolder dataSource : mDataSources) {
+			if (dataSource.getIdentifier().equals(identifier)) {
+				return dataSource;
+			}
+		}
+		return null;
+	}
 }
