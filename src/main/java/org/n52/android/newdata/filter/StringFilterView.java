@@ -26,9 +26,11 @@ import android.widget.EditText;
 public class StringFilterView extends EditText implements FilterView<String> {
 
 	private boolean notNull;
+	private Field field;
 
 	public StringFilterView(Context context, Field field, int inputType) {
 		super(context);
+		this.field = field;
 
 		// Check annotations
 		notNull = field.isAnnotationPresent(NotNull.class);
@@ -70,5 +72,10 @@ public class StringFilterView extends EditText implements FilterView<String> {
 	@Override
 	public View getView() {
 		return this;
+	}
+
+	@Override
+	public Field getField() {
+		return field;
 	}
 }

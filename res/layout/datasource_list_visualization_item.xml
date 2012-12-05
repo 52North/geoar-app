@@ -3,7 +3,8 @@
     style="?android:attr/dropDownItemStyle"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal" >
+    android:orientation="horizontal"
+    android:paddingRight="0dp" >
 
     <TextView
         android:id="@+id/textView"

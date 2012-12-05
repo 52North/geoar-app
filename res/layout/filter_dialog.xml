@@ -7,10 +7,16 @@
     <ScrollView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/dialogView"
+        style="@style/formView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1" >
     </ScrollView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/dividerHorizontal" />
 
     <LinearLayout
         style="?android:attr/buttonBarStyle"

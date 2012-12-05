@@ -16,24 +16,38 @@
 package org.n52.android.newdata.filter;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.n52.android.R;
-import org.n52.android.newdata.Annotations.Filterable;
+import org.n52.android.newdata.Annotations.Setting;
+import org.n52.android.newdata.Annotations.Settings.Group;
 import org.n52.android.newdata.Annotations.Settings.Name;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.Filter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout.LayoutParams;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -48,7 +62,15 @@ public class FilterDialogActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		LayoutInflater inflater = LayoutInflater.from(this);
+
 		setContentView(R.layout.filter_dialog);
+		TypedArray typedArray = obtainStyledAttributes(R.style.formView,
+				new int[] { android.R.attr.paddingLeft,
+						android.R.attr.paddingRight });
+		int paddingLeft = typedArray.getDimensionPixelSize(0, 0);
+		int paddingRight = typedArray.getDimensionPixelSize(1, 0);
 
 		Button cancelButton = (Button) findViewById(R.id.negativeButton);
 		cancelButton.setOnClickListener(new OnClickListener() {
@@ -68,47 +90,85 @@ public class FilterDialogActivity extends Activity {
 
 		ScrollView dialogView = (ScrollView) findViewById(R.id.dialogView);
 
-		final Map<Field, FilterView<?>> fieldMap = new HashMap<Field, FilterView<?>>();
+		final Map<String, List<FilterView<?>>> groupFieldMap = new TreeMap<String, List<FilterView<?>>>();
 
 		// Find fields and create views for every annotated field
 		for (Field field : dataSource.getFilterClass().getDeclaredFields()) {
-			if (field.isAnnotationPresent(Filterable.class)) {
+			if (field.isAnnotationPresent(Setting.class)) {
 				FilterView<?> filterView = createFilterViewFromField(field,
 						this);
 				if (filterView != null) {
-					fieldMap.put(field, filterView);
+
+					// get group
+					String groupName = "";
+					Group annotation = field.getAnnotation(Group.class);
+					if (annotation != null) {
+						groupName = annotation.value();
+					}
+
+					List<FilterView<?>> viewList = groupFieldMap.get(groupName);
+					if (viewList == null) {
+						viewList = new ArrayList<FilterView<?>>();
+						groupFieldMap.put(groupName, viewList);
+					}
+					viewList.add(filterView);
 				}
 			}
 		}
 
 		// create table with labels and views for each field
-		TableLayout table = new TableLayout(this);
-		for (Entry<Field, FilterView<?>> entry : fieldMap.entrySet()) {
-			Field field = entry.getKey();
-			TableRow row = new TableRow(this);
+		LinearLayout layout = new LinearLayout(this);
+		layout.setOrientation(LinearLayout.VERTICAL);
+		for (Entry<String, List<FilterView<?>>> entry : groupFieldMap
+				.entrySet()) {
+			String group = entry.getKey();
+			if (group != null && !group.isEmpty()) {
+				// TextView groupView = new TextView(this, null,
+				// R.style.formGroup);
+				// Since defStyle is ignored, layout inflater is needed
+				// http://code.google.com/p/android/issues/detail?id=12683
+				TextView groupView = (TextView) inflater.inflate(
+						R.layout.textview_group, null);
 
-			TextView label = new TextView(this);
-			if (field.getAnnotation(Name.class) != null) {
-				label.setText(field.getAnnotation(Name.class).value());
-			}
-			row.addView(label, LayoutParams.WRAP_CONTENT,
-					LayoutParams.WRAP_CONTENT);
-
-			View filterView = entry.getValue().getView();
-			try {
-				field.setAccessible(true);
-				entry.getValue().setValueObject(field.get(currentFilter));
-			} catch (Exception e) {
-				// TODO
+				groupView.setText(group);
+				layout.addView(groupView, LayoutParams.MATCH_PARENT,
+						LayoutParams.WRAP_CONTENT);
 			}
 
-			row.addView(filterView, new TableRow.LayoutParams(
-					LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 1));
-			table.addView(row, LayoutParams.MATCH_PARENT,
-					LayoutParams.WRAP_CONTENT);
+			List<FilterView<?>> viewList = entry.getValue();
+
+			for (FilterView<?> filterView : viewList) {
+				Field field = filterView.getField();
+				if (field.getAnnotation(Name.class) != null) {
+
+					// TextView labelView = new TextView(this, null,
+					// R.style.formLabel);
+					// Since defStyle is ignored, layout inflater is needed
+					// http://code.google.com/p/android/issues/detail?id=12683
+
+					TextView labelView = (TextView) inflater.inflate(
+							R.layout.textview_label, null);
+					labelView.setText(field.getAnnotation(Name.class).value());
+					layout.addView(labelView, LayoutParams.WRAP_CONTENT,
+							LayoutParams.WRAP_CONTENT);
+				}
+
+				try {
+					field.setAccessible(true);
+					filterView.setValueObject(field.get(currentFilter));
+				} catch (Exception e) {
+					// TODO
+				}
+
+				// Set padding
+				filterView.getView()
+						.setPadding(paddingLeft, 0, paddingRight, 0);
+				layout.addView(filterView.getView(), LayoutParams.MATCH_PARENT,
+						LayoutParams.WRAP_CONTENT);
+			}
 		}
 
-		dialogView.addView(table, LayoutParams.MATCH_PARENT,
+		dialogView.addView(layout, LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT);
 
 		Button okButton = (Button) findViewById(R.id.positiveButton);
@@ -118,29 +178,29 @@ public class FilterDialogActivity extends Activity {
 			public void onClick(View arg0) {
 				boolean valid = true;
 				// Validate all filter views
-				for (FilterView<?> filterView : fieldMap.values()) {
-					if (!filterView.validate()) {
-						valid = false;
+				for (List<FilterView<?>> viewList : groupFieldMap.values())
+					for (FilterView<?> filterView : viewList) {
+						if (!filterView.validate()) {
+							valid = false;
+						}
 					}
-				}
 
 				if (valid) {
 					// Set every field of currentFilter to new value
-					for (Entry<Field, FilterView<?>> entry : fieldMap
-							.entrySet()) {
-						try {
-							Field field = entry.getKey();
-							field.setAccessible(true);
-							field.set(currentFilter, entry.getValue()
-									.getValue());
-						} catch (IllegalArgumentException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (IllegalAccessException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+					for (List<FilterView<?>> viewList : groupFieldMap.values())
+						for (FilterView<?> filterView : viewList) {
+							try {
+								Field field = filterView.getField();
+								field.setAccessible(true);
+								field.set(currentFilter, filterView.getValue());
+							} catch (IllegalArgumentException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IllegalAccessException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 						}
-					}
 
 					finish();
 				}
@@ -192,11 +252,59 @@ public class FilterDialogActivity extends Activity {
 				}
 			};
 
-		} else if (String.class.isAssignableFrom(fieldType)) {
+		} else if (fieldType.equals(String.class)) {
 			return new StringFilterView(context, field,
 					InputType.TYPE_CLASS_TEXT);
-		}
+		} else if (Calendar.class.isAssignableFrom(fieldType)) {
+			return new DateTimeFilterView<Calendar>(context, field, null) {
 
+				@Override
+				public Calendar getValue() {
+					return getSelectedValue();
+				}
+
+				@Override
+				public void setValue(Calendar value) {
+					setSelectedValue(value);
+				}
+
+				@Override
+				public void setValueObject(Object object) {
+					setValue((Calendar) object);
+				}
+
+			};
+		} else if (fieldType.equals(Date.class)) {
+			return new DateTimeFilterView<Date>(context, field, null) {
+
+				@Override
+				public Date getValue() {
+					Calendar selectedValue = getSelectedValue();
+					if (selectedValue != null) {
+						return selectedValue.getTime();
+					}
+
+					return null;
+				}
+
+				@Override
+				public void setValue(Date value) {
+					if (value != null) {
+						Calendar calendar = Calendar.getInstance();
+						calendar.setTime(value);
+						setSelectedValue(calendar);
+					} else {
+						setSelectedValue(null);
+					}
+				}
+
+				@Override
+				public void setValueObject(Object object) {
+					setValue((Date) object);
+				}
+
+			};
+		}
 		return null;
 	}
 }

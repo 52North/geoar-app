@@ -28,6 +28,16 @@ import java.util.zip.ZipFile;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.n52.android.GeoARApplication;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.w3c.dom.Document;
@@ -93,12 +103,32 @@ public class PluginLoader {
 			}
 		}
 	};
+	private static DefaultHttpClient mHttpClient;
 
 	static {
 		mInstalledPlugins
 				.addOnCheckedChangeListener(pluginCheckedChangedListener);
 		loadPlugins();
 		restoreSelection();
+	}
+
+	public static DefaultHttpClient getSharedHttpClient() {
+		if (mHttpClient == null) {
+			SchemeRegistry registry = new SchemeRegistry();
+			registry.register(new Scheme("http", PlainSocketFactory
+					.getSocketFactory(), 80));
+			registry.register(new Scheme("https", SSLSocketFactory
+					.getSocketFactory(), 443));
+
+			HttpParams httpParameters = new BasicHttpParams();
+			HttpConnectionParams.setSoTimeout(httpParameters, 10000);
+			HttpConnectionParams.setConnectionTimeout(httpParameters, 10000);
+			ClientConnectionManager cm = new ThreadSafeClientConnManager(
+					httpParameters, registry);
+			mHttpClient = new DefaultHttpClient(cm, httpParameters);
+		}
+
+		return mHttpClient;
 	}
 
 	private static void restoreSelection() {

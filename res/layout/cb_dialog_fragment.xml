@@ -11,29 +11,21 @@
         android:layout_gravity="center" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="31dp"
-        android:text="Description"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        style="@style/formGroup"
+        android:text="Description" />
 
     <TextView
         android:id="@+id/textViewDescription"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="@style/formView"
         android:text="TextView" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="31dp"
-        android:text="Data Sources"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        style="@style/formGroup"
+        android:text="Data Sources" />
 
     <TextView
         android:id="@+id/textViewDataSources"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="@style/formView"
         android:text="TextView" />
 
 </LinearLayout>

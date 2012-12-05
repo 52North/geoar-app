@@ -50,7 +50,6 @@ public class DataCache {
 	/**
 	 * Future-like interface for cancellation of requests
 	 * 
-	 * 
 	 */
 	public interface RequestHolder {
 		void cancel();

@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.n52.android.GeoARApplication;
+import org.n52.android.newdata.Annotations.SharedHttpClient;
 import org.n52.android.newdata.Annotations.PostConstruct;
 import org.n52.android.newdata.Annotations.SupportedVisualization;
 import org.n52.android.newdata.Annotations.SystemService;
@@ -195,6 +196,11 @@ public class DataSourceHolder implements Parcelable {
 					f.setAccessible(true);
 					f.set(target, GeoARApplication.applicationContext
 							.getSystemService(serviceName));
+				}
+
+				if (f.isAnnotationPresent(SharedHttpClient.class)) {
+					f.setAccessible(true);
+					f.set(target, PluginLoader.getSharedHttpClient());
 				}
 			}
 		} catch (IllegalArgumentException e) {

@@ -15,10 +15,14 @@
  */
 package org.n52.android.newdata.filter;
 
+import java.lang.reflect.Field;
+
 import android.view.View;
 
 public interface FilterView<T> {
 
+	Field getField();
+	
 	boolean validate();
 
 	T getValue();

@@ -45,10 +45,11 @@ public abstract class SpinnerFilterView<T> extends Spinner implements
 			return noValueText;
 		}
 	};
+	private Field field;
 
 	public SpinnerFilterView(Context context, Field field, List<Object> items) {
 		super(context);
-
+		this.field = field;
 		// Init adapter
 		adapter = new ArrayAdapter<Object>(context,
 				android.R.layout.simple_spinner_item, items);
@@ -115,6 +116,11 @@ public abstract class SpinnerFilterView<T> extends Spinner implements
 	@Override
 	public void onNothingSelected(AdapterView<?> parent) {
 		selectedValue = null;
+	}
+
+	@Override
+	public Field getField() {
+		return field;
 	}
 
 }

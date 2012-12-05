@@ -12,9 +12,14 @@
         android:layout_weight="1" >
     </ExpandableListView>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/dividerHorizontal" />
+
     <Button
         android:id="@+id/buttonMore"
-        style="?android:attr/actionButtonStyle"
+        style="?android:attr/borderlessButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="More..." />

@@ -31,10 +31,11 @@ public abstract class NumberFilterView<T extends Number> extends EditText
 	private boolean notNull;
 	private T minValue;
 	private T maxValue;
+	private Field field;
 
 	public NumberFilterView(Context context, Field field, int inputType) {
 		super(context);
-
+		this.field = field;
 		// Check annotations
 		notNull = field.isAnnotationPresent(NotNull.class);
 
@@ -45,6 +46,11 @@ public abstract class NumberFilterView<T extends Number> extends EditText
 			maxValue = parseString(field.getAnnotation(Max.class).value());
 		}
 		setInputType(inputType);
+	}
+
+	@Override
+	public Field getField() {
+		return field;
 	}
 
 	@Override
@@ -68,7 +74,7 @@ public abstract class NumberFilterView<T extends Number> extends EditText
 			setError("Must be less than " + maxValue);
 			return false;
 		}
-		
+
 		return true;
 	}
 
