@@ -42,11 +42,6 @@ import android.util.Log;
  */
 public class DataCache {
 
-	public static final int ABORT_UNKOWN = 0;
-	public static final int ABORT_NO_CONNECTION = 1;
-	public static final int ABORT_CANCELED = 2;
-	public static final int STEP_REQUEST = 3;
-
 	/**
 	 * Future-like interface for cancellation of requests
 	 * 
@@ -124,24 +119,62 @@ public class DataCache {
 
 	}
 
+	public static final int ABORT_UNKOWN = 0;
+	public static final int ABORT_NO_CONNECTION = 1;
+	public static final int ABORT_CANCELED = 2;
+	public static final int STEP_REQUEST = 3;
+
+	private static final long MIN_RELOAD_INTERVAL = 60000;
+
+	private static ThreadPoolExecutor SHARED_THREAD_POOL = (ThreadPoolExecutor) Executors
+			.newFixedThreadPool(3);
+
 	protected Map<Tile, SoftReference<DataTile>> tileCacheMapping = new HashMap<Tile, SoftReference<DataTile>>();
 	protected DataSourceHolder dataSource;
-	protected ThreadPoolExecutor fetchingThreadPool;
-	final protected byte tileZoom; // Zoom level for the tiling system of this
-									// cache
+	private ThreadPoolExecutor fetchingThreadPool;
+	protected byte tileZoom; // Zoom level for the tiling system of this
+								// cache
 	protected Filter dataFilter;
+	protected String logTag;
+	private long minReloadInterval;
 
 	public DataCache(DataSourceHolder dataSource) {
-		this.dataSource = dataSource;
-		tileZoom = dataSource.getCacheZoomLevel();
-		// TODO Filter
-		dataFilter = dataSource.getCurrentFilter();// DataSourceAdapter.createMeasurementFilter();//
-		// new MeasurementFilter();
-		fetchingThreadPool = (ThreadPoolExecutor) Executors
-				.newFixedThreadPool(3); // TODO make size changeable
+		this(dataSource, SHARED_THREAD_POOL);
 	}
 
+	public DataCache(DataSourceHolder dataSource,
+			ThreadPoolExecutor fetchingThreadPool) {
+		this(dataSource, dataSource.getCacheZoomLevel(), fetchingThreadPool);
+	}
+
+	public DataCache(DataSourceHolder dataSource, byte tileZoom,
+			ThreadPoolExecutor fetchingThreadPool) {
+		this.dataSource = dataSource;
+		this.tileZoom = tileZoom;
+		this.logTag = getClass().getSimpleName() + " " + dataSource.getName();
+		this.fetchingThreadPool = fetchingThreadPool;
+		minReloadInterval = this.dataSource.getMinReloadInterval();
+		if (minReloadInterval <= 0) {
+			minReloadInterval = Long.MAX_VALUE;
+		} else {
+			minReloadInterval = Math
+					.max(minReloadInterval, MIN_RELOAD_INTERVAL);
+		}
+
+		dataFilter = dataSource.getCurrentFilter();
+
+	}
+
+	/**
+	 * Sets a new {@link Filter} to use for requesting data. As the cached data
+	 * might not match this filter, the cache will be cleared.
+	 * 
+	 * @param filter
+	 */
 	public void setFilter(Filter filter) {
+		// Perhaps use a re-requesting mechanism as used in NoiseDroid, i.e.
+		// find a trade off between clearing the whole cache and
+		// requesting/removing missing/extra data.
 		clearCache();
 		this.dataFilter = filter;
 	}
@@ -155,7 +188,8 @@ public class DataCache {
 	 */
 	public void clearCache() {
 		synchronized (tileCacheMapping) {
-			// Cancel all operations
+			Log.i(logTag, "Clearing cache");
+			// Cancel all operation
 			for (SoftReference<DataTile> cacheReference : tileCacheMapping
 					.values()) {
 				if (cacheReference.get() != null) {
@@ -166,30 +200,50 @@ public class DataCache {
 		}
 	}
 
+	/**
+	 * Method to request data by spatial index {@link Tile}. This method will
+	 * automatically fetch new data if the specified {@link Tile} is (no longer)
+	 * cached and based on the expiration settings of the underlying
+	 * {@link DataSource}.
+	 * 
+	 * @param tile
+	 * @param callback
+	 *            The callback which will receive the requested data
+	 * @param forceUpdate
+	 *            Allows to force requesting of new data instead of returning
+	 *            cached date
+	 * @return Holder to cancel this request
+	 */
 	public RequestHolder getDataByTile(Tile tile, GetDataCallback callback,
 			boolean forceUpdate) {
-		Log.i("Test", "getMeasures " + tile.x + ", " + tile.y);
-
 		RequestHolder requestHolder = null;
 
 		synchronized (tileCacheMapping) {
+			if (forceUpdate) {
+				Log.i(logTag, "Forcing update");
+			}
+
 			SoftReference<DataTile> cacheReference = tileCacheMapping.get(tile);
 			DataTile cachedTile = cacheReference != null ? cacheReference.get()
 					: null;
 			if (cachedTile != null) {
 				// Tile bereits vorhanden
-				if (cachedTile.hasMeasurements()) {
+				if (cachedTile.hasMeasurements() && !forceUpdate) {
+					Log.i(logTag, "Tile Cache direct hit " + tile.x + ", "
+							+ tile.y);
+
 					callback.onReceiveMeasurements(cachedTile.tile,
 							cachedTile.data);
 				}
 				if (!cachedTile.hasMeasurements()
 						|| cachedTile.lastUpdate <= System.currentTimeMillis()
-								- dataSource.getMinReloadInterval()
-						|| forceUpdate) {
+								- minReloadInterval || forceUpdate) {
+					Log.i(logTag, "Tile Cache hit " + tile.x + ", " + tile.y);
 					cachedTile.addCallback(callback);
 					requestHolder = fetchMeasurements(cachedTile);
 				}
 			} else {
+				Log.i(logTag, "Tile Cache miss " + tile.x + ", " + tile.y);
 				cachedTile = new DataTile(tile);
 				cachedTile.addCallback(callback);
 				tileCacheMapping.put(tile, new SoftReference<DataTile>(
@@ -202,6 +256,13 @@ public class DataCache {
 		return requestHolder;
 	}
 
+	/**
+	 * Queues fetching of data for a {@link DataTile} using the currently set
+	 * {@link Filter}.
+	 * 
+	 * @param dataTile
+	 * @return Holder to dequeue the request
+	 */
 	private RequestHolder fetchMeasurements(final DataTile dataTile) {
 
 		if (!dataTile.updatePending) {
@@ -211,11 +272,10 @@ public class DataCache {
 				public void run() {
 					// try {
 
-					Filter filter = dataFilter.clone().setBoundingBox(
-							dataTile.tile.getGeoLocationRect());
-
-					dataTile.setMeasurements(dataSource.getDataSource()
-							.getMeasurements(filter));
+					Log.i(logTag, "Requesting Data " + dataTile.tile.x + ", "
+							+ dataTile.tile.y);
+					requestDataForTile(dataTile);
+					// TODO exception handling
 
 					// }
 					// catch (RequestException e) {
@@ -236,8 +296,34 @@ public class DataCache {
 		};
 	}
 
+	protected void requestDataForTile(DataTile dataTile) {
+		Filter filter = dataFilter.clone().setBoundingBox(
+				dataTile.tile.getGeoLocationRect());
+
+		// Actual access to DataSoure interface
+		dataTile.setMeasurements(dataSource.getDataSource().getMeasurements(
+				filter));
+	}
+
+	/**
+	 * Requests data for a specific spatial bounding box. Internally determines
+	 * all tiles from the tile cache which intersect the bounding box,
+	 * concurrently requests data for each tile and returns their aggregated
+	 * results via the specified callback.
+	 * 
+	 * Note that returned {@link SpatialEntity}s may lie outside the requested
+	 * bounding box.
+	 * 
+	 * @param bounds
+	 *            The minimum bounding box to request data for
+	 * @param callback
+	 *            The callback will finally receive the requested data
+	 * @param forceUpdate
+	 *            Forces to update the cache instead of returned cached data
+	 * @return Holder to cancel this request
+	 */
 	// TODO ByGeoLocationRect
-	// TODO reuse of arrays
+	// TODO reuse of result arrays, less allocations
 	public RequestHolder getDataByBBox(final MercatorRect bounds,
 			final GetDataBoundsCallback callback, boolean forceUpdate) {
 		// Transform provided bounds into tile bounds using the zoom level of
@@ -311,6 +397,7 @@ public class DataCache {
 		callback.onProgressUpdate(0, tileDataList.size(), STEP_REQUEST);
 
 		// Actually request data
+		Log.i(logTag, "DataByBBox, " + tileDataList.size() + " Tiles affected ");
 		for (int y = tileTopY; y <= tileBottomY; y++)
 			for (int x = tileLeftX; x <= tileRightX; x++) {
 				Tile tile = new Tile(x, y, tileZoom);

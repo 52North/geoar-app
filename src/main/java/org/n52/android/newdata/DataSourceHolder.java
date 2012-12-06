@@ -24,13 +24,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.n52.android.GeoARApplication;
-import org.n52.android.newdata.Annotations.SharedHttpClient;
 import org.n52.android.newdata.Annotations.PostConstruct;
+import org.n52.android.newdata.Annotations.SharedHttpClient;
 import org.n52.android.newdata.Annotations.SupportedVisualization;
 import org.n52.android.newdata.Annotations.SystemService;
 import org.n52.android.newdata.CheckList.CheckManager;
 import org.n52.android.newdata.CheckList.CheckedChangedListener;
-import org.n52.android.newdata.CheckList.Checker;
 import org.n52.android.newdata.filter.FilterDialogActivity;
 
 import android.content.Context;
@@ -55,9 +54,10 @@ public class DataSourceHolder implements Parcelable {
 	private DataCache dataCache;
 
 	@CheckManager
-	private Checker mChecker;
+	private CheckList<DataSourceHolder>.Checker mChecker;
 
 	private static final int CLEAR_CACHE = 1;
+	private static final int CLEAR_CACHE_AFTER_DEACTIVATION_DELAY = 10000;
 
 	private Handler dataSourceHandler = new Handler(new Handler.Callback() {
 		@Override
@@ -133,7 +133,7 @@ public class DataSourceHolder implements Parcelable {
 					"Data source does not specify a filter class");
 		}
 
-		dataCache = new DataCache(this);
+		dataCache = new BalancingDataCache(this);
 	}
 
 	public DataSource<? super Filter> getDataSource() {
@@ -289,6 +289,7 @@ public class DataSourceHolder implements Parcelable {
 	 */
 	// TODO perhaps package private
 	public void activate() {
+		Log.i("GeoAR", "Activating data source " + getName());
 		if (dataSource == null) {
 			initializeDataSource();
 		}
@@ -301,8 +302,10 @@ public class DataSourceHolder implements Parcelable {
 	 */
 	public void deactivate() {
 		// Clears the cache 30s after calling this method
+		Log.i("GeoAR", "Deactivating data source " + getName());
 		dataSourceHandler.sendMessageDelayed(
-				dataSourceHandler.obtainMessage(CLEAR_CACHE), 30000);
+				dataSourceHandler.obtainMessage(CLEAR_CACHE),
+				CLEAR_CACHE_AFTER_DEACTIVATION_DELAY);
 	}
 
 	@CheckedChangedListener

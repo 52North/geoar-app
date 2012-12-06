@@ -124,7 +124,7 @@ public class DataSourceOverlayHandler {
 
 						for (SpatialEntity entity : data) {
 							GeoPoint point = new GeoPoint(entity.getLatitude(),
-									entity.getmLongitude());
+									entity.getLongitude());
 
 							for (ItemVisualization visualization : visualizations) {
 								OverlayItem overlayItem = new OverlayItem(
