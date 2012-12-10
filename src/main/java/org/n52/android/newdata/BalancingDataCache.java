@@ -37,9 +37,9 @@ import org.n52.android.alg.proj.MercatorRect;
  */
 public class BalancingDataCache extends DataCache {
 
-	private static final byte MIN_ZOOM = 12; // Zoom level below which a proxy
+	private static final byte MIN_ZOOM = 8; // Zoom level below which a proxy
 												// data cache will be used
-	private static final byte ZOOM_GAP = 4; // Guaranteed zoom level difference
+	private static final byte ZOOM_GAP = 2; // Guaranteed zoom level difference
 											// to proxy data cache
 
 	private static ThreadPoolExecutor SHARED_PROXY_THREAD_POOL = (ThreadPoolExecutor) Executors

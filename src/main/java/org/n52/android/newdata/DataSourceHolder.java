@@ -23,7 +23,6 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.n52.android.GeoARApplication;
 import org.n52.android.newdata.Annotations.PostConstruct;
 import org.n52.android.newdata.Annotations.SharedHttpClient;
 import org.n52.android.newdata.Annotations.SupportedVisualization;
@@ -34,6 +33,7 @@ import org.n52.android.newdata.filter.FilterDialogActivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
@@ -78,10 +78,24 @@ public class DataSourceHolder implements Parcelable {
 	private byte minZoomLevel;
 	private byte maxZoomLevel;
 	private Class<? extends DataSource<? super Filter>> dataSourceClass;
+	private InstalledPluginHolder mPluginHolder;
 
+	/**
+	 * Wrapper for a {@link DataSource}. Provides access to general settings of
+	 * a data source, as well as its {@link Filter} implementation and supported
+	 * {@link Visualization}s. This holder also maintains the state of a
+	 * {@link DataSource} as it automatically activates and deactivates a data
+	 * source and clears its {@link DataCache} if required.
+	 * 
+	 * @param dataSourceClass
+	 * @param pluginHolder
+	 *            {@link InstalledPluginHolder} containing this data source
+	 */
 	@SuppressWarnings("unchecked")
 	public DataSourceHolder(
-			Class<? extends DataSource<? super Filter>> dataSourceClass) {
+			Class<? extends DataSource<? super Filter>> dataSourceClass,
+			InstalledPluginHolder pluginHolder) {
+		this.mPluginHolder = pluginHolder;
 		this.dataSourceClass = dataSourceClass;
 		Annotations.DataSource dataSourceAnnotation = dataSourceClass
 				.getAnnotation(Annotations.DataSource.class);
@@ -178,15 +192,14 @@ public class DataSourceHolder implements Parcelable {
 	}
 
 	/**
-	 * Static method which injects all fields with GeoAR-{@link Annotations} and
+	 * Method which injects all fields with GeoAR-{@link Annotations} and
 	 * finally calls the {@link PostConstruct} method (if available) for any
 	 * object.
 	 * 
 	 * @param target
 	 *            Any object
 	 */
-	// TODO move to a utilities package?
-	public static void perfomInjection(Object target) {
+	public void perfomInjection(Object target) {
 		// Field injection
 		try {
 			for (Field f : target.getClass().getDeclaredFields()) {
@@ -194,13 +207,18 @@ public class DataSourceHolder implements Parcelable {
 					String serviceName = f.getAnnotation(SystemService.class)
 							.value();
 					f.setAccessible(true);
-					f.set(target, GeoARApplication.applicationContext
+					f.set(target, mPluginHolder.getPluginContext()
 							.getSystemService(serviceName));
 				}
 
 				if (f.isAnnotationPresent(SharedHttpClient.class)) {
 					f.setAccessible(true);
 					f.set(target, PluginLoader.getSharedHttpClient());
+				}
+
+				if (f.isAnnotationPresent(Annotations.PluginContext.class)) {
+					f.setAccessible(true);
+					f.set(target, mPluginHolder.getPluginContext());
 				}
 			}
 		} catch (IllegalArgumentException e) {

@@ -18,6 +18,7 @@ package org.n52.android.newdata;
 
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -216,11 +217,30 @@ public class DataCache {
 	 */
 	public RequestHolder getDataByTile(Tile tile, GetDataCallback callback,
 			boolean forceUpdate) {
+		return getDataByTile(tile, callback, forceUpdate, true);
+	}
+
+	/**
+	 * Method to request data by spatial index {@link Tile}. This method will
+	 * automatically fetch new data if the specified {@link Tile} is (no longer)
+	 * cached and based on the expiration settings of the underlying
+	 * {@link DataSource}.
+	 * 
+	 * @param tile
+	 * @param callback
+	 *            The callback which will receive the requested data
+	 * @param forceUpdate
+	 *            Allows to force requesting of new data instead of returning
+	 *            cached date
+	 * @return Holder to cancel this request
+	 */
+	private RequestHolder getDataByTile(Tile tile, GetDataCallback callback,
+			boolean forceUpdate, boolean async) {
 		RequestHolder requestHolder = null;
 
 		synchronized (tileCacheMapping) {
 			if (forceUpdate) {
-				Log.i(logTag, "Forcing update");
+				// Log.i(logTag, "Forcing update");
 			}
 
 			SoftReference<DataTile> cacheReference = tileCacheMapping.get(tile);
@@ -229,8 +249,8 @@ public class DataCache {
 			if (cachedTile != null) {
 				// Tile bereits vorhanden
 				if (cachedTile.hasMeasurements() && !forceUpdate) {
-					Log.i(logTag, "Tile Cache direct hit " + tile.x + ", "
-							+ tile.y);
+					// Log.i(logTag, "Tile Cache direct hit " + tile.x + ", "
+					// + tile.y);
 
 					callback.onReceiveMeasurements(cachedTile.tile,
 							cachedTile.data);
@@ -238,18 +258,19 @@ public class DataCache {
 				if (!cachedTile.hasMeasurements()
 						|| cachedTile.lastUpdate <= System.currentTimeMillis()
 								- minReloadInterval || forceUpdate) {
-					Log.i(logTag, "Tile Cache hit " + tile.x + ", " + tile.y);
+					// Log.i(logTag, "Tile Cache hit " + tile.x + ", " +
+					// tile.y);
 					cachedTile.addCallback(callback);
-					requestHolder = fetchMeasurements(cachedTile);
+					requestHolder = fetchMeasurements(cachedTile, async);
 				}
 			} else {
-				Log.i(logTag, "Tile Cache miss " + tile.x + ", " + tile.y);
+				// Log.i(logTag, "Tile Cache miss " + tile.x + ", " + tile.y);
 				cachedTile = new DataTile(tile);
 				cachedTile.addCallback(callback);
 				tileCacheMapping.put(tile, new SoftReference<DataTile>(
 						cachedTile));
 
-				requestHolder = fetchMeasurements(cachedTile);
+				requestHolder = fetchMeasurements(cachedTile, async);
 			}
 		}
 
@@ -263,7 +284,8 @@ public class DataCache {
 	 * @param dataTile
 	 * @return Holder to dequeue the request
 	 */
-	private RequestHolder fetchMeasurements(final DataTile dataTile) {
+	private RequestHolder fetchMeasurements(final DataTile dataTile,
+			boolean async) {
 
 		if (!dataTile.updatePending) {
 
@@ -286,7 +308,11 @@ public class DataCache {
 					// }
 				}
 			};
-			fetchingThreadPool.execute(dataTile.fetchRunnable);
+			if (async) {
+				fetchingThreadPool.execute(dataTile.fetchRunnable);
+			} else {
+				dataTile.fetchRunnable.run();
+			}
 		}
 
 		return new RequestHolder() {
@@ -325,7 +351,7 @@ public class DataCache {
 	// TODO ByGeoLocationRect
 	// TODO reuse of result arrays, less allocations
 	public RequestHolder getDataByBBox(final MercatorRect bounds,
-			final GetDataBoundsCallback callback, boolean forceUpdate) {
+			final GetDataBoundsCallback callback, final boolean forceUpdate) {
 		// Transform provided bounds into tile bounds using the zoom level of
 		// this cache
 		final int tileLeftX = (int) MercatorProj
@@ -334,21 +360,28 @@ public class DataCache {
 		final int tileTopY = (int) MercatorProj.transformPixelYToTileY(
 				MercatorProj.transformPixel(bounds.top, bounds.zoom, tileZoom),
 				tileZoom);
-		int tileRightX = (int) MercatorProj.transformPixelXToTileX(MercatorProj
-				.transformPixel(bounds.right, bounds.zoom, tileZoom), tileZoom);
-		int tileBottomY = (int) MercatorProj.transformPixelYToTileY(
+		final int tileRightX = (int) MercatorProj.transformPixelXToTileX(
+				MercatorProj
+						.transformPixel(bounds.right, bounds.zoom, tileZoom),
+				tileZoom);
+		final int tileBottomY = (int) MercatorProj.transformPixelYToTileY(
 				MercatorProj.transformPixel(bounds.bottom, bounds.zoom,
 						tileZoom), tileZoom);
 		final int tileGridWidth = tileRightX - tileLeftX + 1;
-
+		final int tileCount = tileGridWidth * (tileBottomY - tileTopY + 1);
 		// List to monitor loading of all data for all required tiles
-		final Vector<List<? extends SpatialEntity>> tileDataList = new Vector<List<? extends SpatialEntity>>();
-		tileDataList.setSize(tileGridWidth * (tileBottomY - tileTopY + 1));
+		final BitSet tileMonitorSet = new BitSet(tileCount);
+		tileMonitorSet.set(0, tileCount);
+
+		// final Vector<List<? extends SpatialEntity>> tileDataList = new
+		// Vector<List<? extends SpatialEntity>>();
+		// tileDataList.setSize(tileGridWidth * (tileBottomY - tileTopY + 1));
 
 		// Callback for data of a tile
 		final GetDataCallback measureCallback = new GetDataCallback() {
 			boolean active = true;
 			private int progress;
+			List<SpatialEntity> measurementsList = new ArrayList<SpatialEntity>();
 
 			public void onReceiveMeasurements(Tile tile,
 					List<? extends SpatialEntity> data) {
@@ -360,28 +393,23 @@ public class DataCache {
 				int checkIndex = ((tile.y - tileTopY) * tileGridWidth)
 						+ (tile.x - tileLeftX);
 
-				if (tileDataList.set(checkIndex, data) == null) {
-					// Previously no elements for that tile
+				if (tileMonitorSet.get(checkIndex)) {
+					// Still waiting for that tile
+					tileMonitorSet.clear(checkIndex);
 					progress++;
-					callback.onProgressUpdate(progress, tileDataList.size(),
-							STEP_REQUEST);
+					measurementsList.addAll(data);
+					callback.onProgressUpdate(progress, tileCount, STEP_REQUEST);
 				}
-				if (!tileDataList.contains(null)) {
+				if (tileMonitorSet.isEmpty()) {
 					// All tiles loaded
-					final List<SpatialEntity> measurementsList = new ArrayList<SpatialEntity>();
-					// Merge all data of each requested tile
-					for (List<? extends SpatialEntity> tileData : tileDataList) {
-						measurementsList.addAll(tileData);
-					}
 
-					new Thread(new Runnable() {
-						public void run() {
-							if (active) {
-								callback.onReceiveDataUpdate(bounds,
-										measurementsList);
-							}
-						}
-					}).run();
+					// new Thread(new Runnable() {
+					// public void run() {
+					if (active) {
+						callback.onReceiveDataUpdate(bounds, measurementsList);
+					}
+					// }
+					// }).run();
 				}
 			}
 
@@ -394,17 +422,29 @@ public class DataCache {
 
 		};
 
-		callback.onProgressUpdate(0, tileDataList.size(), STEP_REQUEST);
+		callback.onProgressUpdate(0, tileCount, STEP_REQUEST);
 
 		// Actually request data
-		Log.i(logTag, "DataByBBox, " + tileDataList.size() + " Tiles affected ");
-		for (int y = tileTopY; y <= tileBottomY; y++)
-			for (int x = tileLeftX; x <= tileRightX; x++) {
-				Tile tile = new Tile(x, y, tileZoom);
 
-				getDataByTile(tile, measureCallback, forceUpdate);
-				// TODO cache return value to allow proper cancellation behavior
+		Runnable getAllTilesRunnable = new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+
+				// Log.i(logTag, "DataByBBox, " + tileCount +
+				// " Tiles affected ");
+				for (int y = tileTopY; y <= tileBottomY; y++)
+					for (int x = tileLeftX; x <= tileRightX; x++) {
+						Tile tile = new Tile(x, y, tileZoom);
+
+						getDataByTile(tile, measureCallback, forceUpdate, false);
+						// TODO cache return value to allow proper cancellation
+						// behavior
+					}
 			}
+		};
+		fetchingThreadPool.execute(getAllTilesRunnable);
 
 		return new RequestHolder() {
 			public void cancel() {

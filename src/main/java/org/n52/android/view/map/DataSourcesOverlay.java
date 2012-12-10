@@ -29,13 +29,13 @@ import android.graphics.drawable.Drawable;
  * efficiently add and remove {@link OverlayItem}s from different sources to and
  * from the same overlay.
  */
-public class DataSourcesOverlay extends ItemizedOverlay<OverlayItem> {
+public class DataSourcesOverlay extends ItemizedOverlay<VisualizationOverlayItem> {
 
 	interface OnOverlayItemTapListener {
-		boolean onOverlayItemTap(OverlayItem item);
+		boolean onOverlayItemTap(VisualizationOverlayItem item);
 	}
 
-	private Map<Object, List<OverlayItem>> overlayItemMap = new HashMap<Object, List<OverlayItem>>();
+	private Map<Object, List<VisualizationOverlayItem>> overlayItemMap = new HashMap<Object, List<VisualizationOverlayItem>>();
 	private OnOverlayItemTapListener overlayItemTapListener;
 
 	public DataSourcesOverlay() {
@@ -55,7 +55,7 @@ public class DataSourcesOverlay extends ItemizedOverlay<OverlayItem> {
 	 */
 	public void clear() {
 		synchronized (this.overlayItemMap) {
-			for (List<OverlayItem> itemList : overlayItemMap.values()) {
+			for (List<VisualizationOverlayItem> itemList : overlayItemMap.values()) {
 				itemList.clear();
 			}
 			overlayItemMap.clear();
@@ -78,7 +78,7 @@ public class DataSourcesOverlay extends ItemizedOverlay<OverlayItem> {
 	 */
 	public void removeItem(OverlayItem overlayItem) {
 		synchronized (this.overlayItemMap) {
-			for (List<OverlayItem> itemList : overlayItemMap.values()) {
+			for (List<VisualizationOverlayItem> itemList : overlayItemMap.values()) {
 				itemList.remove(overlayItem);
 			}
 		}
@@ -89,7 +89,7 @@ public class DataSourcesOverlay extends ItemizedOverlay<OverlayItem> {
 	public int size() {
 		synchronized (this.overlayItemMap) {
 			int size = 0;
-			for (List<OverlayItem> itemList : overlayItemMap.values()) {
+			for (List<VisualizationOverlayItem> itemList : overlayItemMap.values()) {
 				size += itemList.size();
 			}
 			return size;
@@ -97,10 +97,10 @@ public class DataSourcesOverlay extends ItemizedOverlay<OverlayItem> {
 	}
 
 	@Override
-	protected OverlayItem createItem(int index) {
+	protected VisualizationOverlayItem createItem(int index) {
 		synchronized (this.overlayItemMap) {
 			int minIndex = 0;
-			for (List<OverlayItem> itemList : overlayItemMap.values()) {
+			for (List<VisualizationOverlayItem> itemList : overlayItemMap.values()) {
 				if (index >= minIndex && index < minIndex + itemList.size()) {
 					return itemList.get(index - minIndex);
 				}
@@ -112,11 +112,12 @@ public class DataSourcesOverlay extends ItemizedOverlay<OverlayItem> {
 		}
 	}
 
-	public void setOverlayItems(List<OverlayItem> overlayItems, Object key) {
+	public void setOverlayItems(List<VisualizationOverlayItem> overlayItems,
+			Object key) {
 		synchronized (this.overlayItemMap) {
 
-			List<OverlayItem> previousMapping = this.overlayItemMap.put(key,
-					overlayItems);
+			List<VisualizationOverlayItem> previousMapping = this.overlayItemMap
+					.put(key, overlayItems);
 			if (previousMapping != null) {
 				previousMapping.clear();
 			}
@@ -124,9 +125,10 @@ public class DataSourcesOverlay extends ItemizedOverlay<OverlayItem> {
 		populate();
 	}
 
-	public void addOverlayItems(List<OverlayItem> overlayItems, Object key) {
+	public void addOverlayItems(List<VisualizationOverlayItem> overlayItems,
+			Object key) {
 		synchronized (this.overlayItemMap) {
-			List<OverlayItem> mapping = this.overlayItemMap.get(key);
+			List<VisualizationOverlayItem> mapping = this.overlayItemMap.get(key);
 			if (mapping == null) {
 				this.overlayItemMap.put(key, overlayItems);
 			} else {
@@ -144,5 +146,5 @@ public class DataSourcesOverlay extends ItemizedOverlay<OverlayItem> {
 		}
 		return super.onTap(index);
 	}
-	
+
 }

@@ -20,9 +20,7 @@ import java.util.List;
 
 import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.Projection;
-import org.mapsforge.android.maps.overlay.OverlayItem;
 import org.mapsforge.core.GeoPoint;
-import org.metalev.multitouch.controller.MultiTouchController.PositionAndScale;
 import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.newdata.DataCache.GetDataBoundsCallback;
 import org.n52.android.newdata.DataCache.RequestHolder;
@@ -117,7 +115,7 @@ public class DataSourceOverlayHandler {
 					List<? extends SpatialEntity> data) {
 				synchronized (updateLock) {
 					if (!canceled) {
-						List<OverlayItem> overlayItems = new ArrayList<OverlayItem>();
+						List<VisualizationOverlayItem> overlayItems = new ArrayList<VisualizationOverlayItem>();
 						List<ItemVisualization> visualizations = dataSource
 								.getVisualizations().getCheckedItems(
 										ItemVisualization.class);
@@ -127,11 +125,12 @@ public class DataSourceOverlayHandler {
 									entity.getLongitude());
 
 							for (ItemVisualization visualization : visualizations) {
-								OverlayItem overlayItem = new OverlayItem(
+								VisualizationOverlayItem overlayItem = new VisualizationOverlayItem(
 										point, visualization.getTitle(entity),
 										visualization.getDescription(entity),
 										visualization
-												.getDrawableForEntity(entity));
+												.getDrawableForEntity(entity),
+										entity, visualization);
 								overlayItems.add(overlayItem);
 							}
 						}

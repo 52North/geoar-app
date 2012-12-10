@@ -21,7 +21,6 @@ import java.util.Map;
 import org.mapsforge.android.maps.MapController;
 import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.mapgenerator.tiledownloader.MapnikTileDownloader;
-import org.mapsforge.android.maps.overlay.OverlayItem;
 import org.mapsforge.core.GeoPoint;
 import org.n52.android.R;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
@@ -125,11 +124,21 @@ public class MapFragment extends SherlockFragment {
 				.setOverlayItemTapListener(new OnOverlayItemTapListener() {
 
 					@Override
-					public boolean onOverlayItemTap(OverlayItem item) {
+					public boolean onOverlayItemTap(
+							VisualizationOverlayItem item) {
 						Builder builder = new AlertDialog.Builder(getActivity());
 						builder.setTitle(item.getTitle())
 								.setMessage(item.getSnippet())
 								.setNeutralButton(R.string.ok, null);
+
+						// TODO use view caching with convertView parameter
+						View featureView = item.getVisualization()
+								.getFeatureView(item.getSpatialEntity(), null,
+										null);
+
+						if (featureView != null) {
+							builder.setView(featureView);
+						}
 						builder.show();
 						return true;
 					}
