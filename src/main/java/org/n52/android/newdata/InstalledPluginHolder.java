@@ -202,7 +202,7 @@ public class InstalledPluginHolder extends PluginHolder {
 				Method method = AssetManager.class.getMethod("addAssetPath",
 						String.class);
 				method.setAccessible(true);
-				method.invoke(newInstance, getPluginFile().getAbsolutePath());
+				method.invoke(newInstance, getPluginFile().getAbsolutePath()); 
 
 				// get display metrics
 				WindowManager windowManager = (WindowManager) GeoARApplication.applicationContext

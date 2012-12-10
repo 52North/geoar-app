@@ -150,7 +150,7 @@ public class PluginFragment extends SherlockFragment {
 			@Override
 			public void onCheckedChanged(InstalledPluginHolder item,
 					boolean newState) {
-				notifyDataSetChanged();
+				notifyDataSetInvalidated();
 			}
 		};
 
@@ -210,7 +210,7 @@ public class PluginFragment extends SherlockFragment {
 		@Override
 		public void onDataSourceResult(List<PluginDownloadHolder> dataSources) {
 			this.plugins = dataSources;
-			notifyDataSetChanged();
+			notifyDataSetInvalidated();
 		}
 	}
 }
