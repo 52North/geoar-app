@@ -25,14 +25,11 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-import org.n52.android.GeoARActivity;
 import org.n52.android.GeoARApplication;
 import org.n52.android.newdata.CheckList.CheckManager;
-import org.n52.android.newdata.CheckList.Checker;
 import org.n52.android.newdata.PluginLoader.PluginInfo;
 
 import android.annotation.SuppressLint;
-import android.app.Application;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.AssetManager;
@@ -58,7 +55,7 @@ public class InstalledPluginHolder extends PluginHolder {
 	private Context mPluginContext;
 
 	@CheckManager
-	private Checker mChecker;
+	private CheckList<InstalledPluginHolder>.Checker mChecker;
 
 	public InstalledPluginHolder(String identifier, Long version,
 			File pluginFile) {
@@ -168,12 +165,15 @@ public class InstalledPluginHolder extends PluginHolder {
 										+ entryClass.getSimpleName()
 										+ " is not implementing DataSource interface");
 						// TODO handle error
-					}
+					} 
 				}
 			}
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Dex changed");
-		}
+		} catch (LinkageError e) {
+			Log.e("GeoAR", "Data source " + getName() + " uses invalid class, "
+					+ e.getMessage());
+		} 
 
 		loaded = true;
 	}

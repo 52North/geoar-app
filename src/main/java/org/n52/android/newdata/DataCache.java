@@ -296,7 +296,14 @@ public class DataCache {
 
 					Log.i(logTag, "Requesting Data " + dataTile.tile.x + ", "
 							+ dataTile.tile.y);
-					requestDataForTile(dataTile);
+
+					try {
+						requestDataForTile(dataTile);
+
+					} catch (RuntimeException e) {
+						e.printStackTrace();
+						dataTile.abort(ABORT_UNKOWN);
+					}
 					// TODO exception handling
 
 					// }

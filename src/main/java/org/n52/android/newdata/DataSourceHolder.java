@@ -227,6 +227,9 @@ public class DataSourceHolder implements Parcelable {
 		} catch (IllegalAccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (LinkageError e) {
+			Log.e("GeoAR", "Data source " + getName() + " uses invalid class, "
+					+ e.getMessage());
 		}
 
 		// Post construct
