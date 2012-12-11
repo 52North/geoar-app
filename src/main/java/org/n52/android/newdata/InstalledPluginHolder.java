@@ -28,12 +28,15 @@ import java.util.List;
 import org.n52.android.GeoARApplication;
 import org.n52.android.newdata.CheckList.CheckManager;
 import org.n52.android.newdata.PluginLoader.PluginInfo;
+import org.osmdroid.tileprovider.modules.MBTilesFileArchive;
 
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.content.res.Resources.Theme;
 import android.os.Parcel;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -56,6 +59,7 @@ public class InstalledPluginHolder extends PluginHolder {
 
 	@CheckManager
 	private CheckList<InstalledPluginHolder>.Checker mChecker;
+	private DexClassLoader mPluginDexClassLoader;
 
 	public InstalledPluginHolder(String identifier, Long version,
 			File pluginFile) {
@@ -136,7 +140,7 @@ public class InstalledPluginHolder extends PluginHolder {
 		// Path for optimized dex equals path which will be used by
 		// dexClassLoader
 		// create separate ClassLoader for each plugin
-		DexClassLoader dexClassLoader = new DexClassLoader(getPluginFile()
+		mPluginDexClassLoader = new DexClassLoader(getPluginFile()
 				.getAbsolutePath(), tmpDir.getAbsolutePath(), null,
 				GeoARApplication.applicationContext.getClassLoader());
 
@@ -145,7 +149,7 @@ public class InstalledPluginHolder extends PluginHolder {
 				// Check each classname for annotations
 				String entry = entries.nextElement();
 
-				Class<?> entryClass = dexClassLoader.loadClass(entry);
+				Class<?> entryClass = mPluginDexClassLoader.loadClass(entry);
 				if (entryClass
 						.isAnnotationPresent(Annotations.DataSource.class)) {
 					// Class is a annotated as datasource
@@ -165,7 +169,7 @@ public class InstalledPluginHolder extends PluginHolder {
 										+ entryClass.getSimpleName()
 										+ " is not implementing DataSource interface");
 						// TODO handle error
-					} 
+					}
 				}
 			}
 		} catch (ClassNotFoundException e) {
@@ -173,7 +177,7 @@ public class InstalledPluginHolder extends PluginHolder {
 		} catch (LinkageError e) {
 			Log.e("GeoAR", "Data source " + getName() + " uses invalid class, "
 					+ e.getMessage());
-		} 
+		}
 
 		loaded = true;
 	}
@@ -196,13 +200,13 @@ public class InstalledPluginHolder extends PluginHolder {
 				// public
 				constructor = AssetManager.class.getConstructor();
 				constructor.setAccessible(true);
-				AssetManager newInstance = constructor.newInstance();
+				AssetManager assetManager = constructor.newInstance();
 
 				// For unknown reasons, the addAssetPath method is not public
 				Method method = AssetManager.class.getMethod("addAssetPath",
 						String.class);
 				method.setAccessible(true);
-				method.invoke(newInstance, getPluginFile().getAbsolutePath()); 
+				method.invoke(assetManager, getPluginFile().getAbsolutePath());
 
 				// get display metrics
 				WindowManager windowManager = (WindowManager) GeoARApplication.applicationContext
@@ -211,7 +215,7 @@ public class InstalledPluginHolder extends PluginHolder {
 				windowManager.getDefaultDisplay().getMetrics(displayMetrics);
 
 				// Create Resources object, no Configuration object required
-				mPluginResources = new Resources(newInstance, displayMetrics,
+				mPluginResources = new Resources(assetManager, displayMetrics,
 						null);
 			} catch (NoSuchMethodException e1) {
 				// TODO Auto-generated catch block
@@ -254,6 +258,7 @@ public class InstalledPluginHolder extends PluginHolder {
 					GeoARApplication.applicationContext) {
 
 				private LayoutInflater mLayoutInflater;
+				private Theme mTheme;
 
 				@Override
 				public Resources getResources() {
@@ -272,7 +277,32 @@ public class InstalledPluginHolder extends PluginHolder {
 						return mLayoutInflater;
 					}
 					return super.getSystemService(name);
+				}
 
+				@Override
+				public String getPackageResourcePath() {
+					return getPluginFile().getAbsolutePath();
+				}
+
+				@Override
+				public ClassLoader getClassLoader() {
+					return mPluginDexClassLoader;
+				}
+
+				@Override
+				public Theme getTheme() {
+					if (mTheme == null) {
+						// Create special theme to include the custom Resources
+						// instance for a plugin
+						mTheme = getResources().newTheme();
+						mTheme.setTo(getBaseContext().getTheme());
+					}
+					return mTheme;
+				}
+
+				@Override
+				public String getPackageCodePath() {
+					return getPluginFile().getAbsolutePath();
 				}
 			};
 		}
