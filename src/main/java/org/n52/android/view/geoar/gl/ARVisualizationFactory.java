@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.n52.android.newdata.DataSourceHolder;
-import org.n52.android.newdata.RenderingFactory;
+import org.n52.android.newdata.RenderFeatureFactory;
 import org.n52.android.newdata.gl.primitives.DataSourceRenderable;
 import org.n52.android.newdata.gl.primitives.RenderLoader;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OpenGLCallable;
@@ -31,7 +31,7 @@ import org.n52.android.view.geoar.gl.model.primitives.Cube;
 
 import android.opengl.GLSurfaceView;
 
-public class ARVisualizationFactory implements RenderingFactory {
+public class ARVisualizationFactory implements RenderFeatureFactory {
 
 	private static final Map<Class<?>, RenderNode> set = Collections
 			.synchronizedMap(new HashMap<Class<?>, RenderNode>());
