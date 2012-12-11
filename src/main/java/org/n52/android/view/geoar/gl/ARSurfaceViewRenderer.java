@@ -30,11 +30,12 @@ import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.PluginLoader;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.n52.android.view.InfoView;
+import org.n52.android.view.geoar.gl.mode.RenderFeature;
+import org.n52.android.view.geoar.gl.mode.features.ReferencedGridFeature;
 import org.n52.android.view.geoar.gl.model.GLESGridRenderer;
 import org.n52.android.view.geoar.gl.model.RenderNode;
 import org.n52.android.view.geoar.gl.model.Renderding;
-import org.n52.android.view.geoar.gl.model.primitives.Grid;
-import org.n52.android.view.geoar.gl.model.shader.SimpleColorRenderer;
+import org.n52.android.view.geoar.gl.model.rendering.ReferencedHeightMap;
 import org.osmdroid.util.GeoPoint;
 
 import android.content.Context;
@@ -63,21 +64,6 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		void onCreateInGLESThread();
 	}
 
-	// public interface OnObservationUpdateListener {
-	// public void onObservationUpdate(List<? extends SpatialEntity> m);
-	// }
-	//
-	// public interface GeoLocationUpdateListener {
-	// /**
-	// * Updates the relative location of the Renderable according to the
-	// * location device
-	// *
-	// * @param locationUpdate
-	// * current location of the device.
-	// */
-	// public void onGeoLocationUpdate(GeoPoint g);
-	// }
-
 	/**
 	 * Public interface to create an object which supplies the renderer with the
 	 * current extrinsic camera rotation. Ensures that matrices are just
@@ -92,90 +78,6 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		 */
 		float[] getRotationMatrix();
 	}
-
-	// protected class UpdateHolder implements Runnable {
-	// protected boolean canceled;
-	// protected MercatorRect bounds;
-	// protected RequestHolder requestHolder;
-	//
-	// protected GetDataBoundsCallback callback = new GetDataBoundsCallback() {
-	//
-	// @Override
-	// public void onProgressUpdate(int progress, int maxProgress, int step) {
-	// if (mInfoHandler != null) {
-	// String stepTitle = "";
-	// // switch (step) {
-	// // // case NoiseInterpolation.STEP_CLUSTERING:
-	// // // stepTitle = mContext.getString(R.string.clustering);
-	// // // break;
-	// // // case NoiseInterpolation.STEP_INTERPOLATION:
-	// // // stepTitle =
-	// // mContext.getString(R.string.interpolation);
-	// // // break;
-	// // case DataCache.STEP_REQUEST:
-	// // stepTitle = mContext
-	// // .getString(R.string.measurement_request);
-	// // break;
-	// // }
-	//
-	// mInfoHandler.setProgressTitle(stepTitle,
-	// ARSurfaceViewRenderer.this);
-	// mInfoHandler.setProgress(progress, maxProgress,
-	// ARSurfaceViewRenderer.this);
-	// }
-	// }
-	//
-	// @Override
-	// public void onAbort(MercatorRect bounds, int reason) {
-	// if (mInfoHandler != null) {
-	// // mInfoHandler.clearProgress(ARSurfaceViewRenderer.this);
-	// // if (reason == DataCache.ABORT_NO_CONNECTION) {
-	// // mInfoHandler.setStatus(R.string.connection_error, 5000,
-	// // ARSurfaceViewRenderer.this);
-	// // } else if (reason == DataCache.ABORT_UNKOWN) {
-	// // mInfoHandler.setStatus(R.string.unkown_error, 5000,
-	// // ARSurfaceViewRenderer.this);
-	// // }
-	// }
-	// }
-	//
-	// @Override
-	// public void onReceiveDataUpdate(MercatorRect bounds,
-	// List<? extends SpatialEntity> data) {
-	// synchronized (up) {
-	//
-	// }
-	// // Save result reference in variable. Those should always be the
-	// // same
-	// currentInterpolationRect = bounds;
-	// currentMeasurement = data;
-	// if (currentCenterGPoint == null)
-	// return;
-	//
-	// // for (OnObservationUpdateListener r : observationUpdateListener)
-	// // r.onObservationUpdate(currentMeasurement);
-	// //
-	// // for (GeoLocationUpdateListener lu : geoLocationUpdateListener)
-	// // lu.onGeoLocationUpdate(currentCenterGPoint);
-	//
-	// // TODO needed for Interpolation
-	// // glInterpolation.setWidth(bounds.width());
-	// // glInterpolation.setHeight(bounds.height());
-	// // Ask the corresponding texture to reload its data on next draw
-	// // interpolationTexture.reload();
-	// }
-	//
-	//
-	// };
-	//
-	//
-	// @Override
-	// public void run() {
-	// // TODO Auto-generated method stub
-	//
-	// }
-	//
-	// }
 
 	Renderding renderding;
 	GLESGridRenderer renderer;
@@ -204,6 +106,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	private ARVisualizationFactory factory;
 	private List<DataSourceVisualizationHandler> visualizationHandler = new ArrayList<DataSourceVisualizationHandler>();
 
+	private RenderFeature renderFeature;
 	private OnCheckedChangedListener<DataSourceHolder> dataSourceListener = new OnCheckedChangedListener<DataSourceHolder>() {
 
 		@Override
@@ -232,45 +135,42 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		this.mRotationProvider = (IRotationMatrixProvider) glSurfaceView;
 		this.glSurfaceView = glSurfaceView;
 
-		// this.observationUpdateListener = new
-		// ArrayList<OnObservationUpdateListener>();
 		children = new Stack<RenderNode>();
 
-		// this.geoLocationUpdateListener = new
-		// ArrayList<ARSurfaceViewRenderer.GeoLocationUpdateListener>();
 		PluginLoader.getSelectedDataSources().addOnCheckedChangeListener(
 				dataSourceListener);
 
 		factory = new ARVisualizationFactory(glSurfaceView);
-	}
-
-//	public void setInfoHandler(InfoView infoHandler) {
-//		this.mInfoHandler = infoHandler;
-//	}
+	} 
 
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
-		int clearMask = GLES20.GL_COLOR_BUFFER_BIT;
-		if (enableDepthBuffer) {
-			clearMask |= GLES20.GL_DEPTH_BUFFER_BIT;
-			GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-			GLES20.glDepthFunc(GLES20.GL_LESS);
-			GLES20.glDepthMask(true);
-			GLES20.glClearDepthf(1.f);
-		}
-		GLES20.glClear(clearMask);
 
-		renderding.onDrawFrame(glUnused);
+		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+
+		// int clearMask = GLES20.GL_COLOR_BUFFER_BIT;
+		// if (enableDepthBuffer) {
+		// clearMask |= GLES20.GL_DEPTH_BUFFER_BIT;
+//		 GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+//		 GLES20.glDepthFunc(GLES20.GL_LESS);
+//		 GLES20.glDepthMask(true);
+//		 GLES20.glClearDepthf(1.f);
+		// }
+		// GLES20.glClear(clearMask);
+
 
 		float[] rotationMatrix = mRotationProvider.getRotationMatrix();
+		renderFeature.onRender(GLESCamera.projectionMatrix, GLESCamera.viewMatrix, rotationMatrix);
 		for (int i = 0; i < children.size(); i++) {
-			children.get(i).onRender(GLESCamera.projectionMatrix,
-					GLESCamera.viewMatrix, rotationMatrix
-			// null
+			children.get(i).onRender(GLESCamera.projectionMatrix, 
+					GLESCamera.viewMatrix, 
+					rotationMatrix
+//			 null
 					);
 		}
+		// renderding.onDrawFrame(glUnused);
 
-		// renderer.onDrawFrame();
+//		 renderer.onDrawFrame();
 	}
 
 	@Override
@@ -282,52 +182,65 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	@Override
 	public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
 
-		// set the background color to transparent
+		// Set the background clear color to black.
 		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+//		// Use culling to remove back faces.
+//		GLES20.glEnable(GLES20.GL_CULL_FACE);
+//
+//		// Enable depth testing
+//		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+
+//		// set the background color to transparent
+//		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 		// set up the view matrix
 		GLESCamera.createViewMatrix();
 
-		// GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-		// GLES20.glClearDepthf(1.0f);
-		// GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-		// GLES20.glDepthMask(true);
-		//
-		// // No culling of back faces
-		// GLES20.glDisable(GLES20.GL_CULL_FACE);
-
-		// No depth testing
-		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-
-		// // Enable blending
-		// GLES20.glEnable(GLES20.GL_BLEND);
-		// GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
-
-		// backface culling
-		GLES20.glEnable(GLES20.GL_CULL_FACE);
-		GLES20.glCullFace(GLES20.GL_BACK);
+		 GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+		 GLES20.glClearDepthf(1.0f);
+		 GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+		 GLES20.glDepthMask(true);
+		 //
+//		 // // No culling of back faces
+//		 GLES20.glDisable(GLES20.GL_CULL_FACE);
+//		
+//		 // No depth testing
+//		 GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+		
+		 // // Enable blending
+		 GLES20.glEnable(GLES20.GL_BLEND);
+		 GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
+		
+		 // backface culling
+		 GLES20.glEnable(GLES20.GL_CULL_FACE);
+		 GLES20.glCullFace(GLES20.GL_BACK);
 		initScene();
 
 	}
 
 	private void initScene() {
-
+		renderFeature = new ReferencedGridFeature();
+		
+//		 Cube cube = new Cube();
+//		 cube.setPosition(new float[] { 0.0f, 0.0f, 10.0f });
+//		 cube.onCreateInGLESThread();
+//		 this.children.add(cube);
+		
 		// Set<DataSourceHolder> list =
 		// DataSourceLoader.getDataSources();
 		// // DataSourceLoader.
 		// for(DataSourceHolder holder : list){
 		// ARVisualizationFactory fac = new ARVisualizationFactory();
 		// }
-		Grid grid = new Grid();
-		grid.setRenderer(SimpleColorRenderer.getInstance());
-		grid.onCreateInGLESThread();
-		this.children.clear(); // onSurfaceCreated is also called for recreation
-		this.children.add(grid);
-		renderding = new Renderding();
-		// Cube cube = new Cube();
-		// cube.setPosition(new float[]{0.0f, 0.0f, 3.0f});
-		// cube.onCreateInGLESThread();
-		// this.children.add(cube);
+		// Grid grid = new Grid();
+		// grid.setRenderer(SimpleColorRenderer.getInstance());
+		// grid.onCreateInGLESThread();
+		// this.children.clear(); // onSurfaceCreated is also called for
+		// recreation
+		// this.children.add(grid);
+		// renderding = new Renderding();
+
 
 		// renderer = new GLESGridRenderer(mRotationProvider);
 
@@ -350,11 +263,12 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		// addRenderNode(map);
 		// this.children.add(map);
 		// //
-		// ReferencedHeightMap hMap = new ReferencedHeightMap();
-		// addRenderNode(hMap);
-		// this.children.add(hMap);
-
-		// Cube cube = new Cube(1);
+//		ReferencedHeightMap hMap = new ReferencedHeightMap();
+//		addRenderNode(hMap);
+//		this.children.clear();
+//		this.children.add(hMap);
+		
+		// Cube cube = new Cube();
 		// cube.setPosition(new float[] {0,0,5});
 		// cube.setRenderer(SimpleColorRenderer.getInstance());
 		// addRenderNode(cube);
