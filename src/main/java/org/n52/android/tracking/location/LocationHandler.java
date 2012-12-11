@@ -21,8 +21,8 @@ import java.util.List;
 
 import org.n52.android.GeoARApplication;
 import org.n52.android.R;
+import org.n52.android.utils.GeoLocation;
 import org.n52.android.view.InfoView;
-import org.osmdroid.util.GeoPoint;
 
 import android.content.Context;
 import android.location.Location;
@@ -30,6 +30,9 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
 
 /**
  * Helper class to allow an safe and common way to receive location updates from
@@ -40,18 +43,31 @@ import android.os.Bundle;
  */
 public class LocationHandler implements Serializable {
 	private static final long serialVersionUID = 6337877169906901138L;
+	private static final int DISABLE_LOCATION_UPDATES_MESSAGE = 1;
+	private static final long DISABLE_LOCATION_UPDATES_DELAY = 12000;
 
 	public interface OnLocationUpdateListener {
 		void onLocationChanged(Location location);
 	}
 
 	private static LocationManager locationManager;
-	private static Object gpsStatusInfo = new Object();
-	private static Object gpsProviderInfo = new Object();
+	private static final Object gpsStatusInfo = new Object();
+	private static final Object gpsProviderInfo = new Object();
 	private static List<OnLocationUpdateListener> listeners = new ArrayList<OnLocationUpdateListener>();
 
 	private static boolean manualLocationMode = true;
 	private static Location manualLocation;
+
+	private static Handler disableUpdateHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			if (msg.what == DISABLE_LOCATION_UPDATES_MESSAGE) {
+				onPause();
+			} else {
+				super.handleMessage(msg);
+			}
+		}
+	};
 
 	static {
 		locationManager = (LocationManager) GeoARApplication.applicationContext
@@ -105,7 +121,7 @@ public class LocationHandler implements Serializable {
 	 * 
 	 * @param geoPoint
 	 */
-	public static void setManualLocation(GeoPoint geoPoint) {
+	public static void setManualLocation(GeoLocation geoPoint) {
 		manualLocationMode = true;
 		onPause();
 		if (manualLocation == null) {
@@ -131,21 +147,25 @@ public class LocationHandler implements Serializable {
 	 * Performs processes needed to enable location updates
 	 */
 	public static void onResume() {
-		if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-			InfoView.setStatus(R.string.gps_nicht_aktiviert, -1,
-					gpsProviderInfo);
+		if (!listeners.isEmpty()) {
+			if (!locationManager
+					.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+				InfoView.setStatus(R.string.gps_nicht_aktiviert, -1,
+						gpsProviderInfo);
+			}
+			locationManager.requestLocationUpdates(
+					LocationManager.GPS_PROVIDER, 5000, 0, locationListener);
+			Log.i("GeoAR", "Requesting Location Updates");
 		}
-
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-				5000, 0, locationListener);
 	}
 
 	/**
 	 * Should be called if activity gets paused. Removes location updates
 	 */
 	public static void onPause() {
-		InfoView.clearStatus(gpsProviderInfo);
 		locationManager.removeUpdates(locationListener);
+		InfoView.clearStatus(gpsProviderInfo);
+		Log.i("GeoAR", "Removed Location Updates");
 	}
 
 	/**
@@ -175,11 +195,18 @@ public class LocationHandler implements Serializable {
 	 */
 	public static void addLocationUpdateListener(
 			OnLocationUpdateListener listener) {
+		boolean shouldResume = listeners.isEmpty();
 		if (!listeners.contains(listener)) {
 			listeners.add(listener);
 			if (getLastKnownLocation() != null) {
 				listener.onLocationChanged(getLastKnownLocation());
 			}
+			disableUpdateHandler
+					.removeMessages(DISABLE_LOCATION_UPDATES_MESSAGE);
+		}
+
+		if (shouldResume) {
+			onResume();
 		}
 	}
 
@@ -191,6 +218,11 @@ public class LocationHandler implements Serializable {
 	public static void removeLocationUpdateListener(
 			OnLocationUpdateListener listener) {
 		listeners.remove(listener);
+		if (listeners.isEmpty()) {
+			disableUpdateHandler.sendMessageDelayed(disableUpdateHandler
+					.obtainMessage(DISABLE_LOCATION_UPDATES_MESSAGE),
+					DISABLE_LOCATION_UPDATES_DELAY);
+		}
 	}
 
 	public static void onSaveInstanceState(Bundle outState) {
