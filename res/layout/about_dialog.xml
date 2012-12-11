@@ -1,59 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/ScrollView"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+	android:id="@+id/ScrollView" android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
 
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#ffffffff"
-        android:orientation="vertical"
-        android:scrollbarAlwaysDrawVerticalTrack="true"
-        android:scrollbars="vertical" >
-
-        <ImageView
-            android:id="@+id/about_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dip"
-            android:src="@drawable/n52_logo_highreso" />
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_width="match_parent" android:layout_height="wrap_content"
+		android:background="#ffffffff" android:orientation="vertical"
+		android:scrollbarAlwaysDrawVerticalTrack="true" android:scrollbars="vertical">
+		
+		<ImageView android:id="@+id/about_image"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:layout_margin="8dip" android:src="@drawable/n52_logo_highreso" />
 
-        <TextView
-            android:id="@+id/about_headline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dip"
-            android:gravity="center" />
+		<TextView android:id="@+id/about_headline"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:layout_margin="8dip" android:gravity="center" />
 
-        <TextView
-            android:id="@+id/info_more_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dip" />
+		<TextView android:id="@+id/info_more_text"
+			android:layout_width="match_parent" android:layout_height="wrap_content"
+			android:layout_margin="8dip" />
 
-        <TextView
-            android:id="@+id/about_legal_text"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dip"
-            android:textColor="#cccccc"
-            android:textSize="10dip"
-            android:textStyle="italic" />
+		<TextView android:id="@+id/about_legal_text"
+			android:layout_width="fill_parent" android:layout_height="wrap_content"
+			android:layout_margin="8dip" android:textColor="#cccccc"
+			android:textSize="10dip" android:textStyle="italic" />
 
-        <ImageView
-            android:id="@+id/about_geoviqua_image"
-            android:layout_width="wrap_content"
-            android:layout_height="90dip"
-            android:layout_marginTop="0dip"
-            android:src="@drawable/geoviqua" />
+		<ImageView android:id="@+id/about_geoviqua_image"
+			android:layout_width="wrap_content" android:layout_height="90dip"
+			android:layout_marginTop="0dip" android:src="@drawable/geoviqua" />
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/fp7"
-            android:layout_margin="8dip" />
-    </LinearLayout>
+		<ImageView android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:layout_margin="8dip"
+			android:src="@drawable/fp7" />
+	</LinearLayout>
 
 </ScrollView>
