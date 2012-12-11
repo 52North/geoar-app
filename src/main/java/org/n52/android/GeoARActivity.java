@@ -26,6 +26,7 @@ import org.n52.android.newdata.InstalledPluginHolder;
 import org.n52.android.newdata.PluginLoader;
 import org.n52.android.newdata.Visualization;
 import org.n52.android.tracking.camera.RealityCamera;
+import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.view.geoar.ARFragment2;
 import org.n52.android.view.map.MapFragment;
 
@@ -116,18 +117,10 @@ public class GeoARActivity extends SherlockFragmentActivity {
 		SharedPreferences prefs = getSharedPreferences("NoiseAR", MODE_PRIVATE);
 		RealityCamera.setHeight(prefs.getFloat("cameraHeight", 1.6f));
 
-		// if (savedInstanceState != null) {
-		//
-		// // restore manual positioning
-		// // locationHandler.onRestoreInstanceState(savedInstanceState);
-		// } else {
-		// Builder builder = new AlertDialog.Builder(this);
-		// builder.setMessage(R.string.info_use);
-		// builder.setCancelable(true);
-		// builder.setPositiveButton(R.string.ok, null);
-		// builder.setTitle(R.string.advice);
-		// builder.show();
-		// }
+		if (savedInstanceState != null) {
+			// restore manual positioning
+			LocationHandler.onRestoreInstanceState(savedInstanceState);
+		}
 
 	}
 
@@ -160,7 +153,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		// save manual positioning
-		// locationHandler.onSaveInstanceState(outState);
+		LocationHandler.onSaveInstanceState(outState);
 	}
 
 	@Override
@@ -173,6 +166,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 		editor.commit();
 
 		PluginLoader.saveSelection();
+
 	}
 
 	@Override
@@ -227,9 +221,21 @@ public class GeoARActivity extends SherlockFragmentActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	@Override
+	protected void onPause() {
+		super.onPause();
+		LocationHandler.onPause();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		LocationHandler.onResume();
+	}
+
 	/**
 	 * Reusable {@link ActionProvider} for data sources ActionBar menu. Shows a
-	 * {@link PopupWindow} with options to enable/diable data sources and their
+	 * {@link PopupWindow} with options to enable/disable data sources and their
 	 * visualizations
 	 */
 	public class DataSourcesActionProvider extends ActionProvider {

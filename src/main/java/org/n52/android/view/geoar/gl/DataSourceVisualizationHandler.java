@@ -31,6 +31,7 @@ import org.n52.android.newdata.SpatialEntity;
 import org.n52.android.newdata.Visualization.ARVisualization.ItemVisualization;
 import org.n52.android.newdata.gl.primitives.DataSourceRenderable;
 import org.n52.android.newdata.gl.primitives.RenderLoader;
+import org.n52.android.utils.GeoLocation;
 import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.Settings;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OpenGLCallable;
@@ -113,7 +114,7 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 	protected final GLSurfaceView glSurfaceView;
 
 	public List<RenderFeature> renderFeatures = new ArrayList<RenderFeature>();
-	private GeoPoint currentCenterGPoint;
+	private GeoLocation currentCenterGPoint;
 	private MercatorPoint currentCenterMercator;
 	private float currentGroundResolution;
 	private MercatorRect currentRect;
@@ -134,7 +135,7 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 		}
 	}
 
-	public void setCenter(GeoPoint gPoint) {
+	public void setCenter(GeoLocation gPoint) {
 		currentCenterGPoint = gPoint;
 
 		// Calculate thresholds for request of data

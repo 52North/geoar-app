@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.n52.android.GeoARApplication;
 import org.n52.android.R;
 import org.n52.android.view.InfoView;
 import org.osmdroid.util.GeoPoint;
@@ -37,168 +38,172 @@ import android.os.Bundle;
  * @author Holger Hopmann
  * 
  */
-public class LocationHandler implements LocationListener, Serializable {
-    private static final long serialVersionUID = 6337877169906901138L;
+public class LocationHandler implements Serializable {
+	private static final long serialVersionUID = 6337877169906901138L;
 
-    public interface OnLocationUpdateListener {
-	void onLocationChanged(Location location);
-    }
-
-    private InfoView infoHandler;
-    private LocationManager locationManager;
-    private Object gpsStatusInfo = new Object();
-    private Object gpsProviderInfo = new Object();
-    private List<OnLocationUpdateListener> listeners = new ArrayList<OnLocationUpdateListener>();
-
-    private boolean manualLocationMode = true;
-    private Location manualLocation;
-
-    /**
-     * Constructor
-     * 
-     * @param context
-     * @param infoHandler
-     *            The overall {@link InfoView} to generate status updates for
-     *            the user
-     */
-    public LocationHandler(Context context, InfoView infoHandler) {
-	locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-	this.infoHandler = infoHandler;
-
-    }
-
-    /**
-     * Override with a user generated location fix
-     * 
-     * @param location
-     */
-    public void setManualLocation(Location location) {
-	manualLocationMode = true;
-	onPause();
-	manualLocation = location;
-	onLocationChanged(manualLocation);
-	infoHandler.setStatus(R.string.manual_position, -1, manualLocation);
-    }
-
-    /**
-     * Override with a user generated location fix
-     * 
-     * @param geoPoint
-     */
-    public void setManualLocation(GeoPoint geoPoint) {
-	manualLocationMode = true;
-	onPause();
-	if (manualLocation == null) {
-	    manualLocation = new Location("manual");
-	}
-	manualLocation.setLatitude(geoPoint.getLatitudeE6() / 1E6f);
-	manualLocation.setLongitude(geoPoint.getLongitudeE6() / 1E6f);
-	onLocationChanged(manualLocation);
-
-	infoHandler.setStatus(R.string.manual_position, -1, manualLocation);
-    }
-
-    /**
-     * Reregister location updates for real location provider
-     */
-    public void disableManualLocation() {
-	infoHandler.clearStatus(manualLocation);
-	manualLocationMode = false;
-	onResume();
-    }
-
-    /**
-     * Performs processes needed to enable location updates
-     */
-    public void onResume() {
-	if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-	    infoHandler.setStatus(R.string.gps_nicht_aktiviert, -1, gpsProviderInfo);
+	public interface OnLocationUpdateListener {
+		void onLocationChanged(Location location);
 	}
 
-	locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, this);
-    }
+	private static LocationManager locationManager;
+	private static Object gpsStatusInfo = new Object();
+	private static Object gpsProviderInfo = new Object();
+	private static List<OnLocationUpdateListener> listeners = new ArrayList<OnLocationUpdateListener>();
 
-    /**
-     * Should be called if activity gets paused. Removes location updates
-     */
-    public void onPause() {
-	infoHandler.clearStatus(gpsProviderInfo);
-	locationManager.removeUpdates(this);
-    }
+	private static boolean manualLocationMode = true;
+	private static Location manualLocation;
 
-    public void onLocationChanged(Location location) {
-	for (OnLocationUpdateListener listener : listeners) {
-	    listener.onLocationChanged(location);
-	}
-    }
-
-    /**
-     * Returns the last known location. Takes user generated locations into
-     * account. Returns location fix from network provider if no GPS available
-     * 
-     * @return
-     */
-    public Location getLastKnownLocation() {
-	if (manualLocationMode) {
-	    return manualLocation;
-	} else if (locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
-	    return locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-	} else {
-	    return locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-	}
-    }
-
-    public void onProviderDisabled(String provider) {
-	infoHandler.setStatus(R.string.gps_nicht_aktiviert, -1, gpsProviderInfo);
-    }
-
-    public void onProviderEnabled(String provider) {
-	infoHandler.setStatus(R.string.gps_aktiviert, 2000, gpsProviderInfo);
-    }
-
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-	if (status != LocationProvider.AVAILABLE) {
-	    infoHandler.setStatus(R.string.warte_auf_gps_verf_gbarkeit, 5000, gpsStatusInfo);
-	} else {
-	    infoHandler.clearStatus(gpsStatusInfo);
+	static {
+		locationManager = (LocationManager) GeoARApplication.applicationContext
+				.getSystemService(Context.LOCATION_SERVICE);
 	}
 
-    }
+	private static LocationListener locationListener = new LocationListener() {
 
-    /**
-     * Register listener for location updates. Gets immediately called with the
-     * last known location, if available
-     * 
-     * @param listener
-     */
-    public void addLocationUpdateListener(OnLocationUpdateListener listener) {
-	if (!listeners.contains(listener)) {
-	    listeners.add(listener);
-	    if (getLastKnownLocation() != null) {
-		listener.onLocationChanged(getLastKnownLocation());
-	    }
+		public void onProviderDisabled(String provider) {
+			InfoView.setStatus(R.string.gps_nicht_aktiviert, -1,
+					gpsProviderInfo);
+		}
+
+		public void onProviderEnabled(String provider) {
+			InfoView.setStatus(R.string.gps_aktiviert, 2000, gpsProviderInfo);
+		}
+
+		public void onStatusChanged(String provider, int status, Bundle extras) {
+			if (status != LocationProvider.AVAILABLE) {
+				InfoView.setStatus(R.string.warte_auf_gps_verf_gbarkeit, 5000,
+						gpsStatusInfo);
+			} else {
+				InfoView.clearStatus(gpsStatusInfo);
+			}
+
+		}
+
+		@Override
+		public void onLocationChanged(Location location) {
+			for (OnLocationUpdateListener listener : listeners) {
+				listener.onLocationChanged(location);
+			}
+		}
+	};
+
+	/**
+	 * Override with a user generated location fix
+	 * 
+	 * @param location
+	 */
+	public static void setManualLocation(Location location) {
+		manualLocationMode = true;
+		onPause();
+		manualLocation = location;
+		locationListener.onLocationChanged(manualLocation);
+		InfoView.setStatus(R.string.manual_position, -1, manualLocation);
 	}
-    }
 
-    /**
-     * Removes location update listener
-     * 
-     * @param listener
-     */
-    public void removeLocationUpdateListener(OnLocationUpdateListener listener) {
-	listeners.remove(listener);
-    }
+	/**
+	 * Override with a user generated location fix
+	 * 
+	 * @param geoPoint
+	 */
+	public static void setManualLocation(GeoPoint geoPoint) {
+		manualLocationMode = true;
+		onPause();
+		if (manualLocation == null) {
+			manualLocation = new Location("manual");
+		}
+		manualLocation.setLatitude(geoPoint.getLatitudeE6() / 1E6f);
+		manualLocation.setLongitude(geoPoint.getLongitudeE6() / 1E6f);
+		locationListener.onLocationChanged(manualLocation);
 
-    public void onSaveInstanceState(Bundle outState) {
-	if (manualLocationMode) {
-	    outState.putParcelable("manualLocation", manualLocation);
+		InfoView.setStatus(R.string.manual_position, -1, manualLocation);
 	}
-    }
 
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
-	if (savedInstanceState.get("manualLocation") != null) {
-	    setManualLocation((Location) savedInstanceState.getParcelable("manualLocation"));
+	/**
+	 * Reregister location updates for real location provider
+	 */
+	public static void disableManualLocation() {
+		InfoView.clearStatus(manualLocation);
+		manualLocationMode = false;
+		onResume();
 	}
-    }
+
+	/**
+	 * Performs processes needed to enable location updates
+	 */
+	public static void onResume() {
+		if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+			InfoView.setStatus(R.string.gps_nicht_aktiviert, -1,
+					gpsProviderInfo);
+		}
+
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+				5000, 0, locationListener);
+	}
+
+	/**
+	 * Should be called if activity gets paused. Removes location updates
+	 */
+	public static void onPause() {
+		InfoView.clearStatus(gpsProviderInfo);
+		locationManager.removeUpdates(locationListener);
+	}
+
+	/**
+	 * Returns the last known location. Takes user generated locations into
+	 * account. Returns location fix from network provider if no GPS available
+	 * 
+	 * @return
+	 */
+	public static Location getLastKnownLocation() {
+		if (manualLocationMode) {
+			return manualLocation;
+		} else if (locationManager
+				.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
+			return locationManager
+					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		} else {
+			return locationManager
+					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+		}
+	}
+
+	/**
+	 * Register listener for location updates. Gets immediately called with the
+	 * last known location, if available
+	 * 
+	 * @param listener
+	 */
+	public static void addLocationUpdateListener(
+			OnLocationUpdateListener listener) {
+		if (!listeners.contains(listener)) {
+			listeners.add(listener);
+			if (getLastKnownLocation() != null) {
+				listener.onLocationChanged(getLastKnownLocation());
+			}
+		}
+	}
+
+	/**
+	 * Removes location update listener
+	 * 
+	 * @param listener
+	 */
+	public static void removeLocationUpdateListener(
+			OnLocationUpdateListener listener) {
+		listeners.remove(listener);
+	}
+
+	public static void onSaveInstanceState(Bundle outState) {
+		if (manualLocationMode) {
+			outState.putParcelable("manualLocation", manualLocation);
+		}
+	}
+
+	public static void onRestoreInstanceState(Bundle savedInstanceState) {
+		if (savedInstanceState.get("manualLocation") != null) {
+			setManualLocation((Location) savedInstanceState
+					.getParcelable("manualLocation"));
+		}
+	}
 
 }

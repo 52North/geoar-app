@@ -29,6 +29,7 @@ import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.PluginLoader;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
+import org.n52.android.utils.GeoLocation;
 import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.gl.mode.RenderFeature;
 import org.n52.android.view.geoar.gl.mode.features.GridFeature;
@@ -196,9 +197,8 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 	public void setCenter(Location location) {
 		for (DataSourceVisualizationHandler handler : visualizationHandler)
-			handler.setCenter(new GeoPoint(
-					(int) (location.getLatitude() * 1E6), (int) (location
-							.getLongitude() * 1E6)));
+			handler.setCenter(new GeoLocation(location.getLatitude(), location
+					.getLongitude()));
 	}
 
 	/**
