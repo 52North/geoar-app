@@ -17,6 +17,8 @@ package org.n52.android.view.geoar;
 
 import org.n52.android.R;
 import org.n52.android.tracking.camera.RealityCamera;
+import org.n52.android.tracking.location.LocationHandler;
+import org.n52.android.tracking.location.LocationHandler.OnLocationUpdateListener;
 import org.n52.android.tracking.location.LowPassSensorBuffer;
 import org.n52.android.tracking.location.SensorBuffer;
 import org.n52.android.view.InfoView;
@@ -47,7 +49,7 @@ import android.view.WindowManager;
  * @author Arne de Wall
  */
 public class ARSurfaceView extends GLSurfaceView implements
-		SensorEventListener, IRotationMatrixProvider {
+		SensorEventListener, IRotationMatrixProvider, OnLocationUpdateListener {
 
 	// Sensor related
 	private SensorBuffer magnetValues = new LowPassSensorBuffer(3, 0.05f);
@@ -61,7 +63,6 @@ public class ARSurfaceView extends GLSurfaceView implements
 	private float[] rotMatrix = new float[16];
 
 	private ARSurfaceViewRenderer renderer;
-	private InfoView infoHandler;
 
 	private boolean updateMagneticVector = true;
 	private boolean sensorValuesChanged;
@@ -90,9 +91,9 @@ public class ARSurfaceView extends GLSurfaceView implements
 		setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Forces to make translucent
 		// drawing available
 		getHolder().setFormat(PixelFormat.TRANSLUCENT);
-		
+
 		setRenderer(renderer);
-		
+
 	}
 
 	/**
@@ -161,7 +162,7 @@ public class ARSurfaceView extends GLSurfaceView implements
 			if (isShown()) {
 				onResume();
 			} else {
-				onPause(); 
+				onPause();
 			}
 		}
 		super.onVisibilityChanged(changedView, visibility);
@@ -172,9 +173,9 @@ public class ARSurfaceView extends GLSurfaceView implements
 	public void onPause() {
 		RealityCamera.removeCameraUpdateListener(renderer);
 		mSensorManager.unregisterListener(this);
-		// if (locationHandler != null) {
-		// locationHandler.removeLocationUpdateListener(this);
-		// }
+
+		LocationHandler.removeLocationUpdateListener(this);
+
 		super.onPause();
 	}
 
@@ -183,27 +184,26 @@ public class ARSurfaceView extends GLSurfaceView implements
 		RealityCamera.addCameraUpdateListener(renderer);
 		if (!mSensorManager.registerListener(this, magnet,
 				SensorManager.SENSOR_DELAY_GAME)) {
-			infoHandler.setStatus(R.string.magnetic_field_not_started, 5000,
+			InfoView.setStatus(R.string.magnetic_field_not_started, 5000,
 					magnet);
 		}
 		if (!mSensorManager.registerListener(this, accel,
 				SensorManager.SENSOR_DELAY_GAME)) {
-			infoHandler.setStatus(R.string.accel_not_started, 5000, accel);
+			InfoView.setStatus(R.string.accel_not_started, 5000, accel);
 		}
-		// if (locationHandler != null) {
-		// locationHandler.addLocationUpdateListener(this);
-		// }
+
+		LocationHandler.addLocationUpdateListener(this);
+
 		super.onResume();
 	}
 
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 		if (accuracy != SensorManager.SENSOR_STATUS_ACCURACY_HIGH) {
 			if (sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-				infoHandler.setStatus(R.string.magnetic_field_not_calibrated,
+				InfoView.setStatus(R.string.magnetic_field_not_calibrated,
 						5000, magnet);
 			} else if (sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-				infoHandler.setStatus(R.string.accel_not_calibrated, 5000,
-						accel);
+				InfoView.setStatus(R.string.accel_not_calibrated, 5000, accel);
 			}
 		}
 	}
@@ -219,19 +219,8 @@ public class ARSurfaceView extends GLSurfaceView implements
 		sensorValuesChanged = true;
 	}
 
-	// //
-
 	public void onLocationChanged(Location location) {
 		renderer.setCenter(location);
 	}
-
-//	public Integer getMenuGroupId() {
-//		return 0;
-//		// return R.id.group_noiseview;
-//	}
-
-//	public boolean isVisible() {
-//		return isShown();
-//	}
 
 }
