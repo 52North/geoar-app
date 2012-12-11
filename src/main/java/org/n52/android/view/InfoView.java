@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.n52.android.GeoARApplication;
 import org.n52.android.R;
 
 import android.content.Context;
@@ -253,8 +254,9 @@ public class InfoView extends LinearLayout {
 	 * @param maxDuration
 	 * @param id
 	 */
-	public void setStatus(int stringId, int maxDuration, Object id) {
-		setStatus(getResources().getString(stringId), maxDuration, id);
+	public static void setStatus(int stringId, int maxDuration, Object id) {
+		setStatus(GeoARApplication.applicationContext.getString(stringId),
+				maxDuration, id);
 	}
 
 	/**
