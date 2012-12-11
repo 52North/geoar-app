@@ -144,10 +144,13 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		renderFeature.onRender(GLESCamera.projectionMatrix,
 				GLESCamera.viewMatrix, rotationMatrix);
 
+		// render Data
 		for (DataSourceVisualizationHandler handler : visualizationHandler) {
-			// handler. FIXME
+			for (OpenGLCallable feature : handler.renderFeatures) {
+				feature.onRender(GLESCamera.projectionMatrix,
+						GLESCamera.viewMatrix, rotationMatrix);
+			}
 		}
-
 	}
 
 	@Override
@@ -159,31 +162,16 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	@Override
 	public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
 
-		// Set the background clear color to black.
+		// Set the background clear color to transparent.
 		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-		// // Use culling to remove back faces.
-		// GLES20.glEnable(GLES20.GL_CULL_FACE);
-		//
-		// // Enable depth testing
-		// GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-
-		// // set the background color to transparent
-		// GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 		// set up the view matrix
 		GLESCamera.createViewMatrix();
-
+		// // Enable depth testing
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 		GLES20.glClearDepthf(1.0f);
 		GLES20.glDepthFunc(GLES20.GL_LEQUAL);
 		GLES20.glDepthMask(true);
-		//
-		// // // No culling of back faces
-		// GLES20.glDisable(GLES20.GL_CULL_FACE);
-		//
-		// // No depth testing
-		// GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 
 		// // Enable blending
 		GLES20.glEnable(GLES20.GL_BLEND);
@@ -198,80 +186,6 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 	private void initScene() {
 		renderFeature = new GridFeature();
-
-		// Cube cube = new Cube();
-		// cube.setPosition(new float[] { 0.0f, 0.0f, 10.0f });
-		// cube.onCreateInGLESThread();
-		// this.children.add(cube);
-
-		// Set<DataSourceHolder> list =
-		// DataSourceLoader.getDataSources();
-		// // DataSourceLoader.
-		// for(DataSourceHolder holder : list){
-		// ARVisualizationFactory fac = new ARVisualizationFactory();
-		// }
-		// Grid grid = new Grid();
-		// grid.setRenderer(SimpleColorRenderer.getInstance());
-		// grid.onCreateInGLESThread();
-		// this.children.clear(); // onSurfaceCreated is also called for
-		// recreation
-		// this.children.add(grid);
-		// renderding = new Renderding();
-
-		// renderer = new GLESGridRenderer(mRotationProvider);
-
-		// PointsOfInteresst poi = new
-		// PointsOfInteresst(SimpleColorRenderer.getInstance(), glSurfaceView );
-		// poi.onGeoLocationUpdate(currentCenterGPoint);
-		// addRenderNode(poi);
-
-		// Sphere sphere = new Sphere(1, 10, 10);
-		// sphere.setPosition(new float[] {0,0,5});
-		// addRenderNode(sphere);
-		//
-		// Cube cube = new Cube();
-		// cube.setPosition(new float[] {0,5,10});
-		// addRenderNode(cube);
-		// cube.onCreateInGLESThread();
-		// this.children.add(cube);
-		//
-		// HeightMap map = new HeightMap();
-		// addRenderNode(map);
-		// this.children.add(map);
-		// //
-		// ReferencedHeightMap hMap = new ReferencedHeightMap();
-		// addRenderNode(hMap);
-		// this.children.clear();
-		// this.children.add(hMap);
-
-		// Cube cube = new Cube();
-		// cube.setPosition(new float[] {0,0,5});
-		// cube.setRenderer(SimpleColorRenderer.getInstance());
-		// addRenderNode(cube);
-		//
-		// Cube cube2 = new Cube(1);
-		// cube2.setPosition(new float[] {0,2,5});
-		// cube2.setRenderer(SimpleColorRenderer.getInstance());
-		// cube.addChild(cube2);
-
-		// GLESItemizedRenderer p = new GLESItemizedRenderer(mRotationProvider);
-		// p.onLocationUpdate(currentCenterGPoint);
-		// mRenderObjects.add(p);
-
-		// GridRenderer g = new GridRenderer(mRotationProvider);
-		// mRenderObjects.add(g);
-	}
-
-	@Deprecated
-	private void addRenderNode(RenderNode renderNode) {
-		// if (renderNode instanceof GeoLocationUpdateListener)
-		// this.geoLocationUpdateListener
-		// .add((GeoLocationUpdateListener) renderNode);
-		// if (renderNode instanceof OnObservationUpdateListener)
-		// this.observationUpdateListener
-		// .add((OnObservationUpdateListener) renderNode);
-		// this.children.add(renderNode);
-		// this.numChildren++;
 	}
 
 	@Override

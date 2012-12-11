@@ -26,16 +26,21 @@ import org.n52.android.newdata.DataCache;
 import org.n52.android.newdata.DataCache.GetDataBoundsCallback;
 import org.n52.android.newdata.DataCache.RequestHolder;
 import org.n52.android.newdata.DataSourceHolder;
+import org.n52.android.newdata.RenderFeatureFactory;
 import org.n52.android.newdata.SpatialEntity;
 import org.n52.android.newdata.Visualization.ARVisualization.ItemVisualization;
+import org.n52.android.newdata.gl.primitives.DataSourceRenderable;
+import org.n52.android.newdata.gl.primitives.RenderLoader;
 import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.Settings;
+import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OpenGLCallable;
 import org.n52.android.view.geoar.gl.mode.RenderFeature;
+import org.n52.android.view.geoar.gl.mode.features.CubeFeature;
 import org.osmdroid.util.GeoPoint;
 
 import android.opengl.GLSurfaceView;
 
-public class DataSourceVisualizationHandler {
+public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 
 	public interface OnProgressUpdateListener extends
 			org.n52.android.newdata.DataCache.OnProgressUpdateListener {
@@ -88,15 +93,17 @@ public class DataSourceVisualizationHandler {
 				for (SpatialEntity entity : data) {
 					for (ItemVisualization visualization : visualizations) {
 						RenderFeature feature = (RenderFeature) visualization
-								.getEntityVisualization(entity, visFactory);
+								.getEntityVisualization(entity,
+										DataSourceVisualizationHandler.this);
 						feature.setEntity(entity);
+						enqueueRenderable(feature);
 						renderFeatures.add(feature);
 					}
 				}
+
+				DataSourceVisualizationHandler.this.renderFeatures = renderFeatures;
 			}
-
 		}
-
 	};
 
 	private DataSourceHolder dataSourceHolder;
@@ -183,12 +190,39 @@ public class DataSourceVisualizationHandler {
 		// }
 
 	}
-	
-	public void rload(){
-		
+
+	private void enqueueRenderable(final OpenGLCallable renderNode) {
+		this.glSurfaceView.queueEvent(new Runnable() {
+			@Override
+			public void run() {
+				renderNode.onCreateInGLESThread();
+			}
+		});
+	}
+
+	public void reload() {
+
 	}
 
 	public DataSourceHolder getDataSourceHolder() {
 		return dataSourceHolder;
+	}
+
+	@Override
+	public DataSourceRenderable createCube() {
+		CubeFeature cube = new CubeFeature();
+		return cube;
+	}
+
+	@Override
+	public DataSourceRenderable createSphere() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DataSourceRenderable createRenderable(RenderLoader renderLoader) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
