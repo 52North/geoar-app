@@ -97,8 +97,8 @@ public class ReferencedHeightMap extends RenderNode {
 				normals[normalOffSet++] = normalVector[1] / length;
 				normals[normalOffSet++] = normalVector[2] / length;
 
-				colors[colorOffset++] = 0f;
-				colors[colorOffset++] = 0f;
+				colors[colorOffset++] = 1.f;
+				colors[colorOffset++] = 0.5f;
 				colors[colorOffset++] = 0.5f;
 				colors[colorOffset++] = 0.5f;
 			}

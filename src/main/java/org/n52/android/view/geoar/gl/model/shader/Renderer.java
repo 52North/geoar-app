@@ -29,7 +29,11 @@ import android.util.Log;
  * 
  */
 public abstract class Renderer {
+	
 
+	private static final String POSITION_ATTRIBUTE = "a_Position";
+	private static final String NORMAL_ATTRIBUTE = "a_Normal";
+	private static final String COLOR_ATTRIBUTE = "a_Color";
 	/************************
 	 * Variables
 	 ************************/
@@ -60,7 +64,7 @@ public abstract class Renderer {
 
 	public void initShaders() {
 		if (vertexShader == null || fragmentShader == null)
-			return;
+			return; 
 
 		programHandle = GLESUtils.createProgram(vertexShader, fragmentShader);
 		if (programHandle == 0)
@@ -102,6 +106,7 @@ public abstract class Renderer {
 	}
 
 	public void setVertices(final int vertexBufferHandle) {
+		vertexHandle = GLES20.glGetAttribLocation(programHandle, POSITION_ATTRIBUTE);
 		if (vertexBufferHandle >= 0) {
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBufferHandle);
 			GLES20.glEnableVertexAttribArray(positionHandle);
@@ -114,6 +119,7 @@ public abstract class Renderer {
 	}
 
 	public void setNormals(final int normalBufferHandle) {
+		normalHandle = GLES20.glGetAttribLocation(programHandle, NORMAL_ATTRIBUTE);
 		if (normalBufferHandle >= 0) {
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, normalBufferHandle);
 			GLES20.glEnableVertexAttribArray(normalHandle);
@@ -126,6 +132,7 @@ public abstract class Renderer {
 	}
 
 	public void setColors(final int colorBufferHandle, Buffer buf) {
+		colorHandle = GLES20.glGetAttribLocation(programHandle, COLOR_ATTRIBUTE);
 		if (colorBufferHandle >= 0) {
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, colorBufferHandle);
 			GLES20.glEnableVertexAttribArray(colorHandle);
@@ -145,7 +152,7 @@ public abstract class Renderer {
 	}
 
 	public void setMVPMatrix(float[] mvpMatrix) {
-
+		mvpMatrixHandle = GLES20.glGetUniformLocation(programHandle, "u_MVPMatrix");
 		GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0);
 	}
 
@@ -156,6 +163,7 @@ public abstract class Renderer {
 
 	public void setViewMatrix(float[] viewMatrix) {
 		this.viewMatrix = viewMatrix;
+//		mvMatrixHandle = GLES20.glGetUniformLocation(programHandle, "u_MVPMatrix");
 		GLES20.glUniformMatrix4fv(viewMatrixHandle, 1, false, viewMatrix, 0);
 	}
 
