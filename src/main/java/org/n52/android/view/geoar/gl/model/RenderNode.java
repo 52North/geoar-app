@@ -97,8 +97,7 @@ public abstract class RenderNode extends Spatial implements
 		Matrix.setIdentityM(scaleMatrix, 0);
 		Matrix.setIdentityM(rotateMatrix, 0);
 		Matrix.setIdentityM(tmpMatrix, 0);
-		// Matrix.scaleM(scaleMatrix, 0, x, y, z)
-		// Matrix.translateM(modelMatrix, 0, 0f, 0f, 5f);
+
 		Matrix.translateM(modelMatrix, 0, position[0], position[1], position[2]);
 		Matrix.translateM(modelMatrix, 0, 0.f, -1.6f, 0.f);
 		// do we really need this step FIXME
@@ -118,13 +117,13 @@ public abstract class RenderNode extends Spatial implements
 			onPreRender();
 			this.projMatrix = projectionMatrix;
 			// set blending settings
-			if (enableBlending) {
-				GLES20.glEnable(GLES20.GL_BLEND);
-				GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA,
-						GLES20.GL_ONE_MINUS_SRC_ALPHA);
-			} else {
-				GLES20.glDisable(GLES20.GL_BLEND);
-			}
+//			if (enableBlending) {
+//				GLES20.glEnable(GLES20.GL_BLEND);
+//				GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA,
+//						GLES20.GL_ONE_MINUS_SRC_ALPHA);
+//			} else {
+//				GLES20.glDisable(GLES20.GL_BLEND);
+//			}
 
 //			// double sided rendering
 //			if (enableCullFace)
@@ -138,7 +137,7 @@ public abstract class RenderNode extends Spatial implements
 //			else
 //				GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 
-			GLES20.glDepthMask(enableDepthMask);
+//			GLES20.glDepthMask(enableDepthMask);
 
 			if (renderer == null) {
 				renderer = SimpleColorRenderer.getInstance();
@@ -155,8 +154,8 @@ public abstract class RenderNode extends Spatial implements
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER,
 					geometry.getIndicesDetails().bufferHandle);
 			// WTF! FU OPENGLES 2.0
-//			GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0,
-//					geometry.getVerticesCount());
+			GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0,
+					geometry.getVerticesCount());
 			GLES20.glDrawElements(drawingMode, geometry.getIndicesCount(),
 					GLES20.GL_UNSIGNED_INT, 0);
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0); 
