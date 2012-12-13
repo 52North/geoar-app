@@ -287,11 +287,7 @@ public class DataSourceHolder implements Parcelable {
 					}
 
 					visualizations.add(v);
-				}
-
-				if (visualizations.size() > 0) {
-					// Set first visualization as checked
-					visualizations.checkItem(0, true);
+					visualizations.checkItem(v);	// TODO
 				}
 			} catch (InstantiationException e) {
 				throw new RuntimeException(
