@@ -34,6 +34,26 @@ public class CheckList<T> extends ArrayList<T> {
 		void onCheckedChanged(T item, boolean newState);
 	}
 
+	public interface OnItemChangedListener<T> {
+		void onItemAdded(T item);
+
+		void onItemRemoved(T item);
+	}
+
+	public static abstract class OnItemChangedListenerWrapper<T> implements
+			OnItemChangedListener<T> {
+		public void onItemAdded(T item) {
+			onItemChanged();
+		};
+
+		public void onItemRemoved(T item) {
+			onItemChanged();
+		};
+
+		public void onItemChanged() {
+		};
+	}
+
 	public class Checker {
 		private T item;
 
@@ -64,7 +84,9 @@ public class CheckList<T> extends ArrayList<T> {
 	private Method checkedChangedMethod;
 
 	private BitSet checkSet = new BitSet();
-	private Set<OnCheckedChangedListener<T>> changeListeners = new HashSet<OnCheckedChangedListener<T>>();
+	private Set<OnCheckedChangedListener<T>> checkedChangeListeners = new HashSet<OnCheckedChangedListener<T>>();
+	private Set<OnItemChangedListener<T>> itemChangeListeners = new HashSet<OnItemChangedListener<T>>();
+
 	private Field checkManagerField;
 
 	public CheckList(Class<?> itemClass) {
@@ -142,12 +164,15 @@ public class CheckList<T> extends ArrayList<T> {
 	public void add(int index, T object) {
 		injectFields(object);
 		super.add(index, object);
+		notifyItemAdded(object);
 	};
 
 	@Override
 	public boolean add(T object) {
 		injectFields(object);
-		return super.add(object);
+		boolean changed = super.add(object);
+		notifyItemAdded(object);
+		return changed;
 	};
 
 	public void add(T object, boolean state) {
@@ -180,18 +205,38 @@ public class CheckList<T> extends ArrayList<T> {
 	}
 
 	private void notifyCheckedChanged(T item, boolean newState) {
-		for (OnCheckedChangedListener<T> listener : changeListeners) {
+		for (OnCheckedChangedListener<T> listener : checkedChangeListeners) {
 			listener.onCheckedChanged(item, newState);
 		}
 	}
 
+	private void notifyItemAdded(T item) {
+		for (OnItemChangedListener<T> listener : itemChangeListeners) {
+			listener.onItemAdded(item);
+		}
+	}
+
+	private void notifyItemRemoved(T item) {
+		for (OnItemChangedListener<T> listener : itemChangeListeners) {
+			listener.onItemRemoved(item);
+		}
+	}
+
 	public void addOnCheckedChangeListener(OnCheckedChangedListener<T> listener) {
-		changeListeners.add(listener);
+		checkedChangeListeners.add(listener);
 	}
 
 	public void removeOnCheckedChangeListener(
 			OnCheckedChangedListener<T> listener) {
-		changeListeners.remove(listener);
+		checkedChangeListeners.remove(listener);
+	}
+
+	public void addOnItemChangeListener(OnItemChangedListener<T> listener) {
+		itemChangeListeners.add(listener);
+	}
+
+	public void removeOnItemChangeListener(OnItemChangedListener<T> listener) {
+		itemChangeListeners.remove(listener);
 	}
 
 	public boolean isChecked(T item) {
@@ -220,6 +265,7 @@ public class CheckList<T> extends ArrayList<T> {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+		notifyItemRemoved(item);
 		return item;
 	}
 
@@ -242,5 +288,6 @@ public class CheckList<T> extends ArrayList<T> {
 	public void clear() {
 		checkSet.clear();
 		super.clear();
+		notifyItemRemoved(null);
 	}
 }

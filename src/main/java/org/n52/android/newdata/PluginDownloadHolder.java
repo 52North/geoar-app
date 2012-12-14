@@ -15,17 +15,27 @@
  */
 package org.n52.android.newdata;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Parcel;
+import android.util.Log;
 
 public class PluginDownloadHolder extends PluginHolder {
 
 	private String description;
 	private Uri downloadLink;
-	private String imageLink;
+	private Uri imageLink;
 	private String identifier;
 	private String name;
 	private Long version;
+	private Bitmap pluginIcon;
+	private boolean iconLoaded = false;
 
 	public String getDescription() {
 		return description;
@@ -35,7 +45,7 @@ public class PluginDownloadHolder extends PluginHolder {
 		return downloadLink;
 	}
 
-	public String getImageLink() {
+	public Uri getImageLink() {
 		return imageLink;
 	}
 
@@ -47,6 +57,11 @@ public class PluginDownloadHolder extends PluginHolder {
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public String getPublisher() {
+		return null; // TODO
 	}
 
 	@Override
@@ -66,7 +81,7 @@ public class PluginDownloadHolder extends PluginHolder {
 		this.downloadLink = downloadLink;
 	}
 
-	public void setImageLink(String imageLink) {
+	public void setImageLink(Uri imageLink) {
 		this.imageLink = imageLink;
 	}
 
@@ -82,6 +97,32 @@ public class PluginDownloadHolder extends PluginHolder {
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(getClass().getName());
 		super.writeToParcel(dest, flags);
+	}
+
+	@Override
+	public Bitmap getPluginIcon() {
+		if (!iconLoaded) {
+			try {
+				iconLoaded = true;
+				URLConnection connection = new URL(getImageLink().toString())
+						.openConnection();
+				connection.setConnectTimeout(5000);
+				connection.setReadTimeout(10000);
+				connection.connect();
+				BufferedInputStream bis = new BufferedInputStream(
+						connection.getInputStream());
+				pluginIcon = BitmapFactory.decodeStream(bis);
+				bis.close();
+			} catch (IOException e) {
+				Log.e("GeoAR", "Could not load image " + getImageLink());
+			}
+		}
+
+		return pluginIcon;
+	}
+
+	public boolean isDownloaded() {
+		return PluginLoader.getPluginByIdentifier(getIdentifier()) != null;
 	}
 
 }

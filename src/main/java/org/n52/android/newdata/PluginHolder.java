@@ -15,6 +15,7 @@
  */
 package org.n52.android.newdata;
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,6 +28,10 @@ public abstract class PluginHolder implements Parcelable {
 	public abstract Long getVersion();
 
 	public abstract String getDescription();
+
+	public abstract Bitmap getPluginIcon();
+	
+	public abstract String getPublisher();
 
 	@Override
 	public boolean equals(Object o) {

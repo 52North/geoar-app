@@ -24,19 +24,21 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.n52.android.GeoARApplication;
 import org.n52.android.newdata.CheckList.CheckManager;
 import org.n52.android.newdata.PluginLoader.PluginInfo;
-import org.osmdroid.tileprovider.modules.MBTilesFileArchive;
 
 import android.annotation.SuppressLint;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Parcel;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -56,17 +58,13 @@ public class InstalledPluginHolder extends PluginHolder {
 	private String name;
 	private Resources mPluginResources;
 	private Context mPluginContext;
+	private Bitmap pluginIcon;
+	private String publisher;
 
 	@CheckManager
 	private CheckList<InstalledPluginHolder>.Checker mChecker;
 	private DexClassLoader mPluginDexClassLoader;
-
-	public InstalledPluginHolder(String identifier, Long version,
-			File pluginFile) {
-		this.identifier = this.name = identifier;
-		this.version = version;
-		this.pluginFile = pluginFile;
-	}
+	private boolean iconLoaded;
 
 	public InstalledPluginHolder(PluginInfo pluginInfo) {
 		this.version = pluginInfo.version;
@@ -74,6 +72,7 @@ public class InstalledPluginHolder extends PluginHolder {
 		this.description = pluginInfo.description;
 		this.name = pluginInfo.name;
 		this.pluginFile = pluginInfo.pluginFile;
+		this.publisher = pluginInfo.publisher;
 	}
 
 	@Override
@@ -84,6 +83,11 @@ public class InstalledPluginHolder extends PluginHolder {
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public String getPublisher() {
+		return publisher;
 	}
 
 	@Override
@@ -307,6 +311,26 @@ public class InstalledPluginHolder extends PluginHolder {
 			};
 		}
 		return mPluginContext;
+	}
+
+	@Override
+	public Bitmap getPluginIcon() {
+		if (!iconLoaded) {
+			try {
+				iconLoaded = true;
+				ZipFile zipFile = new ZipFile(pluginFile);
+				ZipEntry pluginIconEntry = zipFile.getEntry("icon.png");
+				if (pluginIconEntry != null) {
+					pluginIcon = BitmapFactory.decodeStream(zipFile
+							.getInputStream(pluginIconEntry));
+					Log.i("GeoAR", "Plugin " + getName() + " has no icon");
+				}
+			} catch (IOException e) {
+				Log.i("GeoAR", "Plugin " + getName() + " has an invalid icon");
+			}
+		}
+
+		return pluginIcon;
 	}
 
 	@Override

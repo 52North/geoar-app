@@ -53,12 +53,13 @@ public class PluginLoader {
 
 	public static class PluginInfo {
 		public PluginInfo(File pluginFile, String name, String description,
-				Long version, String identifier) {
+				Long version, String identifier, String publisher) {
 			this.name = name;
 			this.description = description;
 			this.version = version;
 			this.pluginFile = pluginFile;
 			this.identifier = identifier;
+			this.publisher = publisher;
 		}
 
 		File pluginFile;
@@ -66,6 +67,7 @@ public class PluginLoader {
 		String description;
 		Long version;
 		String identifier;
+		public String publisher;
 	}
 
 	private static final FilenameFilter PLUGIN_FILENAME_FILTER = new FilenameFilter() {
@@ -208,6 +210,13 @@ public class PluginLoader {
 		return versionNumber;
 	}
 
+	/**
+	 * Extracts and parses the geoar-plugin.xml plugin-descriptor to create and
+	 * fill a {@link PluginInfo} instance.
+	 * 
+	 * @param pluginFile
+	 * @return
+	 */
 	private static PluginInfo readPluginInfoFromPlugin(File pluginFile) {
 		try {
 			ZipFile zipFile = new ZipFile(pluginFile);
@@ -228,6 +237,16 @@ public class PluginLoader {
 			} else {
 				Log.w("GeoAR", "Plugin Descriptor for " + pluginFile.getName()
 						+ " does not specify a name");
+			}
+
+			// Find publisher
+			String publisher = null;
+			nodeList = document.getElementsByTagName("publisher");
+			if (nodeList != null && nodeList.getLength() >= 1) {
+				publisher = nodeList.item(0).getTextContent();
+			} else {
+				Log.w("GeoAR", "Plugin Descriptor for " + pluginFile.getName()
+						+ " does not specify a publisher");
 			}
 
 			// Find description
@@ -275,7 +294,7 @@ public class PluginLoader {
 			}
 
 			return new PluginInfo(pluginFile, name, description, version,
-					identifier);
+					identifier, publisher);
 		} catch (SAXException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -292,6 +311,13 @@ public class PluginLoader {
 		return null;
 	}
 
+	/**
+	 * Reads {@link PluginInfo} from the path of a plugin. This will only
+	 * extract a name and version information
+	 * 
+	 * @param pluginFile
+	 * @return
+	 */
 	private static PluginInfo readPluginInfoFromFilename(File pluginFile) {
 		String pluginFileName = pluginFile.getName();
 
@@ -314,7 +340,7 @@ public class PluginLoader {
 			}
 		}
 
-		return new PluginInfo(pluginFile, name, null, version, name);
+		return new PluginInfo(pluginFile, name, null, version, name, null);
 	}
 
 	/**

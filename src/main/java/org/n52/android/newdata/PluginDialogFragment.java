@@ -15,13 +15,12 @@
  */
 package org.n52.android.newdata;
 
-import org.n52.android.data.ImageLoader;
 import org.n52.android.R;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DownloadManager;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
@@ -48,16 +47,27 @@ public class PluginDialogFragment extends DialogFragment {
 
 		// inflate layout
 		LayoutInflater inflater = getActivity().getLayoutInflater();
-		View v = inflater.inflate(R.layout.cb_dialog_fragment, null);
+		View view = inflater.inflate(R.layout.cb_dialog_fragment, null);
 
-		TextView textViewDescription = (TextView) v
-				.findViewById(R.id.textViewDescription);
-		textViewDescription.setText(plugin.getDescription() != "" ? plugin
-				.getDescription() : "No Description");
+		final ImageView imageView = (ImageView) view
+				.findViewById(R.id.imageView);
 
+		((TextView) view.findViewById(R.id.textViewName)).setText(plugin
+				.getName());
+		((TextView) view.findViewById(R.id.textViewPublisher)).setText(plugin
+				.getPublisher() != null ? plugin.getPublisher()
+				: "Unkown Publisher");
+		((TextView) view.findViewById(R.id.textViewVersion)).setText(plugin
+				.getVersion() != null ? "" + plugin.getVersion()
+				: "No Version Information");
+
+		((TextView) view.findViewById(R.id.textViewDescription)).setText(plugin
+				.getDescription() != null ? plugin.getDescription()
+				: "No Description");
+
+		TextView textViewDataSources = (TextView) view
+				.findViewById(R.id.textViewDataSources);
 		if (plugin instanceof InstalledPluginHolder) {
-			TextView textViewDataSources = (TextView) v
-					.findViewById(R.id.textViewDataSources);
 
 			String dsText = "";
 			for (DataSourceHolder dataSource : ((InstalledPluginHolder) plugin)
@@ -67,11 +77,9 @@ public class PluginDialogFragment extends DialogFragment {
 				dsText += dataSource.getName();
 			}
 			textViewDataSources.setText(dsText);
+		} else {
+			textViewDataSources.setText("Unkown");
 		}
-
-		ImageView imageView = (ImageView) v.findViewById(R.id.imageView);
-		ImageLoader.getInstance().displayImage("", imageView); // TODO
-		// imageView.setImageBitmap();
 
 		// dialogButton.setAnimation(getActivity().findViewById(android.R.drawable.stat_sys_download));
 		Dialog dsDialog = new AlertDialog.Builder(getActivity())
@@ -89,10 +97,25 @@ public class PluginDialogFragment extends DialogFragment {
 											.downloadPlugin((PluginDownloadHolder) plugin);
 								}
 							}
-						}).setNegativeButton("Cancel", null).setView(v)
+						}).setNegativeButton("Cancel", null).setView(view)
 				.create();
+
+		// Asynchronously load and display plugin icon
+		Thread imageThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				final Bitmap pluginIcon = plugin.getPluginIcon();
+				getActivity().runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						if (pluginIcon != null)
+							imageView.setImageBitmap(pluginIcon);
+					}
+				});
+			}
+		});
+		imageThread.start();
 
 		return dsDialog;
 	}
-
 }

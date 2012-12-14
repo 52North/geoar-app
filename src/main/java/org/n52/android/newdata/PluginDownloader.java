@@ -178,8 +178,8 @@ public class PluginDownloader {
 								.getString(CODEBASE_DESCRIPTION));
 						holder.setDownloadLink(Uri.parse(currentObject
 								.getString(CODEBASE_DOWNLOADLINK)));
-						holder.setImageLink(currentObject
-								.getString(CODEBASE_IMAGELINK));
+						holder.setImageLink(Uri.parse(currentObject
+								.getString(CODEBASE_IMAGELINK)));
 
 						mDownloadableDataSources.add(holder);
 					}

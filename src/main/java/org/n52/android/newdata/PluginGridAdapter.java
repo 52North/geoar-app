@@ -18,9 +18,10 @@ package org.n52.android.newdata;
 import java.util.List;
 
 import org.n52.android.R;
-import org.n52.android.data.ImageLoader;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,14 +38,39 @@ public class PluginGridAdapter<T extends PluginHolder> extends BaseAdapter {
 		void onItemChecked(boolean newState, int position);
 	}
 
-	private boolean showCheckBox = false;
-
 	private class ViewHolder {
-		public ImageView imageView;
-		public TextView textView;
-		public CheckBox checkBox;
-		public OnGridCheckedChangeListener checkedListener;
+		ImageView imageView;
+		TextView textViewTitle;
+		CheckBox checkBox;
+		OnGridCheckedChangeListener checkedListener;
+		ImageTask imageTask;
+		public TextView textViewSubTitle;
+		public TextView textViewStatus;
 	}
+
+	private class ImageTask extends AsyncTask<Void, Void, Bitmap> {
+
+		private ImageView imageView;
+		private T plugin;
+
+		public ImageTask(ImageView imageView, T plugin) {
+			this.imageView = imageView;
+			this.plugin = plugin;
+		}
+
+		@Override
+		protected Bitmap doInBackground(Void... params) {
+			return plugin.getPluginIcon();
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap result) {
+			imageView.setImageBitmap(result);
+		}
+
+	}
+
+	private boolean showCheckBox = false;
 
 	private class OnGridCheckedChangeListener implements
 			OnCheckedChangeListener {
@@ -107,9 +133,13 @@ public class PluginGridAdapter<T extends PluginHolder> extends BaseAdapter {
 			view = inflater.inflate(R.layout.cb_grid_item, parent, false);
 			viewHolder = new ViewHolder();
 			viewHolder.imageView = (ImageView) view
-					.findViewById(R.id.cb_grid_image);
-			viewHolder.textView = (TextView) view
-					.findViewById(R.id.cb_grid_label);
+					.findViewById(R.id.imageView);
+			viewHolder.textViewTitle = (TextView) view
+					.findViewById(R.id.textViewTitle);
+			viewHolder.textViewSubTitle = (TextView) view
+					.findViewById(R.id.textViewSubTitle);
+			viewHolder.textViewStatus = (TextView) view
+					.findViewById(R.id.textViewStatus);
 			viewHolder.checkBox = (CheckBox) view.findViewById(R.id.checkBox);
 			if (showCheckBox) {
 				viewHolder.checkedListener = new OnGridCheckedChangeListener();
@@ -127,14 +157,30 @@ public class PluginGridAdapter<T extends PluginHolder> extends BaseAdapter {
 		if (viewHolder.checkedListener != null) {
 			viewHolder.checkedListener.setPosition(position);
 		}
-		
-		final T dataSource = plugins.get(position);
+
+		final T plugin = plugins.get(position);
 		// load image via imageCache
-		ImageLoader.getInstance().displayImage("", viewHolder.imageView); // TODO?
-		viewHolder.textView.setText(dataSource.getName());
+		// ImageLoader.getInstance().displayImage("", viewHolder.imageView); //
+		// TODO?
+
+		if (viewHolder.imageTask != null) {
+			viewHolder.imageTask.cancel(true);
+		}
+		viewHolder.imageTask = new ImageTask(viewHolder.imageView, plugin);
+		viewHolder.imageTask.execute((Void) null);
+
+		viewHolder.textViewTitle.setText(plugin.getName());
+		viewHolder.textViewSubTitle
+				.setText(plugin.getPublisher() != null ? plugin.getPublisher()
+						: "Unkown Publisher");
+		viewHolder.textViewStatus.setText(getPluginStatus(plugin));
 		viewHolder.checkBox.setChecked(getItemChecked(position));
 
 		return view;
+	}
+
+	protected String getPluginStatus(T plugin) {
+		return "";
 	}
 
 	protected boolean getItemChecked(int position) {

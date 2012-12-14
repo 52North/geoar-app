@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.n52.android.R;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
+import org.n52.android.newdata.CheckList.OnItemChangedListenerWrapper;
 import org.n52.android.newdata.PluginDownloader.OnDataSourceResultListener;
 import org.n52.android.newdata.PluginGridAdapter.OnItemCheckedListener;
 
@@ -47,6 +48,8 @@ public class PluginFragment extends SherlockFragment {
 
 	private GridView mGridViewInstalled;
 	private GridView mGridViewDownload;
+	private DownloadPluginsAdapter gridAdapterDownload;
+	private InstalledPluginsAdapter gridAdapterInstalled;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -68,8 +71,7 @@ public class PluginFragment extends SherlockFragment {
 		mGridViewDownload = (GridView) getView().findViewById(
 				R.id.gridViewDownload);
 
-		final InstalledPluginsAdapter gridAdapterInstalled = new InstalledPluginsAdapter(
-				getActivity());
+		gridAdapterInstalled = new InstalledPluginsAdapter(getActivity());
 		mGridViewInstalled.setAdapter(gridAdapterInstalled);
 		mGridViewInstalled.setOnItemClickListener(new OnItemClickListener() {
 			@Override
@@ -97,8 +99,7 @@ public class PluginFragment extends SherlockFragment {
 				});
 		gridAdapterInstalled.setShowCheckBox(true);
 
-		final DownloadPluginsAdapter gridAdapterDownload = new DownloadPluginsAdapter(
-				getActivity());
+		gridAdapterDownload = new DownloadPluginsAdapter(getActivity());
 		mGridViewDownload.setAdapter(gridAdapterDownload);
 		mGridViewDownload.setOnItemClickListener(new OnItemClickListener() {
 			@Override
@@ -142,14 +143,27 @@ public class PluginFragment extends SherlockFragment {
 		return super.onOptionsItemSelected(item);
 	}
 
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		gridAdapterInstalled.destroy();
+	}
+
 	private class InstalledPluginsAdapter extends
 			PluginGridAdapter<InstalledPluginHolder> {
 
-		private OnCheckedChangedListener<InstalledPluginHolder> pluginChangedListener = new OnCheckedChangedListener<InstalledPluginHolder>() {
+		private OnCheckedChangedListener<InstalledPluginHolder> pluginCheckedChangeListener = new OnCheckedChangedListener<InstalledPluginHolder>() {
 
 			@Override
 			public void onCheckedChanged(InstalledPluginHolder item,
 					boolean newState) {
+				notifyDataSetInvalidated();
+			}
+		};
+		private OnItemChangedListenerWrapper<InstalledPluginHolder> pluginItemChangeListener = new OnItemChangedListenerWrapper<InstalledPluginHolder>() {
+
+			@Override
+			public void onItemChanged() {
 				notifyDataSetInvalidated();
 			}
 		};
@@ -158,13 +172,26 @@ public class PluginFragment extends SherlockFragment {
 			super(context);
 			plugins = PluginLoader.getInstalledPlugins();
 			PluginLoader.getInstalledPlugins().addOnCheckedChangeListener(
-					pluginChangedListener);
-			// TODO remove listener?
+					pluginCheckedChangeListener);
+			PluginLoader.getInstalledPlugins().addOnItemChangeListener(
+					pluginItemChangeListener);
+		}
+
+		public void destroy() {
+			PluginLoader.getInstalledPlugins().removeOnCheckedChangeListener(
+					pluginCheckedChangeListener);
+			PluginLoader.getInstalledPlugins().removeOnItemChangeListener(
+					pluginItemChangeListener);
 		}
 
 		@Override
 		protected boolean getItemChecked(int position) {
 			return getItem(position).isChecked();
+		}
+
+		@Override
+		protected String getPluginStatus(InstalledPluginHolder plugin) {
+			return plugin.isChecked() ? "Activated" : "";
 		}
 	}
 
@@ -211,6 +238,11 @@ public class PluginFragment extends SherlockFragment {
 		public void onDataSourceResult(List<PluginDownloadHolder> dataSources) {
 			this.plugins = dataSources;
 			notifyDataSetInvalidated();
+		}
+		
+		@Override
+		protected String getPluginStatus(PluginDownloadHolder plugin) {
+			return plugin.isDownloaded() ? "Installed" : "";
 		}
 	}
 }
