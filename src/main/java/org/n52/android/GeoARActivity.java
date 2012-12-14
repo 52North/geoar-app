@@ -40,6 +40,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -429,6 +430,19 @@ public class GeoARActivity extends SherlockFragmentActivity {
 			@Override
 			public View getChildView(int groupPosition, int childPosition,
 					boolean isLastChild, View view, ViewGroup parent) {
+				if (getChildType(groupPosition, childPosition) == 1) {
+					TextView textView = new TextView(GeoARActivity.this, null,
+							android.R.attr.dropDownItemStyle);
+					int dp5 = (int) TypedValue.applyDimension(
+							TypedValue.COMPLEX_UNIT_DIP, 5, getResources()
+									.getDisplayMetrics());
+					textView.setGravity(Gravity.CENTER);
+					textView.setEnabled(false);
+					textView.setPadding(0, dp5, 0, dp5);
+					textView.setText("Activate Data Source First");
+					return textView;
+				}
+
 				VisualizationViewHolder viewHolder;
 
 				if (view == null) {
@@ -465,8 +479,28 @@ public class GeoARActivity extends SherlockFragmentActivity {
 
 			@Override
 			public int getChildrenCount(int groupPosition) {
-				return selectedDataSources.get(groupPosition)
-						.getVisualizations().ofType(visualizationClass).size();
+
+				DataSourceHolder dataSource = selectedDataSources
+						.get(groupPosition);
+				if (dataSource.isInitialized()) {
+					return selectedDataSources.get(groupPosition)
+							.getVisualizations().ofType(visualizationClass)
+							.size();
+				} else {
+					return 1;
+				}
+			}
+
+			@Override
+			public int getChildTypeCount() {
+				return 2;
+			}
+
+			@Override
+			public int getChildType(int groupPosition, int childPosition) {
+				DataSourceHolder dataSource = selectedDataSources
+						.get(groupPosition);
+				return dataSource.isInitialized() ? 0 : 1;
 			}
 
 			@Override

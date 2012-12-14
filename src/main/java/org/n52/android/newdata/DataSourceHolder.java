@@ -159,6 +159,15 @@ public class DataSourceHolder implements Parcelable {
 		return dataSource;
 	}
 
+	/**
+	 * Checks whether the underlying {@link DataSource} is already created
+	 * 
+	 * @return
+	 */
+	public boolean isInitialized() {
+		return dataSource != null;
+	}
+
 	public long getMinReloadInterval() {
 		return minReloadInterval;
 	}
@@ -183,6 +192,15 @@ public class DataSourceHolder implements Parcelable {
 		return maxZoomLevel;
 	}
 
+	/**
+	 * Returns {@link Visualization}s supported by this data source.
+	 * 
+	 * As {@link DataSource}s get lazily initialized, this method will not
+	 * return any {@link Visualization}s until the underlying {@link DataSource}
+	 * is accessed, e.g. by {@link DataSourceHolder#getDataSource()}.
+	 * 
+	 * @return
+	 */
 	public CheckList<Visualization> getVisualizations() {
 		return visualizations;
 	}
@@ -287,7 +305,7 @@ public class DataSourceHolder implements Parcelable {
 					}
 
 					visualizations.add(v);
-					visualizations.checkItem(v);	// TODO
+					visualizations.checkItem(v); // TODO
 				}
 			} catch (InstantiationException e) {
 				throw new RuntimeException(
