@@ -80,17 +80,13 @@ public class CubeFeature extends RenderFeature {
 	 * Constructor
 	 ***************************/
 	public CubeFeature() {
-		this(new ColoredFeatureShader());
-	}
-	
-	public CubeFeature(FeatureShader renderer){
 		this.drawingMode = GLES20.GL_TRIANGLES;
-		this.renderer = renderer;
 	}
-	
+		
 	@Override
 	public void onCreateInGLESThread() {
 		setRenderObjectives(vertices, colors, normals, indices);
+		this.renderer = new ColoredFeatureShader();
 	}
 
 	@Override

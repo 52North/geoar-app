@@ -105,11 +105,11 @@ public class GridFeature extends RenderFeature {
 			a = 1.0f;
 		}
 
-		for (int i = 0, length = gridSize * 4; i < length; i += 4) {
-			colors[i] = r;
-			colors[i + 1] = g;
-			colors[i + 2] = b;
-			colors[i + 3] = a;
+		for (int i = 0, length = gridSize * 16; i < length; i += 4) {
+			colors[i] = 1.0f;
+			colors[i + 1] = 1.0f;
+			colors[i + 2] = 1.0f;
+			colors[i + 3] = 1.0f;
 		}
 
 		setRenderObjectives(vertices, colors, normals, indices);

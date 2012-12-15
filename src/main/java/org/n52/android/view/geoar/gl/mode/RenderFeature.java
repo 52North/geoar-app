@@ -87,6 +87,21 @@ public abstract class RenderFeature extends Spatial implements
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+			
+//			FloatBuffer cubeBuffer = 
+//			final int dataLength = vertices.length + normals.length + colors.length;
+			
+//			int vertexOffset = 0;
+//			int colorOffset = 0;
+//			int normalOffset = 0;
+//			
+//			final FloatBuffer floatBuffer = ByteBuffer.allocateDirect(dataLength * BYTES_PER_FLOAT).order(ByteOrder.nativeOrder()).asFloatBuffer();
+//			for(int v = 0, length = )
+//			final int buffers[] = new int[i];
+//			GLES20.glGenBuffers(1, buffers, 0);
+//			
+//			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[0]);
+//			GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, size, data, usage)
 
 			final FloatBuffer verticesBuffer = ByteBuffer
 					.allocateDirect(vertices.length * BYTES_PER_FLOAT)
@@ -101,6 +116,19 @@ public abstract class RenderFeature extends Spatial implements
 			verticesDetails = new BufferDetails(verticesBuffer, FLOAT_BUFFER,
 					GLES20.GL_ARRAY_BUFFER, bufferObjects[0], BYTES_PER_FLOAT);
 
+//			final FloatBuffer normalsBuffer = ByteBuffer
+//					.allocateDirect(normals.length * BYTES_PER_FLOAT)
+//					.order(ByteOrder.nativeOrder()).asFloatBuffer();
+//			normalsBuffer.put(normals).position(0);
+
+//			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, bufferObjects[2]);
+//			GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER,
+//					normalsBuffer.capacity() * BYTES_PER_FLOAT, normalsBuffer,
+//					GLES20.GL_STATIC_DRAW);
+//			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+//			normalsDetails = new BufferDetails(normalsBuffer, FLOAT_BUFFER,
+//					GLES20.GL_ARRAY_BUFFER, bufferObjects[2], BYTES_PER_FLOAT);
+			
 			final FloatBuffer colorsBuffer = ByteBuffer
 					.allocateDirect(colors.length * BYTES_PER_FLOAT)
 					.order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -108,38 +136,27 @@ public abstract class RenderFeature extends Spatial implements
 
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, bufferObjects[1]);
 			GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER,
-					verticesBuffer.capacity() * BYTES_PER_FLOAT,
-					verticesBuffer, GLES20.GL_STATIC_DRAW);
+					colorsBuffer.capacity() * BYTES_PER_FLOAT,
+					colorsBuffer, GLES20.GL_STATIC_DRAW);
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 			colorsDetails = new BufferDetails(colorsBuffer, FLOAT_BUFFER,
 					GLES20.GL_ARRAY_BUFFER, bufferObjects[1], BYTES_PER_FLOAT);
 
-			final FloatBuffer normalsBuffer = ByteBuffer
-					.allocateDirect(normals.length * BYTES_PER_FLOAT)
-					.order(ByteOrder.nativeOrder()).asFloatBuffer();
-			normalsBuffer.put(normals).position(0);
 
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, bufferObjects[2]);
-			GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER,
-					normalsBuffer.capacity() * BYTES_PER_FLOAT, normalsBuffer,
-					GLES20.GL_STATIC_DRAW);
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-			normalsDetails = new BufferDetails(normalsBuffer, FLOAT_BUFFER,
-					GLES20.GL_ARRAY_BUFFER, bufferObjects[2], BYTES_PER_FLOAT);
-
+			
 			final ShortBuffer indicesBuffer = ByteBuffer
 					.allocateDirect(indices.length * BYTES_PER_SHORT)
 					.order(ByteOrder.nativeOrder()).asShortBuffer();
 			indicesBuffer.put(indices).position(0);
 
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER,
-					bufferObjects[3]);
+					bufferObjects[2]);
 			GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER,
 					indicesBuffer.capacity() * BYTES_PER_SHORT, indicesBuffer,
 					GLES20.GL_STATIC_DRAW);
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 			indicesDetails = new BufferDetails(indicesBuffer, SHORT_BUFFER,
-					GLES20.GL_ELEMENT_ARRAY_BUFFER, bufferObjects[3],
+					GLES20.GL_ELEMENT_ARRAY_BUFFER, bufferObjects[2],
 					BYTES_PER_SHORT);
 
 		}
@@ -163,7 +180,7 @@ public abstract class RenderFeature extends Spatial implements
 
 	protected Float alpha;
 	protected int androidColor;
-	
+
 	protected SpatialEntity entity;
 
 	protected void setRenderObjectives(float[] vertices, float[] colors,
@@ -181,33 +198,37 @@ public abstract class RenderFeature extends Spatial implements
 		Matrix.setIdentityM(mvpMatrix, 0);
 		Matrix.setIdentityM(tmpMatrix, 0);
 
-		Matrix.translateM(modelMatrix, 0, position[0], position[1] - 1.6f,
-				position[2]);
+		Matrix.translateM(modelMatrix, 0, 10f, position[1] - 1.6f, 10f);
 
 		if (parentMatrix != null) {
 			Matrix.multiplyMM(tmpMatrix, 0, parentMatrix, 0, modelMatrix, 0);
 			System.arraycopy(tmpMatrix, 0, modelMatrix, 0, 16);
 		}
-
+		
 		Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, modelMatrix, 0);
 		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, mvpMatrix, 0);
 
+		renderer.setModelViewProjectionMatrix(mvpMatrix);
+		
 		renderer.useProgram();
 		renderer.setVertices(geometry.verticesDetails.bufferHandle);
-		renderer.setNormals(geometry.normalsDetails.bufferHandle);
+//		renderer.setNormals(geometry.normalsDetails.bufferHandle);
 		renderer.setColors(geometry.colorsDetails.bufferHandle);
 
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-		renderer.setModelViewProjectionMatrix(mvpMatrix);
 
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER,
-				geometry.indicesDetails.bufferHandle);
-		GLES20.glDrawElements(drawingMode,
-				geometry.indicesDetails.buffer.capacity(),
-				GLES20.GL_UNSIGNED_SHORT, 0);
 
-		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+//		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER,
+//				geometry.indicesDetails.bufferHandle);
+//		GLES20.glDrawElements(drawingMode,
+//				geometry.indicesDetails.buffer.capacity(),
+//				GLES20.GL_UNSIGNED_SHORT, 0);
+
+		GLES20.glDrawArrays(GLES20.GL_LINES, 0, 80*4);
+		
+//		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+//		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+
 	}
 
 	@Override

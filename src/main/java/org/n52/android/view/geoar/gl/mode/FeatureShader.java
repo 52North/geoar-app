@@ -43,10 +43,12 @@ public class FeatureShader {
 			GLES20.glAttachShader(programHandle, vertexShader);
 			GLES20.glAttachShader(programHandle, fragmentShader);
 
-			if (attributes != null) {
-				for (int i = 0, size = attributes.length; i < size; i++)
-					GLES20.glBindAttribLocation(programHandle, i+1, attributes[i]);
-			}
+			GLES20.glBindAttribLocation(programHandle, 0, POSITION_ATTRIBUTE);
+			GLES20.glBindAttribLocation(programHandle, 1, NORMAL_ATTRIBUTE);
+//			if (attributes != null) {
+//				for (int i = 0, size = attributes.length; i < size; i++)
+//					GLES20.glBindAttribLocation(programHandle, i+1, attributes[i]);
+//			}
 
 			GLES20.glLinkProgram(programHandle);
 
@@ -93,9 +95,9 @@ public class FeatureShader {
 
 	private int programHandle;
 
-	private int positionHandle;
-	private int colorHandle;
-	private int normalHandle;
+	private int positionHandle = -1;
+	private int colorHandle = -1;
+	private int normalHandle = -1;
 	
 	private int mvpMatrixUniform = -1;
 	private int mvMatrixUniform = -1;
@@ -132,9 +134,9 @@ public class FeatureShader {
 		positionHandle = GLES20.glGetAttribLocation(programHandle, POSITION_ATTRIBUTE);
 		if (vertexBufferHandle >= 0) {
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBufferHandle);
-			GLES20.glEnableVertexAttribArray(positionHandle);
 			GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT,
 					false, 0, 0);
+			GLES20.glEnableVertexAttribArray(positionHandle);
 		} else {
 			Log.d(this.getClass().getSimpleName(),
 					"vertexbufferhandle is not a valid handle");
@@ -165,7 +167,7 @@ public class FeatureShader {
 		}
 		
 		colorHandle = GLES20.glGetAttribLocation(programHandle, COLOR_ATTRIBUTE);
-		if (colorBufferHandle >= 0) {
+		if (colorHandle >= 0) {
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, colorBufferHandle);
 			GLES20.glVertexAttribPointer(colorHandle, 4, GLES20.GL_FLOAT,
 					false, 0, 0);
@@ -181,13 +183,13 @@ public class FeatureShader {
 		if(mvpMatrixUniform >= 0)
 			GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mvpMatrix, 0);
 		// Model view matrix
-		mvMatrixUniform = GLES20.glGetUniformLocation(programHandle, "u_MVMatrix");
-		if(mvMatrixUniform >= 0)
-			GLES20.glUniformMatrix4fv(mvMatrixUniform, 1, false, modelMatrix, 0);
-		// View Matrix
-		vMatrixUniform = GLES20.glGetUniformLocation(programHandle, "u_VMatrix");
-		if(vMatrixUniform >= 0)
-			GLES20.glUniformMatrix4fv(vMatrixUniform, 1, false, viewMatrix, 0);
+//		mvMatrixUniform = GLES20.glGetUniformLocation(programHandle, "u_MVMatrix");
+//		if(mvMatrixUniform >= 0)
+//			GLES20.glUniformMatrix4fv(mvMatrixUniform, 1, false, modelMatrix, 0);
+//		// View Matrix
+//		vMatrixUniform = GLES20.glGetUniformLocation(programHandle, "u_VMatrix");
+//		if(vMatrixUniform >= 0)
+//			GLES20.glUniformMatrix4fv(vMatrixUniform, 1, false, viewMatrix, 0);
 	}
 	
 	public void setModelViewProjectionMatrix(float[] mvpMatrix){

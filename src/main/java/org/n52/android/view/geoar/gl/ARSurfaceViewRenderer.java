@@ -18,27 +18,18 @@ package org.n52.android.view.geoar.gl;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Stack;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import org.n52.android.alg.proj.MercatorPoint;
-import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.PluginLoader;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
+import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.utils.GeoLocation;
-import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.gl.mode.RenderFeature;
 import org.n52.android.view.geoar.gl.mode.features.GridFeature;
-import org.n52.android.view.geoar.gl.mode.features.ReferencedGridFeature;
-import org.n52.android.view.geoar.gl.model.GLESGridRenderer;
-import org.n52.android.view.geoar.gl.model.RenderNode;
-import org.n52.android.view.geoar.gl.model.Renderding;
-import org.n52.android.view.geoar.gl.model.rendering.ReferencedHeightMap;
-import org.osmdroid.util.GeoPoint;
 
 import android.content.Context;
 import android.location.Location;
@@ -87,7 +78,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		public void onCheckedChanged(DataSourceHolder item, boolean newState) {
 			if (newState == true) {
 				DataSourceVisualizationHandler handler = new DataSourceVisualizationHandler(
-						ARSurfaceViewRenderer.this.glSurfaceView, item, factory);
+						ARSurfaceViewRenderer.this.glSurfaceView, item);
 				visualizationHandler.add(handler);
 			} else {
 				for (Iterator<DataSourceVisualizationHandler> it = visualizationHandler
@@ -98,8 +89,10 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 						it.remove();
 						break;
 					}
+					
 				}
 			}
+			setCenter(LocationHandler.getLastKnownLocation());
 		}
 	};
 
@@ -109,7 +102,6 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	protected final Context mContext;
 	private GLSurfaceView glSurfaceView;
 
-	private ARVisualizationFactory factory;
 	private List<DataSourceVisualizationHandler> visualizationHandler = new ArrayList<DataSourceVisualizationHandler>();
 
 	private RenderFeature renderFeature;
@@ -122,8 +114,6 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 		PluginLoader.getSelectedDataSources().addOnCheckedChangeListener(
 				dataSourceListener);
-
-		factory = new ARVisualizationFactory(glSurfaceView);
 	}
 
 	@Override
@@ -147,10 +137,12 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 		// render Data
 		for (DataSourceVisualizationHandler handler : visualizationHandler) {
-			for (OpenGLCallable feature : handler.renderFeatures) {
-				feature.onRender(GLESCamera.projectionMatrix,
+			handler.renderFeatures.get(0).onRender(GLESCamera.projectionMatrix,
 						GLESCamera.viewMatrix, rotationMatrix);
-			}
+//			for (OpenGLCallable feature : handler.renderFeatures) {
+//				feature.onRender(GLESCamera.projectionMatrix,
+//						GLESCamera.viewMatrix, rotationMatrix);
+//			}
 		}
 	}
 
@@ -170,17 +162,17 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		GLESCamera.createViewMatrix();
 		// // Enable depth testing
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-		GLES20.glClearDepthf(1.0f);
-		GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-		GLES20.glDepthMask(true);
+//		GLES20.glClearDepthf(1.0f);
+//		GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+//		GLES20.glDepthMask(true);
 
 		// // Enable blending
-		GLES20.glEnable(GLES20.GL_BLEND);
-		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
+//		GLES20.glEnable(GLES20.GL_BLEND);
+//		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
 
 		// backface culling
-		GLES20.glEnable(GLES20.GL_CULL_FACE);
-		GLES20.glCullFace(GLES20.GL_BACK);
+//		GLES20.glEnable(GLES20.GL_CULL_FACE);
+//		GLES20.glCullFace(GLES20.GL_BACK);
 		initScene();
 
 	}

@@ -26,6 +26,8 @@ import org.n52.android.R;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.PluginLoader;
+import org.n52.android.tracking.location.LocationHandler;
+import org.n52.android.utils.GeoLocation;
 import org.n52.android.view.map.DataSourcesOverlay.OnOverlayItemTapListener;
 
 import android.app.AlertDialog;
@@ -116,7 +118,7 @@ public class MapFragment extends SherlockFragment {
 		controller.setZoom(15);
 		controller.setCenter(new GeoPoint(51.965344, 7.600003)); // Coesfelder
 																	// Kreuz
-
+		LocationHandler.setManualLocation(new GeoLocation(51.965344, 7.600003));
 		// Data source handling
 		overlayHandlerMap = new HashMap<DataSourceHolder, DataSourceOverlayHandler>();
 		dataSourcesOverlay = new DataSourcesOverlay();

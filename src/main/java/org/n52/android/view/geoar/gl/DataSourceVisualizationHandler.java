@@ -28,6 +28,7 @@ import org.n52.android.newdata.DataCache.RequestHolder;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.RenderFeatureFactory;
 import org.n52.android.newdata.SpatialEntity;
+import org.n52.android.newdata.Visualization.ARVisualization;
 import org.n52.android.newdata.Visualization.ARVisualization.ItemVisualization;
 import org.n52.android.newdata.gl.primitives.DataSourceRenderable;
 import org.n52.android.newdata.gl.primitives.RenderLoader;
@@ -89,7 +90,7 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 				List<RenderFeature> renderFeatures = new ArrayList<RenderFeature>();
 				List<ItemVisualization> visualizations = dataSourceHolder
 						.getVisualizations().getCheckedItems(
-								ItemVisualization.class);
+								ARVisualization.ItemVisualization.class);
 
 				for (SpatialEntity entity : data) {
 					for (ItemVisualization visualization : visualizations) {
@@ -109,8 +110,6 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 
 	private DataSourceHolder dataSourceHolder;
 	protected Object mutex = new Object();
-	protected ARVisualizationFactory visFactory;
-
 	protected final GLSurfaceView glSurfaceView;
 
 	public List<RenderFeature> renderFeatures = new ArrayList<RenderFeature>();
@@ -122,10 +121,8 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 	private RequestHolder currentUpdate;
 
 	public DataSourceVisualizationHandler(final GLSurfaceView glSurfaceView,
-			DataSourceHolder dataSource,
-			ARVisualizationFactory visualizationFactory) {
+			DataSourceHolder dataSource) {
 		this.glSurfaceView = glSurfaceView;
-		this.visFactory = visualizationFactory;
 		this.dataSourceHolder = dataSource;
 	}
 
