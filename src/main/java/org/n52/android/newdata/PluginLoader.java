@@ -401,11 +401,11 @@ public class PluginLoader {
 	}
 
 	public static void reloadPlugins() {
-
-		// TODO selection state
+		saveSelection();
 		mInstalledPlugins.clear();
 		mDataSources.clear();
 		loadPlugins();
+		restoreSelection();
 	}
 
 	public static CheckList<InstalledPluginHolder> getInstalledPlugins() {
