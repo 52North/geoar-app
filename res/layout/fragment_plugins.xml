@@ -12,7 +12,7 @@
 
 		<FrameLayout android:id="@android:id/tabcontent"
 			android:layout_width="match_parent" android:layout_height="0dp"
-			android:layout_weight="1">
+			android:layout_weight="1" android:background="@android:color/darker_gray">
 
 			<GridView android:id="@+id/gridViewInstalled"
 				android:layout_width="match_parent" android:layout_height="match_parent"

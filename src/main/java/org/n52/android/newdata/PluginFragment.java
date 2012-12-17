@@ -60,7 +60,7 @@ public class PluginFragment extends SherlockFragment {
 	@Override
 	public View onCreateView(final LayoutInflater inflater,
 			final ViewGroup container, final Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.fragment_cb, container, false);
+		return inflater.inflate(R.layout.fragment_plugins, container, false);
 	}
 
 	public void onActivityCreated(Bundle savedInstanceState) {
@@ -239,7 +239,7 @@ public class PluginFragment extends SherlockFragment {
 			this.plugins = dataSources;
 			notifyDataSetInvalidated();
 		}
-		
+
 		@Override
 		protected String getPluginStatus(PluginDownloadHolder plugin) {
 			return plugin.isDownloaded() ? "Installed" : "";

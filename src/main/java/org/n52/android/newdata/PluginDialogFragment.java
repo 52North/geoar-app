@@ -47,7 +47,7 @@ public class PluginDialogFragment extends DialogFragment {
 
 		// inflate layout
 		LayoutInflater inflater = getActivity().getLayoutInflater();
-		View view = inflater.inflate(R.layout.cb_dialog_fragment, null);
+		View view = inflater.inflate(R.layout.fragment_plugin_dialog, null);
 
 		final ImageView imageView = (ImageView) view
 				.findViewById(R.id.imageView);
