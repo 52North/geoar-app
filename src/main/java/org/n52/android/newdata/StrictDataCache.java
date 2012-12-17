@@ -28,12 +28,12 @@ import org.n52.android.alg.proj.MercatorRect;
  */
 public class StrictDataCache extends DataCache {
 
-	public StrictDataCache(DataSourceHolder dataSource, byte tileZoom,
+	public StrictDataCache(DataSourceInstanceHolder dataSource, byte tileZoom,
 			ThreadPoolExecutor fetchingThreadPool) {
 		super(dataSource, tileZoom, fetchingThreadPool);
 	}
 
-	public StrictDataCache(DataSourceHolder dataSource,
+	public StrictDataCache(DataSourceInstanceHolder dataSource,
 			ThreadPoolExecutor fetchingThreadPool) {
 		super(dataSource, fetchingThreadPool);
 	}

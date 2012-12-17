@@ -15,6 +15,9 @@
  */
 package org.n52.android.newdata;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -27,13 +30,11 @@ import org.n52.android.newdata.Annotations.PostConstruct;
 import org.n52.android.newdata.Annotations.SharedHttpClient;
 import org.n52.android.newdata.Annotations.SupportedVisualization;
 import org.n52.android.newdata.Annotations.SystemService;
-import org.n52.android.newdata.CheckList.CheckManager;
 import org.n52.android.newdata.CheckList.CheckedChangedListener;
-import org.n52.android.newdata.filter.FilterDialogActivity;
+import org.n52.android.newdata.filter.SettingsHelper;
+import org.osmdroid.views.overlay.MinimapOverlay;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
@@ -43,18 +44,12 @@ import android.util.Log;
 public class DataSourceHolder implements Parcelable {
 	private static Map<Class<? extends Visualization>, Visualization> visualizationMap = new HashMap<Class<? extends Visualization>, Visualization>();
 	private static int nextId = 0;
-	private DataSource<? super Filter> dataSource;
-	private CheckList<Visualization> visualizations = new CheckList<Visualization>();
+	private CheckList<Visualization> visualizations;
 
 	private long minReloadInterval;
 	private byte cacheZoomLevel;
 	private final int id = nextId++;
 	private String description;
-
-	private DataCache dataCache;
-
-	@CheckManager
-	private CheckList<DataSourceHolder>.Checker mChecker;
 
 	private static final int CLEAR_CACHE = 1;
 	private static final int CLEAR_CACHE_AFTER_DEACTIVATION_DELAY = 10000;
@@ -65,7 +60,9 @@ public class DataSourceHolder implements Parcelable {
 			if (msg.what == CLEAR_CACHE) {
 				// Delayed clearing of cache after datasource has been
 				// deactivated
-				dataCache.clearCache();
+				for (DataSourceInstanceHolder instance : mDataSourceInstances) {
+					instance.deactivate();
+				}
 				return true;
 			}
 
@@ -73,12 +70,14 @@ public class DataSourceHolder implements Parcelable {
 		}
 	});
 	private Class<? extends Filter> filterClass;
-	private Filter currentFilter;
+
 	private String name;
 	private byte minZoomLevel;
 	private byte maxZoomLevel;
 	private Class<? extends DataSource<? super Filter>> dataSourceClass;
 	private InstalledPluginHolder mPluginHolder;
+	private CheckList<DataSourceInstanceHolder> mDataSourceInstances;
+	private boolean mInstanceable;
 
 	/**
 	 * Wrapper for a {@link DataSource}. Provides access to general settings of
@@ -102,6 +101,7 @@ public class DataSourceHolder implements Parcelable {
 		if (dataSourceAnnotation == null) {
 			throw new RuntimeException("Class not annotated as datasource");
 		}
+		mInstanceable = SettingsHelper.hasSettings(dataSourceClass);
 
 		name = dataSourceAnnotation.name();
 		description = dataSourceAnnotation.description();
@@ -124,15 +124,6 @@ public class DataSourceHolder implements Parcelable {
 
 				filterClass = (Class<? extends Filter>) type
 						.getActualTypeArguments()[0];
-				try {
-					this.currentFilter = filterClass.newInstance();
-				} catch (InstantiationException e) {
-					throw new RuntimeException(
-							"Referenced filter has no appropriate constructor");
-				} catch (IllegalAccessException e) {
-					throw new RuntimeException(
-							"Referenced filter has no appropriate constructor");
-				}
 
 			}
 
@@ -147,66 +138,41 @@ public class DataSourceHolder implements Parcelable {
 					"Data source does not specify a filter class");
 		}
 
-		dataCache = new BalancingDataCache(this);
 	}
 
-	public DataSource<? super Filter> getDataSource() {
-		if (dataSource == null) {
-			initializeDataSource();
-			Log.i("GeoAR",
-					"Data source is was not yet initialized, activation sequence missing");
+	private void initializeVisualizations() {
+		visualizations = new CheckList<Visualization>();
+
+		SupportedVisualization supportedVisualization = dataSourceClass
+				.getAnnotation(SupportedVisualization.class);
+		if (supportedVisualization != null) {
+			Class<? extends Visualization>[] visualizationClasses = supportedVisualization
+					.visualizationClasses();
+
+			try {
+				for (int i = 0; i < visualizationClasses.length; i++) {
+					// Find cached instance or create new one
+					Visualization v = visualizationMap
+							.get(visualizationClasses[i]);
+					if (v == null) {
+						// New instance needed
+						v = visualizationClasses[i].newInstance();
+						perfomInjection(v);
+						visualizationMap.put(visualizationClasses[i], v);
+					}
+
+					visualizations.add(v);
+					visualizations.checkItem(v); // TODO
+				}
+			} catch (InstantiationException e) {
+				throw new RuntimeException(
+						"Referenced visualization has no appropriate constructor");
+			} catch (IllegalAccessException e) {
+				throw new RuntimeException(
+						"Referenced visualization has no appropriate constructor");
+			}
 		}
-		return dataSource;
-	}
 
-	/**
-	 * Checks whether the underlying {@link DataSource} is already created
-	 * 
-	 * @return
-	 */
-	public boolean isInitialized() {
-		return dataSource != null;
-	}
-
-	public long getMinReloadInterval() {
-		return minReloadInterval;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public byte getCacheZoomLevel() {
-		return cacheZoomLevel;
-	}
-
-	public byte getMinZoomLevel() {
-		return minZoomLevel;
-	}
-
-	public byte getMaxZoomLevel() {
-		return maxZoomLevel;
-	}
-
-	/**
-	 * Returns {@link Visualization}s supported by this data source.
-	 * 
-	 * As {@link DataSource}s get lazily initialized, this method will not
-	 * return any {@link Visualization}s until the underlying {@link DataSource}
-	 * is accessed, e.g. by {@link DataSourceHolder#getDataSource()}.
-	 * 
-	 * @return
-	 */
-	public CheckList<Visualization> getVisualizations() {
-		return visualizations;
-	}
-
-	public Filter getCurrentFilter() {
-		return currentFilter;
 	}
 
 	/**
@@ -271,63 +237,66 @@ public class DataSourceHolder implements Parcelable {
 		}
 	}
 
-	private void initializeDataSource() {
-		// Construction of data source instance
+	public long getMinReloadInterval() {
+		return minReloadInterval;
+	}
 
-		try {
-			dataSource = dataSourceClass.newInstance();
-		} catch (InstantiationException e) {
-			throw new RuntimeException("No default constructor for datasource");
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException("No valid constructor for datasource");
+	public String getName() {
+		return name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public byte getCacheZoomLevel() {
+		return cacheZoomLevel;
+	}
+
+	public byte getMinZoomLevel() {
+		return minZoomLevel;
+	}
+
+	public byte getMaxZoomLevel() {
+		return maxZoomLevel;
+	}
+
+	public Class<? extends Filter> getFilterClass() {
+		return filterClass;
+	}
+
+	/**
+	 * Returns {@link Visualization}s supported by this data source.
+	 * 
+	 * As {@link DataSource}s get lazily initialized, this method will not
+	 * return any {@link Visualization}s until the underlying {@link DataSource}
+	 * is accessed, e.g. by {@link DataSourceHolder#getDataSource()}.
+	 * 
+	 * @return
+	 */
+	public CheckList<Visualization> getVisualizations() {
+		if (visualizations == null) {
+			initializeVisualizations();
 		}
+		return visualizations;
+	}
 
-		// Field injection
-		perfomInjection(dataSource);
-
-		// Visualizations
-		SupportedVisualization supportedVisualization = dataSourceClass
-				.getAnnotation(SupportedVisualization.class);
-		if (supportedVisualization != null) {
-			Class<? extends Visualization>[] visualizationClasses = supportedVisualization
-					.visualizationClasses();
-
-			try {
-				for (int i = 0; i < visualizationClasses.length; i++) {
-					// Find cached instance or create new one
-					Visualization v = visualizationMap
-							.get(visualizationClasses[i]);
-					if (v == null) {
-						// New instance needed
-						v = visualizationClasses[i].newInstance();
-						perfomInjection(v);
-						visualizationMap.put(visualizationClasses[i], v);
-					}
-
-					visualizations.add(v);
-					visualizations.checkItem(v); // TODO
-				}
-			} catch (InstantiationException e) {
-				throw new RuntimeException(
-						"Referenced visualization has no appropriate constructor");
-			} catch (IllegalAccessException e) {
-				throw new RuntimeException(
-						"Referenced visualization has no appropriate constructor");
-			}
+	@CheckedChangedListener
+	public void checkedChanged(boolean state) {
+		if (state == true) {
+			activate();
+		} else {
+			deactivate();
 		}
-
 	}
 
 	/**
 	 * Prevents datasource from getting unloaded. Should be called when
 	 * datasource is added to map/ar.
 	 */
-	// TODO perhaps package private
 	public void activate() {
 		Log.i("GeoAR", "Activating data source " + getName());
-		if (dataSource == null) {
-			initializeDataSource();
-		}
+
 		// prevents clearing of cache by removing messages
 		dataSourceHandler.removeMessages(CLEAR_CACHE);
 	}
@@ -343,39 +312,60 @@ public class DataSourceHolder implements Parcelable {
 				CLEAR_CACHE_AFTER_DEACTIVATION_DELAY);
 	}
 
-	@CheckedChangedListener
-	public void checkedChanged(boolean state) {
-		if (state == true) {
-			activate();
-		} else {
-			deactivate();
+	public String getIdentifier() {
+		return dataSourceClass.getSimpleName();
+	}
+
+	private void initializeInstances() {
+		mDataSourceInstances = new CheckList<DataSourceInstanceHolder>(
+				DataSourceInstanceHolder.class);
+
+		if (!mInstanceable) {
+			// data source has no instance-specific settings, create the single
+			// instance
+			Log.i("GeoAR", "Creating single-instance data source instance "
+					+ getName());
+			try {
+				DataSource<? super Filter> dataSource = dataSourceClass
+						.newInstance();
+				perfomInjection(dataSource);
+
+				mDataSourceInstances.add(new DataSourceInstanceHolder(this,
+						dataSource));
+			} catch (InstantiationException e) {
+				throw new RuntimeException(
+						"No default constructor for datasource");
+			} catch (IllegalAccessException e) {
+				throw new RuntimeException(
+						"No valid constructor for datasource");
+			}
 		}
+
 	}
 
-	public boolean isChecked() {
-		return mChecker.isChecked();
-	}
-
-	public void setChecked(boolean state) {
-		mChecker.setChecked(state);
-	}
-
-	public DataCache getDataCache() {
-		return dataCache;
-	}
-
-	public Class<?> getFilterClass() {
-		return filterClass;
+	public CheckList<DataSourceInstanceHolder> getInstances() {
+		if (mDataSourceInstances == null) {
+			initializeInstances();
+		}
+		return mDataSourceInstances;
 	}
 
 	public void createFilterDialog(Context context) {
-		Intent intent = new Intent(context, FilterDialogActivity.class);
-		intent.putExtra("dataSource", this);
-		context.startActivity(intent);
+		// TODO
 	}
 
-	public String getIdentifier() {
-		return dataSourceClass.getSimpleName();
+	public void setChecked(boolean state) {
+		if (mDataSourceInstances != null) {
+			mDataSourceInstances.checkAll(state);
+		}
+	}
+
+	public boolean areAllChecked() {
+		return mDataSourceInstances.allChecked();
+	}
+
+	public boolean instanceable() {
+		return mInstanceable;
 	}
 
 	// Parcelable
@@ -395,8 +385,7 @@ public class DataSourceHolder implements Parcelable {
 		public DataSourceHolder createFromParcel(Parcel in) {
 			int id = in.readInt();
 			// Find DataSourceHolder with provided id
-			for (DataSourceHolder holder : PluginLoader
-					.getSelectedDataSources()) {
+			for (DataSourceHolder holder : PluginLoader.getDataSources()) {
 				if (holder.id == id) {
 					return holder;
 				}
@@ -410,4 +399,23 @@ public class DataSourceHolder implements Parcelable {
 		}
 	};
 
+	public void saveState(ObjectOutputStream objectOutputStream)
+			throws IOException {
+		if (!mInstanceable) {
+			objectOutputStream.writeBoolean(mDataSourceInstances != null
+					&& mDataSourceInstances.get(0).isChecked());
+		}
+	}
+
+	public void restoreState(ObjectInputStream objectInputStream)
+			throws IOException {
+		if (!mInstanceable) {
+			boolean checked = objectInputStream.readBoolean();
+			if (checked || mDataSourceInstances != null) {
+				// Set saved state if instance was checked or if it is already
+				// initialized
+				getInstances().get(0).setChecked(checked);
+			}
+		}
+	}
 }

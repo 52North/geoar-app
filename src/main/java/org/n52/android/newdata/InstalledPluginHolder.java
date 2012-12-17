@@ -15,9 +15,13 @@
  */
 package org.n52.android.newdata;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -99,7 +103,12 @@ public class InstalledPluginHolder extends PluginHolder {
 		return description;
 	};
 
-	List<DataSourceHolder> getDataSources() {
+	/**
+	 * Changes to the returned list do not affect loaded data sources
+	 * 
+	 * @return
+	 */
+	public List<DataSourceHolder> getDataSources() {
 		if (!loaded) {
 			try {
 				loadPlugin();
@@ -337,6 +346,21 @@ public class InstalledPluginHolder extends PluginHolder {
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(getClass().getName());
 		super.writeToParcel(dest, flags);
+	}
+
+	public void saveState(ObjectOutputStream objectOutputStream)
+			throws IOException {
+		objectOutputStream.writeBoolean(isChecked());
+		for (DataSourceHolder dataSource : mDataSources) {
+			dataSource.saveState(objectOutputStream);
+		}
+	}
+
+	public void restoreState(ObjectInputStream objectInputStream) throws IOException {
+		setChecked(objectInputStream.readBoolean());
+		for (DataSourceHolder dataSource : mDataSources) {
+			dataSource.restoreState(objectInputStream);
+		}
 	}
 
 }

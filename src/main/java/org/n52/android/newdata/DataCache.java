@@ -131,7 +131,7 @@ public class DataCache {
 			.newFixedThreadPool(3);
 
 	protected Map<Tile, SoftReference<DataTile>> tileCacheMapping = new HashMap<Tile, SoftReference<DataTile>>();
-	protected DataSourceHolder dataSource;
+	protected DataSourceInstanceHolder dataSource;
 	private ThreadPoolExecutor fetchingThreadPool;
 	protected byte tileZoom; // Zoom level for the tiling system of this
 								// cache
@@ -139,22 +139,22 @@ public class DataCache {
 	protected String logTag;
 	private long minReloadInterval;
 
-	public DataCache(DataSourceHolder dataSource) {
+	public DataCache(DataSourceInstanceHolder dataSource) {
 		this(dataSource, SHARED_THREAD_POOL);
 	}
 
-	public DataCache(DataSourceHolder dataSource,
+	public DataCache(DataSourceInstanceHolder dataSource,
 			ThreadPoolExecutor fetchingThreadPool) {
-		this(dataSource, dataSource.getCacheZoomLevel(), fetchingThreadPool);
+		this(dataSource, dataSource.getParent().getCacheZoomLevel(), fetchingThreadPool);
 	}
 
-	public DataCache(DataSourceHolder dataSource, byte tileZoom,
+	public DataCache(DataSourceInstanceHolder dataSource, byte tileZoom,
 			ThreadPoolExecutor fetchingThreadPool) {
 		this.dataSource = dataSource;
 		this.tileZoom = tileZoom;
 		this.logTag = getClass().getSimpleName() + " " + dataSource.getName();
 		this.fetchingThreadPool = fetchingThreadPool;
-		minReloadInterval = this.dataSource.getMinReloadInterval();
+		minReloadInterval = this.dataSource.getParent().getMinReloadInterval();
 		if (minReloadInterval <= 0) {
 			minReloadInterval = Long.MAX_VALUE;
 		} else {

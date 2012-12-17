@@ -25,7 +25,7 @@ import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.newdata.DataCache;
 import org.n52.android.newdata.DataCache.GetDataBoundsCallback;
 import org.n52.android.newdata.DataCache.RequestHolder;
-import org.n52.android.newdata.DataSourceHolder;
+import org.n52.android.newdata.DataSourceInstanceHolder;
 import org.n52.android.newdata.RenderFeatureFactory;
 import org.n52.android.newdata.SpatialEntity;
 import org.n52.android.newdata.Visualization.ARVisualization;
@@ -38,7 +38,6 @@ import org.n52.android.view.geoar.Settings;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OpenGLCallable;
 import org.n52.android.view.geoar.gl.mode.RenderFeature;
 import org.n52.android.view.geoar.gl.mode.features.CubeFeature;
-import org.osmdroid.util.GeoPoint;
 
 import android.opengl.GLSurfaceView;
 
@@ -89,7 +88,9 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 
 				List<RenderFeature> renderFeatures = new ArrayList<RenderFeature>();
 				List<ItemVisualization> visualizations = dataSourceHolder
-						.getVisualizations().getCheckedItems(
+						.getParent()
+						.getVisualizations()
+						.getCheckedItems(
 								ARVisualization.ItemVisualization.class);
 
 				for (SpatialEntity entity : data) {
@@ -108,7 +109,7 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 		}
 	};
 
-	private DataSourceHolder dataSourceHolder;
+	private DataSourceInstanceHolder dataSourceHolder;
 	protected Object mutex = new Object();
 	protected final GLSurfaceView glSurfaceView;
 
@@ -121,7 +122,7 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 	private RequestHolder currentUpdate;
 
 	public DataSourceVisualizationHandler(final GLSurfaceView glSurfaceView,
-			DataSourceHolder dataSource) {
+			DataSourceInstanceHolder dataSource) {
 		this.glSurfaceView = glSurfaceView;
 		this.dataSourceHolder = dataSource;
 	}
@@ -202,7 +203,7 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 
 	}
 
-	public DataSourceHolder getDataSourceHolder() {
+	public DataSourceInstanceHolder getDataSource() {
 		return dataSourceHolder;
 	}
 

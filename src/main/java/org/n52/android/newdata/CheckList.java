@@ -290,4 +290,14 @@ public class CheckList<T> extends ArrayList<T> {
 		super.clear();
 		notifyItemRemoved(null);
 	}
+
+	public void checkAll(boolean state) {
+		for (int i = 0, len = size(); i < len; i++) {
+			checkItem(i, state);
+		}
+	}
+
+	public boolean allChecked() {
+		return checkSet.cardinality() == size();
+	}
 }

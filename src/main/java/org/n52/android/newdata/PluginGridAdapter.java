@@ -164,6 +164,7 @@ public class PluginGridAdapter<T extends PluginHolder> extends BaseAdapter {
 		// TODO?
 
 		if (viewHolder.imageTask != null) {
+			viewHolder.imageView.setImageBitmap(null);
 			viewHolder.imageTask.cancel(true);
 		}
 		viewHolder.imageTask = new ImageTask(viewHolder.imageView, plugin);

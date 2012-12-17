@@ -15,14 +15,9 @@
  */
 package org.n52.android;
 
-import java.util.List;
-
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
-import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.PluginFragment;
-import org.n52.android.newdata.DataSourceHolder;
-import org.n52.android.newdata.InstalledPluginHolder;
 import org.n52.android.newdata.PluginLoader;
 import org.n52.android.newdata.Visualization;
 import org.n52.android.tracking.camera.RealityCamera;
@@ -40,22 +35,15 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ExpandableListView;
 import android.widget.FrameLayout.LayoutParams;
-import android.widget.ImageView;
 import android.widget.PopupWindow;
-import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.ActionProvider;
@@ -285,7 +273,8 @@ public class GeoARActivity extends SherlockFragmentActivity {
 				Button moreButton = (Button) layout
 						.findViewById(R.id.buttonMore);
 
-				DataSourceListAdapter sourceListAdapter = new DataSourceListAdapter();
+				DataSourceListAdapter sourceListAdapter = new DataSourceListAdapter(
+						GeoARActivity.this, mListView);
 				mListView.setAdapter(sourceListAdapter);
 				mListView.setGroupIndicator(null);
 
@@ -311,276 +300,6 @@ public class GeoARActivity extends SherlockFragmentActivity {
 
 			}
 			return mPopup;
-		}
-
-		private class DataSourceListAdapter extends BaseExpandableListAdapter {
-
-			private class OnDataSourceCheckedChangeListener implements
-					OnCheckedChangeListener {
-
-				private int position;
-
-				public void setPosition(int position) {
-					this.position = position;
-				}
-
-				@Override
-				public void onCheckedChanged(CompoundButton buttonView,
-						boolean isChecked) {
-					DataSourceHolder dataSource = selectedDataSources
-							.get(position);
-					if (dataSource.isChecked() != isChecked) {
-						dataSource.setChecked(isChecked);
-						notifyDataSetChanged();
-					}
-				}
-
-			}
-
-			private class OnDataSourceClickListener implements OnClickListener {
-
-				private int position;
-
-				public void setPosition(int position) {
-					this.position = position;
-				}
-
-				@Override
-				public void onClick(View v) {
-					if (!mListView.isGroupExpanded(position))
-						mListView.expandGroup(position);
-					else
-						mListView.collapseGroup(position);
-				}
-
-			}
-
-			private class OnSettingsClickListener implements OnClickListener {
-
-				private int position;
-
-				public void setPosition(int position) {
-					this.position = position;
-				}
-
-				@Override
-				public void onClick(View v) {
-					DataSourceHolder dataSource = selectedDataSources
-							.get(position);
-					dataSource.createFilterDialog(GeoARActivity.this);
-				}
-
-			}
-
-			/**
-			 * Holder for group items
-			 * 
-			 */
-			private class DataSourceViewHolder {
-				public ImageView imageViewSettings;
-				public TextView textView;
-				public CheckBox checkBox;
-				public OnDataSourceCheckedChangeListener checkListener;
-				public OnDataSourceClickListener clickListener;
-				public OnSettingsClickListener settingsClickListener;
-			}
-
-			/**
-			 * Holder for child items
-			 * 
-			 */
-			private class VisualizationViewHolder {
-				public TextView textView;
-				public CheckBox checkBox;
-			}
-
-			private List<DataSourceHolder> selectedDataSources;
-			private OnCheckedChangedListener<InstalledPluginHolder> pluginChangedListener = new OnCheckedChangedListener<InstalledPluginHolder>() {
-
-				@Override
-				public void onCheckedChanged(InstalledPluginHolder item,
-						boolean newState) {
-					selectedDataSources = PluginLoader.getSelectedDataSources();
-					notifyDataSetChanged();
-				}
-			};
-
-			public <E extends Visualization> DataSourceListAdapter() {
-				selectedDataSources = PluginLoader.getSelectedDataSources();
-				PluginLoader.getInstalledPlugins().addOnCheckedChangeListener(
-						pluginChangedListener);
-				// TODO remove listener somehow
-			}
-
-			@Override
-			public boolean areAllItemsEnabled() {
-				return true;
-			}
-
-			@Override
-			public Object getChild(int groupPosition, int childPosition) {
-				return null;
-			}
-
-			@Override
-			public long getChildId(int groupPosition, int childPosition) {
-				return childPosition;
-			}
-
-			@Override
-			public View getChildView(int groupPosition, int childPosition,
-					boolean isLastChild, View view, ViewGroup parent) {
-				if (getChildType(groupPosition, childPosition) == 1) {
-					TextView textView = new TextView(GeoARActivity.this, null,
-							android.R.attr.dropDownItemStyle);
-					int dp5 = (int) TypedValue.applyDimension(
-							TypedValue.COMPLEX_UNIT_DIP, 5, getResources()
-									.getDisplayMetrics());
-					textView.setGravity(Gravity.CENTER);
-					textView.setEnabled(false);
-					textView.setPadding(0, dp5, 0, dp5);
-					textView.setText("Activate Data Source First");
-					return textView;
-				}
-
-				VisualizationViewHolder viewHolder;
-
-				if (view == null) {
-					view = mInflater.inflate(
-							R.layout.datasource_list_visualization_item,
-							parent, false);
-					viewHolder = new VisualizationViewHolder();
-					viewHolder.textView = (TextView) view
-							.findViewById(R.id.textView);
-
-					viewHolder.checkBox = (CheckBox) view
-							.findViewById(R.id.checkBox);
-
-					view.setTag(viewHolder);
-				} else {
-					viewHolder = (VisualizationViewHolder) view.getTag();
-				}
-
-				DataSourceHolder dataSource = selectedDataSources
-						.get(groupPosition);
-				Visualization visualization = dataSource.getVisualizations()
-						.ofType(visualizationClass).get(childPosition);
-				viewHolder.textView.setText(visualization.getClass()
-						.getSimpleName());
-
-				viewHolder.checkBox.setChecked(dataSource.getVisualizations()
-						.isChecked(visualization));
-
-				viewHolder.textView.setEnabled(dataSource.isChecked());
-				viewHolder.checkBox.setEnabled(dataSource.isChecked());
-
-				return view;
-			}
-
-			@Override
-			public int getChildrenCount(int groupPosition) {
-
-				DataSourceHolder dataSource = selectedDataSources
-						.get(groupPosition);
-				if (dataSource.isInitialized()) {
-					return selectedDataSources.get(groupPosition)
-							.getVisualizations().ofType(visualizationClass)
-							.size();
-				} else {
-					return 1;
-				}
-			}
-
-			@Override
-			public int getChildTypeCount() {
-				return 2;
-			}
-
-			@Override
-			public int getChildType(int groupPosition, int childPosition) {
-				DataSourceHolder dataSource = selectedDataSources
-						.get(groupPosition);
-				return dataSource.isInitialized() ? 0 : 1;
-			}
-
-			@Override
-			public Object getGroup(int groupPosition) {
-				return selectedDataSources.get(groupPosition);
-			}
-
-			@Override
-			public int getGroupCount() {
-				return selectedDataSources.size();
-			}
-
-			@Override
-			public long getGroupId(int groupPosition) {
-				return groupPosition;
-			}
-
-			@Override
-			public View getGroupView(int groupPosition, boolean isExpanded,
-					View view, ViewGroup parent) {
-				DataSourceViewHolder viewHolder;
-
-				if (view == null) {
-					view = mInflater.inflate(
-							R.layout.datasource_list_datasource_item, parent,
-							false);
-					viewHolder = new DataSourceViewHolder();
-					viewHolder.imageViewSettings = (ImageView) view
-							.findViewById(R.id.imageViewSettings);
-					viewHolder.settingsClickListener = new OnSettingsClickListener();
-					viewHolder.imageViewSettings
-							.setOnClickListener(viewHolder.settingsClickListener);
-
-					viewHolder.textView = (TextView) view
-							.findViewById(R.id.textView);
-
-					viewHolder.clickListener = new OnDataSourceClickListener();
-					viewHolder.textView
-							.setOnClickListener(viewHolder.clickListener);
-
-					viewHolder.checkBox = (CheckBox) view
-							.findViewById(R.id.checkBox);
-
-					viewHolder.checkListener = new OnDataSourceCheckedChangeListener();
-					viewHolder.checkBox
-							.setOnCheckedChangeListener(viewHolder.checkListener);
-
-					view.setTag(viewHolder);
-				} else {
-					viewHolder = (DataSourceViewHolder) view.getTag();
-				}
-
-				viewHolder.settingsClickListener.setPosition(groupPosition);
-				viewHolder.checkListener.setPosition(groupPosition);
-				viewHolder.clickListener.setPosition(groupPosition);
-				DataSourceHolder dataSource = selectedDataSources
-						.get(groupPosition);
-
-				viewHolder.textView.setText(dataSource.getName());
-				viewHolder.checkBox.setChecked(dataSource.isChecked());
-
-				return view;
-			}
-
-			@Override
-			public boolean hasStableIds() {
-				return false;
-			}
-
-			@Override
-			public boolean isChildSelectable(int groupPosition,
-					int childPosition) {
-				return true;
-			}
-
-			@Override
-			public boolean isEmpty() {
-				return selectedDataSources.isEmpty();
-			}
-
 		}
 	}
 

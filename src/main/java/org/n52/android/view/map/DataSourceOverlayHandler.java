@@ -24,7 +24,7 @@ import org.mapsforge.core.GeoPoint;
 import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.newdata.DataCache.GetDataBoundsCallback;
 import org.n52.android.newdata.DataCache.RequestHolder;
-import org.n52.android.newdata.DataSourceHolder;
+import org.n52.android.newdata.DataSourceInstanceHolder;
 import org.n52.android.newdata.SpatialEntity;
 import org.n52.android.newdata.Visualization.MapVisualization.ItemVisualization;
 import org.n52.android.view.InfoView;
@@ -117,8 +117,8 @@ public class DataSourceOverlayHandler {
 					if (!canceled) {
 						List<VisualizationOverlayItem> overlayItems = new ArrayList<VisualizationOverlayItem>();
 						List<ItemVisualization> visualizations = dataSource
-								.getVisualizations().getCheckedItems(
-										ItemVisualization.class);
+								.getParent().getVisualizations()
+								.getCheckedItems(ItemVisualization.class);
 
 						for (SpatialEntity entity : data) {
 							GeoPoint point = new GeoPoint(entity.getLatitude(),
@@ -164,7 +164,7 @@ public class DataSourceOverlayHandler {
 		public void run() {
 			synchronized (updateLock) {
 				if (!canceled) {
-					if (bounds.zoom >= dataSource.getMinZoomLevel()) {
+					if (bounds.zoom >= dataSource.getParent().getMinZoomLevel()) {
 						// Just runs if zoom is in range
 						requestHolder = dataSource.getDataCache()
 								.getDataByBBox(bounds, callback, false);
@@ -196,15 +196,15 @@ public class DataSourceOverlayHandler {
 	// protected Drawable itemizedDrawable;
 
 	// private MapView mapView;
-	private DataSourceHolder dataSource;
+	private DataSourceInstanceHolder dataSource;
 
 	public DataSourceOverlayHandler(DataSourcesOverlay overlay,
-			DataSourceHolder dataSource) {
+			DataSourceInstanceHolder dataSource) {
 		this.overlay = overlay;
 		this.dataSource = dataSource;
 	}
 
-	public DataSourceHolder getDataSource() {
+	public DataSourceInstanceHolder getDataSource() {
 		return dataSource;
 	}
 
@@ -246,7 +246,7 @@ public class DataSourceOverlayHandler {
 	public void updateOverlay(MapView mapView, boolean force) {
 		byte zoom = (byte) (mapView.getMapPosition().getZoomLevel() - 1);
 
-		zoom = (byte) Math.min(zoom, dataSource.getMaxZoomLevel());
+		zoom = (byte) Math.min(zoom, dataSource.getParent().getMaxZoomLevel());
 		Projection proj = mapView.getProjection();
 
 		GeoPoint gPoint = (GeoPoint) proj.fromPixels(0, 0);

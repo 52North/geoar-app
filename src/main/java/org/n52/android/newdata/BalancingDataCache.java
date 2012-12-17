@@ -47,7 +47,7 @@ public class BalancingDataCache extends DataCache {
 
 	private DataCache proxyDataCache;
 
-	public BalancingDataCache(DataSourceHolder dataSource) {
+	public BalancingDataCache(DataSourceInstanceHolder dataSource) {
 		super(dataSource);
 
 		if (tileZoom < MIN_ZOOM) {
