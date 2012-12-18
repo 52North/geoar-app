@@ -1,3 +1,18 @@
+/**
+ * Copyright 2012 52°North Initiative for Geospatial Open Source Software GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.n52.android;
 
 import java.util.List;
@@ -54,7 +69,7 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 		OnClickListener settingsClickListener = new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				dataSourceInstance.createFilterDialog(mContext);
+				dataSourceInstance.createSettingsDialog(mContext);
 			}
 		};
 	}
@@ -134,7 +149,17 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 				boolean newState) {
 			mDataSources = PluginLoader.getDataSources();
 			notifyDataSetInvalidated();
-			updateListener();
+			if (newState == false) {
+				for (DataSourceHolder dataSource : item.getDataSources()) {
+					dataSource.getInstances().removeOnItemChangeListener(
+							dataSourceChangedListener);
+				}
+			} else {
+				for (DataSourceHolder dataSource : item.getDataSources()) {
+					dataSource.getInstances().addOnItemChangeListener(
+							dataSourceChangedListener);
+				}
+			}
 		}
 	};
 
@@ -147,10 +172,14 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 		}
 	};
 
+	private Class<? extends Visualization> visualizationClass;
+
 	public <E extends Visualization> DataSourceListAdapter(Context context,
-			ExpandableListView listView) {
+			ExpandableListView listView,
+			Class<? extends Visualization> visualizationClass) {
 		this.listView = listView;
 		this.mContext = context;
+		this.visualizationClass = visualizationClass;
 		childPadding = (int) TypedValue.applyDimension(
 				TypedValue.COMPLEX_UNIT_DIP, 25, context.getResources()
 						.getDisplayMetrics());
@@ -158,13 +187,18 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 		mDataSources = PluginLoader.getDataSources();
 		PluginLoader.getInstalledPlugins().addOnCheckedChangeListener(
 				mPluginChangedListener);
-		updateListener();
+		for (DataSourceHolder dataSource : mDataSources) {
+			dataSource.getInstances().addOnItemChangeListener(
+					dataSourceChangedListener);
+		}
 		// TODO remove listener somehow
 	}
 
-	private void updateListener() {
+	public void destroy() {
+		PluginLoader.getInstalledPlugins().removeOnCheckedChangeListener(
+				mPluginChangedListener);
 		for (DataSourceHolder dataSource : mDataSources) {
-			dataSource.getInstances().addOnItemChangeListener(
+			dataSource.getInstances().removeOnItemChangeListener(
 					dataSourceChangedListener);
 		}
 	}
@@ -344,6 +378,15 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 		viewHolder.checkBox.setChecked(viewHolder.dataSourceInstance
 				.isChecked());
 
+		if (viewHolder.dataSourceInstance.getParent().getVisualizations()
+				.ofType(visualizationClass).isEmpty()) {
+			viewHolder.textView.setEnabled(false);
+			viewHolder.checkBox.setEnabled(false);
+		} else {
+			viewHolder.textView.setEnabled(true);
+			viewHolder.checkBox.setEnabled(true);
+		}
+
 		return view;
 	}
 
@@ -399,6 +442,15 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 			viewHolder.checkBox.setVisibility(View.VISIBLE);
 			viewHolder.imageViewSettings.setVisibility(View.VISIBLE);
 			viewHolder.imageViewAdd.setVisibility(View.GONE);
+		}
+
+		if (viewHolder.dataSource.getVisualizations()
+				.ofType(visualizationClass).isEmpty()) {
+			viewHolder.textView.setEnabled(false);
+			viewHolder.checkBox.setEnabled(false);
+		} else {
+			viewHolder.textView.setEnabled(true);
+			viewHolder.checkBox.setEnabled(true);
 		}
 
 		return view;

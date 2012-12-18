@@ -31,7 +31,6 @@ import org.n52.android.newdata.Annotations.SharedHttpClient;
 import org.n52.android.newdata.Annotations.SupportedVisualization;
 import org.n52.android.newdata.Annotations.SystemService;
 import org.n52.android.newdata.CheckList.CheckedChangedListener;
-import org.n52.android.newdata.filter.FilterDialogActivity;
 import org.n52.android.newdata.filter.SettingsHelper;
 
 import android.content.Context;
@@ -455,7 +454,7 @@ public class DataSourceHolder implements Parcelable {
 			mDataSourceInstances.add(instance);
 
 			Intent intent = new Intent(context,
-					DataSourceInstanceDialogActivity.class);
+					DataSourceInstanceSettingsDialogActivity.class);
 			intent.putExtra("dataSourceInstance", instance);
 			context.startActivity(intent);
 		} catch (InstantiationException e) {

@@ -274,7 +274,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 						.findViewById(R.id.buttonMore);
 
 				DataSourceListAdapter sourceListAdapter = new DataSourceListAdapter(
-						GeoARActivity.this, mListView);
+						GeoARActivity.this, mListView, visualizationClass);
 				mListView.setAdapter(sourceListAdapter);
 				mListView.setGroupIndicator(null);
 

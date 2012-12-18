@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.android.newdata.filter;
+package org.n52.android.newdata;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -26,64 +26,72 @@ import org.n52.android.R;
 import org.n52.android.newdata.Annotations.Setting;
 import org.n52.android.newdata.Annotations.Settings.Group;
 import org.n52.android.newdata.Annotations.Settings.Name;
+import org.n52.android.newdata.filter.FilterView;
+import org.n52.android.newdata.filter.SettingsHelper;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.res.TypedArray;
-import android.os.Bundle;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.FrameLayout.LayoutParams;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
-/**
- * Dialog to dynamically show and edit filter settings of a supplied data source
- * 
- */
-public abstract class AbstractSettingsDialogActivity extends Activity {
+public class SettingsView extends LinearLayout {
 
-	protected abstract Object getSettingsObject();
+	public class SettingsException extends RuntimeException {
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+		private static final long serialVersionUID = 1L;
 
-		LayoutInflater inflater = LayoutInflater.from(this);
+		public SettingsException(String msg, Throwable cause) {
+			super(msg, cause);
+		}
+	}
 
-		setContentView(R.layout.filter_dialog);
-		TypedArray typedArray = obtainStyledAttributes(R.style.formView,
+	private Object settingsObject;
+	private LayoutInflater mInflater;
+	// Assigning Fields to groups
+	final Map<String, List<FilterView<?>>> groupFieldMap = new TreeMap<String, List<FilterView<?>>>();
+
+	public SettingsView(Context context) {
+		super(context);
+		init();
+	}
+
+	public SettingsView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		init();
+	}
+
+	private void init() {
+		mInflater = LayoutInflater.from(getContext());
+		setOrientation(LinearLayout.VERTICAL);
+	}
+
+	public void setSettingsObject(Object settingsObject) {
+		this.settingsObject = settingsObject;
+		updateViews();
+	}
+
+	public void updateViews() {
+		removeAllViews();
+		if (settingsObject == null) {
+			throw new IllegalStateException();
+		}
+
+		TypedArray typedArray = getContext().obtainStyledAttributes(
+				R.style.formView,
 				new int[] { android.R.attr.paddingLeft,
 						android.R.attr.paddingRight });
 		int paddingLeft = typedArray.getDimensionPixelSize(0, 0);
 		int paddingRight = typedArray.getDimensionPixelSize(1, 0);
 
-		Button cancelButton = (Button) findViewById(R.id.negativeButton);
-		cancelButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				setResult(RESULT_CANCELED);
-				finish();
-			}
-		});
-
-		final Object settingsObject = getSettingsObject();
-		if (settingsObject == null) {
-			// TODO
-			return;
-		}
-
-		ScrollView dialogView = (ScrollView) findViewById(R.id.dialogView);
-
-		final Map<String, List<FilterView<?>>> groupFieldMap = new TreeMap<String, List<FilterView<?>>>();
+		groupFieldMap.clear();
 
 		// Find fields and create views for every annotated field
 		for (Field field : settingsObject.getClass().getDeclaredFields()) {
 			if (field.isAnnotationPresent(Setting.class)) {
 				FilterView<?> filterView = SettingsHelper
-						.createFilterViewFromField(field, this);
+						.createFilterViewFromField(field, getContext());
 				if (filterView != null) {
 
 					// get group
@@ -104,8 +112,7 @@ public abstract class AbstractSettingsDialogActivity extends Activity {
 		}
 
 		// create table with labels and views for each field
-		LinearLayout layout = new LinearLayout(this);
-		layout.setOrientation(LinearLayout.VERTICAL);
+
 		for (Entry<String, List<FilterView<?>>> entry : groupFieldMap
 				.entrySet()) {
 			String group = entry.getKey();
@@ -114,11 +121,11 @@ public abstract class AbstractSettingsDialogActivity extends Activity {
 				// R.style.formGroup);
 				// Since defStyle is ignored, layout inflater is needed
 				// http://code.google.com/p/android/issues/detail?id=12683
-				TextView groupView = (TextView) inflater.inflate(
+				TextView groupView = (TextView) mInflater.inflate(
 						R.layout.textview_group, null);
 
 				groupView.setText(group);
-				layout.addView(groupView, LayoutParams.MATCH_PARENT,
+				addView(groupView, LayoutParams.MATCH_PARENT,
 						LayoutParams.WRAP_CONTENT);
 			}
 
@@ -133,10 +140,10 @@ public abstract class AbstractSettingsDialogActivity extends Activity {
 					// Since defStyle is ignored, layout inflater is needed
 					// http://code.google.com/p/android/issues/detail?id=12683
 
-					TextView labelView = (TextView) inflater.inflate(
+					TextView labelView = (TextView) mInflater.inflate(
 							R.layout.textview_label, null);
 					labelView.setText(field.getAnnotation(Name.class).value());
-					layout.addView(labelView, LayoutParams.WRAP_CONTENT,
+					addView(labelView, LayoutParams.WRAP_CONTENT,
 							LayoutParams.WRAP_CONTENT);
 				}
 
@@ -150,49 +157,46 @@ public abstract class AbstractSettingsDialogActivity extends Activity {
 				// Set padding
 				filterView.getView()
 						.setPadding(paddingLeft, 0, paddingRight, 0);
-				layout.addView(filterView.getView(), LayoutParams.MATCH_PARENT,
+				addView(filterView.getView(), LayoutParams.MATCH_PARENT,
 						LayoutParams.WRAP_CONTENT);
 			}
 		}
 
-		dialogView.addView(layout, LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT);
+	}
 
-		Button okButton = (Button) findViewById(R.id.positiveButton);
-		okButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View arg0) {
-				boolean valid = true;
-				// Validate all filter views
-				for (List<FilterView<?>> viewList : groupFieldMap.values())
-					for (FilterView<?> filterView : viewList) {
-						if (!filterView.validate()) {
-							valid = false;
-						}
-					}
-
-				if (valid) {
-					// Set every field of currentFilter to new value
-					for (List<FilterView<?>> viewList : groupFieldMap.values())
-						for (FilterView<?> filterView : viewList) {
-							try {
-								Field field = filterView.getField();
-								field.setAccessible(true);
-								field.set(settingsObject, filterView.getValue());
-							} catch (IllegalArgumentException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							} catch (IllegalAccessException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-
-					finish();
+	public boolean validate() {
+		boolean valid = true;
+		for (List<FilterView<?>> viewList : groupFieldMap.values())
+			for (FilterView<?> filterView : viewList) {
+				if (!filterView.validate()) {
+					valid = false;
 				}
 			}
-		});
+
+		return valid;
+	}
+
+	public void updateObject() {
+		if (settingsObject == null) {
+			throw new IllegalStateException();
+		}
+		// Set every field of settingsObject to new value
+		for (List<FilterView<?>> viewList : groupFieldMap.values())
+			for (FilterView<?> filterView : viewList) {
+				try {
+					Field field = filterView.getField();
+					field.setAccessible(true);
+					field.set(settingsObject, filterView.getValue());
+				} catch (IllegalArgumentException e) {
+					throw new SettingsException(e.getMessage(), e);
+				} catch (IllegalAccessException e) {
+					throw new SettingsException(e.getMessage(), e);
+				}
+			}
+	}
+
+	public boolean isEmpty() {
+		return groupFieldMap.isEmpty();
 	}
 
 }

@@ -157,7 +157,7 @@ public class PluginFragment extends SherlockFragment {
 			@Override
 			public void onCheckedChanged(InstalledPluginHolder item,
 					boolean newState) {
-				notifyDataSetInvalidated();
+				notifyDataSetChanged();
 			}
 		};
 		private OnItemChangedListenerWrapper<InstalledPluginHolder> pluginItemChangeListener = new OnItemChangedListenerWrapper<InstalledPluginHolder>() {

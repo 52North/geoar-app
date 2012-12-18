@@ -9,8 +9,37 @@
         android:id="@+id/dialogView"
         style="@style/formView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textViewGroupGeneral"
+                style="@style/formGroup"
+                android:text="General Settings" />
+
+            <org.n52.android.newdata.SettingsView
+                android:id="@+id/settingsViewGeneral"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+            </org.n52.android.newdata.SettingsView>
+
+            <TextView
+                android:id="@+id/textViewGroupFilter"
+                style="@style/formGroup"
+                android:layout_marginTop="5dp"
+                android:text="Filter Settings" />
+
+            <org.n52.android.newdata.SettingsView
+                android:id="@+id/settingsViewFilter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+            </org.n52.android.newdata.SettingsView>
+        </LinearLayout>
     </ScrollView>
 
     <View

@@ -40,15 +40,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="org.n52.android.newdata.filter.FilterDialogActivity"
-            android:label="Filter Settings"
-            android:theme="@android:style/Theme.Holo.Dialog" >
-        </activity>
-        <activity
-            android:name="org.n52.android.newdata.DataSourceInstanceDialogActivity"
+            android:name="org.n52.android.newdata.DataSourceInstanceSettingsDialogActivity"
             android:label="Data Source Settings"
             android:theme="@android:style/Theme.Holo.Dialog" >
         </activity>
+
     </application>
 
 </manifest>
