@@ -58,6 +58,12 @@ import android.util.Log;
 
 public class PluginLoader {
 
+	/**
+	 * Class to hold information about a plugin, usually obtained from its
+	 * plugin descriptor file. At least an identifier is required to load a
+	 * plugin.
+	 * 
+	 */
 	public static class PluginInfo {
 		public PluginInfo(File pluginFile, String name, String description,
 				Long version, String identifier, String publisher) {
@@ -69,12 +75,12 @@ public class PluginLoader {
 			this.publisher = publisher;
 		}
 
-		File pluginFile;
+		File pluginFile; // Path to the plugin
 		String name;
 		String description;
 		Long version;
 		String identifier;
-		public String publisher;
+		String publisher;
 	}
 
 	private static final FilenameFilter PLUGIN_FILENAME_FILTER = new FilenameFilter() {
@@ -85,7 +91,6 @@ public class PluginLoader {
 		}
 	};
 	private static final String PLUGIN_STATE_PREF = "selected_plugins";
-	private static final String DATASOURCE_SELECTION_PREF = "selected_datasources";
 	private static final File PLUGIN_DIRECTORY_PATH = GeoARApplication.applicationContext
 			.getExternalFilesDir(null);
 	// Pattern captures the plugin version string
@@ -98,8 +103,8 @@ public class PluginLoader {
 	private static CheckList<InstalledPluginHolder> mInstalledPlugins = new CheckList<InstalledPluginHolder>(
 			InstalledPluginHolder.class);
 	private static List<DataSourceHolder> mDataSources = new ArrayList<DataSourceHolder>();
+	// Listener to update the list of currently available data sources
 	private static OnCheckedChangedListener<InstalledPluginHolder> pluginCheckedChangedListener = new OnCheckedChangedListener<InstalledPluginHolder>() {
-
 		@Override
 		public void onCheckedChanged(InstalledPluginHolder item,
 				boolean newState) {
@@ -120,6 +125,12 @@ public class PluginLoader {
 		restoreSelection();
 	}
 
+	/**
+	 * Returns a thread safe {@link DefaultHttpClient} instance to be reused
+	 * among different parts of the application
+	 * 
+	 * @return
+	 */
 	public static DefaultHttpClient getSharedHttpClient() {
 		if (mHttpClient == null) {
 			SchemeRegistry registry = new SchemeRegistry();
@@ -139,6 +150,11 @@ public class PluginLoader {
 		return mHttpClient;
 	}
 
+	/**
+	 * Restores the state of plugins from {@link SharedPreferences}. If an error
+	 * occurs, e.g. if a previously selected plugin got removed, this function
+	 * will quit silently.
+	 */
 	private static void restoreSelection() {
 		try {
 			SharedPreferences preferences = GeoARApplication.applicationContext
@@ -169,6 +185,9 @@ public class PluginLoader {
 		}
 	}
 
+	/**
+	 * Saves the state of plugins to {@link SharedPreferences}.
+	 */
 	public static void saveSelection() {
 		try {
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -201,7 +220,7 @@ public class PluginLoader {
 
 	/**
 	 * Parses a version string to long. Assumes that each part of a version
-	 * string is < 100
+	 * string is < 100.
 	 * 
 	 * @param version
 	 *            Version string, e.g. "1.2.3"
@@ -373,7 +392,7 @@ public class PluginLoader {
 			return;
 
 		// Map to store all plugins with their versions for loading only the
-		// newest
+		// newest ones
 		HashMap<String, PluginInfo> pluginVersionMap = new HashMap<String, PluginInfo>();
 
 		for (String pluginFileName : apksInDirectory) {
@@ -413,6 +432,10 @@ public class PluginLoader {
 
 	}
 
+	/**
+	 * Reloads all plugins. The current state of the plugins are restored
+	 * afterwards.
+	 */
 	public static void reloadPlugins() {
 		saveSelection();
 		mInstalledPlugins.clear();
@@ -434,6 +457,11 @@ public class PluginLoader {
 		mDataSources.remove(dataSource);
 	}
 
+	/**
+	 * Returns all {@link DataSourceHolder} of currently activated plugins.
+	 * 
+	 * @return
+	 */
 	public static List<DataSourceHolder> getDataSources() {
 		return mDataSources;
 	}

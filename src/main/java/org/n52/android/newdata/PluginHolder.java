@@ -29,8 +29,14 @@ public abstract class PluginHolder implements Parcelable {
 
 	public abstract String getDescription();
 
+	/**
+	 * Returns the icon associated with this plugin; that is the icon packaged
+	 * with an installed plugin, or the icon provided by the GeoAR webservices
+	 * 
+	 * @return
+	 */
 	public abstract Bitmap getPluginIcon();
-	
+
 	public abstract String getPublisher();
 
 	@Override

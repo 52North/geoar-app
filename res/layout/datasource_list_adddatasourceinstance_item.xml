@@ -12,13 +12,6 @@
         android:layout_gravity="center_vertical" >
 
         <ImageButton
-            android:id="@+id/imageViewSettings"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?android:attr/selectableItemBackground"
-            android:src="@drawable/ic_menu_preferences" />
-
-        <ImageButton
             android:id="@+id/imageViewAdd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -43,14 +36,6 @@
         android:paddingBottom="5dp"
         android:paddingTop="5dp"
         android:singleLine="true"
-        android:text="Title" />
-
-    <CheckBox
-        android:id="@+id/checkBox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:focusable="false"
-        android:focusableInTouchMode="false" />
+        android:text="Add Instance..." />
 
 </LinearLayout>

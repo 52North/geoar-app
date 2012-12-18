@@ -103,15 +103,6 @@ public class DataSourceInstanceHolder implements Parcelable {
 		return dataSource;
 	}
 
-	/**
-	 * Checks whether the underlying {@link DataSource} is already created
-	 * 
-	 * @return
-	 */
-	public boolean isInitialized() {
-		return dataSource != null;
-	}
-
 	@Override
 	public int describeContents() {
 		return 0;
