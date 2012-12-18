@@ -90,13 +90,6 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		this.mContext = context;
 		this.mRotationProvider = (IRotationMatrixProvider) glSurfaceView;
 		this.glSurfaceView = glSurfaceView;
-
-
-		for (DataSourceHolder dataSource : PluginLoader.getDataSources()) {
-			dataSource.getInstances().addOnCheckedChangeListener(
-					dataSourceListener);
-		}
-		// TODO remove listeners eventually!
 	}
 
 	@Override

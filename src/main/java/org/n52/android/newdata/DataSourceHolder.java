@@ -342,7 +342,9 @@ public class DataSourceHolder implements Parcelable {
 			if (checked || mDataSourceInstances != null) {
 				// Set saved state if instance was checked or if it is already
 				// initialized
-				getInstances().get(0).setChecked(checked);
+				if (!getInstances().isEmpty()) {
+					getInstances().get(0).setChecked(checked);
+				}
 			}
 		}
 	}

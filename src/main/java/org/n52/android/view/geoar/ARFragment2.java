@@ -22,6 +22,7 @@ import java.util.List;
 import org.n52.android.R;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceHolder;
+import org.n52.android.newdata.DataSourceInstanceHolder;
 import org.n52.android.newdata.PluginLoader;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.tracking.location.LocationHandler.OnLocationUpdateListener;
@@ -45,24 +46,22 @@ import com.actionbarsherlock.app.SherlockFragment;
 /**
  * 
  * @author Arne de Wall
- *
+ * 
  */
 public class ARFragment2 extends SherlockFragment implements
 		OnLocationUpdateListener {
-	
 
 	public interface SpatiallyDependent {
 		void onGeolocationUpdate(Location newLocation);
 	}
 
 	private ARSurfaceView augmentedView;
-	
 
-
-	private OnCheckedChangedListener<DataSourceHolder> dataSourceListener = new OnCheckedChangedListener<DataSourceHolder>() {
+	private OnCheckedChangedListener<DataSourceInstanceHolder> dataSourceListener = new OnCheckedChangedListener<DataSourceInstanceHolder>() {
 
 		@Override
-		public void onCheckedChanged(DataSourceHolder item, boolean newState) {
+		public void onCheckedChanged(DataSourceInstanceHolder item,
+				boolean newState) {
 			if (newState == true) {
 				DataSourceVisualizationHandler handler = new DataSourceVisualizationHandler(
 						augmentedView, item);
@@ -83,15 +82,17 @@ public class ARFragment2 extends SherlockFragment implements
 		}
 	};
 
-	private List<DataSourceVisualizationHandler> checkedVisualizationHandler = 
-			new LinkedList<DataSourceVisualizationHandler>();
+	private List<DataSourceVisualizationHandler> checkedVisualizationHandler = new LinkedList<DataSourceVisualizationHandler>();
 
 	/**
 	 * Constructor
 	 */
 	public ARFragment2() {
-		PluginLoader.getDataSources().addOnCheckedChangeListener(
-				dataSourceListener);
+		for (DataSourceHolder dataSource : PluginLoader.getDataSources()) {
+			dataSource.getInstances().addOnCheckedChangeListener(
+					dataSourceListener);
+		}
+		// TODO Wieder friegeben irgendwann!
 		LocationHandler.addLocationUpdateListener(this);
 	}
 
@@ -189,8 +190,9 @@ public class ARFragment2 extends SherlockFragment implements
 	@Override
 	public void onResume() {
 		super.onResume();
-		PluginLoader.getDataSources().removeOnCheckedChangeListener(
-				dataSourceListener);
+		// PluginLoader.getDataSources().removeOnCheckedChangeListener(
+		// dataSourceListener);
+		// TODO
 		LocationHandler.addLocationUpdateListener(this);
 		if (augmentedView != null)
 			augmentedView.onResume();
