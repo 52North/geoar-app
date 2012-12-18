@@ -30,35 +30,26 @@ public class CubeFeature extends RenderFeature {
 	private static final String TAG = Cube.class.getSimpleName();
 
 	/** standard color array */
-	private static final float[] colors = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+	private static final float[] colors = { 
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+		1, 1, 1, 1, 1, 1, 1, 1,	1, 1, 1, 1, 
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
 	/** standard vertices array */
-	private static final float[] vertices = { 0.5f, 0.5f, 0.5f, -0.5f, 0.5f,
-			0.5f, -0.5f, -0.5f,
-			0.5f,
-			0.5f,
-			-0.5f,
-			0.5f, // 0-1-halfSize-3 front
-			0.5f, 0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f, -0.5f,
-			-0.5f,
-			0.5f,
-			0.5f,
-			-0.5f, // 0-3-4-5 right
-			0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f, -0.5f,
-			0.5f,
-			0.5f,
-			-0.5f, // 4-7-6-5 back
-			-0.5f, 0.5f, 0.5f, -0.5f, 0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f,
-			-0.5f,
-			0.5f, // 1-6-7-halfSize left
-			0.5f, 0.5f, 0.5f, 0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f,
-			0.5f, 0.5f, // top0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f,
-						// -0.5f, -0.5f, 0.5f,
-			-0.5f, -0.5f, // bottom
+	private static final float[] vertices = {
+        -0.5f, 	-0.5f, 	-0.5f,
+        0.5f, 	-0.5f, 	-0.5f,
+        0.5f,  	0.5f, 	-0.5f,
+        -0.5f,  0.5f, 	-0.5f,
+        -0.5f, 	-0.5f,  0.5f,
+        0.5f, 	-0.5f,  0.5f,
+        0.5f,  	0.5f,  	0.5f,
+        -0.5f,  0.5f,  	0.5f,
 	};
 
 	/** standard normals array */
@@ -72,15 +63,20 @@ public class CubeFeature extends RenderFeature {
 	};
 
 	/** standard indices array */
-	private static final short[] indices = { 0, 1, 2, 0, 2, 3, 2, 1, 0, 2, 3, 0,
-			4, 5, 6, 4, 6, 7, 8, 9, 10, 8, 10, 11, 12, 13, 14, 12, 14, 15, 16,
-			17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23, };
+	private static final short[] indices = {
+        0, 4, 5,    0, 5, 1,
+        1, 5, 6,    1, 6, 2,
+        2, 6, 7,    2, 7, 3,
+        3, 7, 4,    3, 4, 0,
+        4, 7, 6,    4, 6, 5,
+        3, 0, 1,    3, 1, 2
+	};
 
 	/***************************
 	 * Constructor
 	 ***************************/
 	public CubeFeature() {
-		this.drawingMode = GLES20.GL_TRIANGLES;
+		this.drawingMode = GLES20.GL_TRIANGLES;  // GLES20.GL_TRIANGLE_FAN;
 	}
 		
 	@Override

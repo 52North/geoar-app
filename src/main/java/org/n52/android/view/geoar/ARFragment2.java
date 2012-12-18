@@ -15,15 +15,25 @@
  */
 package org.n52.android.view.geoar;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.n52.android.R;
-import org.n52.android.tracking.camera.CameraView;
+import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
+import org.n52.android.newdata.DataSourceHolder;
+import org.n52.android.newdata.PluginLoader;
+import org.n52.android.tracking.location.LocationHandler;
+import org.n52.android.tracking.location.LocationHandler.OnLocationUpdateListener;
+import org.n52.android.view.geoar.gl.DataSourceVisualizationHandler;
+import org.n52.android.view.geoar.gl.mode.RenderFeature;
 
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,12 +42,63 @@ import android.widget.FrameLayout.LayoutParams;
 
 import com.actionbarsherlock.app.SherlockFragment;
 
-public class ARFragment2 extends SherlockFragment {
+/**
+ * 
+ * @author Arne de Wall
+ *
+ */
+public class ARFragment2 extends SherlockFragment implements
+		OnLocationUpdateListener {
+	
+
+	public interface SpatiallyDependent {
+		void onGeolocationUpdate(Location newLocation);
+	}
 
 	private ARSurfaceView augmentedView;
+	
 
+
+	private OnCheckedChangedListener<DataSourceHolder> dataSourceListener = new OnCheckedChangedListener<DataSourceHolder>() {
+
+		@Override
+		public void onCheckedChanged(DataSourceHolder item, boolean newState) {
+			if (newState == true) {
+				DataSourceVisualizationHandler handler = new DataSourceVisualizationHandler(
+						augmentedView, item);
+				checkedVisualizationHandler.add(handler);
+			} else {
+				for (Iterator<DataSourceVisualizationHandler> it = checkedVisualizationHandler
+						.iterator(); it.hasNext();) {
+					DataSourceVisualizationHandler current = it.next();
+					if (current.getDataSourceHolder() == item) {
+						current.clear();
+						it.remove();
+						break;
+					}
+				}
+			}
+			// TODO
+			// setCenter(LocationHandler.getLastKnownLocation());
+		}
+	};
+
+	private List<DataSourceVisualizationHandler> checkedVisualizationHandler = 
+			new LinkedList<DataSourceVisualizationHandler>();
+
+	/**
+	 * Constructor
+	 */
 	public ARFragment2() {
-		// this.setRetainInstance(true);
+		PluginLoader.getDataSources().addOnCheckedChangeListener(
+				dataSourceListener);
+		LocationHandler.addLocationUpdateListener(this);
+	}
+
+	@Override
+	public void onLocationChanged(Location location) {
+		for (DataSourceVisualizationHandler handler : checkedVisualizationHandler)
+			handler.onLocationChanged(location);
 	}
 
 	@Override
@@ -113,6 +174,7 @@ public class ARFragment2 extends SherlockFragment {
 	@Override
 	public void onPause() {
 		super.onPause();
+		LocationHandler.removeLocationUpdateListener(this);
 		if (augmentedView != null)
 			augmentedView.onPause();
 	}
@@ -127,6 +189,9 @@ public class ARFragment2 extends SherlockFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
+		PluginLoader.getDataSources().removeOnCheckedChangeListener(
+				dataSourceListener);
+		LocationHandler.addLocationUpdateListener(this);
 		if (augmentedView != null)
 			augmentedView.onResume();
 	}
@@ -143,4 +208,5 @@ public class ARFragment2 extends SherlockFragment {
 		setHasOptionsMenu(true);
 		super.onCreate(savedInstanceState);
 	}
+
 }

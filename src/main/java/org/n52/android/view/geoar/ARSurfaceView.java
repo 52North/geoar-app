@@ -24,6 +24,7 @@ import org.n52.android.tracking.location.SensorBuffer;
 import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.IRotationMatrixProvider;
+import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OpenGLCallable;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -50,6 +51,8 @@ import android.view.WindowManager;
  */
 public class ARSurfaceView extends GLSurfaceView implements
 		SensorEventListener, IRotationMatrixProvider, OnLocationUpdateListener {
+	
+	
 
 	// Sensor related
 	private SensorBuffer magnetValues = new LowPassSensorBuffer(3, 0.05f);
@@ -93,8 +96,16 @@ public class ARSurfaceView extends GLSurfaceView implements
 		getHolder().setFormat(PixelFormat.TRANSLUCENT);
 
 		setRenderer(renderer);
-
 	}
+	
+	public void addRenderableToScene(final OpenGLCallable renderNode) {
+		queueEvent(new Runnable() {
+			@Override
+			public void run() {
+				renderNode.onCreateInGLESThread();
+			}
+		});
+	} 
 
 	/**
 	 * Get a {@link NoiseGridValueProvider} to access the raw noise

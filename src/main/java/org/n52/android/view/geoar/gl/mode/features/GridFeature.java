@@ -68,7 +68,7 @@ public class GridFeature extends RenderFeature {
 			vertices[i * 6 + 1] = 0.0f;
 			vertices[i * 6 + 2] = -halfSize + i + 0.0f;
 
-			vertices[i * 6 + 3] = gridSize - 1.f;
+			vertices[i * 6 + 3] = halfSize - 1.f;
 			vertices[i * 6 + 4] = 0.0f;
 			vertices[i * 6 + 5] = -halfSize + i + 0.0f;
 		}
@@ -80,7 +80,7 @@ public class GridFeature extends RenderFeature {
 
 			vertices[i * 6 + 3] = -halfSize + i + 0.0f - gridSize;
 			vertices[i * 6 + 4] = 0.0f;
-			vertices[i * 6 + 5] = gridSize - 1.f;
+			vertices[i * 6 + 5] = halfSize - 1.f;
 		}
 
 		/** init indices array */
@@ -97,12 +97,12 @@ public class GridFeature extends RenderFeature {
 			r = Color.red(androidColor);
 			g = Color.green(androidColor);
 			b = Color.blue(androidColor);
-			a = (alpha == -1 ? Color.alpha(androidColor) : alpha);
+			a = 0.5f;//(alpha == -1 ? Color.alpha(androidColor) : alpha);
 		} else {
 			r = 1.0f;
 			g = 1.0f;
 			b = 1.0f;
-			a = 1.0f;
+			a = 0.5f;
 		}
 
 		for (int i = 0, length = gridSize * 16; i < length; i += 4) {

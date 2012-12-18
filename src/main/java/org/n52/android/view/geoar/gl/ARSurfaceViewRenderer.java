@@ -24,11 +24,11 @@ import javax.microedition.khronos.opengles.GL10;
 
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceHolder;
-import org.n52.android.newdata.DataSourceInstanceHolder;
 import org.n52.android.newdata.PluginLoader;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.utils.GeoLocation;
+import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OpenGLCallable;
 import org.n52.android.view.geoar.gl.mode.RenderFeature;
 import org.n52.android.view.geoar.gl.mode.features.GridFeature;
 
@@ -73,30 +73,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		float[] getRotationMatrix();
 	}
 
-	private OnCheckedChangedListener<DataSourceInstanceHolder> dataSourceListener = new OnCheckedChangedListener<DataSourceInstanceHolder>() {
 
-		@Override
-		public void onCheckedChanged(DataSourceInstanceHolder item,
-				boolean newState) {
-			if (newState == true) {
-				DataSourceVisualizationHandler handler = new DataSourceVisualizationHandler(
-						ARSurfaceViewRenderer.this.glSurfaceView, item);
-				visualizationHandler.add(handler);
-			} else {
-				for (Iterator<DataSourceVisualizationHandler> it = visualizationHandler
-						.iterator(); it.hasNext();) {
-					DataSourceVisualizationHandler current = it.next();
-					if (current.getDataSource() == item) {
-						current.clear();
-						it.remove();
-						break;
-					}
-
-				}
-			}
-			setCenter(LocationHandler.getLastKnownLocation());
-		}
-	};
 
 	private final IRotationMatrixProvider mRotationProvider;
 
@@ -113,6 +90,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		this.mContext = context;
 		this.mRotationProvider = (IRotationMatrixProvider) glSurfaceView;
 		this.glSurfaceView = glSurfaceView;
+
 
 		for (DataSourceHolder dataSource : PluginLoader.getDataSources()) {
 			dataSource.getInstances().addOnCheckedChangeListener(
@@ -142,12 +120,13 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 		// render Data
 		for (DataSourceVisualizationHandler handler : visualizationHandler) {
-			handler.renderFeatures.get(0).onRender(GLESCamera.projectionMatrix,
-					GLESCamera.viewMatrix, rotationMatrix);
-			// for (OpenGLCallable feature : handler.renderFeatures) {
-			// feature.onRender(GLESCamera.projectionMatrix,
-			// GLESCamera.viewMatrix, rotationMatrix);
-			// }
+//			if(handler.renderFeatures.size() > 0)
+//			handler.renderFeatures.get(0).onRender(GLESCamera.projectionMatrix,
+//						GLESCamera.viewMatrix, rotationMatrix);
+			for (OpenGLCallable feature : handler.renderFeatures) {
+				feature.onRender(GLESCamera.projectionMatrix,
+						GLESCamera.viewMatrix, rotationMatrix);
+			}
 		}
 	}
 
@@ -167,24 +146,25 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		GLESCamera.createViewMatrix();
 		// // Enable depth testing
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-		// GLES20.glClearDepthf(1.0f);
-		// GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-		// GLES20.glDepthMask(true);
+		GLES20.glClearDepthf(1.0f);
+		GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+		GLES20.glDepthMask(true);
 
 		// // Enable blending
-		// GLES20.glEnable(GLES20.GL_BLEND);
-		// GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
+		GLES20.glEnable(GLES20.GL_BLEND);
+		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
 
 		// backface culling
-		// GLES20.glEnable(GLES20.GL_CULL_FACE);
-		// GLES20.glCullFace(GLES20.GL_BACK);
+		GLES20.glEnable(GLES20.GL_CULL_FACE);
+		GLES20.glCullFace(GLES20.GL_BACK);
 		initScene();
-
 	}
 
 	private void initScene() {
 		renderFeature = new GridFeature();
 	}
+	
+
 
 	@Override
 	public void onCameraUpdate() {
@@ -206,5 +186,6 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		// for (DataSourceVisualizationHandler handler : visualizationHandler)
 		// handler.setCenter(currentCenterGPoint);
 	}
+
 
 }
