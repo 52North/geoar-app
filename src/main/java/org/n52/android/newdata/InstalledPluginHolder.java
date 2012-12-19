@@ -315,6 +315,7 @@ public class InstalledPluginHolder extends PluginHolder {
 				public String getPackageCodePath() {
 					return getPluginFile().getAbsolutePath();
 				}
+				
 			};
 		}
 		return mPluginContext;

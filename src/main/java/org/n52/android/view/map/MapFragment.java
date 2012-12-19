@@ -135,7 +135,7 @@ public class MapFragment extends SherlockFragment {
 						// TODO use view caching with convertView parameter
 						View featureView = item.getVisualization()
 								.getFeatureView(item.getSpatialEntity(), null,
-										null);
+										null, getActivity());
 
 						if (featureView != null) {
 							builder.setView(featureView);
