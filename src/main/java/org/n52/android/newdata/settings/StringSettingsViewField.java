@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.android.newdata.filter;
+package org.n52.android.newdata.settings;
 
 import java.lang.reflect.Field;
 
@@ -23,12 +23,12 @@ import android.content.Context;
 import android.view.View;
 import android.widget.EditText;
 
-public class StringFilterView extends EditText implements FilterView<String> {
+public class StringSettingsViewField extends EditText implements SettingsViewField<String> {
 
 	private boolean notNull;
 	private Field field;
 
-	public StringFilterView(Context context, Field field, int inputType) {
+	public StringSettingsViewField(Context context, Field field, int inputType) {
 		super(context);
 		this.field = field;
 

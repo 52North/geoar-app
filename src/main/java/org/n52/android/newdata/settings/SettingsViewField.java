@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.android.newdata.filter;
+package org.n52.android.newdata.settings;
 
 import java.lang.reflect.Field;
 
 import android.view.View;
 
-public interface FilterView<T> {
+public interface SettingsViewField<T> {
 
 	Field getField();
 	

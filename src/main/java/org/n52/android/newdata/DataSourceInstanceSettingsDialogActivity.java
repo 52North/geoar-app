@@ -16,6 +16,7 @@
 package org.n52.android.newdata;
 
 import org.n52.android.R;
+import org.n52.android.newdata.settings.SettingsView;
 
 import android.os.Bundle;
 import android.view.View;

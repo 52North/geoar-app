@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.android.newdata.filter;
+package org.n52.android.newdata.settings;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -29,8 +29,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
-public abstract class SpinnerFilterView<T> extends Spinner implements
-		FilterView<T>, android.widget.AdapterView.OnItemSelectedListener {
+public abstract class SpinnerSettingsViewFieldw<T> extends Spinner implements
+		SettingsViewField<T>, android.widget.AdapterView.OnItemSelectedListener {
 
 	private String noValueText = "No Value";
 	private boolean notNull = false;
@@ -47,7 +47,7 @@ public abstract class SpinnerFilterView<T> extends Spinner implements
 	};
 	private Field field;
 
-	public SpinnerFilterView(Context context, Field field, List<Object> items) {
+	public SpinnerSettingsViewFieldw(Context context, Field field, List<Object> items) {
 		super(context);
 		this.field = field;
 		// Init adapter
@@ -70,7 +70,7 @@ public abstract class SpinnerFilterView<T> extends Spinner implements
 		}
 	}
 
-	public SpinnerFilterView(Context context, Field field, Object[] items) {
+	public SpinnerSettingsViewFieldw(Context context, Field field, Object[] items) {
 		this(context, field, new ArrayList<Object>(Arrays.asList(items)));
 	}
 

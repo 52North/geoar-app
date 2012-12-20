@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.android.newdata.filter;
+package org.n52.android.newdata.settings;
 
 import java.lang.reflect.Field;
 
@@ -25,15 +25,15 @@ import android.content.Context;
 import android.view.View;
 import android.widget.EditText;
 
-public abstract class NumberFilterView<T extends Number> extends EditText
-		implements FilterView<T> {
+public abstract class NumberSettingsViewField<T extends Number> extends EditText
+		implements SettingsViewField<T> {
 
 	private boolean notNull;
 	private T minValue;
 	private T maxValue;
 	private Field field;
 
-	public NumberFilterView(Context context, Field field, int inputType) {
+	public NumberSettingsViewField(Context context, Field field, int inputType) {
 		super(context);
 		this.field = field;
 		// Check annotations

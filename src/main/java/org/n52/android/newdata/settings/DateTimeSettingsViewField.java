@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.android.newdata.filter;
+package org.n52.android.newdata.settings;
 
 import java.lang.reflect.Field;
 import java.util.Calendar;
@@ -37,7 +37,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TimePicker;
 
-public abstract class DateTimeFilterView<T> implements FilterView<T>,
+public abstract class DateTimeSettingsViewField<T> implements SettingsViewField<T>,
 		OnDateSetListener, OnTimeSetListener {
 
 	private EditText dateEditText;
@@ -49,7 +49,7 @@ public abstract class DateTimeFilterView<T> implements FilterView<T>,
 	private View filterView;
 	private Field field;
 
-	public DateTimeFilterView(final Context context, Field field,
+	public DateTimeSettingsViewField(final Context context, Field field,
 			TemporalType temporalType) {
 		this.temporalType = temporalType;
 		this.field = field;
@@ -87,7 +87,7 @@ public abstract class DateTimeFilterView<T> implements FilterView<T>,
 						selectedValue = Calendar.getInstance();
 
 					DatePickerDialog dialog = new DatePickerDialog(context,
-							DateTimeFilterView.this, selectedValue
+							DateTimeSettingsViewField.this, selectedValue
 									.get(Calendar.YEAR), selectedValue
 									.get(Calendar.MONTH), selectedValue
 									.get(Calendar.DAY_OF_MONTH));
@@ -115,7 +115,7 @@ public abstract class DateTimeFilterView<T> implements FilterView<T>,
 						selectedValue = Calendar.getInstance();
 
 					TimePickerDialog dialog = new TimePickerDialog(context,
-							DateTimeFilterView.this, selectedValue
+							DateTimeSettingsViewField.this, selectedValue
 									.get(Calendar.HOUR_OF_DAY), selectedValue
 									.get(Calendar.MINUTE), true);
 					dialog.show();

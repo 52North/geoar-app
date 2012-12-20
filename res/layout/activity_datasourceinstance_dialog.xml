@@ -22,11 +22,11 @@
                 style="@style/formGroup"
                 android:text="General Settings" />
 
-            <org.n52.android.newdata.SettingsView
+            <org.n52.android.newdata.settings.SettingsView
                 android:id="@+id/settingsViewGeneral"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" >
-            </org.n52.android.newdata.SettingsView>
+            </org.n52.android.newdata.settings.SettingsView>
 
             <TextView
                 android:id="@+id/textViewGroupFilter"
@@ -34,11 +34,11 @@
                 android:layout_marginTop="5dp"
                 android:text="Filter Settings" />
 
-            <org.n52.android.newdata.SettingsView
+            <org.n52.android.newdata.settings.SettingsView
                 android:id="@+id/settingsViewFilter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" >
-            </org.n52.android.newdata.SettingsView>
+            </org.n52.android.newdata.settings.SettingsView>
         </LinearLayout>
     </ScrollView>
 

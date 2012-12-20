@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.android.newdata.filter;
+package org.n52.android.newdata.settings;
 
 import java.lang.reflect.Field;
 import java.util.Calendar;
@@ -47,11 +47,11 @@ public class SettingsHelper {
 	 * @param context {@link Context} to use for creating views
 	 * @return
 	 */
-	public static FilterView<?> createFilterViewFromField(Field field,
+	public static SettingsViewField<?> createFilterViewFromField(Field field,
 			Context context) {
 		Class<?> fieldType = field.getType();
 		if (fieldType.equals(float.class) || fieldType.equals(Float.class)) {
-			return new NumberFilterView<Float>(context, field,
+			return new NumberSettingsViewField<Float>(context, field,
 					InputType.TYPE_CLASS_NUMBER
 							| InputType.TYPE_NUMBER_FLAG_DECIMAL
 							| InputType.TYPE_NUMBER_FLAG_SIGNED) {
@@ -64,7 +64,7 @@ public class SettingsHelper {
 			};
 		} else if (fieldType.equals(double.class)
 				|| fieldType.equals(Double.class)) {
-			return new NumberFilterView<Double>(context, field,
+			return new NumberSettingsViewField<Double>(context, field,
 					InputType.TYPE_CLASS_NUMBER
 							| InputType.TYPE_NUMBER_FLAG_DECIMAL
 							| InputType.TYPE_NUMBER_FLAG_SIGNED) {
@@ -76,7 +76,7 @@ public class SettingsHelper {
 
 			};
 		} else if (Enum.class.isAssignableFrom(fieldType)) {
-			return new SpinnerFilterView<Enum<?>>(context, field, field
+			return new SpinnerSettingsViewFieldw<Enum<?>>(context, field, field
 					.getType().getEnumConstants()) {
 
 				@Override
@@ -86,10 +86,10 @@ public class SettingsHelper {
 			};
 
 		} else if (fieldType.equals(String.class)) {
-			return new StringFilterView(context, field,
+			return new StringSettingsViewField(context, field,
 					InputType.TYPE_CLASS_TEXT);
 		} else if (Calendar.class.isAssignableFrom(fieldType)) {
-			return new DateTimeFilterView<Calendar>(context, field, null) {
+			return new DateTimeSettingsViewField<Calendar>(context, field, null) {
 
 				@Override
 				public Calendar getValue() {
@@ -108,7 +108,7 @@ public class SettingsHelper {
 
 			};
 		} else if (fieldType.equals(Date.class)) {
-			return new DateTimeFilterView<Date>(context, field, null) {
+			return new DateTimeSettingsViewField<Date>(context, field, null) {
 
 				@Override
 				public Date getValue() {

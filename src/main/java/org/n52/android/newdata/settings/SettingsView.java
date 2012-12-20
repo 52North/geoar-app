@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.android.newdata;
+package org.n52.android.newdata.settings;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -26,8 +26,6 @@ import org.n52.android.R;
 import org.n52.android.newdata.Annotations.Setting;
 import org.n52.android.newdata.Annotations.Settings.Group;
 import org.n52.android.newdata.Annotations.Settings.Name;
-import org.n52.android.newdata.filter.FilterView;
-import org.n52.android.newdata.filter.SettingsHelper;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -50,7 +48,7 @@ public class SettingsView extends LinearLayout {
 	private Object settingsObject;
 	private LayoutInflater mInflater;
 	// Assigning Fields to groups
-	final Map<String, List<FilterView<?>>> groupFieldMap = new TreeMap<String, List<FilterView<?>>>();
+	final Map<String, List<SettingsViewField<?>>> groupFieldMap = new TreeMap<String, List<SettingsViewField<?>>>();
 
 	public SettingsView(Context context) {
 		super(context);
@@ -90,7 +88,7 @@ public class SettingsView extends LinearLayout {
 		// Find fields and create views for every annotated field
 		for (Field field : settingsObject.getClass().getDeclaredFields()) {
 			if (field.isAnnotationPresent(Setting.class)) {
-				FilterView<?> filterView = SettingsHelper
+				SettingsViewField<?> filterView = SettingsHelper
 						.createFilterViewFromField(field, getContext());
 				if (filterView != null) {
 
@@ -101,9 +99,10 @@ public class SettingsView extends LinearLayout {
 						groupName = annotation.value();
 					}
 
-					List<FilterView<?>> viewList = groupFieldMap.get(groupName);
+					List<SettingsViewField<?>> viewList = groupFieldMap
+							.get(groupName);
 					if (viewList == null) {
-						viewList = new ArrayList<FilterView<?>>();
+						viewList = new ArrayList<SettingsViewField<?>>();
 						groupFieldMap.put(groupName, viewList);
 					}
 					viewList.add(filterView);
@@ -113,7 +112,7 @@ public class SettingsView extends LinearLayout {
 
 		// create table with labels and views for each field
 
-		for (Entry<String, List<FilterView<?>>> entry : groupFieldMap
+		for (Entry<String, List<SettingsViewField<?>>> entry : groupFieldMap
 				.entrySet()) {
 			String group = entry.getKey();
 			if (group != null && !group.isEmpty()) {
@@ -129,9 +128,9 @@ public class SettingsView extends LinearLayout {
 						LayoutParams.WRAP_CONTENT);
 			}
 
-			List<FilterView<?>> viewList = entry.getValue();
+			List<SettingsViewField<?>> viewList = entry.getValue();
 
-			for (FilterView<?> filterView : viewList) {
+			for (SettingsViewField<?> filterView : viewList) {
 				Field field = filterView.getField();
 				if (field.getAnnotation(Name.class) != null) {
 
@@ -166,8 +165,8 @@ public class SettingsView extends LinearLayout {
 
 	public boolean validate() {
 		boolean valid = true;
-		for (List<FilterView<?>> viewList : groupFieldMap.values())
-			for (FilterView<?> filterView : viewList) {
+		for (List<SettingsViewField<?>> viewList : groupFieldMap.values())
+			for (SettingsViewField<?> filterView : viewList) {
 				if (!filterView.validate()) {
 					valid = false;
 				}
@@ -181,8 +180,8 @@ public class SettingsView extends LinearLayout {
 			throw new IllegalStateException();
 		}
 		// Set every field of settingsObject to new value
-		for (List<FilterView<?>> viewList : groupFieldMap.values())
-			for (FilterView<?> filterView : viewList) {
+		for (List<SettingsViewField<?>> viewList : groupFieldMap.values())
+			for (SettingsViewField<?> filterView : viewList) {
 				try {
 					Field field = filterView.getField();
 					field.setAccessible(true);

@@ -140,8 +140,8 @@ public class PluginLoader {
 					.getSocketFactory(), 443));
 
 			HttpParams httpParameters = new BasicHttpParams();
-			HttpConnectionParams.setSoTimeout(httpParameters, 10000);
-			HttpConnectionParams.setConnectionTimeout(httpParameters, 10000);
+			HttpConnectionParams.setSoTimeout(httpParameters, 60000);
+			HttpConnectionParams.setConnectionTimeout(httpParameters, 20000);
 			ClientConnectionManager cm = new ThreadSafeClientConnManager(
 					httpParameters, registry);
 			mHttpClient = new DefaultHttpClient(cm, httpParameters);
