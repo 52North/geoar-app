@@ -194,62 +194,6 @@ public class InstalledPluginHolder extends PluginHolder {
 	}
 
 	/**
-	 * Constructs a {@link Resources} instance by creating an
-	 * {@link AssetManager} linked explicitly to this custom plugin using
-	 * reflection to access the non-code assets of this plugin without relying
-	 * on {@link Context#getResources()}, which is not available for manually
-	 * loaded application packages
-	 * 
-	 * @return
-	 */
-	public Resources getPluginResources() {
-		if (mPluginResources == null) {
-
-			Constructor<AssetManager> constructor;
-			try {
-				// For unknown reasons, the AssetManager constructor is not
-				// public
-				constructor = AssetManager.class.getConstructor();
-				constructor.setAccessible(true);
-				AssetManager assetManager = constructor.newInstance();
-
-				// For unknown reasons, the addAssetPath method is not public
-				Method method = AssetManager.class.getMethod("addAssetPath",
-						String.class);
-				method.setAccessible(true);
-				method.invoke(assetManager, getPluginFile().getAbsolutePath());
-
-				// get display metrics
-				WindowManager windowManager = (WindowManager) GeoARApplication.applicationContext
-						.getSystemService(Context.WINDOW_SERVICE);
-				DisplayMetrics displayMetrics = new DisplayMetrics();
-				windowManager.getDefaultDisplay().getMetrics(displayMetrics);
-
-				// Create Resources object, no Configuration object required
-				mPluginResources = new Resources(assetManager, displayMetrics,
-						null);
-			} catch (NoSuchMethodException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
-		return mPluginResources;
-	}
-
-	/**
 	 * Returns a {@link Context} wrapping the
 	 * {@link GeoARApplication#applicationContext}, but returning the value of
 	 * {@link InstalledPluginHolder#getPluginResources()} as
@@ -259,66 +203,14 @@ public class InstalledPluginHolder extends PluginHolder {
 	 */
 	public Context getPluginContext() {
 		if (mPluginContext == null) {
-
-			// Special ContextWrapper will return plugin resources instead of
-			// system resources and it will intercept LayoutInflater service
-			// calls to return a special inflater based on the plugin resources.
-			// Usually, system services are cached in a static Map and do not
-			// reflect different Context/Resources instances
-			mPluginContext = new ContextWrapper(
-					GeoARApplication.applicationContext) {
-
-				private LayoutInflater mLayoutInflater;
-				private Theme mTheme;
-
-				@Override
-				public Resources getResources() {
-					return getPluginResources();
-				}
-
-				@Override
-				public Object getSystemService(String name) {
-					if (LAYOUT_INFLATER_SERVICE.equals(name)) {
-						if (mLayoutInflater == null) {
-							// Get and store a LayoutInflater for this special
-							// plugin context and do not use the cached inflater
-							mLayoutInflater = LayoutInflater.from(
-									getBaseContext()).cloneInContext(this);
-						}
-						return mLayoutInflater;
-					}
-					return super.getSystemService(name);
-				}
-
-				@Override
-				public String getPackageResourcePath() {
-					return getPluginFile().getAbsolutePath();
-				}
-
-				@Override
-				public ClassLoader getClassLoader() {
-					return mPluginDexClassLoader;
-				}
-
-				@Override
-				public Theme getTheme() {
-					if (mTheme == null) {
-						// Create special theme to include the custom Resources
-						// instance for a plugin
-						mTheme = getResources().newTheme();
-						mTheme.setTo(getBaseContext().getTheme());
-					}
-					return mTheme;
-				}
-
-				@Override
-				public String getPackageCodePath() {
-					return getPluginFile().getAbsolutePath();
-				}
-				
-			};
+			mPluginContext = new PluginContext(
+					GeoARApplication.applicationContext, this);
 		}
 		return mPluginContext;
+	}
+
+	public ClassLoader getPluginClassLoader() {
+		return mPluginDexClassLoader;
 	}
 
 	@Override
@@ -355,7 +247,8 @@ public class InstalledPluginHolder extends PluginHolder {
 		}
 	}
 
-	public void restoreState(ObjectInputStream objectInputStream) throws IOException {
+	public void restoreState(ObjectInputStream objectInputStream)
+			throws IOException {
 		setChecked(objectInputStream.readBoolean());
 		for (DataSourceHolder dataSource : mDataSources) {
 			dataSource.restoreState(objectInputStream);
