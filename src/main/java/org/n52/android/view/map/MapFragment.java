@@ -130,7 +130,7 @@ public class MapFragment extends SherlockFragment {
 						Builder builder = new AlertDialog.Builder(getActivity());
 						builder.setTitle(item.getTitle())
 								.setMessage(item.getSnippet())
-								.setNeutralButton(R.string.ok, null);
+								.setNeutralButton(R.string.cancel, null);
 
 						// TODO use view caching with convertView parameter
 						View featureView = item.getVisualization()
