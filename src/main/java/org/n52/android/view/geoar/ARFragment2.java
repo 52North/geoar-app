@@ -15,6 +15,7 @@
  */
 package org.n52.android.view.geoar;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,7 +28,6 @@ import org.n52.android.newdata.PluginLoader;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.tracking.location.LocationHandler.OnLocationUpdateListener;
 import org.n52.android.view.geoar.gl.DataSourceVisualizationHandler;
-import org.n52.android.view.geoar.gl.mode.RenderFeature;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -50,14 +50,32 @@ import com.actionbarsherlock.app.SherlockFragment;
  */
 public class ARFragment2 extends SherlockFragment implements
 		OnLocationUpdateListener {
+	
+	private static final List<DataSourceVisualizationHandler> checkedVisualizationHandler = 
+			new LinkedList<DataSourceVisualizationHandler>();
+	private static final List<ARViewComponent> arViewComponents = 
+			new ArrayList<ARViewComponent>();
 
-	public interface SpatiallyDependent {
-		void onGeolocationUpdate(Location newLocation);
+	public static final void addARViewComponent(ARViewComponent component) {
+		if (arViewComponents.contains(component))
+			return;
+		component.setVisualizationHandlerRef(checkedVisualizationHandler);
+		arViewComponents.add(component);
+	}
+
+	public static final void removeARViewComponent(ARViewComponent component) {
+		arViewComponents.remove(component);
+	}
+
+	public interface ARViewComponent {
+		void onVisualizationHandlerAdded(DataSourceVisualizationHandler handler);
+		void setVisualizationHandlerRef(List<DataSourceVisualizationHandler> handlers);
 	}
 
 	private ARSurfaceView augmentedView;
 
-	private OnCheckedChangedListener<DataSourceInstanceHolder> dataSourceListener = new OnCheckedChangedListener<DataSourceInstanceHolder>() {
+	private OnCheckedChangedListener<DataSourceInstanceHolder> dataSourceListener = 
+			new OnCheckedChangedListener<DataSourceInstanceHolder>() {
 
 		@Override
 		public void onCheckedChanged(DataSourceInstanceHolder item,
@@ -66,6 +84,9 @@ public class ARFragment2 extends SherlockFragment implements
 				DataSourceVisualizationHandler handler = new DataSourceVisualizationHandler(
 						augmentedView, item);
 				checkedVisualizationHandler.add(handler);
+				for (ARViewComponent arViewComponent : arViewComponents) {
+					arViewComponent.onVisualizationHandlerAdded(handler);
+				}
 			} else {
 				for (Iterator<DataSourceVisualizationHandler> it = checkedVisualizationHandler
 						.iterator(); it.hasNext();) {
@@ -78,11 +99,9 @@ public class ARFragment2 extends SherlockFragment implements
 				}
 			}
 			// TODO
-			// setCenter(LocationHandler.getLastKnownLocation());
+
 		}
 	};
-
-	private List<DataSourceVisualizationHandler> checkedVisualizationHandler = new LinkedList<DataSourceVisualizationHandler>();
 
 	/**
 	 * Constructor
@@ -119,17 +138,11 @@ public class ARFragment2 extends SherlockFragment implements
 			// final DisplayMetrics displayMetrics = new DisplayMetrics();
 			// getActivity().getWindowManager().getDefaultDisplay()
 			// .getMetrics(displayMetrics);
-
 		}
-
-		// FrameLayout layout = (FrameLayout) getView().findViewById(
-		// R.id.frameLayout);
-		//
-		// augmentedView = new ARSurfaceView(getActivity());
-		// layout.addView(augmentedView, LayoutParams.MATCH_PARENT,
-		// LayoutParams.MATCH_PARENT);
 		super.onActivityCreated(savedInstanceState);
 	}
+
+
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,

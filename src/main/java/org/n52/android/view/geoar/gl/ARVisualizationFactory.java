@@ -25,6 +25,7 @@ import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.RenderFeatureFactory;
 import org.n52.android.newdata.gl.primitives.DataSourceRenderable;
 import org.n52.android.newdata.gl.primitives.RenderLoader;
+import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OnInitializeInGLThread;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OpenGLCallable;
 import org.n52.android.view.geoar.gl.model.RenderNode;
 import org.n52.android.view.geoar.gl.model.primitives.Cube;
@@ -56,7 +57,7 @@ public class ARVisualizationFactory implements RenderFeatureFactory {
 	 * @param renderNode
 	 *            The node that has to allocate memory on the GPU.
 	 */
-	private void enqueueRenderable(final OpenGLCallable renderNode) {
+	private void enqueueRenderable(final OnInitializeInGLThread renderNode) {
 		this.glSurfaceView.queueEvent(new Runnable() {
 			@Override
 			public void run() {

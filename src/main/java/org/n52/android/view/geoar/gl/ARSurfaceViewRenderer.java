@@ -16,20 +16,17 @@
 package org.n52.android.view.geoar.gl;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
-import org.n52.android.newdata.DataSourceHolder;
-import org.n52.android.newdata.PluginLoader;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
-import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.utils.GeoLocation;
-import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OpenGLCallable;
-import org.n52.android.view.geoar.gl.mode.RenderFeature;
+import org.n52.android.view.geoar.ARFragment2;
+import org.n52.android.view.geoar.ARFragment2.ARViewComponent;
+import org.n52.android.view.geoar.gl.mode.RenderFeature2;
+import org.n52.android.view.geoar.gl.mode.features.CubeFeature2;
 import org.n52.android.view.geoar.gl.mode.features.GridFeature;
 
 import android.content.Context;
@@ -43,7 +40,7 @@ import android.opengl.GLSurfaceView;
  * 
  */
 public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
-		CameraUpdateListener {
+		CameraUpdateListener, ARViewComponent {
 
 	/**
 	 * Interface for the Methods which are called inside the OpenGL specific
@@ -55,6 +52,9 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		void onRender(float[] projectionMatrix, float[] viewMatrix,
 				final float[] parentMatrix);
 
+	}
+	
+	public interface OnInitializeInGLThread{
 		void onCreateInGLESThread();
 	}
 
@@ -81,15 +81,19 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	protected final Context mContext;
 	private GLSurfaceView glSurfaceView;
 
-	private List<DataSourceVisualizationHandler> visualizationHandler = new ArrayList<DataSourceVisualizationHandler>();
+	private List<DataSourceVisualizationHandler> visualizationHandler = 
+			new ArrayList<DataSourceVisualizationHandler>();
+	
+	private List<RenderFeature2> renderFeatures = new ArrayList<RenderFeature2>();
 
-	private RenderFeature renderFeature;
+	private RenderFeature2 renderFeature;
 
 	public ARSurfaceViewRenderer(Context context,
 			final GLSurfaceView glSurfaceView) {
 		this.mContext = context;
 		this.mRotationProvider = (IRotationMatrixProvider) glSurfaceView;
 		this.glSurfaceView = glSurfaceView;
+		ARFragment2.addARViewComponent(this);
 	}
 
 	@Override
@@ -108,19 +112,25 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		// GLES20.glClear(clearMask);
 
 		float[] rotationMatrix = mRotationProvider.getRotationMatrix();
-		renderFeature.onRender(GLESCamera.projectionMatrix,
-				GLESCamera.viewMatrix, rotationMatrix);
+
 
 		// render Data
 		for (DataSourceVisualizationHandler handler : visualizationHandler) {
-//			if(handler.renderFeatures.size() > 0)
-//			handler.renderFeatures.get(0).onRender(GLESCamera.projectionMatrix,
-//						GLESCamera.viewMatrix, rotationMatrix);
-			for (OpenGLCallable feature : handler.renderFeatures) {
+			for (ARObject feature : handler.getARObjects()) {
 				feature.onRender(GLESCamera.projectionMatrix,
 						GLESCamera.viewMatrix, rotationMatrix);
 			}
 		}
+		
+		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+		for(RenderFeature2 r : renderFeatures){
+			r.onRender(GLESCamera.projectionMatrix,
+				GLESCamera.viewMatrix, rotationMatrix);
+		}
+		renderFeature.onRender(GLESCamera.projectionMatrix,
+				GLESCamera.viewMatrix, rotationMatrix);
+		
+//		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 	}
 
 	@Override
@@ -139,9 +149,9 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		GLESCamera.createViewMatrix();
 		// // Enable depth testing
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-		GLES20.glClearDepthf(1.0f);
-		GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-		GLES20.glDepthMask(true);
+//		GLES20.glClearDepthf(1.0f);
+//		GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+//		GLES20.glDepthMask(true);
 
 		// // Enable blending
 		GLES20.glEnable(GLES20.GL_BLEND);
@@ -155,6 +165,23 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 	private void initScene() {
 		renderFeature = new GridFeature();
+		renderFeature.onCreateInGLESThread();
+		
+		// first cube
+		RenderFeature2 first = new CubeFeature2();
+		first.setPosition(new float[] {1,0,5});
+		first.onCreateInGLESThread();
+		renderFeatures.add(first);
+		
+		RenderFeature2 sec = new CubeFeature2();
+		sec.setPosition(new float[] {5,0,5});
+		sec.onCreateInGLESThread();
+		renderFeatures.add(sec);
+		
+		RenderFeature2 third = new CubeFeature2();
+		third.setPosition(new float[] {2.5f,0,5});
+		third.onCreateInGLESThread();
+		renderFeatures.add(third);
 	}
 	
 
@@ -178,6 +205,19 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		// if (currentCenterGPoint != null)
 		// for (DataSourceVisualizationHandler handler : visualizationHandler)
 		// handler.setCenter(currentCenterGPoint);
+	}
+
+	@Override
+	public void onVisualizationHandlerAdded(
+			DataSourceVisualizationHandler handler) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setVisualizationHandlerRef(
+			List<DataSourceVisualizationHandler> handlers) {
+		this.visualizationHandler = handlers;
 	}
 
 

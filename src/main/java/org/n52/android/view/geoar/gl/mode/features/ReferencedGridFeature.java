@@ -16,12 +16,12 @@
 package org.n52.android.view.geoar.gl.mode.features;
 
 import org.n52.android.view.geoar.gl.mode.ColoredFeatureShader;
-import org.n52.android.view.geoar.gl.mode.RenderFeature;
+import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 
-public class ReferencedGridFeature extends RenderFeature{
+public class ReferencedGridFeature extends RenderFeature2{
 
 
 	static final int SIZE_PER_SIDE = 64;
@@ -124,7 +124,7 @@ public class ReferencedGridFeature extends RenderFeature{
 		}
 		renderer = new ColoredFeatureShader();
 		drawingMode = GLES20.GL_LINES;
-		setRenderObjectives(vertices, colors, normals, heightMapIndexData);
+		setRenderObjectives(vertices, colors, normals, null, heightMapIndexData);
 	}
 	
 	@Override

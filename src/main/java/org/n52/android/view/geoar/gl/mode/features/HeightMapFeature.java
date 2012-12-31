@@ -17,13 +17,13 @@ package org.n52.android.view.geoar.gl.mode.features;
 
 import org.n52.android.view.geoar.gl.mode.ColoredFeatureShader;
 import org.n52.android.view.geoar.gl.mode.FeatureShader;
-import org.n52.android.view.geoar.gl.mode.RenderFeature;
+import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.util.Log;
 
-public class HeightMapFeature extends RenderFeature{
+public class HeightMapFeature extends RenderFeature2 {
 
 	private static final String TAG = "HeightMapFeature";
 
@@ -156,7 +156,7 @@ public class HeightMapFeature extends RenderFeature{
 
 			indexCount = heightMapIndexData.length;
 
-			setRenderObjectives(vertices, colors, normals, heightMapIndexData);
+			setRenderObjectives(vertices, colors, normals, null, heightMapIndexData);
 		} catch (Throwable t) {
 			Log.w(TAG, t);
 		}

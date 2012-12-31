@@ -18,13 +18,13 @@ package org.n52.android.view.geoar.gl.mode.features;
 import org.apache.http.MethodNotSupportedException;
 import org.n52.android.view.geoar.gl.mode.ColoredFeatureShader;
 import org.n52.android.view.geoar.gl.mode.FeatureShader;
-import org.n52.android.view.geoar.gl.mode.RenderFeature;
+import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 
 import android.graphics.Color;
 import android.opengl.GLES20;
 import android.util.Log;
 
-public class GridFeature extends RenderFeature {
+public class GridFeature extends RenderFeature2 {
 	private int gridSize;
 	private int lineColor;
 	private float thickness = 1.f;
@@ -36,10 +36,10 @@ public class GridFeature extends RenderFeature {
 	}
 
 	public GridFeature(FeatureShader renderer) {
+		super();
 		gridSize = 80;
 		this.drawingMode = GLES20.GL_LINES;
 		this.renderer = renderer;
-		onCreateInGLESThread();
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public class GridFeature extends RenderFeature {
 			colors[i + 3] = 1.0f;
 		}
 
-		setRenderObjectives(vertices, colors, normals, indices);
+		setRenderObjectives(vertices, colors, null, null);
 	}
 	
 	@Override

@@ -15,32 +15,67 @@
  */
 package org.n52.android.view.geoar.gl;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.n52.android.newdata.SpatialEntity;
-import org.n52.android.view.geoar.gl.mode.RenderFeature;
+import org.n52.android.newdata.Visualization.ARVisualization.ItemVisualization;
+import org.n52.android.tracking.location.LocationHandler;
+import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OpenGLCallable;
+import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 
 import android.location.Location;
 
-public class ARObject {
+public class ARObject implements OpenGLCallable {
 
 	public interface Conditions {
 		boolean nearVisualization();
+
 		boolean farVisualization();
 	}
-	
-	private float distanceTo;
 
-	private RenderFeature renderFeature;
-	private SpatialEntity entity;
+	protected class VisualizationLayer {
+		final Class<? extends ItemVisualization> clazz;
+		private Set<RenderFeature2> renderFeatureList = new HashSet<RenderFeature2>();
 
-	
-	public ARObject(SpatialEntity entity){
-		this.entity = entity;
+		VisualizationLayer(final Class<? extends ItemVisualization> clazz) {
+			this.clazz = clazz;
+		}
+
+		void addRenderFeatures(Collection<RenderFeature2> renderFeatures) {
+			renderFeatureList.addAll(renderFeatures);
+		}
 	}
+
+	private float distanceTo;
 	
-	public void onRender(float[] projectionMatrix, float[] viewMatrix, float[] parentMatrix){
-		// TODO different visualizations
-		if(renderFeature != null)
-			renderFeature.onRender(projectionMatrix, viewMatrix, parentMatrix);
+	private final Map<Class<? extends ItemVisualization>, VisualizationLayer> 
+		visualizationLayers = new HashMap<Class<? extends ItemVisualization>, VisualizationLayer>();
+	private final SpatialEntity entity;
+	
+
+	public ARObject(SpatialEntity entity) {
+		this.entity = entity;
+		onLocationUpdate(LocationHandler.getLastKnownLocation());
+	}
+
+	@Override
+	public void onPreRender() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onRender(float[] projectionMatrix, float[] viewMatrix,
+			float[] parentMatrix) {
+		for(VisualizationLayer layer : visualizationLayers.values()){
+			for(RenderFeature2 renderFeature : layer.renderFeatureList){
+				renderFeature.onRender(projectionMatrix, viewMatrix, parentMatrix);
+			}
+		}
 	}
 
 	public void onLocationUpdate(Location location) {
@@ -50,17 +85,18 @@ public class ARObject {
 		final double longitude = entity.getLongitude();
 		final double latitude = entity.getLatitude();
 		int altitude = entity.getAltitude();
-		
+
 		/** calc the distance */
 		final float[] x = new float[1];
 		Location.distanceBetween(location.getLatitude(),
 				location.getLongitude(), latitude, longitude, x);
 		distanceTo = x[0];
-		
-		// just want the distance -> length 1
+
+		/** just the distance -> length 1 */
 		Location.distanceBetween(location.getLatitude(),
 				location.getLongitude(), location.getLatitude(), longitude, x);
-		// just want the distance -> length 1
+		
+		/** just the distance -> length 1 */
 		final float[] z = new float[1];
 		Location.distanceBetween(location.getLatitude(),
 				location.getLongitude(), latitude, location.getLongitude(), z);
@@ -74,9 +110,25 @@ public class ARObject {
 		if (altitude == 0)
 			altitude = (int) location.getAltitude();
 		// testen
-		renderFeature
-				.setPosition(new float[] { (float) x[0] / 10f,
-						(float) (altitude - location.getAltitude()),
-						(float) z[0] / 10f});
+
+		float[] newPosition = new float[] { (float) x[0] / 10f,
+				(float) (altitude - location.getAltitude()), (float) z[0] / 10f };
+		
+		for(VisualizationLayer layer : visualizationLayers.values()){
+			for(RenderFeature2 renderFeature : layer.renderFeatureList)
+				renderFeature.setPosition(newPosition);
+		}
+		
 	}
+
+	public void add(Class<? extends ItemVisualization> class1,
+			Collection<RenderFeature2> features) {
+		if (visualizationLayers.containsKey(class1)) {
+			visualizationLayers.get(class1).addRenderFeatures(features);
+		} else {
+			VisualizationLayer layer = new VisualizationLayer(class1);
+			layer.addRenderFeatures(features);
+		}
+	}
+
 }

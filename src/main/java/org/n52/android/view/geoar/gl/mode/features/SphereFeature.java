@@ -15,9 +15,9 @@
  */
 package org.n52.android.view.geoar.gl.mode.features;
 
-import org.n52.android.view.geoar.gl.mode.RenderFeature;
+import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 
-public class SphereFeature extends RenderFeature {
+public class SphereFeature extends RenderFeature2 {
 
 	@Override
 	public void setOpenGLPreRenderingSettings() {
@@ -36,5 +36,4 @@ public class SphereFeature extends RenderFeature {
 		// TODO Auto-generated method stub
 		
 	}
-
 }

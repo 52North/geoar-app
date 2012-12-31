@@ -36,7 +36,7 @@ public abstract class Spatial {
 	}
 	
 	public void setPosition(float[] position){
-		position[2] *= -1;
+		position[2] = position[2] * (-1);
 		this.position = position;
 	}
 	

@@ -50,7 +50,6 @@ public class ColoredFeatureShader extends FeatureShader {
 	
 	public ColoredFeatureShader() {
 		super(vertexShader, fragmentShader);
-		initShaders();
 	}
 
 }
