@@ -18,7 +18,6 @@ package org.n52.android.view.geoar.gui;
 import java.util.List;
 
 import org.n52.android.GeoARApplication;
-import org.n52.android.R;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.view.geoar.ARFragment2;
@@ -27,8 +26,6 @@ import org.n52.android.view.geoar.gl.ARObject;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer;
 import org.n52.android.view.geoar.gl.DataSourceVisualizationHandler;
 
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -63,12 +60,14 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener,
 	private Paint poiRenderer;
 
 	private boolean init;
+	private Context context;
 
 	GUIDrawable drawable;
 	private List<DataSourceVisualizationHandler> visualizationHandler;
 
 	public ARCanvasSurfaceView(Context context) {
 		super(context);
+		this.context = context;
 		this.width = getWidth();
 		this.height = getHeight();
 		init();
@@ -76,6 +75,7 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener,
 
 	public ARCanvasSurfaceView(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		this.context = context;
 		this.width = getWidth();
 		this.height = getHeight();
 		init();
@@ -97,7 +97,7 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener,
 						for(ARObject object : visHandler.getARObjects()){
 							if(object.thisObjectHitted(motionEvent.getX(), motionEvent.getY())){
 								Toast.makeText(GeoARApplication.applicationContext, "omg yea", Toast.LENGTH_SHORT).show();
-//								object.onItemClicked();
+								object.onItemClicked(context);
 							}
 						}
 					}

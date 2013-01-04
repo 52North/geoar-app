@@ -105,8 +105,8 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 							features.add((RenderFeature2) feature);
 							glSurfaceView.addRenderableToScene((OnInitializeInGLThread) feature);
 						}
-						arObject.addRenderFeature(visualization.getClass(), features);
-						arObject.addCanvasFeature(visualization.getClass(), visualization.getEntityVisualzation(entity));
+						arObject.addRenderFeature(visualization, features);
+						arObject.addCanvasFeature(visualization, visualization.getEntityVisualzation(entity));
 					}
 					arObjects.add(arObject); 
 				}

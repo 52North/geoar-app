@@ -34,6 +34,7 @@ import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.location.Location;
@@ -45,11 +46,13 @@ public class ARObject implements OpenGLCallable {
 
 	protected class VisualizationLayer {
 		final Class<? extends ItemVisualization> clazz;
+		final ItemVisualization itemVisualization;
 		private Set<RenderFeature2> renderFeatureList = new HashSet<RenderFeature2>();
 		private DataSourceVisualizationCanvas canvasFeature;
 
-		VisualizationLayer(final Class<? extends ItemVisualization> clazz) {
-			this.clazz = clazz;
+		VisualizationLayer(ItemVisualization itemVisualization) {
+			this.itemVisualization = itemVisualization;
+			this.clazz = itemVisualization.getClass();
 		}
 
 		void addRenderFeatures(Collection<RenderFeature2> renderFeatures) {
@@ -123,23 +126,23 @@ public class ARObject implements OpenGLCallable {
 		}
 	}
 	
-//	public void onItemClicked(){
-//		Builder builder = new AlertDialog.Builder(GeoARApplication.applicationContext);
-//		builder.setTitle("entity")
-//				.setMessage("entitysnippet")
-//				.setNeutralButton(R.string.cancel, null);
-//
-////		// TODO use view caching with convertView parameter
-////		View featureView = item.getVisualization()
-////				.getFeatureView(item.getSpatialEntity(), null,
-////						null, getActivity());
-//
-////		if (featureView != null) {
-////			builder.setView(featureView);
-////		}
-////		builder.show();
-//
-//	}
+	public void onItemClicked(Context context){
+		Builder builder = new AlertDialog.Builder(context);
+		builder.setTitle("entity")
+				.setMessage("entitysnippet")
+				.setNeutralButton(R.string.cancel, null);
+
+		// TODO use view caching with convertView parameter
+		View featureView = visualizationLayers.values().iterator().next().itemVisualization
+				.getFeatureView(entity, null,
+						null, context);
+
+		if (featureView != null) {
+			builder.setView(featureView);
+		}
+		builder.create().show();
+
+	}
 	
 	public void updateScreenCoordinates(){
 		float[] screenPos = new float[3];
@@ -215,34 +218,35 @@ public class ARObject implements OpenGLCallable {
 		this.newPosition[2] = newPosition[2] - GLESCamera.cameraPosition[2];
 	}
 
-	public void addRenderFeature(Class<? extends ItemVisualization> class1,
+	public void addRenderFeature(ItemVisualization itemVisualization,
 			Collection<RenderFeature2> features) {
-		if (visualizationLayers.containsKey(class1)) {
-			visualizationLayers.get(class1).addRenderFeatures(features);
+		if (visualizationLayers.containsKey(itemVisualization.getClass())) {
+			visualizationLayers.get(itemVisualization.getClass()).addRenderFeatures(features);
 		} else {
-			VisualizationLayer layer = new VisualizationLayer(class1);
+			VisualizationLayer layer = new VisualizationLayer(itemVisualization);
 			layer.addRenderFeatures(features);
+			// FIXME XXX TODO brauchen wir nicht
 			for (RenderFeature2 feature : features) {
 				feature.setRelativePosition(newPosition);
 			}
-			visualizationLayers.put(class1, layer);
+			visualizationLayers.put(itemVisualization.getClass(), layer);
 		}
 	}
 
-	public void addCanvasFeature(Class<? extends ItemVisualization> clazz,
+	public void addCanvasFeature(ItemVisualization itemVisualization,
 			DataSourceVisualizationCanvas canvasFeature) {
 		if (canvasFeature == null)
 			return;
 
-		if (visualizationLayers.containsKey(clazz)) {
-			visualizationLayers.get(clazz).canvasFeature = canvasFeature;
+		if (visualizationLayers.containsKey(itemVisualization.getClass())) {
+			visualizationLayers.get(itemVisualization.getClass()).canvasFeature = canvasFeature;
 		} else {
-			VisualizationLayer layer = new VisualizationLayer(clazz);
+			VisualizationLayer layer = new VisualizationLayer(itemVisualization);
 			layer.canvasFeature = canvasFeature;
 			// for (RenderFeature2 feature : features) {
 			// feature.setRelativePosition(newPosition);
 			// }
-			visualizationLayers.put(clazz, layer);
+			visualizationLayers.put(itemVisualization.getClass(), layer);
 		}
 	}
 
