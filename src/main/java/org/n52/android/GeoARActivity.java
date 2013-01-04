@@ -22,6 +22,7 @@ import org.n52.android.newdata.PluginLoader;
 import org.n52.android.newdata.Visualization;
 import org.n52.android.tracking.camera.RealityCamera;
 import org.n52.android.tracking.location.LocationHandler;
+import org.n52.android.utils.GeoLocation;
 import org.n52.android.view.geoar.ARFragment2;
 import org.n52.android.view.map.MapFragment;
 
@@ -110,7 +111,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 			// restore manual positioning
 			LocationHandler.onRestoreInstanceState(savedInstanceState);
 		}
-
+		LocationHandler.setManualLocation(new GeoLocation(51.965344, 7.600003));
 	}
 
 	private void showFragment(Fragment fragment) {

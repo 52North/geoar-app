@@ -18,9 +18,10 @@ package org.n52.android.view.geoar.gl.model;
 import java.util.ArrayList;
 
 import org.n52.android.newdata.SpatialEntity;
-import org.n52.android.newdata.gl.primitives.DataSourceRenderable;
+import org.n52.android.newdata.vis.DataSourceVisualization.DataSourceVisualizationGL;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OnInitializeInGLThread;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OpenGLCallable;
+import org.n52.android.view.geoar.gl.mode.Spatial;
 import org.n52.android.view.geoar.gl.model.shader.Renderer;
 import org.n52.android.view.geoar.gl.model.shader.SimpleColorRenderer;
 
@@ -30,7 +31,7 @@ import android.opengl.Matrix;
 
 @SuppressLint("NewApi")
 public abstract class RenderNode extends Spatial implements
-		DataSourceRenderable, OpenGLCallable, OnInitializeInGLThread {
+		DataSourceVisualizationGL, OpenGLCallable, OnInitializeInGLThread {
 
 	protected String name;
 
@@ -88,11 +89,12 @@ public abstract class RenderNode extends Spatial implements
 		onRender(projectionMatrix, viewMatrix, null);
 	}
 
+	@Override
 	public void onRender(float[] projectionMatrix, float[] viewMatrix,
 			final float[] parentMatrix) {
 		if (!isVisible)
-			return; 
-
+			return;
+	
 		// set identity
 		Matrix.setIdentityM(modelMatrix, 0);
 		Matrix.setIdentityM(scaleMatrix, 0);
@@ -169,6 +171,7 @@ public abstract class RenderNode extends Spatial implements
 		for (RenderNode child : children) {
 			child.onRender(projectionMatrix, viewMatrix, modelMatrix);
 		}
+
 	}
 
 	/**

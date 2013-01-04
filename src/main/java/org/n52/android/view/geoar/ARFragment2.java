@@ -28,6 +28,7 @@ import org.n52.android.newdata.PluginLoader;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.tracking.location.LocationHandler.OnLocationUpdateListener;
 import org.n52.android.view.geoar.gl.DataSourceVisualizationHandler;
+import org.n52.android.view.geoar.gui.ARCanvasSurfaceView;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -50,11 +51,9 @@ import com.actionbarsherlock.app.SherlockFragment;
  */
 public class ARFragment2 extends SherlockFragment implements
 		OnLocationUpdateListener {
-	
-	private static final List<DataSourceVisualizationHandler> checkedVisualizationHandler = 
-			new LinkedList<DataSourceVisualizationHandler>();
-	private static final List<ARViewComponent> arViewComponents = 
-			new ArrayList<ARViewComponent>();
+
+	private static final List<DataSourceVisualizationHandler> checkedVisualizationHandler = new LinkedList<DataSourceVisualizationHandler>();
+	private static final List<ARViewComponent> arViewComponents = new ArrayList<ARViewComponent>();
 
 	public static final void addARViewComponent(ARViewComponent component) {
 		if (arViewComponents.contains(component))
@@ -69,13 +68,12 @@ public class ARFragment2 extends SherlockFragment implements
 
 	public interface ARViewComponent {
 		void onVisualizationHandlerAdded(DataSourceVisualizationHandler handler);
-		void setVisualizationHandlerRef(List<DataSourceVisualizationHandler> handlers);
+
+		void setVisualizationHandlerRef(
+				List<DataSourceVisualizationHandler> handlers);
 	}
 
-	private ARSurfaceView augmentedView;
-
-	private OnCheckedChangedListener<DataSourceInstanceHolder> dataSourceListener = 
-			new OnCheckedChangedListener<DataSourceInstanceHolder>() {
+	private OnCheckedChangedListener<DataSourceInstanceHolder> dataSourceListener = new OnCheckedChangedListener<DataSourceInstanceHolder>() {
 
 		@Override
 		public void onCheckedChanged(DataSourceInstanceHolder item,
@@ -102,6 +100,9 @@ public class ARFragment2 extends SherlockFragment implements
 
 		}
 	};
+
+	private ARSurfaceView augmentedView;
+	private ARCanvasSurfaceView canvasView;
 
 	/**
 	 * Constructor
@@ -135,14 +136,18 @@ public class ARFragment2 extends SherlockFragment implements
 			augmentedView.setZOrderMediaOverlay(true);
 			layout.addView(augmentedView, 0, new FrameLayout.LayoutParams(
 					LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+
 			// final DisplayMetrics displayMetrics = new DisplayMetrics();
 			// getActivity().getWindowManager().getDefaultDisplay()
 			// .getMetrics(displayMetrics);
 		}
+
+		canvasView = new ARCanvasSurfaceView(getActivity());
+		layout.addView(canvasView, 1, new FrameLayout.LayoutParams(
+				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+
 		super.onActivityCreated(savedInstanceState);
 	}
-
-
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,

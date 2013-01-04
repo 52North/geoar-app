@@ -15,9 +15,15 @@
  */
 package org.n52.android.view.geoar.gl;
 
+import java.util.Arrays;
+
+import javax.microedition.khronos.opengles.GL10;
+
 import org.n52.android.tracking.camera.RealityCamera;
 
+import android.opengl.GLU;
 import android.opengl.Matrix;
+import android.util.FloatMath;
 
 /**
  * 
@@ -25,6 +31,54 @@ import android.opengl.Matrix;
  * 
  */
 public class GLESCamera {
+
+	private static class GeometryPlane {
+		private static float[] mTmp1;
+		private static float[] mTmp2;
+		final float[] normal = new float[3];
+		float dot = 0;
+
+		void set(float[] p1, float[] p2, float[] p3) {
+			mTmp1 = Arrays.copyOf(p1, 3);
+			mTmp2 = Arrays.copyOf(p2, 3);
+
+			mTmp1[0] -= mTmp2[0];
+			mTmp1[1] -= mTmp2[1];
+			mTmp1[2] -= mTmp2[2];
+
+			mTmp2[0] -= p3[0];
+			mTmp2[1] -= p3[1];
+			mTmp2[2] -= p3[2];
+
+			// cross produkt in order to calculate the normal
+			normal[0] = mTmp1[1] * mTmp2[2] - mTmp1[2] * mTmp2[1];
+			normal[1] = mTmp1[2] * mTmp2[0] - mTmp1[0] * mTmp2[2];
+			normal[2] = mTmp1[0] * mTmp2[1] - mTmp1[1] * mTmp2[0];
+
+			// normalizing the result
+			float a = FloatMath.sqrt(normal[0] * normal[0] + normal[1]
+					* normal[1] + normal[2] * normal[2]);
+			if (a != 0 && a != 1) {
+				a = 1 / a;
+				normal[0] *= a;
+				normal[1] *= a;
+				normal[2] *= a;
+			}
+
+			dot = -(p1[0] * normal[0] + p1[1] * normal[1] + p1[2] * normal[2]);
+		}
+
+		boolean isOutside(float[] p) {
+			float dist = -(p[0] * normal[0] + p[1] * normal[1] + p[2]
+					* normal[2])
+					+ dot;
+			return dist < 0;
+		}
+	}
+
+	/** private constructor -> just a static class */
+	private GLESCamera() {
+	}
 
 	// Viewport of OpenGL Viewport
 	public static int glViewportWidth;
@@ -37,17 +91,185 @@ public class GLESCamera {
 
 	public static int[] viewPortMatrix;
 
+	public static float[] cameraPosition = new float[] { 0.f, 1.6f, 0.f };
+
+	private final static float[][] planePoints = new float[8][3];
+	
+	// TODO FIXME XXX clipSpace needs to be setted with real frustum coordinates
+	private final static float[][] clipSpace = new float[][] {
+			new float[] { -1, -1, -1 }, new float[] { 1, -1, -1 },
+			new float[] { 1, 1, -1 }, new float[] { -1, 1, -1 },
+			new float[] { -1, -1, 1 }, new float[] { 1, -1, 1 },
+			new float[] { 1, 1, 1 }, new float[] { -1, 1, 1 }, };
+	private final static GeometryPlane[] frustumPlanes = new GeometryPlane[6];
+
+	static {
+		for (int i = 0; i < 8; i++) {
+			planePoints[i] = new float[3];
+		}
+		for (int i = 0; i < 6; i++) {
+			frustumPlanes[i] = new GeometryPlane();
+		}
+	}
+
 	public static void createViewMatrix() {
 		// calculate the viewMatrix for OpenGL rendering
 		float[] newViewMatrix = new float[16];
 		Matrix.setIdentityM(newViewMatrix, 0);
-		Matrix.setLookAtM(newViewMatrix, 0, 0.0f, 0.0f, 0.0f, // camera position
-				0.0f, 0.0f, -5.0f, // look at
+		gluLookAt(newViewMatrix, cameraPosition[0], cameraPosition[1],
+				cameraPosition[2], // camera position
+				0.0f, cameraPosition[1], -5.0f, // look at
 				0.0f, 1.0f, 0.0f); // up-vektor
+		// Matrix.setLookAtM(newViewMatrix, 0, 0.0f, 0.0f, 0.0f, // camera
+		// position
+		// 0.0f, 0.0f, -5.0f, // look at
+		// 0.0f, 1.0f, 0.0f); // up-vektor
 		viewMatrix = newViewMatrix;
 	}
 
+	public static boolean pointInFrustum(float[] p) {
+		for (int i = 0; i < frustumPlanes.length; i++) {
+			if (!frustumPlanes[i].isOutside(p))
+				return false;
+		}
+		return true;
+	}
+
+	public static void updateFrustum(float[] projectionMatrix,
+			float[] viewMatrix) {
+		float[] projectionViewMatrix = new float[16];
+		float[] invertPVMatrix = new float[16];
+		Matrix.multiplyMM(projectionViewMatrix, 0, projectionMatrix, 0,
+				viewMatrix, 0);
+		Matrix.invertM(invertPVMatrix, 0, projectionViewMatrix, 0);
+
+		for (int i = 0; i < 8; i++) {
+			float[] point = Arrays.copyOf(clipSpace[i], 3);
+
+			float rw = point[0] * invertPVMatrix[3] + point[1]
+					* invertPVMatrix[7] + point[2] * invertPVMatrix[11]
+					+ invertPVMatrix[15];
+
+			planePoints[i] = clipSpace[i];
+
+			float[] newPlanePoints = new float[3];
+			newPlanePoints[0] = (point[0] * invertPVMatrix[0] + point[1]
+					* invertPVMatrix[4] + point[2] * invertPVMatrix[8] + invertPVMatrix[12])
+					/ rw;
+			newPlanePoints[1] = (point[0] * invertPVMatrix[1] + point[1]
+					* invertPVMatrix[5] + point[2] * invertPVMatrix[9] + invertPVMatrix[13])
+					/ rw;
+			newPlanePoints[2] = (point[0] * invertPVMatrix[2] + point[1]
+					* invertPVMatrix[6] + point[2] * invertPVMatrix[10] + invertPVMatrix[14])
+					/ rw;
+			planePoints[i] = newPlanePoints;
+		}
+
+		frustumPlanes[0].set(planePoints[1], planePoints[0], planePoints[2]);
+		frustumPlanes[1].set(planePoints[4], planePoints[5], planePoints[7]);
+		frustumPlanes[2].set(planePoints[0], planePoints[4], planePoints[3]);
+		frustumPlanes[3].set(planePoints[5], planePoints[1], planePoints[6]);
+		frustumPlanes[4].set(planePoints[2], planePoints[3], planePoints[6]);
+		frustumPlanes[5].set(planePoints[4], planePoints[0], planePoints[1]);
+	}
+
+	public static void gluLookAt(float[] m, float eyeX, float eyeY, float eyeZ,
+			float centerX, float centerY, float centerZ, float upX, float upY,
+			float upZ) {
+
+		// See the OpenGL GLUT documentation for gluLookAt for a description
+		// of the algorithm. We implement it in a straightforward way:
+
+		float fx = centerX - eyeX;
+		float fy = centerY - eyeY;
+		float fz = centerZ - eyeZ;
+
+		// Normalize f
+		float rlf = 1.0f / Matrix.length(fx, fy, fz);
+		fx *= rlf;
+		fy *= rlf;
+		fz *= rlf;
+
+		// compute s = f x up (x means "cross product")
+		float sx = fy * upZ - fz * upY;
+		float sy = fz * upX - fx * upZ;
+		float sz = fx * upY - fy * upX;
+
+		// and normalize s
+		float rls = 1.0f / Matrix.length(sx, sy, sz);
+		sx *= rls;
+		sy *= rls;
+		sz *= rls;
+
+		// compute u = s x f
+		float ux = sy * fz - sz * fy;
+		float uy = sz * fx - sx * fz;
+		float uz = sx * fy - sy * fx;
+
+		m[0] = sx;
+		m[1] = ux;
+		m[2] = -fx;
+		m[3] = 0.0f;
+
+		m[4] = sy;
+		m[5] = uy;
+		m[6] = -fy;
+		m[7] = 0.0f;
+
+		m[8] = sz;
+		m[9] = uz;
+		m[10] = -fz;
+		m[11] = 0.0f;
+
+		m[12] = 0.0f;
+		m[13] = 0.0f;
+		m[14] = 0.0f;
+		m[15] = 1.0f;
+
+		// Matrix.m
+		// gl.glMultMatrixf(m, 0);
+		// gl.glTranslatef(-eyeX, -eyeY, -eyeZ);
+	}
+
 	public static void createProjectionMatrix(int width, int height) {
+		glViewportHeight = height;
+		glViewportWidth = width;
+		viewPortMatrix = new int[] { 0, 0, width, height };
+
+		if (RealityCamera.cameraViewportHeight == 0
+				|| RealityCamera.cameraViewportWidth == 0) {
+			// Set camera viewport if none exists
+			RealityCamera.setViewportSize(width, height);
+		}
+
+		float[] newProjMatrix = new float[16];
+		//
+		// final float ratio = (float) width / height;
+		// float top = RealityCamera.zNear * (float) Math.tan(RealityCamera.fovY
+		// * (Math.PI / 360.0));
+		// float bottom = -top;
+		// float left = bottom * ratio;
+		// float right = top * ratio;
+		//
+		// Matrix.frustumM(newProjMatrix, 0, left, right, bottom, top,
+		// RealityCamera.zNear, RealityCamera.zFar);
+		// projectionMatrix = newProjMatrix;
+
+		final float ratio = (float) width / height;
+		final float left = -ratio;
+		final float right = ratio;
+		final float bottom = -1.0f;
+		final float top = 1.0f;
+		final float near = RealityCamera.zNear;
+		final float far = RealityCamera.zFar;
+
+		Matrix.frustumM(newProjMatrix, 0, left, right, bottom, top, near, far);
+
+		projectionMatrix = newProjMatrix;
+		updateFrustum(newProjMatrix, viewMatrix);
+	}
+
+	public static void createProjectionMatrix(GL10 gl, int width, int height) {
 		glViewportHeight = height;
 		glViewportWidth = width;
 		viewPortMatrix = new int[] { 0, 0, width, height };
@@ -68,22 +290,30 @@ public class GLESCamera {
 		// buildOpenGLProjectionByIntrinsics(newProjMatrix, 500, 500, 0, 240,
 		// 180, width, height, RealityCamera.zNear,
 		// RealityCamera.zFar);
-		openGLProjectionByIntrinsicCameraParamters(newProjMatrix, 500, 500,
-				240, 180, 480, 360, RealityCamera.zNear, RealityCamera.zFar);
+
+		// TODO this worked but has to be optimized
+		// openGLProjectionByIntrinsicCameraParamters(newProjMatrix, 500, 500,
+		// height/2, width/2, height, width, RealityCamera.zNear,
+		// RealityCamera.zFar);
+		// projectionMatrix = newProjMatrix;
+
+		final float ratio = (float) width / height;
+		// final float left = -ratio;
+		// final float right = ratio;
+		// final float bottom = -1.0f;
+		// final float top = 1.0f;
+		// final float near = RealityCamera.zNear;
+		// final float far = RealityCamera.zFar;
+		//
+		// Matrix.frustumM(newProjMatrix, 0, left, right, bottom, top, near,
+		// far);
+		//
+		// projectionMatrix = newProjMatrix;
+
+		perspectiveMatrix(newProjMatrix, width / height, RealityCamera.fovY,
+				ratio, RealityCamera.zNear, RealityCamera.zFar);
+
 		projectionMatrix = newProjMatrix;
-		
-//		final float ratio = (float) width / height;
-//		final float left = -ratio;
-//		final float right = ratio;
-//		final float bottom = -1.0f;
-//		final float top = 1.0f;
-//		final float near = 1.0f;
-//		final float far = 10.0f;
-//		
-//		Matrix.frustumM(newProjMatrix, 0, left, right, bottom, top, near, far);
-//		
-//		projectionMatrix = newProjMatrix;
-//		perspectiveMatrix(newProjMatrix, width / height, fovy, aspect, RealityCamera.zNear, RealityCamera.zFar);
 	}
 
 	/**

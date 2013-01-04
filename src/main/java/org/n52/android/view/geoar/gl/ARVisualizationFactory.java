@@ -23,10 +23,9 @@ import java.util.Set;
 
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.RenderFeatureFactory;
-import org.n52.android.newdata.gl.primitives.DataSourceRenderable;
-import org.n52.android.newdata.gl.primitives.RenderLoader;
+import org.n52.android.newdata.vis.DataSourceVisualization;
+import org.n52.android.newdata.vis.DataSourceVisualization.DataSourceVisualizationGL;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OnInitializeInGLThread;
-import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OpenGLCallable;
 import org.n52.android.view.geoar.gl.model.RenderNode;
 import org.n52.android.view.geoar.gl.model.primitives.Cube;
 
@@ -67,25 +66,21 @@ public class ARVisualizationFactory implements RenderFeatureFactory {
 	}
 
 	@Override
-	public DataSourceRenderable createCube() {
+	public DataSourceVisualizationGL createCube() {
 		Cube cube = new Cube();
 		renderables.add(cube);
 		return cube;
 	}
 
 	@Override
-	public DataSourceRenderable createSphere() {
+	public DataSourceVisualizationGL createSphere() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public DataSourceRenderable createRenderable(RenderLoader renderLoader) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
-	public DataSourceRenderable createGird() {
+
+	public DataSourceVisualization createGird() {
 		// return new Grid();
 		return null;
 	}

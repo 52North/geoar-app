@@ -22,16 +22,19 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
-import org.n52.android.newdata.gl.primitives.DataSourceRenderable;
+import javax.microedition.khronos.opengles.GL10;
+
+import org.n52.android.newdata.vis.DataSourceVisualization.DataSourceVisualizationGL;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OnInitializeInGLThread;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OpenGLCallable;
-import org.n52.android.view.geoar.gl.model.Spatial;
+import org.n52.android.view.geoar.gl.GLESCamera;
 
 import android.opengl.GLES20;
+import android.opengl.GLU;
 import android.opengl.Matrix;
 
 public abstract class RenderFeature2 extends Spatial implements
-		DataSourceRenderable, OpenGLCallable, OnInitializeInGLThread {
+		DataSourceVisualizationGL, OpenGLCallable, OnInitializeInGLThread {
 
 	/** Size of the position data in elements. */
 	static final int POSITION_DATA_SIZE = 3;
@@ -351,62 +354,95 @@ public abstract class RenderFeature2 extends Spatial implements
 		}
 	}
 
+	/** Feature geometries and shader settings */
 	protected FeatureGeometry geometry;
 	protected FeatureShader renderer;
+	protected BoundingBox boundingBox;
 
-	/** OpenGL handles to our program attributes */
-
+	/** Model Matrix of this feature */
 	private final float[] modelMatrix = new float[16];
+	/** Model-View-Projection Matrix of our feature */
 	private final float[] mvpMatrix = new float[16];
+	/** temporary Matrix for caching */
 	private final float[] tmpMatrix = new float[16];
 
+	/** GL drawing mode - default triangles */
 	protected int drawingMode = GLES20.GL_TRIANGLES;
-
+	/** GL for features rendering */
 	protected boolean enableBlending = true;
 	protected boolean enableDepthTest = true;
 	protected boolean enableDepthMask = true;
 	protected boolean enableCullFace = false;
 
-
-
+	/** alpha value for Blending */
 	protected Float alpha;
+	/** color of the object */
 	protected int androidColor;
 	
-
+	public RenderFeature2(){
+		
+	}
 
 	protected void setRenderObjectives(float[] vertices, float[] colors,
 			float[] normals, float[] textureCoords, short[] indices) {
 		if (indices == null || indices.length == 0) {
 			setRenderObjectives(vertices, colors, normals, textureCoords);
 		} else {
-			if(renderer == null){
+			if (renderer == null) {
 				renderer = new ColoredFeatureShader();
 			}
 			renderer.onCreateInGLESThread();
 			geometry = new FeatureGeometryVBOandIBO(vertices, colors, normals,
 					textureCoords, indices);
+			boundingBox = new BoundingBox(vertices);
 		}
 	}
 
 	protected void setRenderObjectives(float[] vertices, float[] colors,
 			float[] normals, float[] textureCoords) {
-		if(renderer == null){
+		if (renderer == null) {
 			renderer = new ColoredFeatureShader();
 		}
 		renderer.onCreateInGLESThread();
 		geometry = new FeatureGeometryStride(vertices, colors, normals,
 				textureCoords);
+		boundingBox = new BoundingBox(vertices);
+	}
+
+	public float[] onScreenCoordsUpdate() {
+		if (modelMatrix == null || GLESCamera.projectionMatrix == null
+				|| GLESCamera.viewPortMatrix == null) {
+			return null;
+		}
+		float[] output = new float[3];
+		int res = GLU.gluProject(position[0], position[1], position[2],
+				modelMatrix, 0, GLESCamera.projectionMatrix, 0,
+				GLESCamera.viewPortMatrix, 0, output, 0);
+
+		if (res == GL10.GL_FALSE)
+			return null;
+		return output;
+	}
+
+	public void transform() {
+		// TODO
+		// gl.glTranslatef(tx, ty, tz);
+		// gl.glRotatef(rz, 0, 0, 1);
+		// gl.glRotatef(ry, 0, 1, 0);
+		// gl.glRotatef(rx, 1, 0, 0);
+		// gl.glScalef(sx, sy, sz);
 	}
 
 	@Override
 	public void onRender(float[] projectionMatrix, float[] viewMatrix,
 			float[] parentMatrix) {
-
+		/** set the matrices to identity matrix */
 		Matrix.setIdentityM(modelMatrix, 0);
 		Matrix.setIdentityM(mvpMatrix, 0);
 		Matrix.setIdentityM(tmpMatrix, 0);
-		Matrix.translateM(modelMatrix, 0, position[0], position[1] - 1.6f,
-				position[2]);
+		/** translate feature to the position relative to the devices place */
+		// TODO i think position[0] must be translated negatively -> Check
+		Matrix.translateM(modelMatrix, 0, position[0], position[1], position[2]);
 
 		if (parentMatrix != null) {
 			Matrix.multiplyMM(tmpMatrix, 0, parentMatrix, 0, modelMatrix, 0);
@@ -414,14 +450,31 @@ public abstract class RenderFeature2 extends Spatial implements
 			Matrix.setIdentityM(tmpMatrix, 0);
 		}
 
-		Matrix.multiplyMM(tmpMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, tmpMatrix, 0);
+		Matrix.multiplyMM(modelMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, modelMatrix, 0);
+
+//		if (boundingBox != null || position != null) {
+//			float[] vec = new float[4];
+//			Matrix.multiplyMV(vec, 0, modelMatrix, 0, position, 0);
+//			if(!GLESCamera.pointInFrustum(vec))
+//				return false;
+//		}
 
 		/** sets the program object as part of current rendering state */
 		renderer.useProgram();
 		renderer.setModelViewProjectionMatrix(mvpMatrix);
-
+		// onScreenCoordsUpdate();
+		/** render the geometry of this feature */
 		geometry.onRenderGeometrie();
+	}
+	
+	public void onRender(float[] mvpMatrix){
+		/** sets the program object as part of current rendering state */
+		renderer.useProgram();
+		renderer.setModelViewProjectionMatrix(mvpMatrix);
+		/** render the geometry of this feature */
+		if(geometry != null)
+			geometry.onRenderGeometrie();
 	}
 
 	@Override

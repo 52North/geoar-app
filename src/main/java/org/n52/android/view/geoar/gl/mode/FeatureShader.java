@@ -157,6 +157,14 @@ public class FeatureShader {
 						"a_Color" });
 		mvpMatrixUniform = GLES20.glGetUniformLocation(programHandle,
 				MVP_MATRIX_UNIFORM);
+		positionHandle = GLES20.glGetAttribLocation(programHandle,
+				POSITION_ATTRIBUTE);
+		if(supportsNormals)
+			normalHandle = GLES20.glGetAttribLocation(programHandle,
+					NORMAL_ATTRIBUTE);
+		if(supportsColors)
+			colorHandle = GLES20.glGetAttribLocation(programHandle, 
+					COLOR_ATTRIBUTE);
 	}
 
 	public void useProgram() {

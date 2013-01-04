@@ -9,11 +9,11 @@
         android:id="@+id/CameraView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
- -->
- 	<org.n52.android.view.geoar.gui.TestGui
+ 
+ 	<org.n52.android.view.geoar.gui.ARCanvasSurfaceView
  	    android:id="@+id/testGui"
  	    android:layout_width="match_parent"
- 	    android:layout_height="match_parent" />  
+ 	    android:layout_height="match_parent" />  -->
 
 
 </FrameLayout>

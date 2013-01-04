@@ -51,10 +51,9 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 		void onRender(float[] projectionMatrix, float[] viewMatrix,
 				final float[] parentMatrix);
-
 	}
-	
-	public interface OnInitializeInGLThread{
+
+	public interface OnInitializeInGLThread {
 		void onCreateInGLESThread();
 	}
 
@@ -73,20 +72,18 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		float[] getRotationMatrix();
 	}
 
-
-
 	private final IRotationMatrixProvider mRotationProvider;
 
 	protected Object updateLock = new Object();
 	protected final Context mContext;
 	private GLSurfaceView glSurfaceView;
 
-	private List<DataSourceVisualizationHandler> visualizationHandler = 
-			new ArrayList<DataSourceVisualizationHandler>();
-	
+	private List<DataSourceVisualizationHandler> visualizationHandler = new ArrayList<DataSourceVisualizationHandler>();
+
 	private List<RenderFeature2> renderFeatures = new ArrayList<RenderFeature2>();
 
 	private RenderFeature2 renderFeature;
+	public static RenderFeature2 test;
 
 	public ARSurfaceViewRenderer(Context context,
 			final GLSurfaceView glSurfaceView) {
@@ -98,93 +95,97 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
+		/** clear color buffer and depth buffer iff activated */
+		int clearMask = GLES20.GL_COLOR_BUFFER_BIT;
+		if (true) { // enableDepthMask = true
+			clearMask |= GLES20.GL_DEPTH_BUFFER_BIT;
+			GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+			GLES20.glDepthFunc(GLES20.GL_LESS);
+			GLES20.glDepthMask(true);
+			GLES20.glClearDepthf(1.f);
+		}
+		GLES20.glClear(clearMask);
 
-		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-
-		// int clearMask = GLES20.GL_COLOR_BUFFER_BIT;
-		// if (enableDepthBuffer) {
-		// clearMask |= GLES20.GL_DEPTH_BUFFER_BIT;
-		// GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-		// GLES20.glDepthFunc(GLES20.GL_LESS);
-		// GLES20.glDepthMask(true);
-		// GLES20.glClearDepthf(1.f);
-		// }
-		// GLES20.glClear(clearMask);
-
+		/** extrinsic camera parameters for matching camera- with virtual view */
 		float[] rotationMatrix = mRotationProvider.getRotationMatrix();
 
+		/** render grid */
+		renderFeature.onRender(GLESCamera.projectionMatrix,
+				GLESCamera.viewMatrix, rotationMatrix);
 
-		// render Data
+		/** render DataSources data */
 		for (DataSourceVisualizationHandler handler : visualizationHandler) {
 			for (ARObject feature : handler.getARObjects()) {
 				feature.onRender(GLESCamera.projectionMatrix,
 						GLESCamera.viewMatrix, rotationMatrix);
 			}
 		}
-		
-		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-		for(RenderFeature2 r : renderFeatures){
-			r.onRender(GLESCamera.projectionMatrix,
-				GLESCamera.viewMatrix, rotationMatrix);
+		/** for testing purposes */
+		for (RenderFeature2 r : renderFeatures) {
+			r.onRender(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
+					rotationMatrix);
 		}
-		renderFeature.onRender(GLESCamera.projectionMatrix,
-				GLESCamera.viewMatrix, rotationMatrix);
-		
-//		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 	}
 
 	@Override
 	public void onSurfaceChanged(GL10 glUnused, int width, int height) {
 		GLES20.glViewport(0, 0, width, height);
+//		GLESCamera.createProjectionMatrix(gl, width, height);
 		GLESCamera.createProjectionMatrix(width, height);
 	}
 
 	@Override
 	public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
-
-		// Set the background clear color to transparent.
+		/** Set the background clear color to "black" and transparent */
 		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-		// set up the view matrix
+		/** set up the view matrix */
 		GLESCamera.createViewMatrix();
-		// // Enable depth testing
+
+		/** Enable depth testing */
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-//		GLES20.glClearDepthf(1.0f);
-//		GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-//		GLES20.glDepthMask(true);
+		GLES20.glClearDepthf(1.0f);
+		GLES20.glDepthFunc(GLES20.GL_LESS);
+		GLES20.glDepthMask(true);
 
-		// // Enable blending
+		/** Enable blending */
 		GLES20.glEnable(GLES20.GL_BLEND);
-		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
+		GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+		// GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
 
-		// backface culling
+		/**
+		 * Backface culling - here back-facing facets are culled when facet
+		 * culling is enabled
+		 */
 		GLES20.glEnable(GLES20.GL_CULL_FACE);
-		GLES20.glCullFace(GLES20.GL_BACK);
+		GLES20.glCullFace(GLES20.GL_BACK); // GL_FRONT_AND_BACK for no facets
 		initScene();
 	}
 
 	private void initScene() {
 		renderFeature = new GridFeature();
 		renderFeature.onCreateInGLESThread();
-		
-		// first cube
-		RenderFeature2 first = new CubeFeature2();
-		first.setPosition(new float[] {1,0,5});
-		first.onCreateInGLESThread();
-		renderFeatures.add(first);
-		
-		RenderFeature2 sec = new CubeFeature2();
-		sec.setPosition(new float[] {5,0,5});
-		sec.onCreateInGLESThread();
-		renderFeatures.add(sec);
-		
-		RenderFeature2 third = new CubeFeature2();
-		third.setPosition(new float[] {2.5f,0,5});
-		third.onCreateInGLESThread();
-		renderFeatures.add(third);
-	}
-	
+		test = new CubeFeature2();
+		test.setRelativePosition(new float[] { 0, 0, -10});
+		test.onCreateInGLESThread();
+		renderFeatures.add(test);
 
+//		// first cube
+//		RenderFeature2 first = new CubeFeature2();
+//		first.setPosition(new float[] { 1, 0, 5 });
+//		first.onCreateInGLESThread();
+//		renderFeatures.add(first);
+//
+//		RenderFeature2 sec = new CubeFeature2();
+//		sec.setPosition(new float[] { 5, 0, 5 });
+//		sec.onCreateInGLESThread();
+//		renderFeatures.add(sec);
+//
+//		RenderFeature2 third = new CubeFeature2();
+//		third.setPosition(new float[] { 2.5f, 0, 5 });
+//		third.onCreateInGLESThread();
+//		renderFeatures.add(third);
+	}
 
 	@Override
 	public void onCameraUpdate() {
@@ -211,7 +212,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	public void onVisualizationHandlerAdded(
 			DataSourceVisualizationHandler handler) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -219,6 +220,5 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 			List<DataSourceVisualizationHandler> handlers) {
 		this.visualizationHandler = handlers;
 	}
-
 
 }

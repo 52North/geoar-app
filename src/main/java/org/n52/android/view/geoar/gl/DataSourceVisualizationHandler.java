@@ -31,8 +31,7 @@ import org.n52.android.newdata.RenderFeatureFactory;
 import org.n52.android.newdata.SpatialEntity;
 import org.n52.android.newdata.Visualization.ARVisualization;
 import org.n52.android.newdata.Visualization.ARVisualization.ItemVisualization;
-import org.n52.android.newdata.gl.primitives.DataSourceRenderable;
-import org.n52.android.newdata.gl.primitives.RenderLoader;
+import org.n52.android.newdata.vis.DataSourceVisualization.DataSourceVisualizationGL;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.utils.GeoLocation;
 import org.n52.android.view.InfoView;
@@ -101,15 +100,15 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 					ARObject arObject = new ARObject(entity);
 					for (ItemVisualization visualization : visualizations) {
 						Collection<RenderFeature2> features = new ArrayList<RenderFeature2>();
-						for(DataSourceRenderable feature : visualization.getEntityVisualization(entity,
+						for(DataSourceVisualizationGL feature : visualization.getEntityVisualization(entity,
 										DataSourceVisualizationHandler.this)){
 							features.add((RenderFeature2) feature);
 							glSurfaceView.addRenderableToScene((OnInitializeInGLThread) feature);
 						}
-						arObject.add(visualization.getClass(), features);
-
+						arObject.addRenderFeature(visualization.getClass(), features);
+						arObject.addCanvasFeature(visualization.getClass(), visualization.getEntityVisualzation(entity));
 					}
-					arObjects.add(arObject);
+					arObjects.add(arObject); 
 				}
 				DataSourceVisualizationHandler.this.arObjects = arObjects;
 			}
@@ -218,21 +217,17 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 	}
 
 	@Override
-	public DataSourceRenderable createCube() {
+	public DataSourceVisualizationGL createCube() {
 		CubeFeature2 cube = new CubeFeature2();
 		return cube;
 	}
 
 	@Override
-	public DataSourceRenderable createSphere() {
+	public DataSourceVisualizationGL createSphere() {
 		SphereFeature sphere = new SphereFeature();
 		return sphere;
 	}
 
-	@Override
-	public DataSourceRenderable createRenderable(RenderLoader renderLoader) {
-		return null;
-	}
 
 	public void onLocationChanged(Location location) {
 		for (ARObject object : arObjects)

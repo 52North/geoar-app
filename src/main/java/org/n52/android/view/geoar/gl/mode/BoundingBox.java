@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.android.view.geoar.gl.model;
+package org.n52.android.view.geoar.gl.mode;
 
 import java.nio.FloatBuffer;
+
+import org.n52.android.view.geoar.gl.model.Geometry;
 
 /**
  * 
@@ -31,6 +33,38 @@ public class BoundingBox {
 		this.geometry = geometry;
 		this.boundingPoints = new float[8][3];
 		generateBoundingBox();
+	}
+	
+	public BoundingBox(float[] vertices){
+		this.boundingPoints = new float[8][3];
+		
+		float[] min = { Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE };
+		float[] max = { Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE };
+		
+		float[] vertex = new float[3];
+		
+		for(int i = 0; i < vertices.length; i+=3){
+			vertex[0] = vertices[i];
+			vertex[1] = vertices[i+1];
+			vertex[2] = vertices[i+2];
+			
+			min[0] = Math.min(min[0], vertex[0]);
+			max[0] = Math.max(max[0], vertex[0]);
+			min[1] = Math.min(min[1], vertex[1]);
+			max[1] = Math.max(max[1], vertex[1]);
+			min[2] = Math.min(min[2], vertex[2]);
+			max[2] = Math.max(max[2], vertex[2]);
+		}
+		
+		boundingPoints[0] = new float[] { min[0], min[1], min[2] }; // -x,-y,-z
+		boundingPoints[1] = new float[] { min[0], min[1], max[2] }; // -x,-y,z
+		boundingPoints[2] = new float[] { max[0], min[1], max[2] }; // x,-y,z
+		boundingPoints[3] = new float[] { max[0], min[1], min[2] }; // x,-y,-z
+
+		boundingPoints[4] = new float[] { min[0], max[1], min[2] }; // -x, y, -z
+		boundingPoints[5] = new float[] { min[0], max[1], max[2] }; // -x, y, z
+		boundingPoints[6] = new float[] { max[0], max[1], max[2] }; // ...
+		boundingPoints[7] = new float[] { max[0], max[1], min[2] };
 	}
 
 	private void generateBoundingBox() {
@@ -56,11 +90,10 @@ public class BoundingBox {
 			max[2] = Math.max(max[2], vertex[2]);
 		}
 
-		boundingPoints[0] = new float[] { min[0], min[1], min[2] }; // -x, -y,
-		// -z
-		boundingPoints[1] = new float[] { min[0], min[1], max[2] }; // -x, -y, z
-		boundingPoints[2] = new float[] { max[0], min[1], max[2] }; // x, -y, z
-		boundingPoints[3] = new float[] { max[0], min[1], min[2] }; // x, -y, -z
+		boundingPoints[0] = new float[] { min[0], min[1], min[2] }; // -x,-y,-z
+		boundingPoints[1] = new float[] { min[0], min[1], max[2] }; // -x,-y,z
+		boundingPoints[2] = new float[] { max[0], min[1], max[2] }; // x,-y,z
+		boundingPoints[3] = new float[] { max[0], min[1], min[2] }; // x,-y,-z
 
 		boundingPoints[4] = new float[] { min[0], max[1], min[2] }; // -x, y, -z
 		boundingPoints[5] = new float[] { min[0], max[1], max[2] }; // -x, y, z
