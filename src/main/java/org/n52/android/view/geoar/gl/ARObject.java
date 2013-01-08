@@ -133,6 +133,7 @@ public class ARObject implements OpenGLCallable {
 				.setNeutralButton(R.string.cancel, null);
 
 		// TODO use view caching with convertView parameter
+		// FIXME NoSuchElementException
 		View featureView = visualizationLayers.values().iterator().next().itemVisualization
 				.getFeatureView(entity, null,
 						null, context);

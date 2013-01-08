@@ -284,24 +284,28 @@ public class DataSourceHolder implements Parcelable {
 	public void perfomInjection(Object target) {
 		// Field injection
 		try {
-			for (Field f : target.getClass().getDeclaredFields()) {
-				if (f.isAnnotationPresent(SystemService.class)) {
-					String serviceName = f.getAnnotation(SystemService.class)
-							.value();
-					f.setAccessible(true);
-					f.set(target, mPluginHolder.getPluginContext()
-							.getSystemService(serviceName));
-				}
+			Class<? extends Object> currentClass = target.getClass();
+			while (currentClass != null) {
+				for (Field f : currentClass.getDeclaredFields()) {
+					if (f.isAnnotationPresent(SystemService.class)) {
+						String serviceName = f.getAnnotation(
+								SystemService.class).value();
+						f.setAccessible(true);
+						f.set(target, mPluginHolder.getPluginContext()
+								.getSystemService(serviceName));
+					}
 
-				if (f.isAnnotationPresent(SharedHttpClient.class)) {
-					f.setAccessible(true);
-					f.set(target, PluginLoader.getSharedHttpClient());
-				}
+					if (f.isAnnotationPresent(SharedHttpClient.class)) {
+						f.setAccessible(true);
+						f.set(target, PluginLoader.getSharedHttpClient());
+					}
 
-				if (f.isAnnotationPresent(Annotations.PluginContext.class)) {
-					f.setAccessible(true);
-					f.set(target, mPluginHolder.getPluginContext());
+					if (f.isAnnotationPresent(Annotations.PluginContext.class)) {
+						f.setAccessible(true);
+						f.set(target, mPluginHolder.getPluginContext());
+					}
 				}
+				currentClass = currentClass.getSuperclass();
 			}
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
@@ -317,11 +321,15 @@ public class DataSourceHolder implements Parcelable {
 		// Post construct
 
 		try {
-			for (Method m : target.getClass().getDeclaredMethods()) {
-				if (m.isAnnotationPresent(PostConstruct.class)) {
-					m.setAccessible(true);
-					m.invoke(target);
+			Class<? extends Object> currentClass = target.getClass();
+			while (currentClass != null) {
+				for (Method m : currentClass.getDeclaredMethods()) {
+					if (m.isAnnotationPresent(PostConstruct.class)) {
+						m.setAccessible(true);
+						m.invoke(target);
+					}
 				}
+				currentClass = currentClass.getSuperclass();
 			}
 		} catch (InvocationTargetException e) {
 			// TODO Auto-generated catch block

@@ -62,7 +62,7 @@ public class AboutDialog extends Dialog {
 				+ "<center><b>http://52north.org/android</b></center> <br> <br>"
 				+ "GeoAR is part of the 52&deg;North Geostatistics Commnity: <br>"
 				+ "<b>http://52north.org/communities/geostatistics/</b> <br> <br>"
-				+ "Contact: <i>Daniel N&uuml;st (d.nuest@52north.org)</i> <br>"
+				+ "Contact: <i>Daniel N&uuml;st (geoar@52north.org)</i> <br>"
 				+ "Development Credits: <i> Arne de Wall, Holger Hopmann </i>";
 
 		tv = (TextView) findViewById(R.id.info_more_text);
