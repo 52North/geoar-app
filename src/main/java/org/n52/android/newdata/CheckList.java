@@ -129,6 +129,15 @@ public class CheckList<T> extends ArrayList<T> {
 		}
 		return resultList;
 	}
+	
+	public List<T> getUncheckedItems() {
+		List<T> resultList = new ArrayList<T>();
+		for (int i = 0; i < size(); i++) {
+			if (!checkSet.get(i))
+				resultList.add(get(i));
+		}
+		return resultList;
+	}
 
 	@SuppressWarnings("unchecked")
 	public <E> List<E> getCheckedItems(Class<E> clazz) {

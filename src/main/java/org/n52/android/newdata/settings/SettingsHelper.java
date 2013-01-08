@@ -15,6 +15,9 @@
  */
 package org.n52.android.newdata.settings;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.util.Calendar;
 import java.util.Date;
@@ -44,7 +47,8 @@ public class SettingsHelper {
 	 * Creates a FilterView object for the specified field
 	 * 
 	 * @param field
-	 * @param context {@link Context} to use for creating views
+	 * @param context
+	 *            {@link Context} to use for creating views
 	 * @return
 	 */
 	public static SettingsViewField<?> createFilterViewFromField(Field field,
@@ -139,6 +143,45 @@ public class SettingsHelper {
 			};
 		}
 		return null;
+	}
+
+	public static void storeSettings(ObjectOutputStream objectOutputStream,
+			Object settingsObject) throws IOException {
+		for (Field field : settingsObject.getClass().getDeclaredFields()) {
+			if (field.isAnnotationPresent(Setting.class)) {
+				try {
+					field.setAccessible(true);
+					objectOutputStream.writeObject(field.get(settingsObject));
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	public static void restoreSettings(ObjectInputStream objectInputStream,
+			Object settingsObject) throws IOException {
+		for (Field field : settingsObject.getClass().getDeclaredFields()) {
+			if (field.isAnnotationPresent(Setting.class)) {
+				try {
+					field.setAccessible(true);
+					field.set(settingsObject, objectInputStream.readObject());
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 }

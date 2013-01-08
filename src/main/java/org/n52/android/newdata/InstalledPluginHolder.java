@@ -247,7 +247,7 @@ public class InstalledPluginHolder extends PluginHolder {
 		}
 	}
 
-	public void restoreState(ObjectInputStream objectInputStream)
+	public void restoreState(PluginStateInputStream objectInputStream)
 			throws IOException {
 		setChecked(objectInputStream.readBoolean());
 		for (DataSourceHolder dataSource : mDataSources) {

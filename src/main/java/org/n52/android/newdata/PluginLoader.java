@@ -91,6 +91,7 @@ public class PluginLoader {
 		}
 	};
 	private static final String PLUGIN_STATE_PREF = "selected_plugins";
+	private static final int PLUGIN_STATE_VERSION = 4;
 	private static final File PLUGIN_DIRECTORY_PATH = GeoARApplication.applicationContext
 			.getExternalFilesDir(null);
 	// Pattern captures the plugin version string
@@ -164,8 +165,15 @@ public class PluginLoader {
 			byte[] data = Base64.decode(
 					preferences.getString(PLUGIN_STATE_PREF, ""),
 					Base64.DEFAULT);
-			ObjectInputStream objectInputStream = new ObjectInputStream(
+			PluginStateInputStream objectInputStream = new PluginStateInputStream(
 					new ByteArrayInputStream(data));
+
+			int stateVersion = objectInputStream.readInt();
+			if (stateVersion != PLUGIN_STATE_VERSION) {
+				// Do not read state if preferences contains old/invalid state
+				// information
+				return;
+			}
 
 			// Restore plugin state
 			int count = objectInputStream.readInt();
@@ -193,6 +201,9 @@ public class PluginLoader {
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(
 					outputStream);
+
+			// store plugin state version
+			objectOutputStream.writeInt(PLUGIN_STATE_VERSION);
 
 			List<InstalledPluginHolder> checkedPlugins = mInstalledPlugins
 					.getCheckedItems();

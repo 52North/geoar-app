@@ -15,7 +15,12 @@
  */
 package org.n52.android.newdata;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import org.n52.android.newdata.CheckList.CheckManager;
+import org.n52.android.newdata.settings.SettingsHelper;
 
 import android.content.Context;
 import android.content.Intent;
@@ -95,7 +100,8 @@ public class DataSourceInstanceHolder implements Parcelable {
 	}
 
 	public void createSettingsDialog(Context context) {
-		Intent intent = new Intent(context, DataSourceInstanceSettingsDialogActivity.class);
+		Intent intent = new Intent(context,
+				DataSourceInstanceSettingsDialogActivity.class);
 		intent.putExtra("dataSourceInstance", this);
 		context.startActivity(intent);
 	}
@@ -131,7 +137,8 @@ public class DataSourceInstanceHolder implements Parcelable {
 
 	public static final Parcelable.Creator<DataSourceInstanceHolder> CREATOR = new Parcelable.Creator<DataSourceInstanceHolder>() {
 		public DataSourceInstanceHolder createFromParcel(Parcel in) {
-			DataSourceHolder dataSource = in.readParcelable(DataSourceHolder.class.getClassLoader());
+			DataSourceHolder dataSource = in
+					.readParcelable(DataSourceHolder.class.getClassLoader());
 			int id = in.readInt();
 			// Find DataSourceInstance with provided id
 			for (DataSourceInstanceHolder instance : dataSource.getInstances()) {
@@ -154,6 +161,34 @@ public class DataSourceInstanceHolder implements Parcelable {
 
 	public void setChecked(boolean state) {
 		mChecker.setChecked(state);
+	}
+
+	public void saveState(ObjectOutputStream objectOutputStream)
+			throws IOException {
+
+		// Store filter, serializable
+		objectOutputStream.writeObject(currentFilter);
+
+		// Store data source instance settings using settings framework
+		SettingsHelper.storeSettings(objectOutputStream, this.dataSource);
+
+		objectOutputStream.writeBoolean(isChecked());
+	}
+
+	public void restoreState(ObjectInputStream objectInputStream)
+			throws IOException {
+		try {
+			// restore filter, serializable
+			currentFilter = (Filter) objectInputStream.readObject();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// restore data source instance settings, settings framework
+		SettingsHelper.restoreSettings(objectInputStream, this.dataSource);
+
+		setChecked(objectInputStream.readBoolean());
 	}
 
 }

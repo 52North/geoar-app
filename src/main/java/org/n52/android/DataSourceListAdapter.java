@@ -133,6 +133,24 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 				dataSource.addInstance(mContext);
 			}
 		};
+	}
+
+	/**
+	 * Holder for add instance items
+	 * 
+	 */
+	private class RemoveUnselectedInstancesViewHolder {
+		DataSourceHolder dataSource;
+		ImageView imageView;
+		TextView textView;
+
+		OnClickListener clickListener = new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// TODO dialog
+				dataSource.removeUncheckedInstances();
+			}
+		};
 
 	}
 
@@ -222,7 +240,7 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 	public int getChildrenCount(int groupPosition) {
 		DataSourceHolder dataSource = mDataSources.get(groupPosition);
 		if (dataSource.instanceable() && !dataSource.getInstances().isEmpty()) {
-			return dataSource.getInstances().size() + 1;
+			return dataSource.getInstances().size() + 2; // Add & Remove
 		} else {
 			return 0;
 		}
@@ -230,16 +248,17 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 
 	@Override
 	public int getChildTypeCount() {
-		return 2; // Instance & New Instance
+		return 3; // Instance & New Instance & Remove
 	}
 
 	@Override
 	public int getChildType(int groupPosition, int childPosition) {
 		if (childPosition >= mDataSources.get(groupPosition).getInstances()
 				.size()) {
-			return 0;
+			DataSourceHolder dataSource = mDataSources.get(groupPosition);
+			return (childPosition - dataSource.getInstances().size()) + 1;
 		} else {
-			return 1;
+			return 0;
 		}
 	}
 
@@ -249,7 +268,20 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 		View resultView;
 		DataSourceHolder dataSource = mDataSources.get(groupPosition);
 		if (childPosition >= dataSource.getInstances().size()) {
-			resultView = getNewDataSourceInstanceView(dataSource, view, parent);
+			int additionalPosition = childPosition
+					- dataSource.getInstances().size();
+			switch (additionalPosition) {
+			case 0:
+				resultView = getNewDataSourceInstanceView(dataSource, view,
+						parent);
+				break;
+			case 1:
+				resultView = getRemoveUnselectedDataSourceInstancesView(
+						dataSource, view, parent);
+				break;
+			default:
+				return null;
+			}
 		} else {
 			DataSourceInstanceHolder dataSourceInstance = dataSource
 					.getInstances().get(childPosition);
@@ -338,6 +370,33 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 			view.setTag(viewHolder);
 		} else {
 			viewHolder = (AddDataSourceInstanceViewHolder) view.getTag();
+		}
+
+		viewHolder.dataSource = dataSource;
+		return view;
+	}
+
+	private View getRemoveUnselectedDataSourceInstancesView(
+			DataSourceHolder dataSource, View view, ViewGroup parent) {
+		RemoveUnselectedInstancesViewHolder viewHolder;
+
+		if (view == null) {
+			view = mInflater
+					.inflate(
+							R.layout.datasource_list_removeunselecteddatasourceinstances_item,
+							parent, false);
+			viewHolder = new RemoveUnselectedInstancesViewHolder();
+			viewHolder.imageView = (ImageView) view
+					.findViewById(R.id.imageViewRemove);
+			viewHolder.imageView.setOnClickListener(viewHolder.clickListener);
+
+			viewHolder.textView = (TextView) view.findViewById(R.id.textView);
+
+			viewHolder.textView.setOnClickListener(viewHolder.clickListener);
+
+			view.setTag(viewHolder);
+		} else {
+			viewHolder = (RemoveUnselectedInstancesViewHolder) view.getTag();
 		}
 
 		viewHolder.dataSource = dataSource;

@@ -23,6 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -343,8 +344,10 @@ public class DataSourceHolder implements Parcelable {
 		}
 	}
 
-	public void restoreState(ObjectInputStream objectInputStream)
+	public void restoreState(PluginStateInputStream objectInputStream)
 			throws IOException {
+		objectInputStream.setPluginClassLoader(mPluginHolder
+				.getPluginClassLoader());
 		if (!mInstanceable) {
 			boolean checked = objectInputStream.readBoolean();
 			if (checked || mDataSourceInstances != null) {
@@ -352,16 +355,44 @@ public class DataSourceHolder implements Parcelable {
 				// initialized
 				if (!getInstances().isEmpty()) {
 					getInstances().get(0).setChecked(checked);
+					getInstances().get(0).restoreState(objectInputStream);
+				}
+			}
+		} else {
+
+			int instancesCount = objectInputStream.readInt();
+			for (int i = 0; i < instancesCount; i++) {
+				try {
+					DataSource<? super Filter> dataSource = dataSourceClass
+							.newInstance();
+					perfomInjection(dataSource);
+
+					DataSourceInstanceHolder dataSourceInstance = new DataSourceInstanceHolder(
+							this, dataSource);
+					getInstances().add(dataSourceInstance);
+					dataSourceInstance.restoreState(objectInputStream);
+
+				} catch (Exception e) {
+					e.printStackTrace();
+					// TODO handle errors
 				}
 			}
 		}
+
 	}
 
 	public void saveState(ObjectOutputStream objectOutputStream)
 			throws IOException {
 		if (!mInstanceable) {
+			// TODO ensure size == 1
 			objectOutputStream.writeBoolean(mDataSourceInstances != null
 					&& mDataSourceInstances.get(0).isChecked());
+			mDataSourceInstances.get(0).saveState(objectOutputStream);
+		} else {
+			objectOutputStream.writeInt(mDataSourceInstances.size());
+			for (DataSourceInstanceHolder dataSourceInstance : mDataSourceInstances) {
+				dataSourceInstance.saveState(objectOutputStream);
+			}
 		}
 	}
 
@@ -472,6 +503,17 @@ public class DataSourceHolder implements Parcelable {
 		} catch (IllegalAccessException e) {
 			throw new RuntimeException("No valid constructor for datasource");
 		}
+	}
 
+	public void removeUncheckedInstances() {
+		if (!mInstanceable) {
+			return;
+		}
+
+		ArrayList<DataSourceInstanceHolder> uncheckedInstances = new ArrayList<DataSourceInstanceHolder>(
+				mDataSourceInstances.getUncheckedItems());
+		for (DataSourceInstanceHolder dataSourceInstance : uncheckedInstances) {
+			mDataSourceInstances.remove(dataSourceInstance);
+		}
 	}
 }
