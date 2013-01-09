@@ -92,4 +92,6 @@
 	
 	<!-- Map Strings -->
 	<string name="map_item_camera">CameraView</string>
+	<string name="add_instance">Add Instance...</string>
+	<string name="remove_unused">Remove unused</string>
 </resources>

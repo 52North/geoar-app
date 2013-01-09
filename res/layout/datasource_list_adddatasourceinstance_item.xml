@@ -6,27 +6,8 @@
     android:orientation="horizontal"
     android:paddingRight="0dp" >
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical" >
-
-        <ImageButton
-            android:id="@+id/imageViewAdd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?android:attr/selectableItemBackground"
-            android:src="@drawable/ic_menu_add" />
-
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
-            android:background="?android:attr/dividerVertical" />
-    </LinearLayout>
-
     <TextView
+        android:drawableLeft="@drawable/ic_menu_add"
         android:id="@+id/textView"
         style="?android:attr/dropDownItemStyle"
         android:layout_width="wrap_content"
@@ -36,6 +17,6 @@
         android:paddingBottom="5dp"
         android:paddingTop="5dp"
         android:singleLine="true"
-        android:text="Add Instance..." />
+        android:text="@string/add_instance" />
 
 </LinearLayout>

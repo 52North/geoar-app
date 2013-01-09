@@ -37,6 +37,7 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class DataSourceListAdapter extends BaseExpandableListAdapter {
@@ -81,10 +82,11 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 	private class DataSourceViewHolder {
 		int groupPosition;
 		DataSourceHolder dataSource;
-		ImageView imageViewSettings;
 		ImageView imageViewAdd;
 		TextView textView;
 		CheckBox checkBox;
+		ImageView imageViewGroup;
+		LinearLayout layoutActions;
 		OnCheckedChangeListener checkListener = new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView,
@@ -104,12 +106,6 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 					listView.collapseGroup(groupPosition);
 			}
 		};
-		OnClickListener settingsClickListener = new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				dataSource.createFilterDialog(mContext);
-			}
-		};
 		OnClickListener addClickListener = new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -124,7 +120,6 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 	 */
 	private class AddDataSourceInstanceViewHolder {
 		DataSourceHolder dataSource;
-		ImageView imageViewAdd;
 		TextView textView;
 
 		OnClickListener clickListener = new OnClickListener() {
@@ -141,7 +136,6 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 	 */
 	private class RemoveUnselectedInstancesViewHolder {
 		DataSourceHolder dataSource;
-		ImageView imageView;
 		TextView textView;
 
 		OnClickListener clickListener = new OnClickListener() {
@@ -327,7 +321,8 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 		DataSourceHolder dataSource = mDataSources.get(groupPosition);
 
 		if (dataSource.instanceable()) {
-			return getDataSourceView(dataSource, groupPosition, view, parent);
+			return getDataSourceView(dataSource, groupPosition, isExpanded,
+					view, parent);
 		} else {
 			return getDataSourceInstanceView(dataSource.getInstances().get(0),
 					view, parent);
@@ -358,11 +353,6 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 					R.layout.datasource_list_adddatasourceinstance_item,
 					parent, false);
 			viewHolder = new AddDataSourceInstanceViewHolder();
-			viewHolder.imageViewAdd = (ImageView) view
-					.findViewById(R.id.imageViewAdd);
-			viewHolder.imageViewAdd
-					.setOnClickListener(viewHolder.clickListener);
-
 			viewHolder.textView = (TextView) view.findViewById(R.id.textView);
 
 			viewHolder.textView.setOnClickListener(viewHolder.clickListener);
@@ -386,9 +376,6 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 							R.layout.datasource_list_removeunselecteddatasourceinstances_item,
 							parent, false);
 			viewHolder = new RemoveUnselectedInstancesViewHolder();
-			viewHolder.imageView = (ImageView) view
-					.findViewById(R.id.imageViewRemove);
-			viewHolder.imageView.setOnClickListener(viewHolder.clickListener);
 
 			viewHolder.textView = (TextView) view.findViewById(R.id.textView);
 
@@ -450,17 +437,19 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 	}
 
 	private View getDataSourceView(DataSourceHolder dataSource,
-			int groupPosition, View view, ViewGroup parent) {
+			int groupPosition, boolean isExpanded, View view, ViewGroup parent) {
 		DataSourceViewHolder viewHolder;
 
 		if (view == null) {
 			view = mInflater.inflate(R.layout.datasource_list_datasource_item,
 					parent, false);
 			viewHolder = new DataSourceViewHolder();
-			viewHolder.imageViewSettings = (ImageView) view
-					.findViewById(R.id.imageViewSettings);
-			viewHolder.imageViewSettings
-					.setOnClickListener(viewHolder.settingsClickListener);
+
+			viewHolder.imageViewGroup = (ImageView) view
+					.findViewById(R.id.imageViewGroup);
+
+			viewHolder.layoutActions = (LinearLayout) view
+					.findViewById(R.id.layoutActions);
 
 			viewHolder.imageViewAdd = (ImageView) view
 					.findViewById(R.id.imageViewAdd);
@@ -485,22 +474,30 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 		viewHolder.dataSource = dataSource;
 
 		viewHolder.textView.setText(viewHolder.dataSource.getName());
+		if (isExpanded) {
+			viewHolder.imageViewGroup.getDrawable().setState(
+					new int[] { android.R.attr.state_expanded });
+		} else {
+			viewHolder.imageViewGroup.getDrawable().setState(new int[] {});
+		}
 
 		if (viewHolder.dataSource.getInstances().isEmpty()) {
 			// No Instances
+			viewHolder.layoutActions.setVisibility(View.VISIBLE);
+			viewHolder.imageViewGroup.setVisibility(View.GONE);
 			viewHolder.checkBox.setVisibility(View.GONE);
-			viewHolder.imageViewSettings.setVisibility(View.GONE);
-			if (dataSource.instanceable()) {
-				viewHolder.imageViewAdd.setVisibility(View.VISIBLE);
-			} else {
-				viewHolder.imageViewAdd.setVisibility(View.GONE);
-			}
+			// if (dataSource.instanceable()) {
+			// viewHolder.imageViewAdd.setVisibility(View.VISIBLE);
+			// } else {
+			// viewHolder.imageViewAdd.setVisibility(View.GONE);
+			// }
 		} else {
 			viewHolder.checkBox.setChecked(viewHolder.dataSource
 					.areAllChecked());
+			viewHolder.layoutActions.setVisibility(View.GONE);
+			viewHolder.imageViewGroup.setVisibility(View.VISIBLE);
 			viewHolder.checkBox.setVisibility(View.VISIBLE);
-			viewHolder.imageViewSettings.setVisibility(View.VISIBLE);
-			viewHolder.imageViewAdd.setVisibility(View.GONE);
+			// viewHolder.imageViewAdd.setVisibility(View.GONE);
 		}
 
 		if (viewHolder.dataSource.getVisualizations()
@@ -514,5 +511,4 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 
 		return view;
 	}
-
 }

@@ -251,7 +251,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 					R.layout.datasource_list_actionitem, null);
 			actionView.setOnClickListener(new OnClickListener() {
 				@Override
-				public void onClick(View arg0) {
+				public void onClick(View v) {
 					if (getPopup().isShowing()) {
 						mPopup.dismiss();
 					} else {
@@ -296,7 +296,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 
 				// Set width of menu
 				mPopup.setWidth((int) TypedValue.applyDimension(
-						TypedValue.COMPLEX_UNIT_DIP, 200, getResources()
+						TypedValue.COMPLEX_UNIT_DIP, 250, getResources()
 								.getDisplayMetrics()));
 
 			}
