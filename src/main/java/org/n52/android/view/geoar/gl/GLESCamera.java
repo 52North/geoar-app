@@ -21,7 +21,6 @@ import javax.microedition.khronos.opengles.GL10;
 
 import org.n52.android.tracking.camera.RealityCamera;
 
-import android.opengl.GLU;
 import android.opengl.Matrix;
 import android.util.FloatMath;
 
@@ -56,7 +55,8 @@ public class GLESCamera {
 			normal[2] = mTmp1[0] * mTmp2[1] - mTmp1[1] * mTmp2[0];
 
 			// normalizing the result
-			float a = FloatMath.sqrt(normal[0] * normal[0] + normal[1]
+			// According to Lint faster than FloatMath
+			float a = (float) Math.sqrt(normal[0] * normal[0] + normal[1]
 					* normal[1] + normal[2] * normal[2]);
 			if (a != 0 && a != 1) {
 				a = 1 / a;

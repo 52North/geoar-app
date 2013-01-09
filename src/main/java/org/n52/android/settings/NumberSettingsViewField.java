@@ -13,69 +13,93 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.android.newdata.settings;
+package org.n52.android.settings;
 
 import java.lang.reflect.Field;
 
+import org.n52.android.newdata.Annotations.Settings.Max;
+import org.n52.android.newdata.Annotations.Settings.Min;
 import org.n52.android.newdata.Annotations.Settings.NotNull;
 
 import android.content.Context;
 import android.view.View;
 import android.widget.EditText;
 
-public class StringSettingsViewField extends EditText implements SettingsViewField<String> {
+public abstract class NumberSettingsViewField<T extends Number> extends EditText
+		implements SettingsViewField<T> {
 
 	private boolean notNull;
+	private T minValue;
+	private T maxValue;
 	private Field field;
 
-	public StringSettingsViewField(Context context, Field field, int inputType) {
+	public NumberSettingsViewField(Context context, Field field, int inputType) {
 		super(context);
 		this.field = field;
-
 		// Check annotations
 		notNull = field.isAnnotationPresent(NotNull.class);
 
-		setInputType(inputType);
-	}
-
-	@Override
-	public boolean validate() {
-		if (getText().toString().isEmpty() && notNull) {
-			setError("Field is required");
-			return false;
+		if (field.isAnnotationPresent(Min.class)) {
+			minValue = parseString(field.getAnnotation(Min.class).value());
 		}
-		return true;
-	}
-
-	@Override
-	public String getValue() {
-		if (getText().toString().isEmpty() && !notNull)
-			return null;
-
-		return getText().toString();
-	}
-
-	protected String parseString(String value) {
-		return value;
-	}
-
-	@Override
-	public void setValue(String value) {
-		setText(value != null ? value + "" : "");
-	}
-
-	@Override
-	public void setValueObject(Object object) {
-		setValue(object.toString());
-	}
-
-	@Override
-	public View getView() {
-		return this;
+		if (field.isAnnotationPresent(Max.class)) {
+			maxValue = parseString(field.getAnnotation(Max.class).value());
+		}
+		setInputType(inputType);
 	}
 
 	@Override
 	public Field getField() {
 		return field;
+	}
+
+	@Override
+	public boolean validate() {
+		if (getText().toString().isEmpty() && !notNull) {
+			return true;
+		}
+		T value;
+		try {
+			value = getValue();
+		} catch (NumberFormatException e) {
+			setError("Invalid Number");
+			return false;
+		}
+
+		if (minValue != null && minValue.doubleValue() > value.doubleValue()) {
+			setError("Must be at least " + minValue);
+			return false;
+		}
+		if (maxValue != null && maxValue.doubleValue() < value.doubleValue()) {
+			setError("Must be less than " + maxValue);
+			return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	public T getValue() {
+		if (getText().toString().isEmpty() && !notNull)
+			return null;
+
+		return parseString(getText().toString());
+	}
+
+	protected abstract T parseString(String value);
+
+	@Override
+	public void setValue(T value) {
+		setText(value != null ? value + "" : "");
+	}
+
+	@Override
+	public void setValueObject(Object object) {
+		setValue((T) object);
+	}
+
+	@Override
+	public View getView() {
+		return this;
 	}
 }

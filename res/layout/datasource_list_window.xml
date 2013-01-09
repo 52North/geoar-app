@@ -22,6 +22,6 @@
         style="?android:attr/borderlessButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="More..." />
+        android:text="@string/more_" />
 
 </LinearLayout>

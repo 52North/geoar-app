@@ -11,6 +11,6 @@
         android:id="@+id/item_map"
         android:icon="@drawable/ic_menu_mapmode"
         android:showAsAction="always"
-        android:title="Map"/>
+        android:title="@string/map"/>
 
 </menu>

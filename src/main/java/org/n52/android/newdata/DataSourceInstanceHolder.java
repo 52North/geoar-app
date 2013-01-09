@@ -20,7 +20,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import org.n52.android.newdata.CheckList.CheckManager;
-import org.n52.android.newdata.settings.SettingsHelper;
+import org.n52.android.settings.SettingsHelper;
 
 import android.content.Context;
 import android.content.Intent;

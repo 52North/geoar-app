@@ -16,11 +16,11 @@
 
         <TextView
             style="@style/formGroup"
-            android:text="Plugin Details" />
+            android:text="@string/plugin_details" />
 
         <TextView
             style="@style/formLabel"
-            android:text="Name" />
+            android:text="@string/name" />
 
         <TextView
             android:id="@+id/textViewName"
@@ -29,7 +29,7 @@
 
         <TextView
             style="@style/formLabel"
-            android:text="Publisher" />
+            android:text="@string/publisher" />
 
         <TextView
             android:id="@+id/textViewPublisher"
@@ -38,7 +38,7 @@
 
         <TextView
             style="@style/formLabel"
-            android:text="Version" />
+            android:text="@string/version" />
 
         <TextView
             android:id="@+id/textViewVersion"
@@ -47,7 +47,7 @@
 
         <TextView
             style="@style/formLabel"
-            android:text="Description" />
+            android:text="@string/description" />
 
         <TextView
             android:id="@+id/textViewDescription"
@@ -56,7 +56,7 @@
 
         <TextView
             style="@style/formGroup"
-            android:text="Provided Data Sources" />
+            android:text="@string/provided_data_sources" />
 
         <TextView
             android:id="@+id/textViewDataSources"

@@ -25,11 +25,8 @@ import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.IRotationMatrixProvider;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OnInitializeInGLThread;
-import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OpenGLCallable;
 
-import android.app.ActivityManager;
 import android.content.Context;
-import android.content.pm.ConfigurationInfo;
 import android.graphics.PixelFormat;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;

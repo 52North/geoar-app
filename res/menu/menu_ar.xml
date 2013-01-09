@@ -9,18 +9,7 @@
         android:id="@+id/item_map"
         android:icon="@drawable/ic_menu_mapmode"
         android:showAsAction="always"
-        android:title="Map"/>
-    <item
-        android:id="@+id/item_select_ar_overlay"
-        android:title="@string/choose_overlay"/>
-    <item
-        android:id="@+id/item_reload_ar"
-        android:title="@string/reload"/>
-    <item
-        android:id="@+id/item_select_chart"
-        android:title="@string/change_chart"/>
-    <item
-        android:id="@+id/item_calibrate"
-        android:title="@string/calibration"/>
+        android:title="@string/map"/>
+
 
 </menu>

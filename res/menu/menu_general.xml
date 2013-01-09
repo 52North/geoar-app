@@ -9,6 +9,6 @@
     <item
         android:id="@+id/item_selectsources"
         android:showAsAction="never"
-        android:title="Select Data Sources"/>
+        android:title="@string/select_data_sources"/>
 
 </menu>

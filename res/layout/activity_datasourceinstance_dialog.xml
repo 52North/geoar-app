@@ -20,25 +20,25 @@
             <TextView
                 android:id="@+id/textViewGroupGeneral"
                 style="@style/formGroup"
-                android:text="General Settings" />
+                android:text="@string/general_settings" />
 
-            <org.n52.android.newdata.settings.SettingsView
+            <org.n52.android.settings.SettingsView
                 android:id="@+id/settingsViewGeneral"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" >
-            </org.n52.android.newdata.settings.SettingsView>
+            </org.n52.android.settings.SettingsView>
 
             <TextView
                 android:id="@+id/textViewGroupFilter"
                 style="@style/formGroup"
                 android:layout_marginTop="5dp"
-                android:text="Filter Settings" />
+                android:text="@string/filter_settings" />
 
-            <org.n52.android.newdata.settings.SettingsView
+            <org.n52.android.settings.SettingsView
                 android:id="@+id/settingsViewFilter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" >
-            </org.n52.android.newdata.settings.SettingsView>
+            </org.n52.android.settings.SettingsView>
         </LinearLayout>
     </ScrollView>
 
@@ -60,7 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="3dip"
             android:layout_weight="1"
-            android:text="Cancel" />
+            android:text="@string/cancel" />
 
         <Button
             android:id="@+id/positiveButton"
@@ -69,7 +69,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="3dip"
             android:layout_weight="1"
-            android:text="OK" />
+            android:text="@string/ok" />
     </LinearLayout>
 
 </LinearLayout>

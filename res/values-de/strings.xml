@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">GeoAR</string>
+    <string name="gps_nicht_aktiviert">GPS nicht aktiviert</string>
+    <string name="gps_aktiviert">GPS aktiviert</string>
+    <string name="warte_auf_gps_verf_gbarkeit">Warte auf GPS Verfügbarkeit</string>
+    <string name="akteulle_position_unbekannt">Aktuelle Position unbekannt</string>
+    <string name="_berlagerung_kalibrieren">Überlagerung kalibrieren</string>
+    <string name="calibration">Kalibrierung</string>
+    <string name="ok">OK</string>
+    <string name="reload">Neu laden</string>
+    <string name="magnetic_field_not_calibrated">Magnetfeldsensor muss kalibriert werden</string>
+    <string name="accel_not_calibrated">Beschleunigungssensor muss kalibriert werden</string>
+    <string name="magnetic_field_not_started">Magnetfeldsensor konnte nicht gestartet werden</string>
+    <string name="accel_not_started">Accelerometer konnte nicht gestartet werden</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="filter">Filtern</string>
+    <string name="select">Auswahl</string>
+    <string name="filter_source">Datenquelle filtern</string>
+    <string name="delete">Löschen</string>
+    <string name="na">Keine Angabe</string>
+    <string name="select_source">Datenquelle wählen</string>
+    <string name="data_source">Datenquelle</string>
+    <string name="data_sources">Datenquellen</string>
+    <string name="manual_position">Manuelle Positionsangabe</string>
+    <string name="not_zoomed_in">Interpolation erfordert höhere Zoomstufe</string>
+    <string name="connection_error">Verbindungsfehler</string>
+    <string name="unkown_error">Unbekannter Fehler</string>
+    <string name="camera_not_available">Die Kamerakomponente konnte nicht erzeugt werden</string>
+    <string name="error">Fehler</string>
+    <string name="info_use">Stellen Sie bei der Verwendung der Augmented
+		Reality Sicht sicher, dass die Magnetfeldsensoren nicht gestört
+		werden. Durch Schütteln des Gerätes können sie zurückgesetzt
+		werden.\n© 2013 52°North, visit http://52north.org/android</string>
+    <string name="advice">Hinweis</string>
+    <string name="toggle_interpolation">Interpolation  Overlay</string>
+    <string name="toggle_itemized">Itemized  Overlay</string>
+    <!-- Codebase Strings -->
+    <string name="cb_menu_refresh">Refresh</string>
+    <string name="cb_menu_about">About</string>
+    <!-- About Dialog -->
+    <string name="about_info_text">	    More information at 
+	    http://52north.org/android </string>
+    <string name="about_more_info_text">	    GeoAR ist Teil der 52°North Geostatistics Community: \n
+		http://52north.org/communities/geostatistics/ \n
+		Kontakt: Daniel Nüst (d.nuest@52north.org) \n
+		Entwicklung: Arne de Wall, Holger Hopmann</string>
+    <string name="about_legal_text">	    This development is supported by the European Commissions Seventh
+		Framework Programme (FP7) via the project GeoViQua (QUAlity aware
+		VIsualisation for the Global Earth Observation system of systems), grant
+		number 265178.</string>
+    <string name="about_titel">	    52°North GeoAR Augmented Reality Browser for Android</string>
+    <string name="about_version_text">	    ${version}</string>
+
+    <!-- Map Strings -->
+    <string name="map_item_camera">CameraView</string>
+    <string name="add_instance">Neue Instanz...</string>
+    <string name="remove_unused">Deaktivierte Löschen</string>
+    <string name="filter_settings">Filtereinstellungen</string>
+    <string name="general_settings">Allgemeine Settings</string>
+    <string name="plugin_details">Plugindetails</string>
+    <string name="publisher">Herausgeber</string>
+    <string name="version">Version</string>
+    <string name="description">Beschreibung</string>
+    <string name="provided_data_sources">Bereitgestellte Datenquellen</string>
+    <string name="name">Name</string>
+    <string name="more_">Weitere...</string>
+<string name="installed">Installiert</string>
+</resources>

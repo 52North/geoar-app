@@ -32,7 +32,7 @@ import org.n52.android.newdata.Annotations.SharedHttpClient;
 import org.n52.android.newdata.Annotations.SupportedVisualization;
 import org.n52.android.newdata.Annotations.SystemService;
 import org.n52.android.newdata.CheckList.CheckedChangedListener;
-import org.n52.android.newdata.settings.SettingsHelper;
+import org.n52.android.settings.SettingsHelper;
 
 import android.content.Context;
 import android.content.Intent;

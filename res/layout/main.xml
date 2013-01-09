@@ -1,35 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:tools="http://schemas.android.com/tools" android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
 
-	<!-- replace dynamically via a FragmentTransaction and non statically defined 
-		fragments -->
-	<!-- <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" 
-		android:id="@+id/fragment_view" android:layout_width="230dp" android:layout_height="348dp" 
-		android:layout_alignParentBottom="true" android:layout_alignParentLeft="true" 
-		android:layout_alignParentRight="true" android:layout_alignParentTop="true" 
-		android:name="org.n52.android.view.map.GeoMapFragment" /> <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" 
-		android:id="@+id/fragment_view2" android:layout_width="230dp" android:layout_height="348dp" 
-		android:layout_alignParentBottom="true" android:layout_alignParentLeft="true" 
-		android:layout_alignParentRight="true" android:layout_alignParentTop="true" 
-		android:name="org.n52.android.view.geoar.ARFragment" /> -->
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+    </FrameLayout>
 
-	<FrameLayout android:id="@+id/fragmentContainer"
-		android:layout_width="match_parent" android:layout_height="match_parent">
-	</FrameLayout>
-
-	<!-- <org.n52.android.view.GeoARViewPager android:id="@+id/pager" android:layout_width="match_parent" 
-		android:layout_height="match_parent" > </org.n52.android.view.GeoARViewPager> -->
-	<!-- Info Panel -->
-
-	<org.n52.android.view.InfoView 
-		android:id="@+id/infoView" android:layout_width="match_parent" 
-		android:layout_height="wrap_content" android:layout_alignParentLeft="true"
-		android:layout_alignParentBottom="true"  android:background="@android:color/background_dark" />
-	
-	<!--   android:background="@android:drawable/toast_frame"  -->
-
-	<!-- Map / AR Switching Button -->
+    <org.n52.android.view.InfoView
+        android:id="@+id/infoView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:background="@android:color/background_dark" />
 
 </RelativeLayout>

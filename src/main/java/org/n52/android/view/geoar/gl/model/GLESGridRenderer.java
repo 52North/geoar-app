@@ -19,9 +19,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import org.mapsforge.core.GeoPoint;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.IRotationMatrixProvider;
-import org.n52.android.view.geoar.gl.GLESCamera;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;

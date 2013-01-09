@@ -19,7 +19,6 @@ import java.nio.Buffer;
 
 import org.n52.android.view.geoar.GLESUtils;
 
-import android.annotation.SuppressLint;
 import android.opengl.GLES20;
 import android.util.Log;
 

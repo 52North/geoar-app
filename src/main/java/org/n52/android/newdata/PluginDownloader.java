@@ -43,7 +43,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.n52.android.GeoARApplication;
 
-import android.R;
 import android.app.DownloadManager;
 import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
@@ -55,7 +54,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
-import android.widget.ImageView;
 
 public class PluginDownloader {
 

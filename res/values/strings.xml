@@ -1,97 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="app_name">GeoAR</string>
-	<string name="gps_nicht_aktiviert">GPS nicht aktiviert</string>
-	<string name="gps_aktiviert">GPS aktiviert</string>
-	<string name="warte_auf_gps_verf_gbarkeit">Warte auf GPS Verfügbarkeit</string>
-	<string name="akteulle_position_unbekannt">Aktuelle Position unbekannt</string>
-	<string name="_berlagerung_kalibrieren">Überlagerung kalibrieren</string>
-	<string name="calibration">Kalibrierung</string>
-	<string name="noise_overlays">Lärm flächig</string>
-	<string name="noise_overlay_grid">Lärmgitter</string>
-	<string name="choose_overlay">Überlagerung wählen</string>
-	<string name="ok">OK</string>
-	<string name="reload">Neu laden</string>
-	<string name="magnetic_field_not_calibrated">Magnetfeldsensor muss kalibriert werden</string>
-	<string name="accel_not_calibrated">Beschleunigungssensor muss kalibriert werden
-	</string>
-	<string name="bars">Balken</string>
-	<string name="bars_labels">Balken Beschriftet</string>
-	<string name="chart_settings">Diagrammeinstellungen</string>
-	<string name="change_chart">Diagramm Ändern</string>
-	<string name="magnetic_field_not_started">Magnetfeldsensor konnte nicht gestartet werden
-	</string>
-	<string name="accel_not_started">Accelerometer konnte nicht gestartet werden
-	</string>
-	<string name="calibration_info">Richten Sie die Sichthöhe aus. Eine Quadratseite
-		ist 1 m lang.</string>
-	<string name="cancel">Abbrechen</string>
-	<string name="filter">Filtern</string>
-	<string name="select">Auswahl</string>
-	<string name="filter_source">Datenquelle filtern</string>
-	<string name="delete">Löschen</string>
-	<string name="na">Keine Angabe</string>
-	<string name="select_source">Datenquelle wählen</string>
-	<string name="data_source">Datenquelle</string>
-	<string name="satellite">Satellit</string>
-	<string name="streets">Straßen</string>
-	<string name="traffic">Verkehr</string>
-	<string name="select_map">Select Overlay Type</string>
-	<string name="manual_position">Manuelle Positionsangabe</string>
-	<string name="set_location">Standort setzen</string>
-	<string name="show_location">Standort zeigen</string>
-	<string name="info_manual_position">Geben Sie ihre aktuelle Position durch Tippen auf
-		der Karte an.</string>
-	<string name="not_zoomed_in">Interpolation erfordert höhere Zoomstufe</string>
-	<string name="connection_error">Verbindungsfehler</string>
-	<string name="unkown_error">Unbekannter Fehler</string>
-	<string name="clustering">Clustering</string>
-	<string name="interpolation">Interpolation</string>
-	<string name="measurement_request">Messungsabfrage</string>
-	<string name="dateTo">Enddatum</string>
-	<string name="dateFrom">Startdatum</string>
-	<string name="time_of_day">Tageszeit</string>
-	<string name="none">Keine</string>
-	<string name="camera_not_available">Die Kamerakomponente konnte nicht erzeugt werden
-	</string>
-	<string name="error">Fehler</string>
-	<string name="info_use">Stellen Sie bei der Verwendung der Augmented
-		Reality Sicht sicher, dass die Magnetfeldsensoren nicht gestört
-		werden. Durch Schütteln des Gerätes können sie zurückgesetzt
-		werden.\n© 2011 52°North, visit http://52north.org/android
-	</string>
-	<string name="advice">Hinweis</string>
-	<string name="info_measurement_query">Messungsabfrage</string>
-	<string name="toggle_interpolation">Interpolation  Overlay</string>
-	<string name="toggle_itemized">Itemized  Overlay</string>
-	<!-- Codebase Strings -->
-	<string name="cb_menu_refresh">Refresh</string>
-	<string name="cb_menu_about">About</string>
-	<!-- About Dialog -->
-	<string name="about_info_text">
-	    More information at 
-	    http://52north.org/android 
-	</string>
-	<string name="about_more_info_text">
-	    GeoAR is part of the 52°North Geostatistics Community: \n
+
+    <string name="app_name">GeoAR</string>
+    <string name="gps_nicht_aktiviert">GPS not enabled</string>
+    <string name="gps_aktiviert">GPS enabled</string>
+    <string name="warte_auf_gps_verf_gbarkeit">Waiting for GPS</string>
+    <string name="akteulle_position_unbekannt">Current location unknown</string>
+    <string name="_berlagerung_kalibrieren">Calibrate</string>
+    <string name="calibration">Clibration</string>
+    <string name="ok">OK</string>
+    <string name="reload">Reload</string>
+    <string name="magnetic_field_not_calibrated">Magnetic field sensor needs calibration</string>
+    <string name="accel_not_calibrated">Accelerometer needs calibration</string>
+    <string name="magnetic_field_not_started">Could not start magnetic field sensor</string>
+    <string name="accel_not_started">Could not start accelerometer</string>
+    <string name="cancel">Cancel</string>
+    <string name="filter">Filter</string>
+    <string name="select">Select</string>
+    <string name="filter_source">Filter Data Source</string>
+    <string name="delete">Delete</string>
+    <string name="na">No Value</string>
+    <string name="select_source">Select Data Source</string>
+    <string name="data_source">Data Source</string>
+    <string name="data_sources">Data Sources</string>
+    <string name="manual_position">Manual location override</string>
+    <string name="not_zoomed_in">Data requires closer zoom</string>
+    <string name="connection_error">Connecion error</string>
+    <string name="unkown_error">Unknown error</string>
+    <string name="camera_not_available">Could not initialize camera</string>
+    <string name="error">Error</string>
+    <string name="info_use">Make sure that the magnetic field sensors are not disturbed when using the augmented reality view.
+		Shaking the device may reset the sensors.\n© 2013 52°North, visit http://52north.org/android</string>
+    <string name="advice">Hinweis</string>
+    <string name="toggle_interpolation">Interpolation  Overlay</string>
+    <string name="toggle_itemized">Itemized  Overlay</string>
+    <!-- Codebase Strings -->
+    <string name="cb_menu_refresh">Refresh</string>
+    <string name="cb_menu_about">About</string>
+    <!-- About Dialog -->
+    <string name="about_info_text">	    More information at 
+	    http://52north.org/android </string>
+    <string name="about_more_info_text">	    GeoAR is part of the 52°North Geostatistics Community: \n
 		http://52north.org/communities/geostatistics/ \n
 		Contact: Daniel Nüst (d.nuest@52north.org) \n
-		Development Credits: Arne de Wall, Holger Hopmann
-	</string>
-	<string name="about_legal_text">
-	    This development is supported by the European Commissions Seventh
+		Development Credits: Arne de Wall, Holger Hopmann</string>
+    <string name="about_legal_text">	    This development is supported by the European Commissions Seventh
 		Framework Programme (FP7) via the project GeoViQua (QUAlity aware
 		VIsualisation for the Global Earth Observation system of systems), grant
 		number 265178.</string>
-	<string name="about_titel">
-	    52°North GeoAR Augmented Reality Browser for Android
-	</string>
-	<string name="about_version_text">
-	    ${version}
-	</string>
-	
-	<!-- Map Strings -->
-	<string name="map_item_camera">CameraView</string>
-	<string name="add_instance">Add Instance...</string>
-	<string name="remove_unused">Remove unused</string>
+    <string name="about_titel">	    52°North GeoAR Augmented Reality Browser for Android</string>
+    <string name="about_version_text">	    ${version}</string>
+
+    <!-- Map Strings -->
+    <string name="map_item_camera">CameraView</string>
+    <string name="add_instance">Add Instance...</string>
+    <string name="remove_unused">Remove unused</string>
+    <string name="filter_settings">Filter Settings</string>
+    <string name="general_settings">General Settings</string>
+    <string name="plugin_details">Plugin Details</string>
+    <string name="publisher">Publisher</string>
+    <string name="version">Version</string>
+    <string name="description">Description</string>
+    <string name="provided_data_sources">Provided Data Sources</string>
+    <string name="name">Name</string>
+    <string name="map">Map</string>
+    <string name="select_data_sources">Select Data Sources</string>
+    <string name="more_">More...</string>
+    <string name="installed">Installed</string>
+    <string name="download">Download</string>
+
 </resources>

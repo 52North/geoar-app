@@ -120,8 +120,10 @@ public class PluginFragment extends SherlockFragment {
 				.findViewById(android.R.id.tabhost);
 		tabHost.setup();
 		tabHost.addTab(tabHost.newTabSpec("installed")
-				.setIndicator("Installed").setContent(R.id.gridViewInstalled));
-		tabHost.addTab(tabHost.newTabSpec("download").setIndicator("Download")
+				.setIndicator(getActivity().getString(R.string.installed))
+				.setContent(R.id.gridViewInstalled));
+		tabHost.addTab(tabHost.newTabSpec("download")
+				.setIndicator(getActivity().getString(R.string.download))
 				.setContent(R.id.gridViewDownload));
 
 		tabHost.setCurrentTab(0);
@@ -242,7 +244,8 @@ public class PluginFragment extends SherlockFragment {
 
 		@Override
 		protected String getPluginStatus(PluginDownloadHolder plugin) {
-			return plugin.isDownloaded() ? "Installed" : "";
+			return plugin.isDownloaded() ? getActivity().getString(
+					R.string.installed) : "";
 		}
 	}
 }
