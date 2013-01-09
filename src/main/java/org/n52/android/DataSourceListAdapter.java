@@ -386,6 +386,8 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 			viewHolder = (RemoveUnselectedInstancesViewHolder) view.getTag();
 		}
 
+		viewHolder.textView.setEnabled(!dataSource.getInstances().allChecked());
+
 		viewHolder.dataSource = dataSource;
 		return view;
 	}

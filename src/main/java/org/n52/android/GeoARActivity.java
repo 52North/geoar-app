@@ -30,6 +30,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.SharedPreferences;
+import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -255,7 +256,9 @@ public class GeoARActivity extends SherlockFragmentActivity {
 					if (getPopup().isShowing()) {
 						mPopup.dismiss();
 					} else {
-						mPopup.showAsDropDown(actionView);
+						// Offset by top margin to align top
+						mPopup.showAsDropDown(actionView, 0, -mPopup
+								.getContentView().getPaddingTop());
 					}
 				}
 			});
@@ -291,7 +294,14 @@ public class GeoARActivity extends SherlockFragmentActivity {
 				mPopup = new PopupWindow(layout);
 				mPopup.setTouchable(true);
 				mPopup.setOutsideTouchable(true);
+
+				TypedArray typedArray = obtainStyledAttributes(new int[] { android.R.attr.actionDropDownStyle });
+				int resId = typedArray.getResourceId(0, 0);
+				typedArray = obtainStyledAttributes(resId,
+						new int[] { android.R.attr.popupBackground });
 				mPopup.setBackgroundDrawable(new BitmapDrawable(getResources()));
+				layout.setBackgroundResource(typedArray.getResourceId(0, 0));
+				// mPopup.setBackgroundDrawable(typedArray.getDrawable(0));
 				mPopup.setWindowLayoutMode(0, LayoutParams.WRAP_CONTENT);
 
 				// Set width of menu
