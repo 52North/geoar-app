@@ -129,7 +129,7 @@ public class CheckList<T> extends ArrayList<T> {
 		}
 		return resultList;
 	}
-	
+
 	public List<T> getUncheckedItems() {
 		List<T> resultList = new ArrayList<T>();
 		for (int i = 0; i < size(); i++) {
@@ -266,6 +266,7 @@ public class CheckList<T> extends ArrayList<T> {
 		for (int i = index, len = size() - 1; i < len; i++) {
 			checkSet.set(index, checkSet.get(i + 1));
 		}
+		checkSet.set(size() - 1, false);
 		T item = super.remove(index);
 		try {
 			if (checkManagerField != null) {
