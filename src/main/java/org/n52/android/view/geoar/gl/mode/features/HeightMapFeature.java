@@ -18,15 +18,15 @@ package org.n52.android.view.geoar.gl.mode.features;
 import org.n52.android.view.geoar.gl.mode.ColoredFeatureShader;
 import org.n52.android.view.geoar.gl.mode.FeatureShader;
 import org.n52.android.view.geoar.gl.mode.RenderFeature2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
-import android.util.Log;
 
 public class HeightMapFeature extends RenderFeature2 {
 
-	private static final String TAG = "HeightMapFeature";
-
+	
 	static final int SIZE_PER_SIDE = 64;
 	static final float MIN_POSITION = -10f;
 	static final float POSITION_RANGE = 20f;
@@ -34,7 +34,10 @@ public class HeightMapFeature extends RenderFeature2 {
 	private static final int POSITION_DATA_SIZE_IN_ELEMENTS = 3;
 	private static final int NORMAL_DATA_SIZE_IN_ELEMENTS = 3;
 	private static final int COLOR_DATA_SIZE_IN_ELEMENTS = 4;
-	
+
+	private static final Logger LOG = LoggerFactory
+			.getLogger(HeightMapFeature.class);
+
 	public HeightMapFeature() {
 		this(new ColoredFeatureShader());
 	}
@@ -47,13 +50,13 @@ public class HeightMapFeature extends RenderFeature2 {
 	@Override
 	public void setOpenGLPreRenderingSettings() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onPreRender() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -156,9 +159,10 @@ public class HeightMapFeature extends RenderFeature2 {
 
 			indexCount = heightMapIndexData.length;
 
-			setRenderObjectives(vertices, colors, normals, null, heightMapIndexData);
+			setRenderObjectives(vertices, colors, normals, null,
+					heightMapIndexData);
 		} catch (Throwable t) {
-			Log.w(TAG, t);
+			LOG.debug("Unkown error", t);
 		}
 	}
 }

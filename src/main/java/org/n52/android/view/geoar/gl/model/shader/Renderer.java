@@ -18,9 +18,11 @@ package org.n52.android.view.geoar.gl.model.shader;
 import java.nio.Buffer;
 
 import org.n52.android.view.geoar.GLESUtils;
+import org.n52.android.view.geoar.gl.mode.features.HeightMapFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import android.opengl.GLES20;
-import android.util.Log;
 
 /**
  * 
@@ -28,11 +30,12 @@ import android.util.Log;
  * 
  */
 public abstract class Renderer {
-	
 
 	private static final String POSITION_ATTRIBUTE = "a_Position";
 	private static final String NORMAL_ATTRIBUTE = "a_Normal";
 	private static final String COLOR_ATTRIBUTE = "a_Color";
+	private static final Logger LOG = LoggerFactory.getLogger(Renderer.class);
+
 	/************************
 	 * Variables
 	 ************************/
@@ -54,21 +57,19 @@ public abstract class Renderer {
 	String vertexShader;
 	String fragmentShader;
 
-
 	public Renderer(String vertexShader, String fragmentShader) {
 		this.vertexShader = vertexShader;
 		this.fragmentShader = fragmentShader;
 
-	}  
+	}
 
 	public void initShaders() {
 		if (vertexShader == null || fragmentShader == null)
-			return; 
+			return;
 
 		programHandle = GLESUtils.createProgram(vertexShader, fragmentShader);
 		if (programHandle == 0)
 			throw new RuntimeException("Could not compile the program");
-
 
 		positionHandle = GLES20
 				.glGetAttribLocation(programHandle, "a_Position");
@@ -79,8 +80,8 @@ public abstract class Renderer {
 		colorHandle = GLES20.glGetAttribLocation(programHandle, "a_Color");
 		if (colorHandle == -1)
 			throw new RuntimeException(
-					"get attrib location fVertexColor failed"); 
-		
+					"get attrib location fVertexColor failed");
+
 		normalHandle = GLES20.glGetAttribLocation(programHandle, "a_Normal");
 
 		mvpMatrixHandle = GLES20.glGetUniformLocation(programHandle,
@@ -93,7 +94,7 @@ public abstract class Renderer {
 		viewMatrixHandle = GLES20.glGetUniformLocation(programHandle,
 				"u_VMatrix");
 
-//		int x = 2;	
+		// int x = 2;
 	}
 
 	public void onDestroy() {
@@ -105,41 +106,41 @@ public abstract class Renderer {
 	}
 
 	public void setVertices(final int vertexBufferHandle) {
-		vertexHandle = GLES20.glGetAttribLocation(programHandle, POSITION_ATTRIBUTE);
+		vertexHandle = GLES20.glGetAttribLocation(programHandle,
+				POSITION_ATTRIBUTE);
 		if (vertexBufferHandle >= 0) {
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBufferHandle);
 			GLES20.glEnableVertexAttribArray(positionHandle);
 			GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT,
 					false, 0, 0);
 		} else {
-			Log.d(this.getClass().getSimpleName(),
-					"vertexbufferhandle is not a valid handle");
+			LOG.debug("vertexbufferhandle is not a valid handle");
 		}
 	}
 
 	public void setNormals(final int normalBufferHandle) {
-		normalHandle = GLES20.glGetAttribLocation(programHandle, NORMAL_ATTRIBUTE);
+		normalHandle = GLES20.glGetAttribLocation(programHandle,
+				NORMAL_ATTRIBUTE);
 		if (normalBufferHandle >= 0) {
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, normalBufferHandle);
 			GLES20.glEnableVertexAttribArray(normalHandle);
 			GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT,
 					false, 0, 0);
 		} else {
-			Log.d(this.getClass().getSimpleName(),
-					"normalbufferhandle is not a valid handle");
+			LOG.debug("normalbufferhandle is not a valid handle");
 		}
 	}
 
 	public void setColors(final int colorBufferHandle, Buffer buf) {
-		colorHandle = GLES20.glGetAttribLocation(programHandle, COLOR_ATTRIBUTE);
+		colorHandle = GLES20
+				.glGetAttribLocation(programHandle, COLOR_ATTRIBUTE);
 		if (colorBufferHandle >= 0) {
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, colorBufferHandle);
 			GLES20.glEnableVertexAttribArray(colorHandle);
 			GLES20.glVertexAttribPointer(colorHandle, 4, GLES20.GL_FLOAT,
 					false, 0, buf);
 		} else {
-			Log.d(this.getClass().getSimpleName(),
-					"colorbufferhandle is not a valid handle");
+			LOG.debug("colorbufferhandle is not a valid handle");
 		}
 	}
 
@@ -147,11 +148,12 @@ public abstract class Renderer {
 			float[] viewMatrix) {
 		setMVPMatrix(mvpMatrix);
 		setModelMatrix(modelMatrix);
-		setViewMatrix(viewMatrix); 
+		setViewMatrix(viewMatrix);
 	}
 
 	public void setMVPMatrix(float[] mvpMatrix) {
-		mvpMatrixHandle = GLES20.glGetUniformLocation(programHandle, "u_MVPMatrix");
+		mvpMatrixHandle = GLES20.glGetUniformLocation(programHandle,
+				"u_MVPMatrix");
 		GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0);
 	}
 
@@ -162,7 +164,8 @@ public abstract class Renderer {
 
 	public void setViewMatrix(float[] viewMatrix) {
 		this.viewMatrix = viewMatrix;
-//		mvMatrixHandle = GLES20.glGetUniformLocation(programHandle, "u_MVPMatrix");
+		// mvMatrixHandle = GLES20.glGetUniformLocation(programHandle,
+		// "u_MVPMatrix");
 		GLES20.glUniformMatrix4fv(viewMatrixHandle, 1, false, viewMatrix, 0);
 	}
 

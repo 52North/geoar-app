@@ -28,6 +28,8 @@ import java.util.zip.ZipFile;
 import org.n52.android.GeoARApplication;
 import org.n52.android.newdata.CheckList.CheckManager;
 import org.n52.android.newdata.PluginLoader.PluginInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -35,7 +37,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Parcel;
-import android.util.Log;
 import dalvik.system.DexClassLoader;
 import dalvik.system.DexFile;
 
@@ -57,6 +58,9 @@ public class InstalledPluginHolder extends PluginHolder {
 	private CheckList<InstalledPluginHolder>.Checker mChecker;
 	private DexClassLoader mPluginDexClassLoader;
 	private boolean iconLoaded;
+
+	private static final Logger LOG = LoggerFactory
+			.getLogger(InstalledPluginHolder.class);
 
 	public InstalledPluginHolder(PluginInfo pluginInfo) {
 		this.version = pluginInfo.version;
@@ -165,18 +169,16 @@ public class InstalledPluginHolder extends PluginHolder {
 
 						mDataSources.add(dataSourceHolder);
 					} else {
-						Log.i("GeoAR",
-								"Datasource "
-										+ entryClass.getSimpleName()
-										+ " is not implementing DataSource interface");
-						// TODO handle error
+						LOG.error("Datasource " + entryClass.getSimpleName()
+								+ " is not implementing DataSource interface");
+						// TODO handle error, somehow propagate back to user
 					}
 				}
 			}
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Dex changed");
 		} catch (LinkageError e) {
-			Log.e("GeoAR", "Data source " + getName() + " uses invalid class, "
+			LOG.error("Data source " + getName() + " uses invalid class, "
 					+ e.getMessage());
 		}
 
@@ -213,10 +215,10 @@ public class InstalledPluginHolder extends PluginHolder {
 				if (pluginIconEntry != null) {
 					pluginIcon = BitmapFactory.decodeStream(zipFile
 							.getInputStream(pluginIconEntry));
-					Log.i("GeoAR", "Plugin " + getName() + " has no icon");
+					LOG.info("Plugin " + getName() + " has no icon");
 				}
 			} catch (IOException e) {
-				Log.i("GeoAR", "Plugin " + getName() + " has an invalid icon");
+				LOG.error("Plugin " + getName() + " has an invalid icon");
 			}
 		}
 

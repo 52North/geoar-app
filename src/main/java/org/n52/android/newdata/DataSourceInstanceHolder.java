@@ -21,6 +21,8 @@ import java.io.ObjectOutputStream;
 
 import org.n52.android.newdata.CheckList.CheckManager;
 import org.n52.android.settings.SettingsHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import android.content.Context;
 import android.content.Intent;
@@ -28,12 +30,13 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 public class DataSourceInstanceHolder implements Parcelable {
 	private static int nextId = 0;
 	private static final int CLEAR_CACHE = 1;
 	private static final int CLEAR_CACHE_AFTER_DEACTIVATION_DELAY = 10000;
+	private static final Logger LOG = LoggerFactory
+			.getLogger(DataSourceInstanceHolder.class);
 
 	private Handler dataSourceHandler = new Handler(new Handler.Callback() {
 		@Override
@@ -78,7 +81,7 @@ public class DataSourceInstanceHolder implements Parcelable {
 	 * datasource is added to map/ar.
 	 */
 	public void activate() {
-		Log.i("GeoAR", "Activating data source " + getName());
+		LOG.info("Activating data source " + getName());
 
 		// prevents clearing of cache by removing messages
 		dataSourceHandler.removeMessages(CLEAR_CACHE);
@@ -89,7 +92,7 @@ public class DataSourceInstanceHolder implements Parcelable {
 	 */
 	public void deactivate() {
 		// Clears the cache 30s after calling this method
-		Log.i("GeoAR", "Deactivating data source " + getName());
+		LOG.info("Deactivating data source " + getName());
 		dataSourceHandler.sendMessageDelayed(
 				dataSourceHandler.obtainMessage(CLEAR_CACHE),
 				CLEAR_CACHE_AFTER_DEACTIVATION_DELAY);

@@ -29,10 +29,12 @@ import org.n52.android.newdata.SpatialEntity;
 import org.n52.android.newdata.Visualization.MapVisualization.ItemVisualization;
 import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.Settings;
+import org.n52.android.view.geoar.gl.mode.features.HeightMapFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import android.graphics.Point;
 import android.os.Handler;
-import android.util.Log;
 import android.view.MotionEvent;
 
 /**
@@ -187,16 +189,10 @@ public class DataSourceOverlayHandler {
 	protected Object updateLock = new Object();
 
 	protected DataSourcesOverlay overlay;
-	// protected ItemizedDataOverlay<OverlayItem> itemizedOverlay;
-
-	// protected int cacheWidth;
-	// protected int cacheHeight;
-	// protected InfoView infoHandler;
-	// protected Paint paint;
-	// protected Drawable itemizedDrawable;
-
-	// private MapView mapView;
 	private DataSourceInstanceHolder dataSource;
+
+	private static final Logger LOG = LoggerFactory
+			.getLogger(DataSourceOverlayHandler.class);
 
 	public DataSourceOverlayHandler(DataSourcesOverlay overlay,
 			DataSourceInstanceHolder dataSource) {
@@ -217,7 +213,7 @@ public class DataSourceOverlayHandler {
 
 	public void clear() {
 		synchronized (updateLock) {
-			Log.d("GeoAR", dataSource.getName() + " clearing map overlay");
+			LOG.info(dataSource.getName() + " clearing map overlay");
 			cancel();
 			overlay.clear(dataSource);
 		}
@@ -228,7 +224,7 @@ public class DataSourceOverlayHandler {
 			if (nextUpdate != null) {
 				updateHandler.removeCallbacks(nextUpdate);
 				nextUpdate.cancel();
-				Log.d("GeoAR", dataSource.getName() + " map overlay canceled");
+				LOG.info(dataSource.getName() + " map overlay canceled");
 			}
 
 		}
@@ -288,7 +284,7 @@ public class DataSourceOverlayHandler {
 				}
 				nextUpdate = new UpdateHolder(newBounds);
 				updateHandler.postDelayed(nextUpdate, Math.max(0, updateDelay));
-				Log.i("GeoAR", "Overlay Update in " + updateDelay / 1000 + " s");
+				LOG.debug("Overlay Update in " + updateDelay / 1000 + " s");
 			}
 		}
 	}

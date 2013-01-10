@@ -28,8 +28,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.data.Tile;
-
-import android.util.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Interface to request measurements from a specific {@link DataSource}. Builds
@@ -138,13 +138,16 @@ public class DataCache {
 	protected String logTag;
 	private long minReloadInterval;
 
+	private static final Logger LOG = LoggerFactory.getLogger(DataCache.class);
+
 	public DataCache(DataSourceInstanceHolder dataSource) {
 		this(dataSource, SHARED_THREAD_POOL);
 	}
 
 	public DataCache(DataSourceInstanceHolder dataSource,
 			ThreadPoolExecutor fetchingThreadPool) {
-		this(dataSource, dataSource.getParent().getCacheZoomLevel(), fetchingThreadPool);
+		this(dataSource, dataSource.getParent().getCacheZoomLevel(),
+				fetchingThreadPool);
 	}
 
 	public DataCache(DataSourceInstanceHolder dataSource, byte tileZoom,
@@ -188,7 +191,7 @@ public class DataCache {
 	 */
 	public void clearCache() {
 		synchronized (tileCacheMapping) {
-			Log.i(logTag, "Clearing cache");
+			LOG.info(logTag + "Clearing cache");
 			// Cancel all operation
 			for (SoftReference<DataTile> cacheReference : tileCacheMapping
 					.values()) {
@@ -293,8 +296,8 @@ public class DataCache {
 				public void run() {
 					// try {
 
-					Log.i(logTag, "Requesting Data " + dataTile.tile.x + ", "
-							+ dataTile.tile.y);
+					LOG.info(logTag + "Requesting Data " + dataTile.tile.x
+							+ ", " + dataTile.tile.y);
 
 					try {
 						requestDataForTile(dataTile);

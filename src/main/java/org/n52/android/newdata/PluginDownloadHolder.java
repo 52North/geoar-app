@@ -20,11 +20,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Parcel;
-import android.util.Log;
 
 public class PluginDownloadHolder extends PluginHolder {
 
@@ -36,6 +38,9 @@ public class PluginDownloadHolder extends PluginHolder {
 	private Long version;
 	private Bitmap pluginIcon;
 	private boolean iconLoaded = false;
+
+	private static final Logger LOG = LoggerFactory
+			.getLogger(PluginDownloadHolder.class);
 
 	public String getDescription() {
 		return description;
@@ -114,7 +119,7 @@ public class PluginDownloadHolder extends PluginHolder {
 				pluginIcon = BitmapFactory.decodeStream(bis);
 				bis.close();
 			} catch (IOException e) {
-				Log.e("GeoAR", "Could not load image " + getImageLink());
+				LOG.error("Could not load image " + getImageLink());
 			}
 		}
 

@@ -18,8 +18,11 @@ package org.n52.android.view.geoar.gl.mode;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.n52.android.newdata.DataCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import android.opengl.GLES20;
-import android.util.Log;
 
 /**
  * 
@@ -49,6 +52,9 @@ public class FeatureShader {
 	private static final String COLOR_ATTRIBUTE = "a_Color";
 	private static final String TEXTURE_ATTRIBUTE = "a_TexCoordinate";
 
+	private static final Logger LOG = LoggerFactory
+			.getLogger(FeatureShader.class);
+
 	private static int createAndLinkProgram(final int vertexShader,
 			final int fragmentShader, final String[] attributes) {
 		int programHandle = GLES20.glCreateProgram();
@@ -71,9 +77,8 @@ public class FeatureShader {
 					0);
 
 			if (status[0] == 0) {
-				Log.e("FeatureShader",
-						"Error compiling program: "
-								+ GLES20.glGetProgramInfoLog(programHandle));
+				LOG.error("Error compiling program: "
+						+ GLES20.glGetProgramInfoLog(programHandle));
 				GLES20.glDeleteProgram(programHandle);
 				programHandle = 0;
 			}
@@ -95,7 +100,8 @@ public class FeatureShader {
 					status, 0);
 
 			if (status[0] == 0) {
-				Log.e("FeatureShader",
+				LOG.error(
+						"FeatureShader",
 						"Error compiling shader: "
 								+ GLES20.glGetShaderInfoLog(shaderHandle));
 				GLES20.glDeleteShader(shaderHandle);
@@ -142,8 +148,8 @@ public class FeatureShader {
 		matcher = pattern.matcher(vertexShader);
 		supportsTextures = matcher.find();
 	}
-	
-	public void onCreateInGLESThread(){
+
+	public void onCreateInGLESThread() {
 		if (vertexShader == null || fragmentShader == null)
 			return;
 
@@ -159,11 +165,11 @@ public class FeatureShader {
 				MVP_MATRIX_UNIFORM);
 		positionHandle = GLES20.glGetAttribLocation(programHandle,
 				POSITION_ATTRIBUTE);
-		if(supportsNormals)
+		if (supportsNormals)
 			normalHandle = GLES20.glGetAttribLocation(programHandle,
 					NORMAL_ATTRIBUTE);
-		if(supportsColors)
-			colorHandle = GLES20.glGetAttribLocation(programHandle, 
+		if (supportsColors)
+			colorHandle = GLES20.glGetAttribLocation(programHandle,
 					COLOR_ATTRIBUTE);
 	}
 
@@ -181,8 +187,7 @@ public class FeatureShader {
 					false, 0, 0);
 			GLES20.glEnableVertexAttribArray(positionHandle);
 		} else {
-			Log.d(this.getClass().getSimpleName(),
-					"vertexbufferhandle is not a valid handle");
+			LOG.debug("vertexbufferhandle is not a valid handle");
 		}
 	}
 
@@ -194,8 +199,7 @@ public class FeatureShader {
 
 	public void setNormals(final int normalBufferHandle) {
 		if (normalBufferHandle < 0) {
-			Log.d(this.getClass().getSimpleName(),
-					"normalbufferhandle is not a valid handle");
+			LOG.debug("normalbufferhandle is not a valid handle");
 			return;
 		}
 
@@ -217,8 +221,7 @@ public class FeatureShader {
 
 	public void setColors(final int colorBufferHandle) {
 		if (colorBufferHandle < 0) {
-			Log.d(this.getClass().getSimpleName(),
-					"colorbufferhandle is not a valid handle");
+			LOG.debug("colorbufferhandle is not a valid handle");
 			return;
 		}
 
@@ -269,12 +272,12 @@ public class FeatureShader {
 	public boolean supportsColors() {
 		return supportsColors;
 	}
-	
+
 	public boolean supportsTextures() {
 		return supportsTextures;
 	}
-	
-	public boolean supportsNormals(){
+
+	public boolean supportsNormals() {
 		return supportsNormals;
 	}
 

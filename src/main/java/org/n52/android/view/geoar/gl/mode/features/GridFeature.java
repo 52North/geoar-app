@@ -16,13 +16,15 @@
 package org.n52.android.view.geoar.gl.mode.features;
 
 import org.apache.http.MethodNotSupportedException;
+import org.n52.android.newdata.DataCache;
 import org.n52.android.view.geoar.gl.mode.ColoredFeatureShader;
 import org.n52.android.view.geoar.gl.mode.FeatureShader;
 import org.n52.android.view.geoar.gl.mode.RenderFeature2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import android.graphics.Color;
 import android.opengl.GLES20;
-import android.util.Log;
 
 public class GridFeature extends RenderFeature2 {
 	private int gridSize;
@@ -30,6 +32,9 @@ public class GridFeature extends RenderFeature2 {
 	private float thickness = 1.f;
 
 	private int androidColor = -1;
+
+	private static final Logger LOG = LoggerFactory
+			.getLogger(GridFeature.class);
 
 	public GridFeature() {
 		this(new ColoredFeatureShader());
@@ -48,8 +53,7 @@ public class GridFeature extends RenderFeature2 {
 			throw new MethodNotSupportedException(
 					"Setting Color array is not supported atm");
 		} catch (MethodNotSupportedException e) { // Lol...
-			Log.d(this.getClass().getSimpleName(),
-					"setColor array is not supported atm");
+			LOG.debug("setColor array is not supported atm");
 			e.printStackTrace();
 		}
 	}
@@ -97,7 +101,7 @@ public class GridFeature extends RenderFeature2 {
 			r = Color.red(androidColor);
 			g = Color.green(androidColor);
 			b = Color.blue(androidColor);
-			a = 0.5f;//(alpha == -1 ? Color.alpha(androidColor) : alpha);
+			a = 0.5f;// (alpha == -1 ? Color.alpha(androidColor) : alpha);
 		} else {
 			r = 1.0f;
 			g = 1.0f;
@@ -114,7 +118,7 @@ public class GridFeature extends RenderFeature2 {
 
 		setRenderObjectives(vertices, colors, null, null);
 	}
-	
+
 	@Override
 	public void onPreRender() {
 		GLES20.glLineWidth(thickness);

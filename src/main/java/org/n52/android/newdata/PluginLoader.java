@@ -46,6 +46,8 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.n52.android.GeoARApplication;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -54,7 +56,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.util.Base64;
-import android.util.Log;
 
 public class PluginLoader {
 
@@ -118,6 +119,9 @@ public class PluginLoader {
 		}
 	};
 	private static DefaultHttpClient mHttpClient;
+
+	private static final Logger LOG = LoggerFactory
+			.getLogger(PluginLoader.class);
 
 	static {
 		mInstalledPlugins
@@ -278,7 +282,7 @@ public class PluginLoader {
 			if (nodeList != null && nodeList.getLength() >= 1) {
 				name = nodeList.item(0).getTextContent();
 			} else {
-				Log.w("GeoAR", "Plugin Descriptor for " + pluginFile.getName()
+				LOG.warn("Plugin Descriptor for " + pluginFile.getName()
 						+ " does not specify a name");
 			}
 
@@ -288,7 +292,7 @@ public class PluginLoader {
 			if (nodeList != null && nodeList.getLength() >= 1) {
 				publisher = nodeList.item(0).getTextContent();
 			} else {
-				Log.w("GeoAR", "Plugin Descriptor for " + pluginFile.getName()
+				LOG.warn("Plugin Descriptor for " + pluginFile.getName()
 						+ " does not specify a publisher");
 			}
 
@@ -298,7 +302,7 @@ public class PluginLoader {
 			if (nodeList != null && nodeList.getLength() >= 1) {
 				description = nodeList.item(0).getTextContent();
 			} else {
-				Log.w("GeoAR", "Plugin Descriptor for " + pluginFile.getName()
+				LOG.warn("Plugin Descriptor for " + pluginFile.getName()
 						+ " does not specify a description");
 			}
 
@@ -308,7 +312,7 @@ public class PluginLoader {
 			if (nodeList != null && nodeList.getLength() >= 1) {
 				identifier = nodeList.item(0).getTextContent();
 			} else {
-				Log.w("GeoAR", "Plugin Descriptor for " + pluginFile.getName()
+				LOG.warn("Plugin Descriptor for " + pluginFile.getName()
 						+ " does not specify an identifier");
 			}
 
@@ -323,12 +327,12 @@ public class PluginLoader {
 					try {
 						version = parseVersionNumber(matcher.group(1));
 					} catch (NumberFormatException e) {
-						Log.e("GeoAR", "Plugin filename version invalid: "
+						LOG.error("Plugin filename version invalid: "
 								+ matcher.group(1));
 					}
 				}
 			} else {
-				Log.w("GeoAR", "Plugin Descriptor for " + pluginFile.getName()
+				LOG.warn("Plugin Descriptor for " + pluginFile.getName()
 						+ " does not specify a version");
 			}
 
@@ -366,7 +370,7 @@ public class PluginLoader {
 
 		Matcher matcher = pluginNamePattern.matcher(pluginFileName);
 		if (!matcher.matches()) {
-			Log.e("GeoAR", "Plugin filename invalid: " + pluginFileName);
+			LOG.error("Plugin filename invalid: " + pluginFileName);
 			return null;
 		}
 
@@ -378,8 +382,8 @@ public class PluginLoader {
 			try {
 				version = parseVersionNumber(matcher.group(1));
 			} catch (NumberFormatException e) {
-				Log.e("GeoAR",
-						"Plugin filename version invalid: " + matcher.group(1));
+				LOG.error("Plugin filename version invalid: "
+						+ matcher.group(1));
 			}
 		}
 
@@ -411,15 +415,16 @@ public class PluginLoader {
 			PluginInfo pluginInfo = readPluginInfoFromPlugin(new File(
 					PLUGIN_DIRECTORY_PATH, pluginFileName));
 			if (pluginInfo == null) {
-				Log.i("GeoAR", "Plugin " + pluginFileName
+				LOG.info("Plugin " + pluginFileName
 						+ " has no plugin descriptor");
 				pluginInfo = readPluginInfoFromFilename(new File(
 						PLUGIN_DIRECTORY_PATH, pluginFileName));
 			}
 
 			if (pluginInfo.identifier == null) {
-				Log.e("GeoAR", "Plugin " + pluginFileName
-						+ " has an invalid plugin descriptor");
+				LOG.error("Plugin "
+						+ pluginFileName
+						+ " has an invalid plugin descriptor and an invalid filename. Plugin excluded from loading.");
 				continue;
 			}
 			if (pluginInfo.version == null) {

@@ -16,11 +16,13 @@
 package org.n52.android.view.geoar.gl.model.primitives;
 
 import org.apache.http.MethodNotSupportedException;
+import org.n52.android.view.geoar.gl.mode.features.HeightMapFeature;
 import org.n52.android.view.geoar.gl.model.RenderNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import android.graphics.Color;
 import android.opengl.GLES20;
-import android.util.Log;
 
 /**
  * 
@@ -35,6 +37,8 @@ public class Grid extends RenderNode {
 	private Float alpha;
 
 	private int androidColor = -1;
+
+	private static final Logger LOG = LoggerFactory.getLogger(Grid.class);
 
 	public Grid() {
 		gridSize = 80;
@@ -61,9 +65,8 @@ public class Grid extends RenderNode {
 		try {
 			throw new MethodNotSupportedException(
 					"Setting Color array is not supported atm");
-		} catch (MethodNotSupportedException e) {	// Lol...
-			Log.d(this.getClass().getSimpleName(),
-					"setColor array is not supported atm");
+		} catch (MethodNotSupportedException e) { // Lol...
+			LOG.debug("setColor array is not supported atm");
 			e.printStackTrace();
 		}
 	}

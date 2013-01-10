@@ -21,8 +21,11 @@ import java.util.List;
 
 import org.n52.android.GeoARApplication;
 import org.n52.android.R;
+import org.n52.android.newdata.DataCache;
 import org.n52.android.utils.GeoLocation;
 import org.n52.android.view.InfoView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import android.content.Context;
 import android.location.Location;
@@ -32,7 +35,6 @@ import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 /**
  * Helper class to allow an safe and common way to receive location updates from
@@ -45,6 +47,8 @@ public class LocationHandler implements Serializable {
 	private static final long serialVersionUID = 6337877169906901138L;
 	private static final int DISABLE_LOCATION_UPDATES_MESSAGE = 1;
 	private static final long DISABLE_LOCATION_UPDATES_DELAY = 12000;
+	private static final Logger LOG = LoggerFactory.getLogger(LocationHandler.class);
+
 
 	public interface OnLocationUpdateListener {
 		void onLocationChanged(Location location);
@@ -155,7 +159,7 @@ public class LocationHandler implements Serializable {
 			}
 			locationManager.requestLocationUpdates(
 					LocationManager.GPS_PROVIDER, 5000, 0, locationListener);
-			Log.i("GeoAR", "Requesting Location Updates");
+			LOG.info("Requesting Location Updates");
 		}
 	}
 
@@ -165,7 +169,7 @@ public class LocationHandler implements Serializable {
 	public static void onPause() {
 		locationManager.removeUpdates(locationListener);
 		InfoView.clearStatus(gpsProviderInfo);
-		Log.i("GeoAR", "Removed Location Updates");
+		LOG.info("Removed Location Updates");
 	}
 
 	/**

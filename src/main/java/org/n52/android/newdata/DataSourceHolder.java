@@ -33,6 +33,8 @@ import org.n52.android.newdata.Annotations.SupportedVisualization;
 import org.n52.android.newdata.Annotations.SystemService;
 import org.n52.android.newdata.CheckList.CheckedChangedListener;
 import org.n52.android.settings.SettingsHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import android.content.Context;
 import android.content.Intent;
@@ -40,7 +42,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 public class DataSourceHolder implements Parcelable {
 	public static final Parcelable.Creator<DataSourceHolder> CREATOR = new Parcelable.Creator<DataSourceHolder>() {
@@ -64,6 +65,8 @@ public class DataSourceHolder implements Parcelable {
 	};
 	private static final int CLEAR_CACHE = 1;
 	private static final int CLEAR_CACHE_AFTER_DEACTIVATION_DELAY = 10000;
+	private static final Logger LOG = LoggerFactory
+			.getLogger(DataSourceHolder.class);
 
 	private static int nextId = 0;
 	private static Map<Class<? extends Visualization>, Visualization> visualizationMap = new HashMap<Class<? extends Visualization>, Visualization>();
@@ -166,7 +169,7 @@ public class DataSourceHolder implements Parcelable {
 	 * datasource is added to map/ar.
 	 */
 	public void activate() {
-		Log.i("GeoAR", "Activating data source " + getName());
+		LOG.info("Activating data source " + getName());
 
 		// prevents clearing of cache by removing messages
 		dataSourceHandler.removeMessages(CLEAR_CACHE);
@@ -198,7 +201,7 @@ public class DataSourceHolder implements Parcelable {
 	 * Queues unloading of datasource and cached data
 	 */
 	public void deactivate() {
-		Log.i("GeoAR", "Deactivating data source " + getName());
+		LOG.info("Deactivating data source " + getName());
 		dataSourceHandler.sendMessageDelayed(
 				dataSourceHandler.obtainMessage(CLEAR_CACHE),
 				CLEAR_CACHE_AFTER_DEACTIVATION_DELAY);
@@ -315,7 +318,7 @@ public class DataSourceHolder implements Parcelable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (LinkageError e) {
-			Log.e("GeoAR", "Data source " + getName() + " uses invalid class, "
+			LOG.error("Data source " + getName() + " uses invalid class, "
 					+ e.getMessage());
 		}
 
@@ -426,7 +429,7 @@ public class DataSourceHolder implements Parcelable {
 		if (!mInstanceable) {
 			// data source has no instance-specific settings, create the single
 			// instance
-			Log.i("GeoAR", "Creating single-instance data source instance "
+			LOG.info("Creating single-instance data source instance "
 					+ getName());
 			try {
 				DataSource<? super Filter> dataSource = dataSourceClass

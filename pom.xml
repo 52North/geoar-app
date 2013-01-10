@@ -39,10 +39,6 @@
 			<scope>provided</scope>
 		</dependency>
 
-
-		<!-- mvn install:install-file -Dfile="${project.basedir}/libs/mapsforge-map-0.3.0-jar-with-dependencies.jar" 
-			-DgroupId=org.mapsforge -DartifactId=mapsforge-map -Dversion=0.3.0 -Dpackaging=jar 
-			-Dclassifier=jar-with-dependencies -->
 		<!-- using lib-repository, maven will install automatically -->
 		<dependency>
 			<groupId>org.mapsforge</groupId>
@@ -51,7 +47,6 @@
 			<classifier>jar-with-dependencies</classifier>
 		</dependency>
 
-
 		<!-- some AR functions still use this dependency -->
 		<dependency>
 			<groupId>org.osmdroid</groupId>
@@ -59,12 +54,29 @@
 			<version>3.0.8</version>
 		</dependency>
 
+		<!-- Logging -->
+		<dependency>
+			<groupId>com.github.tony19</groupId>
+			<artifactId>logback-android-core</artifactId>
+			<version>1.0.7-1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.tony19</groupId>
+			<artifactId>logback-android-classic</artifactId>
+			<version>1.0.7-1</version>
+		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-android</artifactId>
-			<version>1.6.1-RC1</version>
+			<artifactId>slf4j-ext</artifactId>
+			<version>1.7.2</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.14</version>
 		</dependency>
 
+		<!-- ABS -->
 		<dependency>
 			<groupId>com.actionbarsherlock</groupId>
 			<artifactId>actionbarsherlock</artifactId>
@@ -72,14 +84,12 @@
 			<type>jar</type>
 		</dependency>
 
+		<!-- Data Sources -->
 		<dependency>
 			<groupId>org.n52.android</groupId>
 			<artifactId>52n-geoar-ds</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-
-		<!-- <dependency> <groupId>com.google.android</groupId> <artifactId>support-v4</artifactId> 
-			<version>r7</version> </dependency> -->
 
 	</dependencies>
 

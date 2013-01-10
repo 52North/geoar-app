@@ -29,8 +29,7 @@ public class CubeFeature2 extends RenderFeature2 {
 	/*****************************
 	 * static variables
 	 *****************************/
-	private static final String TAG = Cube.class.getSimpleName();
-
+	
 	// R, G, B, A
 	private final float[] colors =
 	{				
