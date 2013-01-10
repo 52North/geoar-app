@@ -108,11 +108,12 @@ public class ARFragment2 extends SherlockFragment implements
 	 * Constructor
 	 */
 	public ARFragment2() {
+		// FIXME Move to sth. like onActivityCreated 
 		for (DataSourceHolder dataSource : PluginLoader.getDataSources()) {
 			dataSource.getInstances().addOnCheckedChangeListener(
 					dataSourceListener);
 		}
-		// TODO Wieder friegeben irgendwann!
+		// TODO Wieder friegeben irgendwann! z.B. onDestroy
 		LocationHandler.addLocationUpdateListener(this);
 	}
 
