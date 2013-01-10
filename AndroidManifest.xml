@@ -1,50 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.n52.android"
-    android:versionCode="1"
-    android:versionName="0.0.1-SNAPSHOT" >
+	package="org.n52.android" android:versionCode="1" android:versionName="0.0.1-SNAPSHOT">
 
-    <!-- reduce minSdkVersion if ABS works correctly with maven etc. -->
-    <uses-sdk
-        android:minSdkVersion="11"
-        android:targetSdkVersion="13" />
+	<!-- reduce minSdkVersion if ABS works correctly with maven etc. -->
+	<uses-sdk android:minSdkVersion="11" android:targetSdkVersion="13" />
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.CAMERA" />
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.CAMERA" />
 
-    <uses-feature
-        android:glEsVersion="0x00020000"
-        android:required="true" />
-    <uses-feature android:name="android.hardware.camera" />
+	<uses-feature android:glEsVersion="0x00020000"
+		android:required="true" />
+	<uses-feature android:name="android.hardware.camera" />
 
-    <application
-        android:name="org.n52.android.GeoARApplication"
-        android:hardwareAccelerated="false"
-        android:icon="@drawable/icon"
-        android:label="@string/app_name" >
-        <activity
-            android:name="org.n52.android.GeoARActivity"
-            android:configChanges="orientation"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" >
+	<application android:name="org.n52.android.GeoARApplication"
+		android:hardwareAccelerated="false" android:icon="@drawable/icon"
+		android:label="@string/app_name">
+		<activity android:name="org.n52.android.GeoARActivity"
+			android:configChanges="orientation" android:label="@string/app_name"
+			android:screenOrientation="portrait">
 
-            <!-- android:name="org.n52.android.DataSourceListActivity" > -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+			<!-- android:name="org.n52.android.DataSourceListActivity" > -->
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name="org.n52.android.newdata.DataSourceInstanceSettingsDialogActivity"
-            android:label="Data Source Settings"
-            android:theme="@android:style/Theme.Holo.Dialog" >
-        </activity>
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+		<activity
+			android:name="org.n52.android.newdata.DataSourceInstanceSettingsDialogActivity"
+			android:label="Data Source Settings" android:theme="@android:style/Theme.Holo.Dialog">
+		</activity>
+	</application>
 
-    </application>
+	<logback>
+		<configuration>
+			<appender name="LOGCAT"
+				class="ch.qos.logback.classic.android.LogcatAppender">
+				<tagEncoder>
+					<pattern>
+						%logger{0}
+					</pattern>
+				</tagEncoder>
+
+				<encoder>
+					<pattern>
+						[%method] > %msg%n
+					</pattern>
+				</encoder>
+			</appender>
+
+			<root level="TRACE">
+				<appender-ref ref="LOGCAT" />
+			</root>
+		</configuration>
+		<configuration>
+			<appender name="FILE"
+				class="ch.qos.logback.core.rolling.RollingFileAppender">
+				<!-- <file> ${DATA_DIR}/logFile.log </file> -->
+				<file> /mnt/sdcard/Android/data/org.n52.android/files/logFile.log </file>
+
+				<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+
+					<!-- daily rollover -->
+					<fileNamePattern>
+						logFile.%d{yyyy-MM-dd}.log
+					</fileNamePattern>
+
+					<!-- keep 30 days' worth of history -->
+					<maxHistory>
+						10
+					</maxHistory>
+
+					<cleanHistoryOnStart>
+						true
+					</cleanHistoryOnStart>
+				</rollingPolicy>
+
+				<encoder>
+					<pattern>
+						%-4relative [%thread] %-5level %logger{35} - %msg%n
+					</pattern>
+				</encoder>
+			</appender>
+
+			<root level="INFO">
+				<appender-ref ref="FILE" />
+			</root>
+		</configuration>
+	</logback>
 
 </manifest>

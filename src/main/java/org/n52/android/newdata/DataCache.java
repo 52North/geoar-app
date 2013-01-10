@@ -191,7 +191,7 @@ public class DataCache {
 	 */
 	public void clearCache() {
 		synchronized (tileCacheMapping) {
-			LOG.info(logTag + "Clearing cache");
+			LOG.info(logTag + " Clearing cache");
 			// Cancel all operation
 			for (SoftReference<DataTile> cacheReference : tileCacheMapping
 					.values()) {
@@ -296,7 +296,7 @@ public class DataCache {
 				public void run() {
 					// try {
 
-					LOG.info(logTag + "Requesting Data " + dataTile.tile.x
+					LOG.debug(logTag + " Requesting Data " + dataTile.tile.x
 							+ ", " + dataTile.tile.y);
 
 					try {
