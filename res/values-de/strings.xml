@@ -66,5 +66,11 @@
     <string name="provided_data_sources">Bereitgestellte Datenquellen</string>
     <string name="name">Name</string>
     <string name="more_">Weitere...</string>
-<string name="installed">Installiert</string>
+    <string name="installed">Installiert</string>
+    <string name="download">Download</string>
+    <string name="info_failed_email">Es tut uns leid, aber GeoAR erzeugte einen unbehandelten Ausnahmefehler bei der letzten Verwendung.\nGlücklicherweise konnten Fehlerdetails aufgezeichnet werden.\nBitte helfen Sie GeoAR zu verbessen, indem Sie einen Fehlerbericht senden.</string>
+    <string name="sorry">Entschuldigung!</string>
+    <string name="text_error_report">Ich freue mich, bei der Verbesserung von GeoAR helfen zu können!</string>
+    <string name="send_report">Bericht senden</string>
+
 </resources>

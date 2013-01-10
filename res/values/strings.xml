@@ -68,5 +68,9 @@
     <string name="more_">More...</string>
     <string name="installed">Installed</string>
     <string name="download">Download</string>
+    <string name="info_failed_email">We are sorry, but GeoAR raised an unhandled exception during its last execution.\nFortunately, details on this error were recorded.\nPlease help us improving GeoAR by sending us an error report.</string>
+    <string name="sorry">Sorry!</string>
+    <string name="text_error_report">I\'m very happy to help improving GeoAR!</string>
+    <string name="send_report">Send Report</string>
 
 </resources>

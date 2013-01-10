@@ -15,6 +15,10 @@
  */
 package org.n52.android;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
 import org.n52.android.newdata.PluginFragment;
@@ -29,10 +33,14 @@ import org.n52.android.view.map.MapFragment;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -73,20 +81,8 @@ public class GeoARActivity extends SherlockFragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		// // Get MeasurementManager from previous instance or create new one
-		// Object lastMeasureManager = getLastCustomNonConfigurationInstance();
-		// if (lastMeasureManager != null) {
-		// measurementManager = (MeasurementManager) lastMeasureManager;
-		// } else {
-		// measurementManager = DataSourceAdapter.createMeasurementManager();
-		// }
-
-		// First time init, create the UI.
 		if (savedInstanceState == null) {
-			// Fragment newFragment = ViewFragment.newInstance();
-			// getSupportFragmentManager().beginTransaction()
-			// .add(android.R.id.content, newFragment).commit();
-
+			// First time init
 			Builder builder = new AlertDialog.Builder(this);
 			builder.setMessage(R.string.info_use);
 			builder.setCancelable(true);
@@ -94,13 +90,31 @@ public class GeoARActivity extends SherlockFragmentActivity {
 			builder.setTitle(R.string.advice);
 			builder.show();
 		}
-		//
-		// mPager = (GeoARViewPager) findViewById(R.id.pager);
-		// mPager.setFragmentManager(getSupportFragmentManager());
-		// mPager.addFragment(mapFragment);
-		// mPager.addFragment(arFragment);
-		// mPager.addFragment(cbFragment);
-		// mPager.showFragment(mapFragment);
+
+		if (GeoARApplication.checkAppFailed()) {
+			// App Failed
+			Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage(R.string.info_failed_email);
+			builder.setCancelable(true);
+			builder.setPositiveButton(getString(R.string.send_report),
+					new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							GeoARApplication.sendFailMail(GeoARActivity.this);
+							GeoARApplication.clearAppFailed();
+						}
+					});
+			builder.setNegativeButton(android.R.string.no, null);
+			builder.setTitle(R.string.sorry);
+			builder.setOnCancelListener(new OnCancelListener() {
+				@Override
+				public void onCancel(DialogInterface dialog) {
+					// remove stack trace file
+					GeoARApplication.clearAppFailed();
+				}
+			});
+			builder.show();
+		}
 
 		showFragment(mapFragment);
 
@@ -158,6 +172,11 @@ public class GeoARActivity extends SherlockFragmentActivity {
 
 		PluginLoader.saveSelection();
 
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
 	}
 
 	@Override

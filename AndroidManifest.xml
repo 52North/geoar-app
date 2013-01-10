@@ -61,7 +61,7 @@
 			<appender name="FILE"
 				class="ch.qos.logback.core.rolling.RollingFileAppender">
 				<!-- <file> ${DATA_DIR}/logFile.log </file> -->
-				<file> /mnt/sdcard/Android/data/org.n52.android/files/logFile.log </file>
+				<file> /mnt/sdcard/Android/data/org.n52.android/files/logs/logFile.log </file>
 
 				<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 
@@ -72,7 +72,7 @@
 
 					<!-- keep 30 days' worth of history -->
 					<maxHistory>
-						10
+						7
 					</maxHistory>
 
 					<cleanHistoryOnStart>
@@ -82,7 +82,7 @@
 
 				<encoder>
 					<pattern>
-						%-4relative [%thread] %-5level %logger{35} - %msg%n
+						%d %-4relative [%thread] %-5level %logger{35} - %msg%n
 					</pattern>
 				</encoder>
 			</appender>
