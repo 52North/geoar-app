@@ -27,6 +27,9 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.n52.android.newdata.PluginLogger;
+import org.n52.android.utils.DataSourceLoggerFactory;
+import org.n52.android.utils.DataSourceLoggerFactory.LoggerCallable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,6 +82,14 @@ public class GeoARApplication extends Application {
 				}
 			}
 		});
+		DataSourceLoggerFactory.setLoggerCallable(new LoggerCallable() {
+			@Override
+			public org.n52.android.utils.DataSourceLoggerFactory.Logger call(
+					Class<?> clazz) {
+				return new PluginLogger(clazz);
+			}
+		});
+
 		super.onCreate();
 	}
 

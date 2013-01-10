@@ -308,6 +308,7 @@ public class DataSourceHolder implements Parcelable {
 						f.setAccessible(true);
 						f.set(target, mPluginHolder.getPluginContext());
 					}
+
 				}
 				currentClass = currentClass.getSuperclass();
 			}

@@ -58,7 +58,7 @@
     <string name="add_instance">Neue Instanz...</string>
     <string name="remove_unused">Deaktivierte Löschen</string>
     <string name="filter_settings">Filtereinstellungen</string>
-    <string name="general_settings">Allgemeine Settings</string>
+    <string name="general_settings">Allgemeine Einstellungen</string>
     <string name="plugin_details">Plugindetails</string>
     <string name="publisher">Herausgeber</string>
     <string name="version">Version</string>
