@@ -18,6 +18,7 @@ package org.n52.android.newdata;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
 
 import org.n52.android.newdata.CheckList.CheckManager;
 import org.n52.android.settings.SettingsHelper;
@@ -118,8 +119,21 @@ public class DataSourceInstanceHolder implements Parcelable {
 	}
 
 	public String getName() {
-		return parentHolder.getName() + " " + id;
-		// TODO
+		if (parentHolder.getNameCallbackMethod() != null) {
+			try {
+				return (String) parentHolder.getNameCallbackMethod().invoke(
+						dataSource);
+			} catch (Exception e) {
+				LOG.warn("Data Source " + parentHolder.getName()
+						+ " NameCallback fails");
+			}
+		}
+
+		if (parentHolder.instanceable()) {
+			return parentHolder.getName() + " " + id;
+		} else {
+			return parentHolder.getName();
+		}
 	}
 
 	public DataSource<? super Filter> getDataSource() {

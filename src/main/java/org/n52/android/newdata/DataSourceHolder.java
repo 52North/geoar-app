@@ -102,6 +102,7 @@ public class DataSourceHolder implements Parcelable {
 	private String name;
 
 	private CheckList<Visualization> visualizations;
+	private Method nameCallbackMethod;
 
 	/**
 	 * Wrapper for a {@link DataSource}. Provides access to general settings of
@@ -133,6 +134,18 @@ public class DataSourceHolder implements Parcelable {
 		cacheZoomLevel = dataSourceAnnotation.cacheZoomLevel();
 		minZoomLevel = dataSourceAnnotation.minZoomLevel();
 		maxZoomLevel = dataSourceAnnotation.maxZoomLevel();
+
+		// Find name callback
+		for (Method method : dataSourceClass.getMethods()) {
+			if (method.isAnnotationPresent(Annotations.NameCallback.class)) {
+				if (String.class.isAssignableFrom(method.getReturnType())) {
+					nameCallbackMethod = method;
+				} else {
+					LOG.error("Data source " + name
+							+ " has an invalid NameCallback");
+				}
+			}
+		}
 
 		// Find filter by getting the actual generic parameter type of the
 		// implemented DataSource interface
@@ -249,6 +262,10 @@ public class DataSourceHolder implements Parcelable {
 
 	public String getName() {
 		return name;
+	}
+	
+	public Method getNameCallbackMethod() {
+		return nameCallbackMethod;
 	}
 
 	/**
