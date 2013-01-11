@@ -133,7 +133,7 @@
 						<platform>15</platform>
 					</sdk>
 					<deleteConflictingFiles>true</deleteConflictingFiles>
-					<undeployBeforeDeploy>true</undeployBeforeDeploy>
+					<undeployBeforeDeploy>false</undeployBeforeDeploy>
 				</configuration>
 				<extensions>true</extensions>
 			</plugin>

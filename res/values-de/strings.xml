@@ -5,23 +5,12 @@
     <string name="gps_nicht_aktiviert">GPS nicht aktiviert</string>
     <string name="gps_aktiviert">GPS aktiviert</string>
     <string name="warte_auf_gps_verf_gbarkeit">Warte auf GPS Verfügbarkeit</string>
-    <string name="akteulle_position_unbekannt">Aktuelle Position unbekannt</string>
-    <string name="_berlagerung_kalibrieren">Überlagerung kalibrieren</string>
-    <string name="calibration">Kalibrierung</string>
     <string name="ok">OK</string>
-    <string name="reload">Neu laden</string>
     <string name="magnetic_field_not_calibrated">Magnetfeldsensor muss kalibriert werden</string>
     <string name="accel_not_calibrated">Beschleunigungssensor muss kalibriert werden</string>
     <string name="magnetic_field_not_started">Magnetfeldsensor konnte nicht gestartet werden</string>
     <string name="accel_not_started">Accelerometer konnte nicht gestartet werden</string>
     <string name="cancel">Abbrechen</string>
-    <string name="filter">Filtern</string>
-    <string name="select">Auswahl</string>
-    <string name="filter_source">Datenquelle filtern</string>
-    <string name="delete">Löschen</string>
-    <string name="na">Keine Angabe</string>
-    <string name="select_source">Datenquelle wählen</string>
-    <string name="data_source">Datenquelle</string>
     <string name="data_sources">Datenquellen</string>
     <string name="manual_position">Manuelle Positionsangabe</string>
     <string name="not_zoomed_in">Interpolation erfordert höhere Zoomstufe</string>
@@ -34,11 +23,8 @@
 		werden. Durch Schütteln des Gerätes können sie zurückgesetzt
 		werden.\n© 2013 52°North, visit http://52north.org/android</string>
     <string name="advice">Hinweis</string>
-    <string name="toggle_interpolation">Interpolation  Overlay</string>
-    <string name="toggle_itemized">Itemized  Overlay</string>
     <!-- Codebase Strings -->
     <string name="cb_menu_refresh">Refresh</string>
-    <string name="cb_menu_about">About</string>
     <!-- About Dialog -->
     <string name="about_legal_text">This development is supported by the European Commissions Seventh
 		Framework Programme (FP7) via the project GeoViQua (QUAlity aware VIsualisation for the Global Earth Observation system of systems), grant
@@ -63,7 +49,7 @@
     <string name="more_">Weitere...</string>
     <string name="installed">Installiert</string>
     <string name="download">Download</string>
-    <string name="info_failed_email">Es tut uns leid, aber GeoAR erzeugte einen unbehandelten Ausnahmefehler bei der letzten Verwendung.\nGlücklicherweise konnten Fehlerdetails aufgezeichnet werden.\nBitte helfen Sie GeoAR zu verbessen, indem Sie einen Fehlerbericht senden.</string>
+    <string name="info_failed_email">Es tut uns leid, aber GeoAR erzeugte einen unbehandelten Ausnahmefehler bei der letzten Verwendung.\nGlücklicherweise konnten Fehlerdetails aufgezeichnet werden.\nBitte helfen Sie GeoAR zu verbessen, indem Sie einen Fehlerbericht senden.\n(Dies öffnet ihre E-Mail App)</string>
     <string name="sorry">Entschuldigung!</string>
     <string name="text_error_report">Ich freue mich, bei der Verbesserung von GeoAR helfen zu können!</string>
     <string name="send_report">Bericht senden</string>
@@ -71,5 +57,9 @@
     <string name="about">Über</string>
     <string name="contact">Kontakt</string>
     <string name="development_credits">Entwicklung</string>
+    <string name="map">Karte</string>
+    <string name="text_feedback_report">Bitte fügen Sie Ihre Rückmeldung ein.</string>
+    <string name="could_not_find_email_application">Konnte keine E-Mail App finden</string>
+    <string name="give_feedback">Feedback Geben</string>
 
 </resources>

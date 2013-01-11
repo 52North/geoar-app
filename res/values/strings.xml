@@ -5,23 +5,12 @@
     <string name="gps_nicht_aktiviert">GPS not enabled</string>
     <string name="gps_aktiviert">GPS enabled</string>
     <string name="warte_auf_gps_verf_gbarkeit">Waiting for GPS</string>
-    <string name="akteulle_position_unbekannt">Current location unknown</string>
-    <string name="_berlagerung_kalibrieren">Calibrate</string>
-    <string name="calibration">Clibration</string>
     <string name="ok">OK</string>
-    <string name="reload">Reload</string>
     <string name="magnetic_field_not_calibrated">Magnetic field sensor needs calibration</string>
     <string name="accel_not_calibrated">Accelerometer needs calibration</string>
     <string name="magnetic_field_not_started">Could not start magnetic field sensor</string>
     <string name="accel_not_started">Could not start accelerometer</string>
     <string name="cancel">Cancel</string>
-    <string name="filter">Filter</string>
-    <string name="select">Select</string>
-    <string name="filter_source">Filter Data Source</string>
-    <string name="delete">Delete</string>
-    <string name="na">No Value</string>
-    <string name="select_source">Select Data Source</string>
-    <string name="data_source">Data Source</string>
     <string name="data_sources">Data Sources</string>
     <string name="manual_position">Manual location override</string>
     <string name="not_zoomed_in">Data requires closer zoom</string>
@@ -32,8 +21,6 @@
     <string name="info_use">Make sure that the magnetic field sensors are not disturbed when using the augmented reality view.
 		Shaking the device may reset the sensors.\n© 2013 52°North, visit http://52north.org/android</string>
     <string name="advice">Hinweis</string>
-    <string name="toggle_interpolation">Interpolation  Overlay</string>
-    <string name="toggle_itemized">Itemized  Overlay</string>
     <!-- Codebase Strings -->
     <string name="cb_menu_refresh">Refresh</string>
     <!-- About Dialog -->
@@ -62,7 +49,7 @@
     <string name="more_">More...</string>
     <string name="installed">Installed</string>
     <string name="download">Download</string>
-    <string name="info_failed_email">We are sorry, but GeoAR raised an unhandled exception during its last execution.\nFortunately, details on this error were recorded!\nPlease help us improving GeoAR by sending us an error report.</string>
+    <string name="info_failed_email">We are sorry, but GeoAR raised an unhandled exception during its last execution.\nFortunately, details on this error were recorded!\nPlease help us improving GeoAR by sending us an error report.\n(This will open your E-Mail App)</string>
     <string name="sorry">Sorry!</string>
     <string name="text_error_report">I\'m very happy to help improving GeoAR!</string>
     <string name="text_feedback_report">Please add your feedback here</string>

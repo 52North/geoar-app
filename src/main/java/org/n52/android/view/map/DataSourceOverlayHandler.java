@@ -21,6 +21,7 @@ import java.util.List;
 import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.Projection;
 import org.mapsforge.core.GeoPoint;
+import org.n52.android.R;
 import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.newdata.DataCache.GetDataBoundsCallback;
 import org.n52.android.newdata.DataCache.RequestHolder;
@@ -29,7 +30,6 @@ import org.n52.android.newdata.SpatialEntity;
 import org.n52.android.newdata.Visualization.MapVisualization.ItemVisualization;
 import org.n52.android.view.InfoView;
 import org.n52.android.view.geoar.Settings;
-import org.n52.android.view.geoar.gl.mode.features.HeightMapFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -171,10 +171,7 @@ public class DataSourceOverlayHandler {
 						requestHolder = dataSource.getDataCache()
 								.getDataByBBox(bounds, callback, false);
 					} else {
-						InfoView.setStatus("Daten erfordern höhere Zoomstufe",
-								5000, this);
-						// infoHandler.setStatus(R.string.not_zoomed_in, 5000,
-						// this);
+						InfoView.setStatus(R.string.not_zoomed_in, 5000, this);
 					}
 				}
 			}

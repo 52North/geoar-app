@@ -17,8 +17,8 @@
 	<uses-feature android:name="android.hardware.camera" />
 
 	<application android:name="org.n52.android.GeoARApplication"
-		android:hardwareAccelerated="false" android:icon="@drawable/icon"
-		android:label="@string/app_name">
+		android:allowBackup="false" android:hardwareAccelerated="false"
+		android:icon="@drawable/icon" android:label="@string/app_name">
 		<activity android:name="org.n52.android.GeoARActivity"
 			android:configChanges="orientation" android:label="@string/app_name"
 			android:screenOrientation="portrait">
