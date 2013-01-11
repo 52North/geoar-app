@@ -120,6 +120,7 @@ public class DataSourceInstanceHolder implements Parcelable {
 
 	public String getName() {
 		if (parentHolder.getNameCallbackMethod() != null) {
+			// try to use name callback
 			try {
 				return (String) parentHolder.getNameCallbackMethod().invoke(
 						dataSource);

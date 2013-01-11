@@ -58,10 +58,13 @@
 			</root>
 		</configuration>
 		<configuration>
+
 			<appender name="FILE"
 				class="ch.qos.logback.core.rolling.RollingFileAppender">
 				<!-- <file> ${DATA_DIR}/logFile.log </file> -->
-				<file> /mnt/sdcard/Android/data/org.n52.android/files/logs/logFile.log </file>
+				<!-- <file> /mnt/sdcard/Android/data/org.n52.android/files/logs/logFile.log 
+					</file> -->
+				<file>${LOG_FILE}</file>
 
 				<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 

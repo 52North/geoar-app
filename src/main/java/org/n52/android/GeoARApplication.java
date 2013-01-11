@@ -42,19 +42,32 @@ import android.net.Uri;
 import android.widget.Toast;
 
 public class GeoARApplication extends Application {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(GeoARApplication.class);
+	private static Logger LOG;
 
 	public static Context applicationContext;
 
 	public static final String PREFERENCES_FILE = "GeoAR";
-	public static final String STACKTRACE_FILE = "stacktrace.log";
+	public static final String STACKTRACE_FILENAME = "stacktrace.log";
+	public static final String LOG_FILENAME = "logfile.log";
+	public static final String REPORT_EMAIL = "h.hopmann@52north.org";
 
 	private UncaughtExceptionHandler defaultUncaughtExceptionHandler;
+
+	private static File stacktraceFile;
+	private static File logFile;
 
 	@Override
 	public void onCreate() {
 		applicationContext = getApplicationContext();
+		stacktraceFile = new File(applicationContext.getFilesDir(),
+				STACKTRACE_FILENAME);
+		logFile = new File(applicationContext.getFilesDir()
+				+ "/logs/logfile.log");
+		System.setProperty("LOG_FILE", logFile.getAbsolutePath());
+
+		// Do not use LoggerFactory before this point
+		LOG = LoggerFactory.getLogger(GeoARApplication.class);
+
 		defaultUncaughtExceptionHandler = Thread
 				.getDefaultUncaughtExceptionHandler();
 
@@ -65,7 +78,7 @@ public class GeoARApplication extends Application {
 				LOG.error("Uncaught exception in thread " + thread.getName(),
 						ex);
 				try {
-					FileOutputStream fos = openFileOutput(STACKTRACE_FILE,
+					FileOutputStream fos = openFileOutput(STACKTRACE_FILENAME,
 							Context.MODE_PRIVATE);
 					ex.printStackTrace(new PrintStream(fos));
 					fos.close();
@@ -97,8 +110,7 @@ public class GeoARApplication extends Application {
 	 * Checks if there is a recorded stacktrace
 	 */
 	public static boolean checkAppFailed() {
-		return new File(applicationContext.getFilesDir(), STACKTRACE_FILE)
-				.exists();
+		return stacktraceFile.exists();
 	}
 
 	/**
@@ -108,7 +120,8 @@ public class GeoARApplication extends Application {
 		if (!checkAppFailed())
 			return;
 
-		new File(applicationContext.getFilesDir(), STACKTRACE_FILE).delete();
+		new File(applicationContext.getFilesDir(), STACKTRACE_FILENAME)
+				.delete();
 	}
 
 	/**
@@ -123,18 +136,13 @@ public class GeoARApplication extends Application {
 		intent.putExtra(Intent.EXTRA_SUBJECT, "GeoAR Error Report");
 		intent.putExtra(Intent.EXTRA_TEXT,
 				applicationContext.getString(R.string.text_error_report));
-		intent.putExtra(Intent.EXTRA_EMAIL,
-				new String[] { "h.hopmann@52north.org" });
+		intent.putExtra(Intent.EXTRA_EMAIL, new String[] { REPORT_EMAIL });
 
 		List<File> attachments = new ArrayList<File>();
 		if (checkAppFailed()) {
-			attachments.add(new File(applicationContext.getFilesDir(),
-					GeoARApplication.STACKTRACE_FILE));
+			attachments.add(stacktraceFile);
 		}
 
-		File logFile = new File(applicationContext.getExternalFilesDir(null)
-				.getAbsolutePath() + "/logs/logFile.log"); // See
-															// AndroidManifest.xml
 		if (logFile.exists()) {
 			attachments.add(logFile);
 		}
@@ -144,7 +152,7 @@ public class GeoARApplication extends Application {
 					getFailAttachments(attachments));
 			context.startActivity(intent);
 		} catch (ActivityNotFoundException e) {
-			Toast.makeText(context, "Could not find email application",
+			Toast.makeText(context, R.string.could_not_find_email_application,
 					Toast.LENGTH_LONG).show();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

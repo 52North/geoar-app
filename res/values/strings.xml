@@ -72,5 +72,6 @@
     <string name="sorry">Sorry!</string>
     <string name="text_error_report">I\'m very happy to help improving GeoAR!</string>
     <string name="send_report">Send Report</string>
+    <string name="could_not_find_email_application">Could not find email application</string>
 
 </resources>
