@@ -17,6 +17,8 @@
 package org.n52.android.newdata;
 
 import java.lang.ref.SoftReference;
+import java.net.ConnectException;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -57,7 +59,7 @@ public class DataCache {
 	public interface GetDataCallback {
 		void onReceiveMeasurements(Tile tile, List<? extends SpatialEntity> data);
 
-		void onAbort(Tile tile, int reason);
+		void onAbort(Tile tile, DataSourceErrorType reason);
 	}
 
 	public abstract interface GetDataBoundsCallback extends
@@ -65,7 +67,7 @@ public class DataCache {
 		void onReceiveDataUpdate(MercatorRect bbox,
 				List<? extends SpatialEntity> data);
 
-		void onAbort(MercatorRect bbox, int reason);
+		void onAbort(MercatorRect bbox, DataSourceErrorType reason);
 	}
 
 	/**
@@ -99,7 +101,7 @@ public class DataCache {
 			}
 		}
 
-		public void abort(int reason) {
+		public void abort(DataSourceErrorType reason) {
 			synchronized (getDataCallbacks) {
 				updatePending = false;
 				for (GetDataCallback callback : getDataCallbacks) {
@@ -119,9 +121,10 @@ public class DataCache {
 
 	}
 
-	public static final int ABORT_UNKOWN = 0;
-	public static final int ABORT_NO_CONNECTION = 1;
-	public static final int ABORT_CANCELED = 2;
+	public enum DataSourceErrorType {
+		UNKNOWN, CONNECTION, CANCELED
+	}
+
 	public static final int STEP_REQUEST = 3;
 
 	private static final long MIN_RELOAD_INTERVAL = 60000;
@@ -130,7 +133,7 @@ public class DataCache {
 			.newFixedThreadPool(3);
 
 	protected Map<Tile, SoftReference<DataTile>> tileCacheMapping = new HashMap<Tile, SoftReference<DataTile>>();
-	protected DataSourceInstanceHolder dataSource;
+	protected DataSourceInstanceHolder dataSourceInstance;
 	private ThreadPoolExecutor fetchingThreadPool;
 	protected byte tileZoom; // Zoom level for the tiling system of this
 								// cache
@@ -152,11 +155,12 @@ public class DataCache {
 
 	public DataCache(DataSourceInstanceHolder dataSource, byte tileZoom,
 			ThreadPoolExecutor fetchingThreadPool) {
-		this.dataSource = dataSource;
+		this.dataSourceInstance = dataSource;
 		this.tileZoom = tileZoom;
 		this.logTag = getClass().getSimpleName() + " " + dataSource.getName();
 		this.fetchingThreadPool = fetchingThreadPool;
-		minReloadInterval = this.dataSource.getParent().getMinReloadInterval();
+		minReloadInterval = this.dataSourceInstance.getParent()
+				.getMinReloadInterval();
 		if (minReloadInterval <= 0) {
 			minReloadInterval = Long.MAX_VALUE;
 		} else {
@@ -196,7 +200,7 @@ public class DataCache {
 			for (SoftReference<DataTile> cacheReference : tileCacheMapping
 					.values()) {
 				if (cacheReference.get() != null) {
-					cacheReference.get().abort(ABORT_CANCELED);
+					cacheReference.get().abort(DataSourceErrorType.CANCELED);
 				}
 			}
 			tileCacheMapping.clear();
@@ -301,10 +305,16 @@ public class DataCache {
 
 					try {
 						requestDataForTile(dataTile);
-
-					} catch (RuntimeException e) {
-						e.printStackTrace();
-						dataTile.abort(ABORT_UNKOWN);
+						// Maybe too unreliable for getDataByBBox
+						dataSourceInstance.clearError();
+					} catch (Exception e) {
+						LOG.error(logTag + " Exception on request", e);
+						dataSourceInstance.reportError(e);
+						if (e instanceof SocketException) {
+							dataTile.abort(DataSourceErrorType.CONNECTION);
+						} else {
+							dataTile.abort(DataSourceErrorType.UNKNOWN);
+						}
 					}
 					// TODO exception handling
 
@@ -331,13 +341,13 @@ public class DataCache {
 		};
 	}
 
-	protected void requestDataForTile(DataTile dataTile) {
+	protected void requestDataForTile(DataTile dataTile) throws Exception {
 		Filter filter = dataFilter.clone().setBoundingBox(
 				dataTile.tile.getGeoLocationRect());
 
 		// Actual access to DataSoure interface
-		dataTile.setMeasurements(dataSource.getDataSource().getMeasurements(
-				filter));
+		dataTile.setMeasurements(dataSourceInstance.getDataSource()
+				.getMeasurements(filter));
 	}
 
 	/**
@@ -422,9 +432,9 @@ public class DataCache {
 				}
 			}
 
-			public void onAbort(Tile tile, int reason) {
+			public void onAbort(Tile tile, DataSourceErrorType reason) {
 				callback.onAbort(bounds, reason);
-				if (reason == ABORT_CANCELED) {
+				if (reason == DataSourceErrorType.CANCELED) {
 					active = false;
 				}
 			}
@@ -448,7 +458,7 @@ public class DataCache {
 						Tile tile = new Tile(x, y, tileZoom);
 
 						getDataByTile(tile, measureCallback, forceUpdate, false);
-						// TODO cache return value to allow proper cancellation
+						// TODO! cache return value to allow proper cancellation
 						// behavior
 					}
 			}
@@ -457,7 +467,7 @@ public class DataCache {
 
 		return new RequestHolder() {
 			public void cancel() {
-				measureCallback.onAbort(null, ABORT_CANCELED);
+				measureCallback.onAbort(null, DataSourceErrorType.CANCELED);
 			}
 		};
 	}

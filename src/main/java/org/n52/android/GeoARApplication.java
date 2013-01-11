@@ -59,19 +59,24 @@ public class GeoARApplication extends Application {
 
 	@Override
 	public void onCreate() {
+		// Store application Context as static field
 		applicationContext = getApplicationContext();
+
+		// File to save uncaught exception trace to
 		stacktraceFile = new File(applicationContext.getFilesDir(),
 				STACKTRACE_FILENAME);
+		// File path to logfile
 		logFile = new File(applicationContext.getFilesDir()
 				+ "/logs/logfile.log");
+		// Set system property with log file, logback config references to it,
+		// so do not use LoggerFactory before this point
 		System.setProperty("LOG_FILE", logFile.getAbsolutePath());
 
-		// Do not use LoggerFactory before this point
 		LOG = LoggerFactory.getLogger(GeoARApplication.class);
 
+		// Set uncaught exception handler
 		defaultUncaughtExceptionHandler = Thread
 				.getDefaultUncaughtExceptionHandler();
-
 		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 
 			@Override
@@ -96,6 +101,8 @@ public class GeoARApplication extends Application {
 				}
 			}
 		});
+		
+		// ensure that plugins can access the main logger
 		DataSourceLoggerFactory.setLoggerCallable(new LoggerCallable() {
 			@Override
 			public org.n52.android.utils.DataSourceLoggerFactory.Logger call(

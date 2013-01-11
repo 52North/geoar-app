@@ -73,7 +73,7 @@ public class MapFragment extends SherlockFragment {
 				DataSourceOverlayHandler overlayHandler = overlayHandlerMap
 						.remove(item);
 				if (overlayHandler != null) {
-					overlayHandler.clear();
+					overlayHandler.destroy();
 				}
 			}
 		}
@@ -207,7 +207,9 @@ public class MapFragment extends SherlockFragment {
 			dataSource.getInstances().removeOnCheckedChangeListener(
 					dataSourceListener);
 		}
-
+		for (DataSourceOverlayHandler handler : overlayHandlerMap.values()) {
+			handler.destroy();
+		}
 		overlayHandlerMap.clear();
 		super.onDestroy();
 	}

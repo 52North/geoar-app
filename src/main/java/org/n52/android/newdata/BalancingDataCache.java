@@ -76,7 +76,7 @@ public class BalancingDataCache extends DataCache {
 	}
 
 	@Override
-	protected void requestDataForTile(final DataTile dataTile) {
+	protected void requestDataForTile(final DataTile dataTile) throws Exception {
 		if (proxyDataCache != null) {
 			proxyDataCache.getDataByBBox(dataTile.tile.getMercatorRect(),
 					new GetDataBoundsCallback() {
@@ -94,8 +94,8 @@ public class BalancingDataCache extends DataCache {
 						}
 
 						@Override
-						public void onAbort(MercatorRect bbox, int reason) {
-							dataTile.abort(ABORT_UNKOWN);
+						public void onAbort(MercatorRect bbox, DataSourceErrorType reason) {
+							dataTile.abort(DataSourceErrorType.UNKNOWN);
 						}
 					}, false);
 		} else {

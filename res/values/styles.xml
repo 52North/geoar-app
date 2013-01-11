@@ -12,7 +12,7 @@
 
         <!-- one cannot subclass android:attr/listSeparatorTextViewStyle :( -->
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_width">match_parent</item>
         <!-- copied from api 16 resources, since it's not public -->
         <item name="android:background">@drawable/list_section_divider_holo_dark</item>
         <item name="android:textAllCaps">true</item>

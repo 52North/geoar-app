@@ -23,9 +23,11 @@ import org.mapsforge.android.maps.Projection;
 import org.mapsforge.core.GeoPoint;
 import org.n52.android.R;
 import org.n52.android.alg.proj.MercatorRect;
+import org.n52.android.newdata.DataCache.DataSourceErrorType;
 import org.n52.android.newdata.DataCache.GetDataBoundsCallback;
 import org.n52.android.newdata.DataCache.RequestHolder;
 import org.n52.android.newdata.DataSourceInstanceHolder;
+import org.n52.android.newdata.DataSourceInstanceHolder.DataSourceSettingsChangedListener;
 import org.n52.android.newdata.SpatialEntity;
 import org.n52.android.newdata.Visualization.MapVisualization.ItemVisualization;
 import org.n52.android.view.InfoView;
@@ -42,7 +44,8 @@ import android.view.MotionEvent;
  * @author Arne de Wall
  * 
  */
-public class DataSourceOverlayHandler {
+public class DataSourceOverlayHandler implements
+		DataSourceSettingsChangedListener {
 
 	public interface OnProgressUpdateListener extends
 			org.n52.android.newdata.DataCache.OnProgressUpdateListener {
@@ -67,7 +70,8 @@ public class DataSourceOverlayHandler {
 			@Override
 			public void onProgressUpdate(int progress, int maxProgress, int step) {
 
-				InfoView.setProgressTitle("Requesting " + dataSource.getName(),
+				InfoView.setProgressTitle(
+						"Requesting " + dataSourceInstance.getName(),
 						UpdateHolder.this); // TODO
 				InfoView.setProgress(progress, maxProgress, UpdateHolder.this);
 
@@ -94,22 +98,17 @@ public class DataSourceOverlayHandler {
 			}
 
 			@Override
-			public void onAbort(MercatorRect bounds, int reason) {
+			public void onAbort(MercatorRect bounds, DataSourceErrorType reason) {
 				canceled = true;
 
 				InfoView.clearProgress(UpdateHolder.this);
-
-				// if (infoHandler != null) {
-				// // inform user of aborting reason
-				// infoHandler.clearProgress(UpdateHolder.this);
-				// if (reason == MeasurementManager.ABORT_NO_CONNECTION) {
-				// infoHandler.setStatus(R.string.connection_error, 5000,
-				// UpdateHolder.this);
-				// } else if (reason == MeasurementManager.ABORT_UNKOWN) {
-				// infoHandler.setStatus(R.string.unkown_error, 5000,
-				// UpdateHolder.this);
-				// }
-				// }
+				if (reason == DataSourceErrorType.CONNECTION) {
+					InfoView.setStatus(R.string.connection_error, 5000,
+							UpdateHolder.this);
+				} else if (reason == DataSourceErrorType.UNKNOWN) {
+					InfoView.setStatus(R.string.unkown_error, 5000,
+							UpdateHolder.this);
+				}
 			}
 
 			@Override
@@ -118,7 +117,7 @@ public class DataSourceOverlayHandler {
 				synchronized (updateLock) {
 					if (!canceled) {
 						List<VisualizationOverlayItem> overlayItems = new ArrayList<VisualizationOverlayItem>();
-						List<ItemVisualization> visualizations = dataSource
+						List<ItemVisualization> visualizations = dataSourceInstance
 								.getParent().getVisualizations()
 								.getCheckedItems(ItemVisualization.class);
 
@@ -136,10 +135,11 @@ public class DataSourceOverlayHandler {
 								overlayItems.add(overlayItem);
 							}
 						}
-						overlay.setOverlayItems(overlayItems, dataSource);
+						overlay.setOverlayItems(overlayItems,
+								dataSourceInstance);
 
-						// interpolation received, now this object represents
-						// the current interpolation
+						// data received, now this object represents
+						// the current data
 						currentUpdate = UpdateHolder.this;
 						nextUpdate = null;
 					}
@@ -150,7 +150,6 @@ public class DataSourceOverlayHandler {
 
 		public UpdateHolder(MercatorRect bounds) {
 			this.bounds = bounds;
-			// this.mapView = mapView;
 		}
 
 		public void cancel() {
@@ -166,9 +165,10 @@ public class DataSourceOverlayHandler {
 		public void run() {
 			synchronized (updateLock) {
 				if (!canceled) {
-					if (bounds.zoom >= dataSource.getParent().getMinZoomLevel()) {
+					if (bounds.zoom >= dataSourceInstance.getParent()
+							.getMinZoomLevel()) {
 						// Just runs if zoom is in range
-						requestHolder = dataSource.getDataCache()
+						requestHolder = dataSourceInstance.getDataCache()
 								.getDataByBBox(bounds, callback, false);
 					} else {
 						InfoView.setStatus(R.string.not_zoomed_in, 5000, this);
@@ -186,7 +186,7 @@ public class DataSourceOverlayHandler {
 	protected Object updateLock = new Object();
 
 	protected DataSourcesOverlay overlay;
-	private DataSourceInstanceHolder dataSource;
+	private DataSourceInstanceHolder dataSourceInstance;
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(DataSourceOverlayHandler.class);
@@ -194,11 +194,12 @@ public class DataSourceOverlayHandler {
 	public DataSourceOverlayHandler(DataSourcesOverlay overlay,
 			DataSourceInstanceHolder dataSource) {
 		this.overlay = overlay;
-		this.dataSource = dataSource;
+		this.dataSourceInstance = dataSource;
+		dataSource.addOnSettingsChangedListener(this);
 	}
 
 	public DataSourceInstanceHolder getDataSource() {
-		return dataSource;
+		return dataSourceInstance;
 	}
 
 	public void onTouchEvent(android.view.MotionEvent e, MapView mapView) {
@@ -210,9 +211,9 @@ public class DataSourceOverlayHandler {
 
 	public void clear() {
 		synchronized (updateLock) {
-			LOG.info(dataSource.getName() + " clearing map overlay");
+			LOG.info(dataSourceInstance.getName() + " clearing map overlay");
 			cancel();
-			overlay.clear(dataSource);
+			overlay.clear(dataSourceInstance);
 		}
 	}
 
@@ -221,7 +222,8 @@ public class DataSourceOverlayHandler {
 			if (nextUpdate != null) {
 				updateHandler.removeCallbacks(nextUpdate);
 				nextUpdate.cancel();
-				LOG.info(dataSource.getName() + " map overlay canceled");
+				nextUpdate = null;
+				LOG.info(dataSourceInstance.getName() + " map overlay canceled");
 			}
 
 		}
@@ -239,7 +241,8 @@ public class DataSourceOverlayHandler {
 	public void updateOverlay(MapView mapView, boolean force) {
 		byte zoom = (byte) (mapView.getMapPosition().getZoomLevel() - 1);
 
-		zoom = (byte) Math.min(zoom, dataSource.getParent().getMaxZoomLevel());
+		zoom = (byte) Math.min(zoom, dataSourceInstance.getParent()
+				.getMaxZoomLevel());
 		Projection proj = mapView.getProjection();
 
 		GeoPoint gPoint = (GeoPoint) proj.fromPixels(0, 0);
@@ -283,6 +286,24 @@ public class DataSourceOverlayHandler {
 				updateHandler.postDelayed(nextUpdate, Math.max(0, updateDelay));
 				LOG.debug("Overlay Update in " + updateDelay / 1000 + " s");
 			}
+		}
+	}
+
+	public void destroy() {
+		clear();
+		dataSourceInstance.removeOnSettingsChangedListener(this);
+	}
+
+	@Override
+	public void onDataSourceSettingsChanged() {
+		if (nextUpdate != null) {
+			// There is already an update pending
+			return;
+		}
+		if (currentUpdate != null) {
+			// repeat last update with new settings
+			updateHandler.removeCallbacks(currentUpdate);
+			updateHandler.post(currentUpdate);
 		}
 	}
 }

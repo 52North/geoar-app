@@ -15,10 +15,6 @@
  */
 package org.n52.android;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
 import org.n52.android.newdata.PluginFragment;
@@ -35,12 +31,10 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -104,12 +98,17 @@ public class GeoARActivity extends SherlockFragmentActivity {
 							GeoARApplication.clearAppFailed();
 						}
 					});
-			builder.setNegativeButton(android.R.string.no, null);
+			builder.setNegativeButton(android.R.string.no,
+					new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							GeoARApplication.clearAppFailed();
+						}
+					});
 			builder.setTitle(R.string.sorry);
 			builder.setOnCancelListener(new OnCancelListener() {
 				@Override
 				public void onCancel(DialogInterface dialog) {
-					// remove stack trace file
 					GeoARApplication.clearAppFailed();
 				}
 			});

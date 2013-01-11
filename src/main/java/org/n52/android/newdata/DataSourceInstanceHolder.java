@@ -18,8 +18,12 @@ package org.n52.android.newdata;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.InvocationTargetException;
+import java.net.SocketException;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.n52.android.GeoARApplication;
+import org.n52.android.R;
 import org.n52.android.newdata.CheckList.CheckManager;
 import org.n52.android.settings.SettingsHelper;
 import org.slf4j.Logger;
@@ -33,6 +37,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class DataSourceInstanceHolder implements Parcelable {
+
+	public interface DataSourceSettingsChangedListener {
+		void onDataSourceSettingsChanged();
+	}
+
 	private static int nextId = 0;
 	private static final int CLEAR_CACHE = 1;
 	private static final int CLEAR_CACHE_AFTER_DEACTIVATION_DELAY = 10000;
@@ -59,6 +68,9 @@ public class DataSourceInstanceHolder implements Parcelable {
 	private Filter currentFilter;
 	@CheckManager
 	private CheckList<DataSourceInstanceHolder>.Checker mChecker;
+	private Exception lastError;
+	private Set<DataSourceSettingsChangedListener> mSettingsChangedListeners = new HashSet<DataSourceInstanceHolder.DataSourceSettingsChangedListener>(
+			0);
 
 	public DataSourceInstanceHolder(DataSourceHolder parentHolder,
 			DataSource<? super Filter> dataSource) {
@@ -116,6 +128,27 @@ public class DataSourceInstanceHolder implements Parcelable {
 
 	public DataSourceHolder getParent() {
 		return parentHolder;
+	}
+
+	public void addOnSettingsChangedListener(
+			DataSourceSettingsChangedListener listener) {
+		mSettingsChangedListeners.add(listener);
+	}
+
+	public void removeOnSettingsChangedListener(
+			DataSourceSettingsChangedListener listener) {
+		mSettingsChangedListeners.remove(listener);
+	}
+
+	/**
+	 * It does not only notify listeners, but also clears the current cache.
+	 * TODO
+	 */
+	void notifySettingsChanged() {
+		dataCache.clearCache();
+		for (DataSourceSettingsChangedListener listener : mSettingsChangedListeners) {
+			listener.onDataSourceSettingsChanged();
+		}
 	}
 
 	public String getName() {
@@ -207,6 +240,28 @@ public class DataSourceInstanceHolder implements Parcelable {
 		SettingsHelper.restoreSettings(objectInputStream, this.dataSource);
 
 		setChecked(objectInputStream.readBoolean());
+	}
+
+	public void reportError(Exception e) {
+		lastError = e;
+	}
+
+	public void clearError() {
+		lastError = null;
+	}
+
+	public String getErrorString() {
+		if (lastError == null) {
+			return null;
+		}
+
+		if (lastError instanceof SocketException) {
+			return GeoARApplication.applicationContext
+					.getString(R.string.connection_error);
+		}
+
+		return GeoARApplication.applicationContext
+				.getString(R.string.unkown_error);
 	}
 
 }

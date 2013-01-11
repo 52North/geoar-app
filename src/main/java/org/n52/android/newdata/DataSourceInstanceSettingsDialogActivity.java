@@ -25,6 +25,11 @@ import android.widget.Button;
 
 import com.actionbarsherlock.app.SherlockActivity;
 
+/**
+ * Activity to set data source instance settings and its filter settings. Also
+ * responsible for updating the data source instance.
+ * 
+ */
 public class DataSourceInstanceSettingsDialogActivity extends SherlockActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +40,7 @@ public class DataSourceInstanceSettingsDialogActivity extends SherlockActivity {
 		final SettingsView generalSettingsView = (SettingsView) findViewById(R.id.settingsViewGeneral);
 		final SettingsView filterSettingsView = (SettingsView) findViewById(R.id.settingsViewFilter);
 
-		DataSourceInstanceHolder dataSourceInstance = getIntent()
+		final DataSourceInstanceHolder dataSourceInstance = getIntent()
 				.getParcelableExtra("dataSourceInstance");
 		generalSettingsView.setSettingsObject(dataSourceInstance
 				.getDataSource());
@@ -67,6 +72,7 @@ public class DataSourceInstanceSettingsDialogActivity extends SherlockActivity {
 						&& filterSettingsView.validate()) {
 					generalSettingsView.updateObject();
 					filterSettingsView.updateObject();
+					dataSourceInstance.notifySettingsChanged();
 					setResult(RESULT_OK);
 					finish();
 				}

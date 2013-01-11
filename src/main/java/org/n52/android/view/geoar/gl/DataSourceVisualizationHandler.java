@@ -24,6 +24,7 @@ import org.n52.android.alg.proj.MercatorPoint;
 import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.newdata.DataCache;
+import org.n52.android.newdata.DataCache.DataSourceErrorType;
 import org.n52.android.newdata.DataCache.GetDataBoundsCallback;
 import org.n52.android.newdata.DataCache.RequestHolder;
 import org.n52.android.newdata.DataSourceInstanceHolder;
@@ -69,18 +70,22 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 				break;
 			}
 
-			InfoView.setProgressTitle(stepTitle, this);
-			InfoView.setProgress(progress, maxProgress, this);
+			InfoView.setProgressTitle(stepTitle,
+					DataSourceVisualizationHandler.this);
+			InfoView.setProgress(progress, maxProgress,
+					DataSourceVisualizationHandler.this);
 
 		}
 
 		@Override
-		public void onAbort(MercatorRect bounds, int reason) {
-			InfoView.clearProgress(DataSourceVisualizationHandler.class);
-			if (reason == DataCache.ABORT_NO_CONNECTION) {
-				InfoView.setStatus(R.string.connection_error, 5000, this);
-			} else if (reason == DataCache.ABORT_UNKOWN) {
-				InfoView.setStatus(R.string.unkown_error, 5000, this);
+		public void onAbort(MercatorRect bounds, DataSourceErrorType reason) {
+			InfoView.clearProgress(DataSourceVisualizationHandler.this);
+			if (reason == DataSourceErrorType.CONNECTION) {
+				InfoView.setStatus(R.string.connection_error, 5000,
+						DataSourceVisualizationHandler.this);
+			} else if (reason == DataSourceErrorType.UNKNOWN) {
+				InfoView.setStatus(R.string.unkown_error, 5000,
+						DataSourceVisualizationHandler.this);
 			}
 		}
 
@@ -100,15 +105,18 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 					ARObject arObject = new ARObject(entity);
 					for (ItemVisualization visualization : visualizations) {
 						Collection<RenderFeature2> features = new ArrayList<RenderFeature2>();
-						for(DataSourceVisualizationGL feature : visualization.getEntityVisualization(entity,
-										DataSourceVisualizationHandler.this)){
+						for (DataSourceVisualizationGL feature : visualization
+								.getEntityVisualization(entity,
+										DataSourceVisualizationHandler.this)) {
 							features.add((RenderFeature2) feature);
-							glSurfaceView.addRenderableToScene((OnInitializeInGLThread) feature);
+							glSurfaceView
+									.addRenderableToScene((OnInitializeInGLThread) feature);
 						}
 						arObject.addRenderFeature(visualization, features);
-						arObject.addCanvasFeature(visualization, visualization.getEntityVisualization(entity));
+						arObject.addCanvasFeature(visualization,
+								visualization.getEntityVisualization(entity));
 					}
-					arObjects.add(arObject); 
+					arObjects.add(arObject);
 				}
 				DataSourceVisualizationHandler.this.arObjects = arObjects;
 			}
@@ -227,7 +235,6 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 		SphereFeature sphere = new SphereFeature();
 		return sphere;
 	}
-
 
 	public void onLocationChanged(Location location) {
 		for (ARObject object : arObjects)

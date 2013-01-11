@@ -40,6 +40,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+/**
+ * Adapter creating the {@link DataSourceHolder} /
+ * {@link DataSourceInstanceHolder} tree list. Allows to manage settings and
+ * instances.
+ * 
+ */
 public class DataSourceListAdapter extends BaseExpandableListAdapter {
 
 	/**
@@ -50,6 +56,7 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 		DataSourceInstanceHolder dataSourceInstance;
 		ImageView imageViewSettings;
 		TextView textView;
+		TextView textViewDetails;
 		CheckBox checkBox;
 		OnCheckedChangeListener checkListener = new OnCheckedChangeListener() {
 			@Override
@@ -59,12 +66,6 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 					dataSourceInstance.setChecked(isChecked);
 					notifyDataSetChanged();
 				}
-			}
-		};
-		OnClickListener clickListener = new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// TODO
 			}
 		};
 		OnClickListener settingsClickListener = new OnClickListener() {
@@ -409,7 +410,8 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 
 			viewHolder.textView = (TextView) view.findViewById(R.id.textView);
 
-			viewHolder.textView.setOnClickListener(viewHolder.clickListener);
+			viewHolder.textViewDetails = (TextView) view
+					.findViewById(R.id.textViewDetails);
 
 			viewHolder.checkBox = (CheckBox) view.findViewById(R.id.checkBox);
 
@@ -425,6 +427,13 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 		viewHolder.textView.setText(dataSourceInstance.getName());
 		viewHolder.checkBox.setChecked(viewHolder.dataSourceInstance
 				.isChecked());
+		String error = dataSourceInstance.getErrorString();
+		if (error != null) {
+			viewHolder.textViewDetails.setVisibility(View.VISIBLE);
+			viewHolder.textViewDetails.setText(error);
+		} else {
+			viewHolder.textViewDetails.setVisibility(View.GONE);
+		}
 
 		if (viewHolder.dataSourceInstance.getParent().getVisualizations()
 				.ofType(visualizationClass).isEmpty()) {

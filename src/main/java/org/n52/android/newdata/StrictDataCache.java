@@ -62,7 +62,7 @@ public class StrictDataCache extends DataCache {
 			}
 
 			@Override
-			public void onAbort(MercatorRect bbox, int reason) {
+			public void onAbort(MercatorRect bbox, DataSourceErrorType reason) {
 				callback.onAbort(bbox, reason);
 			}
 		};
