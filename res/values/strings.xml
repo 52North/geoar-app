@@ -36,21 +36,15 @@
     <string name="toggle_itemized">Itemized  Overlay</string>
     <!-- Codebase Strings -->
     <string name="cb_menu_refresh">Refresh</string>
-    <string name="cb_menu_about">About</string>
     <!-- About Dialog -->
-    <string name="about_info_text">	    More information at 
-	    http://52north.org/android </string>
-    <string name="about_more_info_text">	    GeoAR is part of the 52°North Geostatistics Community: \n
-		http://52north.org/communities/geostatistics/ \n
-		Contact: Daniel Nüst (d.nuest@52north.org) \n
-		Development Credits: Arne de Wall, Holger Hopmann</string>
-    <string name="about_legal_text">	    This development is supported by the European Commissions Seventh
-		Framework Programme (FP7) via the project GeoViQua (QUAlity aware
-		VIsualisation for the Global Earth Observation system of systems), grant
+    <string name="about_legal_text">This development is supported by the European Commissions Seventh
+		Framework Programme (FP7) via the project GeoViQua (QUAlity aware VIsualisation for the Global Earth Observation system of systems), grant
 		number 265178.</string>
-    <string name="about_titel">	    52°North GeoAR Augmented Reality Browser for Android</string>
-    <string name="about_version_text">	    ${version}</string>
-
+    <string name="about_text">More information at\nhttp://52north.org/android \n\nGeoAR is part of the 52°North Geostatistics Community: \nhttp://52north.org/communities/geostatistics/\n</string>
+    <string name="about_contactNames"><i>Daniel Nüst (d.nuest@52north.org)</i></string>
+    <string name="about_developerNames"><i>Arne de Wall, Holger Hopmann</i></string>
+    <string name="about_titel">52°North GeoAR Augmented Reality Browser for Android</string>
+    <string name="about_version_text">Version ${buildNumber}</string>
     <!-- Map Strings -->
     <string name="map_item_camera">CameraView</string>
     <string name="add_instance">Add Instance...</string>
@@ -64,14 +58,19 @@
     <string name="provided_data_sources">Provided Data Sources</string>
     <string name="name">Name</string>
     <string name="map">Map</string>
-    <string name="select_data_sources">Select Data Sources</string>
+    <string name="select_data_sources">Manage Datasources</string>
     <string name="more_">More...</string>
     <string name="installed">Installed</string>
     <string name="download">Download</string>
-    <string name="info_failed_email">We are sorry, but GeoAR raised an unhandled exception during its last execution.\nFortunately, details on this error were recorded.\nPlease help us improving GeoAR by sending us an error report.</string>
+    <string name="info_failed_email">We are sorry, but GeoAR raised an unhandled exception during its last execution.\nFortunately, details on this error were recorded!\nPlease help us improving GeoAR by sending us an error report.</string>
     <string name="sorry">Sorry!</string>
     <string name="text_error_report">I\'m very happy to help improving GeoAR!</string>
+    <string name="text_feedback_report">Please add your feedback here</string>
     <string name="send_report">Send Report</string>
     <string name="could_not_find_email_application">Could not find email application</string>
+    <string name="give_feedback">Give Feedback</string>
+    <string name="about">About</string>
+    <string name="contact">Contact</string>
+    <string name="development_credits">Development Credits</string>
 
 </resources>

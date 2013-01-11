@@ -1,37 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/ScrollView" android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
 
-	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		android:layout_width="match_parent" android:layout_height="wrap_content"
-		android:background="#ffffffff" android:orientation="vertical"
-		android:scrollbarAlwaysDrawVerticalTrack="true" android:scrollbars="vertical">
-		
-		<ImageView android:id="@+id/about_image"
-			android:layout_width="wrap_content" android:layout_height="wrap_content"
-			android:layout_margin="8dip" android:src="@drawable/n52_logo_highreso" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#ffffffff"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:scrollbarAlwaysDrawVerticalTrack="true"
+        android:scrollbars="vertical" >
 
-		<TextView android:id="@+id/about_headline"
-			android:layout_width="wrap_content" android:layout_height="wrap_content"
-			android:layout_margin="8dip" android:gravity="center" />
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:text="@string/about_version_text"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
 
-		<TextView android:id="@+id/info_more_text"
-			android:layout_width="match_parent" android:layout_height="wrap_content"
-			android:layout_margin="8dip" />
+        <ImageView
+            android:id="@+id/imageView52n"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/n52_logo_highreso" />
 
-		<TextView android:id="@+id/about_legal_text"
-			android:layout_width="fill_parent" android:layout_height="wrap_content"
-			android:layout_margin="8dip" android:textColor="#cccccc"
-			android:textSize="10sp" android:textStyle="italic" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/about_titel"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
-		<ImageView android:id="@+id/about_geoviqua_image"
-			android:layout_width="wrap_content" android:layout_height="90dip"
-			android:layout_marginTop="0dip" android:src="@drawable/geoviqua" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autoLink="web"
+            android:linksClickable="true"
+            android:text="@string/about_text" />
 
-		<ImageView android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:layout_margin="8dip"
-			android:src="@drawable/fp7" />
-	</LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/contact" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:text="@string/about_contactNames" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/development_credits" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:text="@string/about_developerNames" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/about_legal_text"
+            android:textColor="#cccccc"
+            android:textSize="10sp"
+            android:textStyle="italic" />
+
+        <ImageView
+            android:id="@+id/imageViewGeoviqua"
+            android:layout_width="wrap_content"
+            android:layout_height="90dp"
+            android:src="@drawable/geoviqua" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/fp7" />
+    </LinearLayout>
 
 </ScrollView>

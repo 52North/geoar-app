@@ -40,19 +40,14 @@
     <string name="cb_menu_refresh">Refresh</string>
     <string name="cb_menu_about">About</string>
     <!-- About Dialog -->
-    <string name="about_info_text">	    More information at 
-	    http://52north.org/android </string>
-    <string name="about_more_info_text">	    GeoAR ist Teil der 52°North Geostatistics Community: \n
-		http://52north.org/communities/geostatistics/ \n
-		Kontakt: Daniel Nüst (d.nuest@52north.org) \n
-		Entwicklung: Arne de Wall, Holger Hopmann</string>
-    <string name="about_legal_text">	    This development is supported by the European Commissions Seventh
-		Framework Programme (FP7) via the project GeoViQua (QUAlity aware
-		VIsualisation for the Global Earth Observation system of systems), grant
+    <string name="about_legal_text">This development is supported by the European Commissions Seventh
+		Framework Programme (FP7) via the project GeoViQua (QUAlity aware VIsualisation for the Global Earth Observation system of systems), grant
 		number 265178.</string>
-    <string name="about_titel">	    52°North GeoAR Augmented Reality Browser for Android</string>
-    <string name="about_version_text">	    ${version}</string>
-
+    <string name="about_text">Weitere Informationen unter\nhttp://52north.org/android \n\nGeoAR ist Teil der 52°North Geostatistics Community: \nhttp://52north.org/communities/geostatistics/\n</string>
+    <string name="about_contactNames"><i>Daniel Nüst (d.nuest@52north.org)</i></string>
+    <string name="about_developerNames"><i>Arne de Wall, Holger Hopmann</i></string>
+    <string name="about_titel">52°North GeoAR Augmented Reality Browser for Android</string>
+    <string name="about_version_text">Version ${buildNumber}</string>
     <!-- Map Strings -->
     <string name="map_item_camera">CameraView</string>
     <string name="add_instance">Neue Instanz...</string>
@@ -72,5 +67,9 @@
     <string name="sorry">Entschuldigung!</string>
     <string name="text_error_report">Ich freue mich, bei der Verbesserung von GeoAR helfen zu können!</string>
     <string name="send_report">Bericht senden</string>
+    <string name="select_data_sources">Datenquellen verwalten</string>
+    <string name="about">Über</string>
+    <string name="contact">Kontakt</string>
+    <string name="development_credits">Entwicklung</string>
 
 </resources>

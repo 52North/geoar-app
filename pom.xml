@@ -94,7 +94,32 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+				<!-- filter res directory -->
+				<directory>${project.basedir}/res</directory>
+				<filtering>true</filtering>
+				<targetPath>${project.build.directory}/filtered-res</targetPath>
+				<includes>
+					<include>**/*</include>
+				</includes>
+			</resource>
+		</resources>
+
 		<plugins>
+			<plugin>
+				<!-- Shift resource processing to earlier phase -->
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>initialize</phase>
+						<goals>
+							<goal>resources</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 				<artifactId>android-maven-plugin</artifactId>
@@ -102,7 +127,7 @@
 				<configuration>
 					<androidManifestFile>${project.basedir}/AndroidManifest.xml</androidManifestFile>
 					<assetsDirectory>${project.basedir}/assets</assetsDirectory>
-					<resourceDirectory>${project.basedir}/res</resourceDirectory>
+					<resourceDirectory>${project.build.directory}/filtered-res</resourceDirectory>
 					<nativeLibrariesDirectory>${project.basedir}/src/main/native</nativeLibrariesDirectory>
 					<sdk>
 						<platform>15</platform>
@@ -180,6 +205,32 @@
 							</pluginExecution>
 						</pluginExecutions>
 					</lifecycleMappingMetadata>
+				</configuration>
+			</plugin>
+
+			<!-- Build number plugin, build number string available via ${buildNumber} -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<version>1.1</version>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<providerImplementations>
+						<svn>javasvn</svn>
+					</providerImplementations>
+					<revisionOnScmFailure>?</revisionOnScmFailure>
+					<format>{0,number}, {1,date,yyyy-MM-dd HH:mm:ss}</format>
+					<items>
+						<item>buildNumber</item>
+						<item>timestamp</item>
+					</items>
 				</configuration>
 			</plugin>
 		</plugins>

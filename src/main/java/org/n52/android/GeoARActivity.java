@@ -226,6 +226,10 @@ public class GeoARActivity extends SherlockFragmentActivity {
 			aboutDialog.setTitle(R.string.about_titel);
 			aboutDialog.show();
 			return true;
+
+		case R.id.item_givefeedbak:
+			GeoARApplication.sendFeedbackMail(this);
+			return true;
 		}
 
 		return super.onOptionsItemSelected(item);

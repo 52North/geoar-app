@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.n52.android.newdata.PluginLogger;
@@ -131,13 +132,6 @@ public class GeoARApplication extends Application {
 	 * @param context
 	 */
 	public static void sendFailMail(Activity context) {
-		Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-		intent.setType("text/plain");
-		intent.putExtra(Intent.EXTRA_SUBJECT, "GeoAR Error Report");
-		intent.putExtra(Intent.EXTRA_TEXT,
-				applicationContext.getString(R.string.text_error_report));
-		intent.putExtra(Intent.EXTRA_EMAIL, new String[] { REPORT_EMAIL });
-
 		List<File> attachments = new ArrayList<File>();
 		if (checkAppFailed()) {
 			attachments.add(stacktraceFile);
@@ -146,18 +140,9 @@ public class GeoARApplication extends Application {
 		if (logFile.exists()) {
 			attachments.add(logFile);
 		}
-
-		try {
-			intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM,
-					getFailAttachments(attachments));
-			context.startActivity(intent);
-		} catch (ActivityNotFoundException e) {
-			Toast.makeText(context, R.string.could_not_find_email_application,
-					Toast.LENGTH_LONG).show();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		sendMail(context, "GeoAR Error Report",
+				applicationContext.getString(R.string.text_error_report),
+				attachments.toArray(new File[] {}));
 	}
 
 	/**
@@ -189,5 +174,31 @@ public class GeoARApplication extends Application {
 		}
 
 		return copiesUris;
+	}
+
+	public static void sendFeedbackMail(Activity context) {
+		sendMail(context, "GeoAR Feedback Report",
+				applicationContext.getString(R.string.text_feedback_report));
+	}
+
+	private static void sendMail(Activity context, String subject,
+			String message, File... attachments) {
+		Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+		intent.setType("text/plain");
+		intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+		intent.putExtra(Intent.EXTRA_TEXT, message);
+		intent.putExtra(Intent.EXTRA_EMAIL, new String[] { REPORT_EMAIL });
+
+		try {
+			intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM,
+					getFailAttachments(Arrays.asList(attachments)));
+			context.startActivity(intent);
+		} catch (ActivityNotFoundException e) {
+			Toast.makeText(context, R.string.could_not_find_email_application,
+					Toast.LENGTH_LONG).show();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
