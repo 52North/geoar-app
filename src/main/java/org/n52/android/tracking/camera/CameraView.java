@@ -186,7 +186,7 @@ public class CameraView extends SurfaceView implements Callback {
 
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		if (camera != null) {
-			// Kamera freigeben
+			/** stop and release the camera */
 			camera.stopPreview();
 			camera.release();
 			camera = null;

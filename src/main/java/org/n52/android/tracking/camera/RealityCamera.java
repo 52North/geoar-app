@@ -41,7 +41,7 @@ public class RealityCamera {
 	public static int cameraViewportWidth;
 	public static int cameraViewportHeight;
 
-	public static float zNear = 0.5f;
+	public static float zNear = 1.f;
 	public static float zFar = Settings.SIZE_AR_INTERPOLATION
 			+ Settings.RELOAD_DIST_AR;
 

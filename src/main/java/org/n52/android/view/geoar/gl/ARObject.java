@@ -61,7 +61,9 @@ public class ARObject implements OpenGLCallable {
 	}
 
 	/** Model Matrix of this feature */
-	private final float[] modelMatrix = new float[16];
+	private final float[] modelMatrix2 = new float[16];
+	/** Model view Matrix of this feature */
+	private final float[] modelViewMatrix = new float[16];
 	/** Model-View-Projection Matrix of our feature */
 	private final float[] mvpMatrix = new float[16];
 	/** temporary Matrix for caching */
@@ -90,32 +92,34 @@ public class ARObject implements OpenGLCallable {
 	@Override
 	public void onRender(float[] projectionMatrix, float[] viewMatrix,
 			float[] parentMatrix) {
-		
+
 		/** set the matrices to identity matrix */
-		Matrix.setIdentityM(modelMatrix, 0);
+		Matrix.setIdentityM(modelMatrix2, 0);
+		Matrix.setIdentityM(modelViewMatrix, 0);
 		Matrix.setIdentityM(mvpMatrix, 0);
 		Matrix.setIdentityM(tmpMatrix, 0);
 
 		// TODO i think position[0] must be translated negatively -> Check
-		Matrix.translateM(modelMatrix, 0, -newPosition[0], newPosition[1],
+		Matrix.translateM(modelMatrix2, 0, -newPosition[0], newPosition[1],
 				newPosition[2]);
 
 		if (parentMatrix != null) {
-			Matrix.multiplyMM(tmpMatrix, 0, parentMatrix, 0, modelMatrix, 0);
-			System.arraycopy(tmpMatrix, 0, modelMatrix, 0, 16);
+			Matrix.multiplyMM(tmpMatrix, 0, parentMatrix, 0, modelMatrix2, 0);
+			System.arraycopy(tmpMatrix, 0, modelMatrix2, 0, 16);
 			Matrix.setIdentityM(tmpMatrix, 0);
 		}
 
-		Matrix.multiplyMM(modelMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, modelMatrix, 0);
+		Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix2, 0);
+		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, modelMatrix2, 0);
 
 		// TODO XXX FIXME frustum test
-		// if (boundingBox != null || position != null) {
-		// float[] vec = new float[4];
-		// Matrix.multiplyMV(vec, 0, modelMatrix, 0, position, 0);
-		// if(!GLESCamera.pointInFrustum(vec))
-		// return false;
-		// }
+		if (newPosition != null) {
+			float[] vec = new float[] {0,0,0,1};
+			Matrix.multiplyMV(vec, 0, modelMatrix2, 0, vec, 0);
+			if (!GLESCamera.frustumCulling(vec))
+				return;
+		}
+		
 		updateScreenCoordinates();
 
 		// TODO XXX FIXME are just active visualizations called !? -> check
@@ -125,18 +129,16 @@ public class ARObject implements OpenGLCallable {
 			}
 		}
 	}
-	
-	public void onItemClicked(Context context){
+
+	public void onItemClicked(Context context) {
 		Builder builder = new AlertDialog.Builder(context);
-		builder.setTitle("entity")
-				.setMessage("entitysnippet")
+		builder.setTitle("entity").setMessage("entitysnippet")
 				.setNeutralButton(R.string.cancel, null);
 
 		// TODO use view caching with convertView parameter
 		// FIXME NoSuchElementException
 		View featureView = visualizationLayers.values().iterator().next().itemVisualization
-				.getFeatureView(entity, null,
-						null, context);
+				.getFeatureView(entity, null, null, context);
 
 		if (featureView != null) {
 			builder.setView(featureView);
@@ -144,29 +146,28 @@ public class ARObject implements OpenGLCallable {
 		builder.create().show();
 
 	}
-	
-	public void updateScreenCoordinates(){
+
+	public void updateScreenCoordinates() {
 		float[] screenPos = new float[3];
 		// TODO FIXME XXX i think newPosition[2] has to be negative
 		int result = GLU.gluProject(-newPosition[0], newPosition[1],
-				newPosition[2], modelMatrix, 0, GLESCamera.projectionMatrix, 0,
-				GLESCamera.viewPortMatrix, 0, screenPos, 0);
-		
-		if(result == GL10.GL_TRUE){
+				newPosition[2], modelMatrix2, 0, GLESCamera.projectionMatrix,
+				0, GLESCamera.viewPortMatrix, 0, screenPos, 0);
+
+		if (result == GL10.GL_TRUE) {
 			screenCoordinates[0] = screenPos[0];
 			screenCoordinates[1] = GLESCamera.glViewportHeight - screenPos[1];
 		}
 	}
-	
-	public boolean thisObjectHitted(float cx, float cy){
+
+	public boolean thisObjectHitted(float cx, float cy) {
 		float dx = screenCoordinates[0] - cx;
 		float dy = screenCoordinates[1] - cy;
 		float length = (float) Math.sqrt(dx * dx - dy * dy);
-		
-		if(length <= 20){
+
+		if (length <= 20) {
 			return true;
-		}
-		else{
+		} else {
 			return false;
 		}
 	}
@@ -222,7 +223,8 @@ public class ARObject implements OpenGLCallable {
 	public void addRenderFeature(ItemVisualization itemVisualization,
 			Collection<RenderFeature2> features) {
 		if (visualizationLayers.containsKey(itemVisualization.getClass())) {
-			visualizationLayers.get(itemVisualization.getClass()).addRenderFeatures(features);
+			visualizationLayers.get(itemVisualization.getClass())
+					.addRenderFeatures(features);
 		} else {
 			VisualizationLayer layer = new VisualizationLayer(itemVisualization);
 			layer.addRenderFeatures(features);
@@ -254,9 +256,10 @@ public class ARObject implements OpenGLCallable {
 	public void renderCanvas(Paint poiRenderer, Canvas canvas) {
 		for (VisualizationLayer layer : visualizationLayers.values()) {
 			// FIXME TODO XXX distanceTo has to be in the Settings
-			if (distanceTo <1000)
+			if (distanceTo < 1000)
 				for (RenderFeature2 renderFeature : layer.renderFeatureList) {
-					layer.canvasFeature.onRender(screenCoordinates[0], screenCoordinates[1], canvas);
+					layer.canvasFeature.onRender(screenCoordinates[0],
+							screenCoordinates[1], canvas);
 				}
 		}
 	}

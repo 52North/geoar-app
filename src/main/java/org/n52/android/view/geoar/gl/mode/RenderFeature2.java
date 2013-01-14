@@ -453,12 +453,12 @@ public abstract class RenderFeature2 extends Spatial implements
 		Matrix.multiplyMM(modelMatrix, 0, viewMatrix, 0, modelMatrix, 0);
 		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, modelMatrix, 0);
 
-//		if (boundingBox != null || position != null) {
-//			float[] vec = new float[4];
-//			Matrix.multiplyMV(vec, 0, modelMatrix, 0, position, 0);
-//			if(!GLESCamera.pointInFrustum(vec))
-//				return false;
-//		}
+//		if (position != null) {
+//		float[] vec = new float[] {0,0,0,1};
+//		Matrix.multiplyMV(vec, 0, modelViewMatrix, 0, vec, 0);
+//		if (!GLESCamera.pointInFrustum(vec))
+//			return;
+//	}
 
 		/** sets the program object as part of current rendering state */
 		renderer.useProgram();
