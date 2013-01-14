@@ -16,6 +16,8 @@
 package org.n52.android.settings;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.n52.android.R;
+import org.n52.android.newdata.Annotations.PostSettingsChanged;
 import org.n52.android.newdata.Annotations.Setting;
 import org.n52.android.newdata.Annotations.Settings.Group;
 import org.n52.android.newdata.Annotations.Settings.Name;
@@ -192,6 +195,21 @@ public class SettingsView extends LinearLayout {
 					throw new SettingsException(e.getMessage(), e);
 				}
 			}
+
+		for (Method method : settingsObject.getClass().getDeclaredMethods()) {
+			if (method.isAnnotationPresent(PostSettingsChanged.class)) {
+				try {
+					method.setAccessible(true);
+					method.invoke(settingsObject);
+				} catch (IllegalArgumentException e) {
+					throw new SettingsException(e.getMessage(), e);
+				} catch (IllegalAccessException e) {
+					throw new SettingsException(e.getMessage(), e);
+				} catch (InvocationTargetException e) {
+					throw new SettingsException(e.getMessage(), e);
+				}
+			}
+		}
 	}
 
 	public boolean isEmpty() {
