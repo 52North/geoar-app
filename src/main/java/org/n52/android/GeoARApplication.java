@@ -101,7 +101,7 @@ public class GeoARApplication extends Application {
 				}
 			}
 		});
-		
+
 		// ensure that plugins can access the main logger
 		DataSourceLoggerFactory.setLoggerCallable(new LoggerCallable() {
 			@Override
@@ -149,7 +149,7 @@ public class GeoARApplication extends Application {
 		}
 		sendMail(context, "GeoAR Error Report",
 				applicationContext.getString(R.string.text_error_report),
-				attachments.toArray(new File[] {}));
+				attachments);
 	}
 
 	/**
@@ -184,21 +184,26 @@ public class GeoARApplication extends Application {
 	}
 
 	public static void sendFeedbackMail(Activity context) {
+		List<File> attachments = new ArrayList<File>();
+		if (logFile.exists()) {
+			attachments.add(logFile);
+		}
 		sendMail(context, "GeoAR Feedback Report",
-				applicationContext.getString(R.string.text_feedback_report));
+				applicationContext.getString(R.string.text_feedback_report),
+				attachments);
 	}
 
 	private static void sendMail(Activity context, String subject,
-			String message, File... attachments) {
+			String message, List<File> attachments) {
 		Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
 		intent.setType("text/plain");
 		intent.putExtra(Intent.EXTRA_SUBJECT, subject);
-		intent.putExtra(Intent.EXTRA_TEXT, message); 
+		intent.putExtra(Intent.EXTRA_TEXT, message);
 		intent.putExtra(Intent.EXTRA_EMAIL, new String[] { REPORT_EMAIL });
 
 		try {
 			intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM,
-					getFailAttachments(Arrays.asList(attachments)));
+					getFailAttachments(attachments));
 			context.startActivity(intent);
 		} catch (ActivityNotFoundException e) {
 			Toast.makeText(context, R.string.could_not_find_email_application,

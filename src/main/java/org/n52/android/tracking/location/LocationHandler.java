@@ -159,7 +159,7 @@ public class LocationHandler implements Serializable {
 			}
 			locationManager.requestLocationUpdates(
 					LocationManager.GPS_PROVIDER, 5000, 0, locationListener);
-			LOG.info("Requesting Location Updates");
+			LOG.debug("Requesting Location Updates");
 		}
 	}
 
@@ -169,7 +169,7 @@ public class LocationHandler implements Serializable {
 	public static void onPause() {
 		locationManager.removeUpdates(locationListener);
 		InfoView.clearStatus(gpsProviderInfo);
-		LOG.info("Removed Location Updates");
+		LOG.debug("Removed Location Updates");
 	}
 
 	/**
