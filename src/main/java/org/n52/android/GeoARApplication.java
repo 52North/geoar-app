@@ -193,7 +193,7 @@ public class GeoARApplication extends Application {
 		Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
 		intent.setType("text/plain");
 		intent.putExtra(Intent.EXTRA_SUBJECT, subject);
-		intent.putExtra(Intent.EXTRA_TEXT, message);
+		intent.putExtra(Intent.EXTRA_TEXT, message); 
 		intent.putExtra(Intent.EXTRA_EMAIL, new String[] { REPORT_EMAIL });
 
 		try {

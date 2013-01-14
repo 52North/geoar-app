@@ -25,10 +25,12 @@ import java.util.Set;
 import org.n52.android.GeoARApplication;
 import org.n52.android.R;
 import org.n52.android.newdata.CheckList.CheckManager;
+import org.n52.android.newdata.DataSourceInstanceSettingsDialogActivity.SettingsResultListener;
 import org.n52.android.settings.SettingsHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -116,9 +118,21 @@ public class DataSourceInstanceHolder implements Parcelable {
 	}
 
 	public void createSettingsDialog(Context context) {
+		SettingsResultListener resultListener = new SettingsResultListener() {
+			@Override
+			void onSettingsResult(int resultCode) {
+				if (resultCode == Activity.RESULT_OK) {
+					notifySettingsChanged();
+				}
+			}
+		};
+
 		Intent intent = new Intent(context,
 				DataSourceInstanceSettingsDialogActivity.class);
 		intent.putExtra("dataSourceInstance", this);
+		intent.putExtra("resultListener", resultListener); // unsure whether
+															// Intent uses weak
+															// references too
 		context.startActivity(intent);
 	}
 
@@ -258,10 +272,26 @@ public class DataSourceInstanceHolder implements Parcelable {
 		if (lastError instanceof SocketException) {
 			return GeoARApplication.applicationContext
 					.getString(R.string.connection_error);
+		} else if (lastError instanceof PluginException) {
+			return ((PluginException) lastError).getTitle();
 		}
 
 		return GeoARApplication.applicationContext
 				.getString(R.string.unkown_error);
 	}
 
+	public boolean hasErrorMessage() {
+		if (lastError == null) {
+			return false;
+		}
+		return lastError instanceof PluginException;
+	}
+
+	public String getErrorMessage() {
+		if (lastError == null || !(lastError instanceof PluginException)) {
+			return null;
+		}
+
+		return lastError.toString();
+	}
 }

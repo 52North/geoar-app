@@ -29,7 +29,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
-public abstract class SpinnerSettingsViewFieldw<T> extends Spinner implements
+public abstract class SpinnerSettingsViewField<T> extends Spinner implements
 		SettingsViewField<T>, android.widget.AdapterView.OnItemSelectedListener {
 
 	private String noValueText = "No Value";
@@ -47,7 +47,7 @@ public abstract class SpinnerSettingsViewFieldw<T> extends Spinner implements
 	};
 	private Field field;
 
-	public SpinnerSettingsViewFieldw(Context context, Field field, List<Object> items) {
+	public SpinnerSettingsViewField(Context context, Field field, List<Object> items) {
 		super(context);
 		this.field = field;
 		// Init adapter
@@ -70,7 +70,7 @@ public abstract class SpinnerSettingsViewFieldw<T> extends Spinner implements
 		}
 	}
 
-	public SpinnerSettingsViewFieldw(Context context, Field field, Object[] items) {
+	public SpinnerSettingsViewField(Context context, Field field, Object[] items) {
 		this(context, field, new ArrayList<Object>(Arrays.asList(items)));
 	}
 

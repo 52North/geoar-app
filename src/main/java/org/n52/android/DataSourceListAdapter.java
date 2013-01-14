@@ -25,6 +25,7 @@ import org.n52.android.newdata.InstalledPluginHolder;
 import org.n52.android.newdata.PluginLoader;
 import org.n52.android.newdata.Visualization;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -74,6 +75,16 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 				dataSourceInstance.createSettingsDialog(mContext);
 			}
 		};
+		OnClickListener titleClickListener = new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (dataSourceInstance.hasErrorMessage()) {
+					new AlertDialog.Builder(mContext).setTitle("Error")
+							.setMessage(dataSourceInstance.getErrorMessage())
+							.setNeutralButton(R.string.cancel, null).show();
+				}
+			}
+		};
 	}
 
 	/**
@@ -94,7 +105,7 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 					boolean isChecked) {
 				if (dataSource.areAllChecked() != isChecked) {
 					dataSource.setChecked(isChecked);
-					notifyDataSetChanged();
+					//notifyDataSetChanged();
 				}
 			}
 		};
@@ -111,6 +122,7 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 			@Override
 			public void onClick(View v) {
 				dataSource.addInstance(mContext);
+				listView.expandGroup(groupPosition);
 			}
 		};
 	}
@@ -165,12 +177,16 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 			if (newState == false) {
 				for (DataSourceHolder dataSource : item.getDataSources()) {
 					dataSource.getInstances().removeOnItemChangeListener(
-							dataSourceChangedListener);
+							dataSourceItemChangedListener);
+					dataSource.getInstances().removeOnCheckedChangeListener(
+							dataSourceCheckedChangedListener);
 				}
 			} else {
 				for (DataSourceHolder dataSource : item.getDataSources()) {
 					dataSource.getInstances().addOnItemChangeListener(
-							dataSourceChangedListener);
+							dataSourceItemChangedListener);
+					dataSource.getInstances().addOnCheckedChangeListener(
+							dataSourceCheckedChangedListener);
 				}
 			}
 		}
@@ -178,9 +194,17 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 
 	private int childPadding;
 
-	private OnItemChangedListenerWrapper<DataSourceInstanceHolder> dataSourceChangedListener = new OnItemChangedListenerWrapper<DataSourceInstanceHolder>() {
+	private OnItemChangedListenerWrapper<DataSourceInstanceHolder> dataSourceItemChangedListener = new OnItemChangedListenerWrapper<DataSourceInstanceHolder>() {
 		@Override
 		public void onItemChanged() {
+			notifyDataSetChanged();
+		}
+	};
+
+	private OnCheckedChangedListener<DataSourceInstanceHolder> dataSourceCheckedChangedListener = new OnCheckedChangedListener<DataSourceInstanceHolder>() {
+		@Override
+		public void onCheckedChanged(DataSourceInstanceHolder item,
+				boolean newState) {
 			notifyDataSetChanged();
 		}
 	};
@@ -202,7 +226,9 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 				mPluginChangedListener);
 		for (DataSourceHolder dataSource : mDataSources) {
 			dataSource.getInstances().addOnItemChangeListener(
-					dataSourceChangedListener);
+					dataSourceItemChangedListener);
+			dataSource.getInstances().addOnCheckedChangeListener(
+					dataSourceCheckedChangedListener);
 		}
 		// TODO remove listener somehow
 	}
@@ -212,7 +238,7 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 				mPluginChangedListener);
 		for (DataSourceHolder dataSource : mDataSources) {
 			dataSource.getInstances().removeOnItemChangeListener(
-					dataSourceChangedListener);
+					dataSourceItemChangedListener);
 		}
 	}
 
@@ -412,6 +438,9 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 
 			viewHolder.textViewDetails = (TextView) view
 					.findViewById(R.id.textViewDetails);
+
+			view.findViewById(R.id.layoutTitle).setOnClickListener(
+					viewHolder.titleClickListener);
 
 			viewHolder.checkBox = (CheckBox) view.findViewById(R.id.checkBox);
 

@@ -16,7 +16,6 @@
 package org.n52.android.newdata;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -32,10 +31,12 @@ import org.n52.android.newdata.Annotations.SharedHttpClient;
 import org.n52.android.newdata.Annotations.SupportedVisualization;
 import org.n52.android.newdata.Annotations.SystemService;
 import org.n52.android.newdata.CheckList.CheckedChangedListener;
+import org.n52.android.newdata.DataSourceInstanceSettingsDialogActivity.SettingsResultListener;
 import org.n52.android.settings.SettingsHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -95,6 +96,7 @@ public class DataSourceHolder implements Parcelable {
 
 	private byte maxZoomLevel;
 	private CheckList<DataSourceInstanceHolder> mDataSourceInstances;
+
 	private long minReloadInterval;
 	private boolean mInstanceable;
 	private byte minZoomLevel;
@@ -263,7 +265,7 @@ public class DataSourceHolder implements Parcelable {
 	public String getName() {
 		return name;
 	}
-	
+
 	public Method getNameCallbackMethod() {
 		return nameCallbackMethod;
 	}
@@ -341,7 +343,6 @@ public class DataSourceHolder implements Parcelable {
 		}
 
 		// Post construct
-
 		try {
 			Class<? extends Object> currentClass = target.getClass();
 			while (currentClass != null) {
@@ -354,13 +355,17 @@ public class DataSourceHolder implements Parcelable {
 				currentClass = currentClass.getSuperclass();
 			}
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Data source " + getName()
+					+ " has an error in its PostConstruct method", e);
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Data source " + getName()
+					+ " has invalid PostConstruct arguments", e);
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
+			LOG.error("Data source " + getName()
+					+ " has an invalid PostConstruct method", e);
+		} catch (RuntimeException e) {
+			LOG.error("Data source " + getName()
+					+ " raised an exception in its PostConstruct method", e);
 			e.printStackTrace();
 		}
 	}
@@ -507,7 +512,7 @@ public class DataSourceHolder implements Parcelable {
 	}
 
 	public void addInstance(Context context) {
-		DataSourceInstanceHolder instance;
+		final DataSourceInstanceHolder instance;
 		try {
 			DataSource<? super Filter> dataSource = dataSourceClass
 					.newInstance();
@@ -515,9 +520,20 @@ public class DataSourceHolder implements Parcelable {
 			instance = new DataSourceInstanceHolder(this, dataSource);
 			mDataSourceInstances.add(instance);
 
+			SettingsResultListener resultListener = new SettingsResultListener() {
+				@Override
+				void onSettingsResult(int resultCode) {
+					if (resultCode == Activity.RESULT_OK) {
+						instance.notifySettingsChanged();
+						instance.setChecked(true);
+					}
+				}
+			};
+
 			Intent intent = new Intent(context,
 					DataSourceInstanceSettingsDialogActivity.class);
 			intent.putExtra("dataSourceInstance", instance);
+			intent.putExtra("resultListener", resultListener);
 			context.startActivity(intent);
 		} catch (InstantiationException e) {
 			throw new RuntimeException("No default constructor for datasource");

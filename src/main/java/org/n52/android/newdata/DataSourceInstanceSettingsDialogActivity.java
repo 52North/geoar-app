@@ -15,10 +15,18 @@
  */
 package org.n52.android.newdata;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.n52.android.R;
 import org.n52.android.settings.SettingsView;
 
+import android.app.Activity;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -31,6 +39,55 @@ import com.actionbarsherlock.app.SherlockActivity;
  * 
  */
 public class DataSourceInstanceSettingsDialogActivity extends SherlockActivity {
+
+	public abstract static class SettingsResultListener implements Parcelable {
+		private static List<WeakReference<SettingsResultListener>> instances = new ArrayList<WeakReference<SettingsResultListener>>();
+		private int id = nextId++;
+		private static int nextId = 0;
+
+		public static final Parcelable.Creator<SettingsResultListener> CREATOR = new Parcelable.Creator<SettingsResultListener>() {
+			@Override
+			public SettingsResultListener createFromParcel(Parcel in) {
+				int id = in.readInt();
+				// Find SettingsResultListener with provided id
+				Iterator<WeakReference<SettingsResultListener>> it = SettingsResultListener.instances
+						.iterator();
+				while (it.hasNext()) {
+					WeakReference<SettingsResultListener> next = it.next();
+					if (next.get() == null) {
+						it.remove();
+					} else if (next.get().id == id) {
+						return next.get();
+					}
+				}
+				return null;
+			}
+
+			@Override
+			public SettingsResultListener[] newArray(int size) {
+				return new SettingsResultListener[size];
+			}
+		};
+
+		public SettingsResultListener() {
+			instances.add(new WeakReference<SettingsResultListener>(this));
+		}
+
+		abstract void onSettingsResult(int resultCode);
+
+		@Override
+		public int describeContents() {
+			return 0;
+		}
+
+		@Override
+		public void writeToParcel(Parcel dest, int flags) {
+			dest.writeInt(id);
+		}
+	}
+
+	private SettingsResultListener resultListener;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -42,6 +99,7 @@ public class DataSourceInstanceSettingsDialogActivity extends SherlockActivity {
 
 		final DataSourceInstanceHolder dataSourceInstance = getIntent()
 				.getParcelableExtra("dataSourceInstance");
+		resultListener = getIntent().getParcelableExtra("resultListener");
 		generalSettingsView.setSettingsObject(dataSourceInstance
 				.getDataSource());
 		filterSettingsView.setSettingsObject(dataSourceInstance
@@ -58,7 +116,7 @@ public class DataSourceInstanceSettingsDialogActivity extends SherlockActivity {
 		cancelButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				setResult(RESULT_CANCELED);
+				setDialogResult(RESULT_CANCELED);
 				finish();
 			}
 		});
@@ -72,12 +130,24 @@ public class DataSourceInstanceSettingsDialogActivity extends SherlockActivity {
 						&& filterSettingsView.validate()) {
 					generalSettingsView.updateObject();
 					filterSettingsView.updateObject();
-					dataSourceInstance.notifySettingsChanged();
-					setResult(RESULT_OK);
+					setDialogResult(RESULT_OK);
 					finish();
 				}
 			}
 		});
-
 	}
+
+	/**
+	 * Should be used instead of {@link Activity#setResult(int)} to use a passed
+	 * {@link SettingsResultListener}
+	 * 
+	 * @param resultCode
+	 */
+	private void setDialogResult(int resultCode) {
+		setResult(resultCode);
+		if (resultListener != null) {
+			resultListener.onSettingsResult(resultCode);
+		}
+	}
+
 }

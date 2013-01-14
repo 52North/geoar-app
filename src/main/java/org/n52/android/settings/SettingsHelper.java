@@ -80,7 +80,7 @@ public class SettingsHelper {
 
 			};
 		} else if (Enum.class.isAssignableFrom(fieldType)) {
-			return new SpinnerSettingsViewFieldw<Enum<?>>(context, field, field
+			return new SpinnerSettingsViewField<Enum<?>>(context, field, field
 					.getType().getEnumConstants()) {
 
 				@Override

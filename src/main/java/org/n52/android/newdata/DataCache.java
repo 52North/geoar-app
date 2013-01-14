@@ -416,7 +416,9 @@ public class DataCache {
 					// Still waiting for that tile
 					tileMonitorSet.clear(checkIndex);
 					progress++;
-					measurementsList.addAll(data);
+					if (data != null) {
+						measurementsList.addAll(data);
+					}
 					callback.onProgressUpdate(progress, tileCount, STEP_REQUEST);
 				}
 				if (tileMonitorSet.isEmpty()) {
