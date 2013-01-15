@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.n52.android.newdata.Annotations.DefaultInstances;
+import org.n52.android.newdata.Annotations.DefaultSettingsSet;
 import org.n52.android.newdata.Annotations.PostConstruct;
 import org.n52.android.newdata.Annotations.SharedHttpClient;
 import org.n52.android.newdata.Annotations.SupportedVisualization;
@@ -175,6 +177,25 @@ public class DataSourceHolder implements Parcelable {
 		if (filterClass == null) {
 			throw new RuntimeException(
 					"Data source does not specify a filter class");
+		}
+
+	}
+
+	public void createDefaultInstances() {
+		if (!instanceable()) {
+			return;
+		}
+
+		DefaultInstances defaultInstances = dataSourceClass
+				.getAnnotation(DefaultInstances.class);
+		if (defaultInstances == null) {
+			return;
+		}
+
+		for (DefaultSettingsSet defaultSettingsSet : defaultInstances.value()) {
+			DataSourceInstanceHolder instance = addInstance();
+			SettingsHelper.applyDefaultSettings(defaultSettingsSet,
+					instance.getDataSource());
 		}
 
 	}
@@ -405,6 +426,10 @@ public class DataSourceHolder implements Parcelable {
 			}
 		}
 
+		if (instanceable() && getInstances().size() == 0) {
+			createDefaultInstances();
+		}
+
 	}
 
 	public void saveState(ObjectOutputStream objectOutputStream)
@@ -469,7 +494,6 @@ public class DataSourceHolder implements Parcelable {
 						"No valid constructor for datasource");
 			}
 		}
-
 	}
 
 	/**
@@ -511,35 +535,40 @@ public class DataSourceHolder implements Parcelable {
 
 	}
 
-	public void addInstance(Context context) {
-		final DataSourceInstanceHolder instance;
+	private DataSourceInstanceHolder addInstance() {
 		try {
 			DataSource<? super Filter> dataSource = dataSourceClass
 					.newInstance();
 			perfomInjection(dataSource);
-			instance = new DataSourceInstanceHolder(this, dataSource);
+			final DataSourceInstanceHolder instance = new DataSourceInstanceHolder(
+					this, dataSource);
 			mDataSourceInstances.add(instance);
-
-			SettingsResultListener resultListener = new SettingsResultListener() {
-				@Override
-				void onSettingsResult(int resultCode) {
-					if (resultCode == Activity.RESULT_OK) {
-						instance.notifySettingsChanged();
-						instance.setChecked(true);
-					}
-				}
-			};
-
-			Intent intent = new Intent(context,
-					DataSourceInstanceSettingsDialogActivity.class);
-			intent.putExtra("dataSourceInstance", instance);
-			intent.putExtra("resultListener", resultListener);
-			context.startActivity(intent);
+			return instance;
 		} catch (InstantiationException e) {
 			throw new RuntimeException("No default constructor for datasource");
 		} catch (IllegalAccessException e) {
 			throw new RuntimeException("No valid constructor for datasource");
 		}
+	}
+
+	public void addInstance(Context context) {
+		final DataSourceInstanceHolder instance = addInstance();
+
+		SettingsResultListener resultListener = new SettingsResultListener() {
+			@Override
+			void onSettingsResult(int resultCode) {
+				if (resultCode == Activity.RESULT_OK) {
+					instance.notifySettingsChanged();
+					instance.setChecked(true);
+				}
+			}
+		};
+
+		Intent intent = new Intent(context,
+				DataSourceInstanceSettingsDialogActivity.class);
+		intent.putExtra("dataSourceInstance", instance);
+		intent.putExtra("resultListener", resultListener);
+		context.startActivity(intent);
 	}
 
 	public void removeUncheckedInstances() {

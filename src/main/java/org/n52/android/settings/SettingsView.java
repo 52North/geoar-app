@@ -39,15 +39,6 @@ import android.widget.TextView;
 
 public class SettingsView extends LinearLayout {
 
-	public class SettingsException extends RuntimeException {
-
-		private static final long serialVersionUID = 1L;
-
-		public SettingsException(String msg, Throwable cause) {
-			super(msg, cause);
-		}
-	}
-
 	private Object settingsObject;
 	private LayoutInflater mInflater;
 	// Assigning Fields to groups
@@ -196,20 +187,7 @@ public class SettingsView extends LinearLayout {
 				}
 			}
 
-		for (Method method : settingsObject.getClass().getDeclaredMethods()) {
-			if (method.isAnnotationPresent(PostSettingsChanged.class)) {
-				try {
-					method.setAccessible(true);
-					method.invoke(settingsObject);
-				} catch (IllegalArgumentException e) {
-					throw new SettingsException(e.getMessage(), e);
-				} catch (IllegalAccessException e) {
-					throw new SettingsException(e.getMessage(), e);
-				} catch (InvocationTargetException e) {
-					throw new SettingsException(e.getMessage(), e);
-				}
-			}
-		}
+		SettingsHelper.notifySettingsChanged(settingsObject);
 	}
 
 	public boolean isEmpty() {

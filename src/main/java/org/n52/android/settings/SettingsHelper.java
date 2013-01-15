@@ -19,9 +19,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.n52.android.newdata.Annotations.DefaultSetting;
+import org.n52.android.newdata.Annotations.DefaultSettingsSet;
+import org.n52.android.newdata.Annotations.PostSettingsChanged;
 import org.n52.android.newdata.Annotations.Setting;
 
 import android.content.Context;
@@ -162,7 +167,7 @@ public class SettingsHelper {
 			}
 		}
 	}
-	
+
 	public static void restoreSettings(ObjectInputStream objectInputStream,
 			Object settingsObject) throws IOException {
 		for (Field field : settingsObject.getClass().getDeclaredFields()) {
@@ -179,6 +184,66 @@ public class SettingsHelper {
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	public static void applyDefaultSettings(
+			DefaultSettingsSet defaultSettingsSet, Object settingsObject) {
+		Class<? extends Object> settingsClass = settingsObject.getClass();
+		try {
+			for (DefaultSetting defaultSetting : defaultSettingsSet.value()) {
+
+				Field field = settingsClass.getDeclaredField(defaultSetting
+						.name());
+				setFieldFromStringValue(field, defaultSetting.value(),
+						settingsObject);
+			}
+
+		} catch (NoSuchFieldException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		notifySettingsChanged(settingsObject);
+	}
+
+	private static void setFieldFromStringValue(Field field, String value,
+			Object settingsObject) {
+		try {
+			if (String.class.isAssignableFrom(field.getType())) {
+				field.setAccessible(true);
+				field.set(settingsObject, value);
+				return;
+			}
+
+			throw new RuntimeException(field.getType()
+					+ " not supported for default setting");
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	static void notifySettingsChanged(Object settingsObject) {
+		for (Method method : settingsObject.getClass().getDeclaredMethods()) {
+			if (method.isAnnotationPresent(PostSettingsChanged.class)) {
+				try {
+					method.setAccessible(true);
+					method.invoke(settingsObject);
+				} catch (IllegalArgumentException e) {
+					throw new SettingsException(e.getMessage(), e);
+				} catch (IllegalAccessException e) {
+					throw new SettingsException(e.getMessage(), e);
+				} catch (InvocationTargetException e) {
+					throw new SettingsException(e.getMessage(), e);
 				}
 			}
 		}
