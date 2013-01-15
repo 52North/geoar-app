@@ -25,7 +25,6 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.n52.android.newdata.PluginLogger;
@@ -50,7 +49,7 @@ public class GeoARApplication extends Application {
 	public static final String PREFERENCES_FILE = "GeoAR";
 	public static final String STACKTRACE_FILENAME = "stacktrace.log";
 	public static final String LOG_FILENAME = "logfile.log";
-	public static final String REPORT_EMAIL = "h.hopmann@52north.org";
+	public static final String REPORT_EMAIL = "geoar@52north.org";
 
 	private UncaughtExceptionHandler defaultUncaughtExceptionHandler;
 

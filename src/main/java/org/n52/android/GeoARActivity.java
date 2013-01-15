@@ -59,10 +59,7 @@ import com.actionbarsherlock.view.MenuItem;
  * Core and only {@link Activity} in this application. Coordinates all its child
  * views, manager classes and inter-view communication. Derived from
  * {@link MapActivity} to utilize a {@link MapView} as child.
- * 
- * Uses an icon from www.androidicons.com
- * 
- * 
+ *  
  */
 public class GeoARActivity extends SherlockFragmentActivity {
 
