@@ -397,20 +397,8 @@ public class DataSourceHolder implements Parcelable {
 
 			int instancesCount = objectInputStream.readInt();
 			for (int i = 0; i < instancesCount; i++) {
-				try {
-					DataSource<? super Filter> dataSource = dataSourceClass
-							.newInstance();
-					perfomInjection(dataSource);
-
-					DataSourceInstanceHolder dataSourceInstance = new DataSourceInstanceHolder(
-							this, dataSource);
-					getInstances().add(dataSourceInstance);
-					dataSourceInstance.restoreState(objectInputStream);
-
-				} catch (Exception e) {
-					e.printStackTrace();
-					// TODO handle errors
-				}
+				DataSourceInstanceHolder dataSourceInstance = addInstance();
+				dataSourceInstance.restoreState(objectInputStream);
 			}
 		}
 		createDefaultInstances();
@@ -517,7 +505,7 @@ public class DataSourceHolder implements Parcelable {
 		try {
 			DataSource<? super Filter> dataSource = dataSourceClass
 					.newInstance();
-			perfomInjection(dataSource);
+			//perfomInjection(dataSource);
 			final DataSourceInstanceHolder instance = new DataSourceInstanceHolder(
 					this, dataSource);
 			mDataSourceInstances.add(instance);

@@ -158,7 +158,6 @@ public class CheckList<T> extends ArrayList<T> {
 		T item = get(index);
 		checkSet.set(index, state);
 		if (changed) {
-			notifyCheckedChanged(item, state);
 			try {
 				if (checkedChangedMethod != null) {
 					checkedChangedMethod.invoke(item, state);
@@ -166,6 +165,7 @@ public class CheckList<T> extends ArrayList<T> {
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
+			notifyCheckedChanged(item, state);	
 		}
 	}
 

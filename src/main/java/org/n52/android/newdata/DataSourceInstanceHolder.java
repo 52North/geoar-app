@@ -25,6 +25,7 @@ import java.util.Set;
 import org.n52.android.GeoARApplication;
 import org.n52.android.R;
 import org.n52.android.newdata.CheckList.CheckManager;
+import org.n52.android.newdata.CheckList.CheckedChangedListener;
 import org.n52.android.newdata.DataSourceInstanceSettingsDialogActivity.SettingsResultListener;
 import org.n52.android.settings.SettingsHelper;
 import org.slf4j.Logger;
@@ -64,6 +65,7 @@ public class DataSourceInstanceHolder implements Parcelable {
 		}
 	});
 	private DataSource<? super Filter> dataSource;
+	private boolean injected = false;
 	private DataSourceHolder parentHolder;
 	private final int id = nextId++;
 	private DataCache dataCache;
@@ -91,6 +93,15 @@ public class DataSourceInstanceHolder implements Parcelable {
 		dataCache = new BalancingDataCache(this);
 	}
 
+	@CheckedChangedListener
+	public void checkedChanged(boolean state) {
+		if (state) {
+			activate();
+		} else {
+			deactivate();
+		}
+	}
+
 	/**
 	 * Prevents datasource from getting unloaded. Should be called when
 	 * datasource is added to map/ar.
@@ -100,6 +111,10 @@ public class DataSourceInstanceHolder implements Parcelable {
 
 		// prevents clearing of cache by removing messages
 		dataSourceHandler.removeMessages(CLEAR_CACHE);
+		if (!injected) {
+			parentHolder.perfomInjection(dataSource);
+			injected = true;
+		}
 	}
 
 	/**
