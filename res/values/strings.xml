@@ -59,5 +59,7 @@
     <string name="about">About</string>
     <string name="contact">Contact</string>
     <string name="development_credits">Development Credits</string>
+    <string name="date">Date</string>
+    <string name="time">Time</string>
 
 </resources>

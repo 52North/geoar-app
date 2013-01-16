@@ -18,6 +18,7 @@ package org.n52.android.settings;
 import java.lang.reflect.Field;
 import java.util.Calendar;
 
+import org.n52.android.R;
 import org.n52.android.newdata.Annotations.Settings.NotNull;
 import org.n52.android.newdata.Annotations.Settings.Temporal;
 import org.n52.android.newdata.Annotations.Settings.Temporal.TemporalType;
@@ -78,7 +79,7 @@ public abstract class DateTimeSettingsViewField<T> implements SettingsViewField<
 			// there
 			// are more options on click
 
-			dateEditText.setHint("Date");
+			dateEditText.setHint(R.string.date);
 			dateEditText.setInputType(InputType.TYPE_NULL);
 			dateEditText.setOnClickListener(new OnClickListener() {
 				@Override
@@ -106,7 +107,7 @@ public abstract class DateTimeSettingsViewField<T> implements SettingsViewField<
 			// there
 			// are more options on click
 
-			timeEditText.setHint("Time");
+			timeEditText.setHint(R.string.time);
 			timeEditText.setInputType(InputType.TYPE_NULL);
 			timeEditText.setOnClickListener(new OnClickListener() {
 				@Override

@@ -61,5 +61,7 @@
     <string name="text_feedback_report">Bitte fügen Sie Ihre Rückmeldung ein.</string>
     <string name="could_not_find_email_application">Konnte keine E-Mail App finden</string>
     <string name="give_feedback">Feedback Geben</string>
+    <string name="date">Datum</string>
+    <string name="time">Zeit</string>
 
 </resources>
