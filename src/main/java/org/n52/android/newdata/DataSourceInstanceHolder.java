@@ -96,7 +96,7 @@ public class DataSourceInstanceHolder implements Parcelable {
 	 * datasource is added to map/ar.
 	 */
 	public void activate() {
-		LOG.info("Activating data source " + getName());
+		LOG.info("Activating data source instance " + getName());
 
 		// prevents clearing of cache by removing messages
 		dataSourceHandler.removeMessages(CLEAR_CACHE);

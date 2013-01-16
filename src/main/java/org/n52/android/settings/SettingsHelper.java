@@ -197,8 +197,9 @@ public class SettingsHelper {
 
 				Field field = settingsClass.getDeclaredField(defaultSetting
 						.name());
-				setFieldFromStringValue(field, defaultSetting.value(),
-						settingsObject);
+				field.setAccessible(true);
+				field.set(settingsObject,
+						getObjectFromStringValue(field, defaultSetting.value()));
 			}
 
 		} catch (NoSuchFieldException e) {
@@ -207,29 +208,21 @@ public class SettingsHelper {
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		notifySettingsChanged(settingsObject);
 	}
 
-	private static void setFieldFromStringValue(Field field, String value,
-			Object settingsObject) {
-		try {
-			if (String.class.isAssignableFrom(field.getType())) {
-				field.setAccessible(true);
-				field.set(settingsObject, value);
-				return;
-			}
-
-			throw new RuntimeException(field.getType()
-					+ " not supported for default setting");
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	private static Object getObjectFromStringValue(Field field, String value) {
+		if (String.class.isAssignableFrom(field.getType())) {
+			return value;
 		}
+
+		throw new RuntimeException(field.getType()
+				+ " not supported for default setting");
 	}
 
 	static void notifySettingsChanged(Object settingsObject) {
@@ -249,4 +242,56 @@ public class SettingsHelper {
 		}
 	}
 
+	static boolean isEqualSettings(Object settingsObject1,
+			Object settingsObject2) {
+		if (!settingsObject2.getClass().isAssignableFrom(
+				settingsObject1.getClass())) {
+			return false;
+		}
+
+		Class<? extends Object> settingsClass = settingsObject1.getClass();
+		try {
+			for (Field field : settingsClass.getDeclaredFields()) {
+				field.setAccessible(true);
+				if (!field.get(settingsObject1).equals(
+						field.get(settingsObject2))) {
+					return false;
+				}
+			}
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return true;
+	}
+
+	public static boolean isEqualSettings(DefaultSettingsSet defaultSettingsSet,
+			Object settingsObject) {
+
+		Class<? extends Object> settingsClass = settingsObject.getClass();
+		try {
+			for (DefaultSetting defaultSetting : defaultSettingsSet.value()) {
+
+				Field field = settingsClass.getDeclaredField(defaultSetting
+						.name());
+				field.setAccessible(true);
+				if (!field.get(settingsObject)
+						.equals(getObjectFromStringValue(field,
+								defaultSetting.value()))) {
+					return false;
+				}
+			}
+		} catch (IllegalAccessException e) {
+
+		} catch (NoSuchFieldException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return true;
+	}
 }

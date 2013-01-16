@@ -166,7 +166,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 		editor.putFloat("cameraHeight", RealityCamera.height);
 		editor.commit();
 
-		PluginLoader.saveSelection();
+		PluginLoader.saveState();
 
 	}
 

@@ -64,16 +64,15 @@
 				<!-- <file> ${DATA_DIR}/logFile.log </file> -->
 				<!-- <file> /mnt/sdcard/Android/data/org.n52.android/files/logs/logFile.log 
 					</file> -->
-				<file>${LOG_FILE}</file>
+				<file>${LOG_DIR}/${LOG_NAME}.${LOG_EXT}</file>
 
 				<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 
 					<!-- daily rollover -->
 					<fileNamePattern>
-						logFile.%d{yyyy-MM-dd}.log
+						${LOG_DIR}/${LOG_NAME}.%d{yyyy-MM-dd}.${LOG_EXT}
 					</fileNamePattern>
 
-					<!-- keep 30 days' worth of history -->
 					<maxHistory>
 						7
 					</maxHistory>

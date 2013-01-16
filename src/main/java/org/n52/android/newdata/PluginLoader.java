@@ -20,7 +20,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -127,7 +126,7 @@ public class PluginLoader {
 		mInstalledPlugins
 				.addOnCheckedChangeListener(pluginCheckedChangedListener);
 		loadPlugins();
-		restoreSelection();
+		restoreState();
 	}
 
 	/**
@@ -160,7 +159,7 @@ public class PluginLoader {
 	 * occurs, e.g. if a previously selected plugin got removed, this function
 	 * will quit silently.
 	 */
-	private static void restoreSelection() {
+	private static void restoreState() {
 		try {
 			SharedPreferences preferences = GeoARApplication.applicationContext
 					.getSharedPreferences(GeoARApplication.PREFERENCES_FILE,
@@ -179,6 +178,8 @@ public class PluginLoader {
 				return;
 			}
 
+			List<InstalledPluginHolder> restoredPlugins = new ArrayList<InstalledPluginHolder>();
+
 			// Restore plugin state
 			int count = objectInputStream.readInt();
 			for (int i = 0; i < count; i++) {
@@ -189,8 +190,15 @@ public class PluginLoader {
 				}
 
 				plugin.restoreState(objectInputStream);
+				restoredPlugins.add(plugin);
 			}
 			objectInputStream.close();
+
+			for (InstalledPluginHolder plugin : mInstalledPlugins) {
+				if(!restoredPlugins.contains(plugin)) {
+					plugin.createState();
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			// TODO
@@ -200,7 +208,7 @@ public class PluginLoader {
 	/**
 	 * Saves the state of plugins to {@link SharedPreferences}.
 	 */
-	public static void saveSelection() {
+	public static void saveState() {
 		try {
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(
@@ -453,11 +461,11 @@ public class PluginLoader {
 	 * afterwards.
 	 */
 	public static void reloadPlugins() {
-		saveSelection();
+		saveState();
 		mInstalledPlugins.clear();
 		mDataSources.clear();
 		loadPlugins();
-		restoreSelection();
+		restoreState();
 	}
 
 	public static CheckList<InstalledPluginHolder> getInstalledPlugins() {

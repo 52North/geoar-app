@@ -66,10 +66,13 @@ public class GeoARApplication extends Application {
 				STACKTRACE_FILENAME);
 		// File path to logfile
 		logFile = new File(applicationContext.getFilesDir()
-				+ "/logs/logfile.log");
-		// Set system property with log file, logback config references to it,
+				+ "/logs/logfile.txt");
+		// Set system properties with log file, logback config references to these,
 		// so do not use LoggerFactory before this point
-		System.setProperty("LOG_FILE", logFile.getAbsolutePath());
+		System.setProperty("LOG_DIR", logFile.getParent());
+		int sepIndex = logFile.getName().lastIndexOf(".");
+		System.setProperty("LOG_NAME", logFile.getName().substring(0, sepIndex));
+		System.setProperty("LOG_EXT", logFile.getName().substring(sepIndex + 1));
 
 		LOG = LoggerFactory.getLogger(GeoARApplication.class);
 
@@ -165,8 +168,14 @@ public class GeoARApplication extends Application {
 		for (int i = 0, attachmentsSize = attachments.size(); i < attachmentsSize; i++) {
 
 			InputStream inputStream = new FileInputStream(attachments.get(i));
+			int sepIndex = attachments.get(i).getName().lastIndexOf(".");
+			attachments.get(i).getName().substring(sepIndex);
+
 			File fileCopy = new File(
-					applicationContext.getExternalFilesDir(null), "fail_" + i);
+					applicationContext.getExternalFilesDir(null), "fail_"
+							+ i
+							+ attachments.get(i).getName()
+									.substring(sepIndex + 1));
 			copiesUris.add(Uri.fromFile(fileCopy));
 			OutputStream outputStream = new FileOutputStream(fileCopy);
 

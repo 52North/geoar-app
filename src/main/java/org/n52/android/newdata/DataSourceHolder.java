@@ -32,7 +32,6 @@ import org.n52.android.newdata.Annotations.PostConstruct;
 import org.n52.android.newdata.Annotations.SharedHttpClient;
 import org.n52.android.newdata.Annotations.SupportedVisualization;
 import org.n52.android.newdata.Annotations.SystemService;
-import org.n52.android.newdata.CheckList.CheckedChangedListener;
 import org.n52.android.newdata.DataSourceInstanceSettingsDialogActivity.SettingsResultListener;
 import org.n52.android.settings.SettingsHelper;
 import org.slf4j.Logger;
@@ -181,7 +180,7 @@ public class DataSourceHolder implements Parcelable {
 
 	}
 
-	public void createDefaultInstances() {
+	private void createDefaultInstances() {
 		if (!instanceable()) {
 			return;
 		}
@@ -192,7 +191,14 @@ public class DataSourceHolder implements Parcelable {
 			return;
 		}
 
-		for (DefaultSettingsSet defaultSettingsSet : defaultInstances.value()) {
+		settingsSets: for (DefaultSettingsSet defaultSettingsSet : defaultInstances
+				.value()) {
+			for (DataSourceInstanceHolder instance : getInstances()) {
+				if (SettingsHelper.isEqualSettings(defaultSettingsSet,
+						instance.getDataSource())) {
+					continue settingsSets;
+				}
+			}
 			DataSourceInstanceHolder instance = addInstance();
 			SettingsHelper.applyDefaultSettings(defaultSettingsSet,
 					instance.getDataSource());
@@ -213,24 +219,6 @@ public class DataSourceHolder implements Parcelable {
 
 	public boolean areAllChecked() {
 		return mDataSourceInstances.allChecked();
-	}
-
-	/**
-	 * Called by {@link CheckList} when this item gets un-/checked
-	 * 
-	 * @param state
-	 */
-	@CheckedChangedListener
-	protected void checkedChanged(boolean state) {
-		if (state == true) {
-			activate();
-		} else {
-			deactivate();
-		}
-	}
-
-	public void createFilterDialog(Context context) {
-		// TODO
 	}
 
 	/**
@@ -425,11 +413,7 @@ public class DataSourceHolder implements Parcelable {
 				}
 			}
 		}
-
-		if (instanceable() && getInstances().size() == 0) {
-			createDefaultInstances();
-		}
-
+		createDefaultInstances();
 	}
 
 	public void saveState(ObjectOutputStream objectOutputStream)
@@ -445,6 +429,10 @@ public class DataSourceHolder implements Parcelable {
 				dataSourceInstance.saveState(objectOutputStream);
 			}
 		}
+	}
+
+	public void createState() {
+		createDefaultInstances();
 	}
 
 	/**
@@ -479,20 +467,7 @@ public class DataSourceHolder implements Parcelable {
 			// instance
 			LOG.info("Creating single-instance data source instance "
 					+ getName());
-			try {
-				DataSource<? super Filter> dataSource = dataSourceClass
-						.newInstance();
-				perfomInjection(dataSource);
-
-				mDataSourceInstances.add(new DataSourceInstanceHolder(this,
-						dataSource));
-			} catch (InstantiationException e) {
-				throw new RuntimeException(
-						"No default constructor for datasource");
-			} catch (IllegalAccessException e) {
-				throw new RuntimeException(
-						"No valid constructor for datasource");
-			}
+			addInstance();
 		}
 	}
 
@@ -536,6 +511,9 @@ public class DataSourceHolder implements Parcelable {
 	}
 
 	private DataSourceInstanceHolder addInstance() {
+		if (mDataSourceInstances == null) {
+			initializeInstances();
+		}
 		try {
 			DataSource<? super Filter> dataSource = dataSourceClass
 					.newInstance();
@@ -582,4 +560,5 @@ public class DataSourceHolder implements Parcelable {
 			mDataSourceInstances.remove(dataSourceInstance);
 		}
 	}
+
 }

@@ -27,13 +27,13 @@ import java.util.zip.ZipFile;
 
 import org.n52.android.GeoARApplication;
 import org.n52.android.newdata.CheckList.CheckManager;
+import org.n52.android.newdata.CheckList.CheckedChangedListener;
 import org.n52.android.newdata.PluginLoader.PluginInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Parcel;
@@ -49,7 +49,6 @@ public class InstalledPluginHolder extends PluginHolder {
 	private boolean loaded = false;
 	private String description;
 	private String name;
-	private Resources mPluginResources;
 	private Context mPluginContext;
 	private Bitmap pluginIcon;
 	private String publisher;
@@ -244,6 +243,12 @@ public class InstalledPluginHolder extends PluginHolder {
 		setChecked(objectInputStream.readBoolean());
 		for (DataSourceHolder dataSource : mDataSources) {
 			dataSource.restoreState(objectInputStream);
+		}
+	}
+
+	public void createState() {
+		for (DataSourceHolder dataSource : mDataSources) {
+			dataSource.createState();
 		}
 	}
 
