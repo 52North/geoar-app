@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.n52.android</groupId>
 	<artifactId>52n-geoar</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.5-SNAPSHOT</version>
 	<packaging>apk</packaging>
 
 	<name>GeoAR</name>
@@ -96,7 +96,7 @@
 	<profiles>
 		<!-- profile to sign & zipalign apk for uploading to play -->
 		<profile>
-			<id>play</id>
+			<id>play52N</id>
 			<build>
 				<plugins>
 					<plugin>
@@ -116,10 +116,10 @@
 									<includes>
 										<include>target/*.apk</include>
 									</includes>
-									<keystore>${user.home}\keystore</keystore>
-									<storepass>pass</storepass>
-									<keypass>pass</keypass>
-									<alias>GeoAR</alias>
+									<keystore>${conf.geoar.keystore.location}</keystore>
+									<storepass>${conf.geoar.keystore.storepass}</storepass>
+									<keypass>${conf.geoar.keystore.keypass}</keypass>
+									<alias>geoar</alias>
 									<arguments>
 										<argument>-sigalg</argument>
 										<argument>MD5withRSA</argument>
@@ -128,17 +128,37 @@
 									</arguments>
 								</configuration>
 							</execution>
+							<execution>
+								<id>verify</id>
+								<goals>
+									<goal>verify</goal>
+								</goals>
+								<configuration>
+									<verbose>true</verbose>
+									<certs>true</certs>
+								</configuration>
+							</execution>
 						</executions>
 					</plugin>
 					<plugin>
 						<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 						<artifactId>android-maven-plugin</artifactId>
 						<inherited>true</inherited>
+						<executions>
+							<execution>
+								<id>alignApk</id>
+								<phase>install</phase>
+								<goals>
+									<goal>zipalign</goal>
+								</goals>
+							</execution>
+						</executions>
 						<configuration>
 							<sign>
 								<debug>false</debug>
 							</sign>
 							<zipalign>
+								<verbose>true</verbose>
 								<skip>false</skip>
 							</zipalign>
 						</configuration>
@@ -166,6 +186,7 @@
 			<plugin>
 				<!-- Shift resource processing to earlier phase -->
 				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.6</version>
 				<executions>
 					<execution>
 						<phase>initialize</phase>
