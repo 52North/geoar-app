@@ -58,7 +58,7 @@ public class PluginDialogFragment extends DialogFragment {
 				.getName());
 		((TextView) view.findViewById(R.id.textViewPublisher)).setText(plugin
 				.getPublisher() != null ? plugin.getPublisher()
-				: "Unkown Publisher");
+				: getString(R.string.unknown_publisher));
 		((TextView) view.findViewById(R.id.textViewVersion)).setText(plugin
 				.getVersion() != null ? "" + plugin.getVersion()
 				: "No Version Information");
@@ -80,7 +80,7 @@ public class PluginDialogFragment extends DialogFragment {
 			}
 			textViewDataSources.setText(dsText);
 		} else {
-			textViewDataSources.setText("Unkown");
+			textViewDataSources.setText(R.string.no_value);
 		}
 
 		// dialogButton.setAnimation(getActivity().findViewById(android.R.drawable.stat_sys_download));

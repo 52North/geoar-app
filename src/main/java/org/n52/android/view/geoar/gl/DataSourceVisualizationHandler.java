@@ -84,7 +84,7 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 				InfoView.setStatus(R.string.connection_error, 5000,
 						DataSourceVisualizationHandler.this);
 			} else if (reason == DataSourceErrorType.UNKNOWN) {
-				InfoView.setStatus(R.string.unkown_error, 5000,
+				InfoView.setStatus(R.string.unknown_error, 5000,
 						DataSourceVisualizationHandler.this);
 			}
 		}

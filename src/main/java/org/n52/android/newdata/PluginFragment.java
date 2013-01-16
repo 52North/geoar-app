@@ -46,14 +46,17 @@ import com.actionbarsherlock.view.MenuItem;
  */
 public class PluginFragment extends SherlockFragment {
 
+	private static final String CURRENT_TAB_KEY = "current_tab";
 	private GridView mGridViewInstalled;
 	private GridView mGridViewDownload;
 	private DownloadPluginsAdapter gridAdapterDownload;
 	private InstalledPluginsAdapter gridAdapterInstalled;
+	private TabHost mTabHost;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		setHasOptionsMenu(true);
+		setRetainInstance(true);
 		super.onCreate(savedInstanceState);
 	}
 
@@ -116,17 +119,28 @@ public class PluginFragment extends SherlockFragment {
 		});
 		gridAdapterDownload.setShowCheckBox(false);
 
-		TabHost tabHost = (TabHost) getView()
-				.findViewById(android.R.id.tabhost);
-		tabHost.setup();
-		tabHost.addTab(tabHost.newTabSpec("installed")
+		mTabHost = (TabHost) getView().findViewById(android.R.id.tabhost);
+		mTabHost.setup();
+		mTabHost.addTab(mTabHost.newTabSpec("installed")
 				.setIndicator(getActivity().getString(R.string.installed))
 				.setContent(R.id.gridViewInstalled));
-		tabHost.addTab(tabHost.newTabSpec("download")
+		mTabHost.addTab(mTabHost.newTabSpec("download")
 				.setIndicator(getActivity().getString(R.string.download))
 				.setContent(R.id.gridViewDownload));
+		if (savedInstanceState != null) {
+			mTabHost.setCurrentTab(savedInstanceState
+					.getInt(CURRENT_TAB_KEY, 0));
+		} else {
+			mTabHost.setCurrentTab(0);
+		}
+	}
 
-		tabHost.setCurrentTab(0);
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		if (mTabHost != null) {
+			outState.putInt(CURRENT_TAB_KEY, mTabHost.getCurrentTab());
+		}
 	}
 
 	@Override
@@ -193,7 +207,7 @@ public class PluginFragment extends SherlockFragment {
 
 		@Override
 		protected String getPluginStatus(InstalledPluginHolder plugin) {
-			return plugin.isChecked() ? "Activated" : "";
+			return plugin.isChecked() ? getString(R.string.activated) : "";
 		}
 	}
 

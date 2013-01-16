@@ -1,7 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Button xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="?android:attr/actionButtonStyle"
     android:layout_width="wrap_content"
-    android:layout_height="match_parent"
-    android:drawableLeft="@drawable/ic_menu_archive"
-    android:text="@string/data_sources" />
+    android:layout_height="wrap_content"
+    android:addStatesFromChildren="true"
+    android:focusable="true"
+    android:gravity="center" >
+
+    <Button
+        android:id="@+id/button"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@null"
+        android:drawableLeft="@drawable/ic_menu_archive"
+        android:focusable="false"
+        android:text="@string/data_sources"
+        android:textAppearance="?android:attr/actionMenuTextAppearance" />
+
+</LinearLayout>

@@ -50,6 +50,7 @@ import android.widget.FrameLayout.LayoutParams;
 import android.widget.PopupWindow;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.internal.view.menu.ActionMenuItemView;
 import com.actionbarsherlock.view.ActionProvider;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -59,13 +60,16 @@ import com.actionbarsherlock.view.MenuItem;
  * Core and only {@link Activity} in this application. Coordinates all its child
  * views, manager classes and inter-view communication. Derived from
  * {@link MapActivity} to utilize a {@link MapView} as child.
- *  
+ * 
  */
 public class GeoARActivity extends SherlockFragmentActivity {
 
-	private MapFragment mapFragment = new MapFragment();
-	private ARFragment2 arFragment = new ARFragment2();
-	private PluginFragment cbFragment = new PluginFragment();
+	private static final String CURRENT_FRAGMENT_KEY = "current_fragment";
+	private MapFragment mMapFragment = new MapFragment();
+	private ARFragment2 mARFragment = new ARFragment2();
+	private PluginFragment mPluginFragment = new PluginFragment();
+	private Fragment[] mFragments = new Fragment[] { mMapFragment, mARFragment,
+			mPluginFragment };
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -112,7 +116,22 @@ public class GeoARActivity extends SherlockFragmentActivity {
 			builder.show();
 		}
 
-		showFragment(mapFragment);
+		Fragment fragmentToShow = mMapFragment;
+		if (savedInstanceState != null) {
+			String currentFragmentClassName = savedInstanceState
+					.getString(CURRENT_FRAGMENT_KEY);
+			if (currentFragmentClassName != null) {
+				for (Fragment fragment : mFragments) {
+					if (fragment.getClass().getSimpleName()
+							.equals(currentFragmentClassName)) {
+						fragmentToShow = fragment;
+						break;
+					}
+				}
+			}
+
+		}
+		showFragment(fragmentToShow);
 
 		// Reset camera height if set
 		SharedPreferences prefs = getSharedPreferences("NoiseAR", MODE_PRIVATE);
@@ -129,6 +148,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 		if (fragment.isAdded()) {
 			return;
 		}
+		getSupportFragmentManager().executePendingTransactions();
 		FragmentTransaction transaction = getSupportFragmentManager()
 				.beginTransaction();
 		transaction.replace(R.id.fragmentContainer, fragment);
@@ -155,6 +175,13 @@ public class GeoARActivity extends SherlockFragmentActivity {
 		super.onSaveInstanceState(outState);
 		// save manual positioning
 		LocationHandler.onSaveInstanceState(outState);
+		for (Fragment fragment : mFragments) {
+			if (fragment.isAdded()) {
+				outState.putString(CURRENT_FRAGMENT_KEY, fragment.getClass()
+						.getSimpleName());
+				break;
+			}
+		}
 	}
 
 	@Override
@@ -206,15 +233,15 @@ public class GeoARActivity extends SherlockFragmentActivity {
 
 		switch (item.getItemId()) {
 		case R.id.item_ar:
-			showFragment(arFragment);
+			showFragment(mARFragment);
 			return true;
 
 		case R.id.item_map:
-			showFragment(mapFragment);
+			showFragment(mMapFragment);
 			return true;
 
 		case R.id.item_selectsources:
-			showFragment(cbFragment);
+			showFragment(mPluginFragment);
 			return true;
 
 		case R.id.item_about:
@@ -269,18 +296,22 @@ public class GeoARActivity extends SherlockFragmentActivity {
 
 			final View actionView = mInflater.inflate(
 					R.layout.datasource_list_actionitem, null);
-			actionView.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					if (getPopup().isShowing()) {
-						mPopup.dismiss();
-					} else {
-						// Offset by top margin to align top
-						mPopup.showAsDropDown(actionView, 0, -mPopup
-								.getContentView().getPaddingTop());
-					}
-				}
-			});
+
+			// TODO use ActionMenuItemView when ABS resources work
+
+			actionView.findViewById(R.id.button).setOnClickListener(
+					new OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							if (getPopup().isShowing()) {
+								mPopup.dismiss();
+							} else {
+								// Offset by top margin to align top
+								mPopup.showAsDropDown(actionView, 0, -mPopup
+										.getContentView().getPaddingTop());
+							}
+						}
+					});
 
 			return actionView;
 		}
@@ -305,7 +336,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 				moreButton.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View arg0) {
-						showFragment(cbFragment);
+						showFragment(mPluginFragment);
 						mPopup.dismiss();
 					}
 				});

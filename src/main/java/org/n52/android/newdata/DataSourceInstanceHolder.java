@@ -292,7 +292,7 @@ public class DataSourceInstanceHolder implements Parcelable {
 		}
 
 		return GeoARApplication.applicationContext
-				.getString(R.string.unkown_error);
+				.getString(R.string.unknown_error);
 	}
 
 	public boolean hasErrorMessage() {

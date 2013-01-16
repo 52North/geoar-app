@@ -15,7 +15,7 @@
     <string name="manual_position">Manuelle Positionsangabe</string>
     <string name="not_zoomed_in">Interpolation erfordert höhere Zoomstufe</string>
     <string name="connection_error">Verbindungsfehler</string>
-    <string name="unkown_error">Unbekannter Fehler</string>
+    <string name="unknown_error">Unbekannter Fehler</string>
     <string name="camera_not_available">Die Kamerakomponente konnte nicht erzeugt werden</string>
     <string name="error">Fehler</string>
     <string name="info_use">Stellen Sie bei der Verwendung der Augmented
@@ -63,5 +63,8 @@
     <string name="give_feedback">Feedback Geben</string>
     <string name="date">Datum</string>
     <string name="time">Zeit</string>
+    <string name="activated">Aktiviert</string>
+    <string name="unknown_publisher">Unbekannter Herausgeber</string>
+    <string name="no_value"><i>Kein Wert</i></string>
 
 </resources>

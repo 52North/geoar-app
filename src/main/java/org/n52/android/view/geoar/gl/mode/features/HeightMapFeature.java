@@ -162,7 +162,7 @@ public class HeightMapFeature extends RenderFeature2 {
 			setRenderObjectives(vertices, colors, normals, null,
 					heightMapIndexData);
 		} catch (Throwable t) {
-			LOG.debug("Unkown error", t);
+			LOG.debug("Unknown error", t);
 		}
 	}
 }

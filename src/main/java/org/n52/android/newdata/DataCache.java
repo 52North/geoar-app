@@ -318,13 +318,7 @@ public class DataCache {
 					}
 					// TODO exception handling
 
-					// }
-					// catch (RequestException e) {
-					// Log.i("NoiseAR", "RequestException" + e.getMessage());
-					// dataTile.abort(ABORT_UNKOWN);
-					// } catch (ConnectException e) {
-					// dataTile.abort(ABORT_NO_CONNECTION);
-					// }
+					
 				}
 			};
 			if (async) {

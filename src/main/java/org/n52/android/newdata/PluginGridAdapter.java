@@ -93,8 +93,10 @@ public class PluginGridAdapter<T extends PluginHolder> extends BaseAdapter {
 
 	protected List<T> plugins;
 	private LayoutInflater inflater;
+	private Context mContext;
 
 	public PluginGridAdapter(Context context) {
+		mContext = context;
 		inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
@@ -173,7 +175,7 @@ public class PluginGridAdapter<T extends PluginHolder> extends BaseAdapter {
 		viewHolder.textViewTitle.setText(plugin.getName());
 		viewHolder.textViewSubTitle
 				.setText(plugin.getPublisher() != null ? plugin.getPublisher()
-						: "Unkown Publisher");
+						: mContext.getString(R.string.unknown_publisher));
 		viewHolder.textViewStatus.setText(getPluginStatus(plugin));
 		viewHolder.checkBox.setChecked(getItemChecked(position));
 
