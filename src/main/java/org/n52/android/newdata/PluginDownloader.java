@@ -51,7 +51,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
 
@@ -69,8 +68,8 @@ public class PluginDownloader {
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
 			if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
-				long downloadId = intent.getLongExtra(
-						DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+				// long downloadId = intent.getLongExtra(
+				// DownloadManager.EXTRA_DOWNLOAD_ID, 0);
 				Query query = new Query();
 
 				long[] downloads = new long[currentDownloads.size()];
@@ -129,7 +128,7 @@ public class PluginDownloader {
 
 	private static Set<PluginDownloadHolder> mDownloadableDataSources = new HashSet<PluginDownloadHolder>();
 
-	private static AsyncTask<Void, Void, Void> mDownloadTask = new AsyncTask<Void, Void, Void>() {
+	static class DownloadTask extends AsyncTask<Void, Void, Void> {
 
 		@Override
 		protected void onPostExecute(Void result) {
@@ -195,6 +194,8 @@ public class PluginDownloader {
 
 	};
 
+	private static DownloadTask mDownloadTask = null;
+
 	private static String convertStreamToString(InputStream is)
 			throws IOException {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
@@ -209,10 +210,13 @@ public class PluginDownloader {
 
 	public static void getDataSources(OnDataSourceResultListener listener,
 			boolean force) {
-		if (mDownloadTask.getStatus() != Status.FINISHED || force) {
+		if (mDownloadTask == null
+				|| mDownloadTask.getStatus() != Status.FINISHED || force) {
 			mCurrentListeners.add(listener);
 
-			if (mDownloadTask.getStatus() != Status.RUNNING) {
+			if (mDownloadTask == null
+					|| mDownloadTask.getStatus() == Status.FINISHED) {
+				mDownloadTask = new DownloadTask();
 				mDownloadTask.execute((Void) null);
 			}
 		} else {

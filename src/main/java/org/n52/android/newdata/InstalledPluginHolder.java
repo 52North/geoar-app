@@ -27,7 +27,6 @@ import java.util.zip.ZipFile;
 
 import org.n52.android.GeoARApplication;
 import org.n52.android.newdata.CheckList.CheckManager;
-import org.n52.android.newdata.CheckList.CheckedChangedListener;
 import org.n52.android.newdata.PluginLoader.PluginInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

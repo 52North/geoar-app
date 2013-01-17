@@ -33,6 +33,8 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.TabHost;
+import android.widget.TabHost.OnTabChangeListener;
+import android.widget.TabHost.TabContentFactory;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
@@ -103,7 +105,6 @@ public class PluginFragment extends SherlockFragment {
 		gridAdapterInstalled.setShowCheckBox(true);
 
 		gridAdapterDownload = new DownloadPluginsAdapter(getActivity());
-		mGridViewDownload.setAdapter(gridAdapterDownload);
 		mGridViewDownload.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
@@ -127,6 +128,16 @@ public class PluginFragment extends SherlockFragment {
 		mTabHost.addTab(mTabHost.newTabSpec("download")
 				.setIndicator(getActivity().getString(R.string.download))
 				.setContent(R.id.gridViewDownload));
+
+		mTabHost.setOnTabChangedListener(new OnTabChangeListener() {
+			@Override
+			public void onTabChanged(String tabId) {
+				if (tabId.equals("download")
+						&& mGridViewDownload.getAdapter() == null) {
+					mGridViewDownload.setAdapter(gridAdapterDownload);
+				}
+			}
+		});
 		if (savedInstanceState != null) {
 			mTabHost.setCurrentTab(savedInstanceState
 					.getInt(CURRENT_TAB_KEY, 0));
@@ -154,6 +165,9 @@ public class PluginFragment extends SherlockFragment {
 		switch (item.getItemId()) {
 		case R.id.item_reload:
 			PluginLoader.reloadPlugins();
+			if (mTabHost.getCurrentTabTag().equals("download")) {
+				PluginDownloader.getDataSources(gridAdapterDownload, true);
+			}
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -163,6 +177,7 @@ public class PluginFragment extends SherlockFragment {
 	public void onDestroyView() {
 		super.onDestroyView();
 		gridAdapterInstalled.destroy();
+		gridAdapterDownload.destroy();
 	}
 
 	private class InstalledPluginsAdapter extends
@@ -215,14 +230,24 @@ public class PluginFragment extends SherlockFragment {
 			PluginGridAdapter<PluginDownloadHolder> implements
 			OnDataSourceResultListener {
 
-		@Override
-		public int getViewTypeCount() {
-			return super.getViewTypeCount() + 1; // Normal + Progress
-		}
+		private OnItemChangedListenerWrapper<InstalledPluginHolder> pluginItemChangeListener = new OnItemChangedListenerWrapper<InstalledPluginHolder>() {
+
+			@Override
+			public void onItemChanged() {
+				notifyDataSetInvalidated();
+			}
+		};
+		boolean initialized = false;
 
 		public DownloadPluginsAdapter(Context context) {
 			super(context);
-			PluginDownloader.getDataSources(this);
+			PluginLoader.getInstalledPlugins().addOnItemChangeListener(
+					pluginItemChangeListener);
+		}
+
+		@Override
+		public int getViewTypeCount() {
+			return super.getViewTypeCount() + 1; // Normal + Progress
 		}
 
 		@Override
@@ -236,6 +261,10 @@ public class PluginFragment extends SherlockFragment {
 
 		@Override
 		public int getCount() {
+			if (!initialized) {
+				PluginDownloader.getDataSources(this);
+				initialized = true;
+			}
 			if (plugins != null)
 				return super.getCount();
 			return 1; // The loading view
@@ -258,8 +287,24 @@ public class PluginFragment extends SherlockFragment {
 
 		@Override
 		protected String getPluginStatus(PluginDownloadHolder plugin) {
-			return plugin.isDownloaded() ? getActivity().getString(
-					R.string.installed) : "";
+			InstalledPluginHolder installedPlugin = PluginLoader
+					.getPluginByIdentifier(plugin.getIdentifier());
+			if (installedPlugin != null) {
+				if (installedPlugin.getVersion() != null
+						&& plugin.getVersion() != null
+						&& installedPlugin.getVersion() < plugin.getVersion()) {
+					return getActivity().getString(R.string.update_available);
+				} else {
+					return getActivity().getString(R.string.installed);
+				}
+			} else {
+				return "";
+			}
+		}
+
+		public void destroy() {
+			PluginLoader.getInstalledPlugins().removeOnItemChangeListener(
+					pluginItemChangeListener);
 		}
 	}
 }

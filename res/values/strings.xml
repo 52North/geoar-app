@@ -64,5 +64,6 @@
     <string name="activated">Activated</string>
     <string name="unknown_publisher">Unknown Publisher</string>
     <string name="no_value"><i>No Value</i></string>
+    <string name="update_available">New Version</string>
 
 </resources>
