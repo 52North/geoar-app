@@ -31,13 +31,12 @@ import android.os.Parcel;
 public class PluginDownloadHolder extends PluginHolder {
 
 	private String description;
-	private Uri downloadLink;
-	private Uri imageLink;
 	private String identifier;
 	private String name;
 	private Long version;
 	private Bitmap pluginIcon;
 	private boolean iconLoaded = false;
+	private String publisher;
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(PluginDownloadHolder.class);
@@ -47,11 +46,13 @@ public class PluginDownloadHolder extends PluginHolder {
 	}
 
 	public Uri getDownloadLink() {
-		return downloadLink;
+		return Uri.parse(PluginDownloader.SERVER_URL + "/" + identifier
+				+ "/apk");
 	}
 
 	public Uri getImageLink() {
-		return imageLink;
+		return Uri.parse(PluginDownloader.SERVER_URL + "/" + identifier
+				+ "/image");
 	}
 
 	@Override
@@ -66,7 +67,7 @@ public class PluginDownloadHolder extends PluginHolder {
 
 	@Override
 	public String getPublisher() {
-		return null; // TODO
+		return publisher;
 	}
 
 	@Override
@@ -82,20 +83,16 @@ public class PluginDownloadHolder extends PluginHolder {
 		this.description = description;
 	}
 
-	public void setDownloadLink(Uri downloadLink) {
-		this.downloadLink = downloadLink;
-	}
-
-	public void setImageLink(Uri imageLink) {
-		this.imageLink = imageLink;
-	}
-
 	public void setName(String name) {
 		this.name = name;
 	}
 
 	public void setVersion(Long version) {
 		this.version = version;
+	}
+
+	public void setPublisher(String publisher) {
+		this.publisher = publisher;
 	}
 
 	@Override

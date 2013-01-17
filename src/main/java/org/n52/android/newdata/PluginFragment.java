@@ -228,7 +228,7 @@ public class PluginFragment extends SherlockFragment {
 		@Override
 		public int getItemViewType(int position) {
 			if (plugins == null && position == 0) {
-				return super.getViewTypeCount() + 1;
+				return super.getViewTypeCount();
 			} else {
 				return super.getItemViewType(position);
 			}

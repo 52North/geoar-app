@@ -117,14 +117,13 @@ public class PluginDownloader {
 				new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 	}
 
-	private static final String SERVER_URL = "http://geoviqua.dev.52north.org/geoar/codebase";
+	static final String SERVER_URL = "http://geoviqua.dev.52north.org/geoar/codebase";
 
 	private static final String CODEBASE_ID = "id";
 	private static final String CODEBASE_NAME = "name";
 	private static final String CODEBASE_DESCRIPTION = "description";
-	private static final String CODEBASE_IMAGELINK = "imageLink";
-	private static final String CODEBASE_DOWNLOADLINK = "downloadLink";
 	private static final String CODEBASE_VERSION = "version";
+	private static final String CODEBASE_PUBLISHER = "publisher";
 
 	private static Set<OnDataSourceResultListener> mCurrentListeners = new HashSet<OnDataSourceResultListener>();
 
@@ -174,10 +173,8 @@ public class PluginDownloader {
 								.getLong(CODEBASE_VERSION));
 						holder.setDescription(currentObject
 								.getString(CODEBASE_DESCRIPTION));
-						holder.setDownloadLink(Uri.parse(currentObject
-								.getString(CODEBASE_DOWNLOADLINK)));
-						holder.setImageLink(Uri.parse(currentObject
-								.getString(CODEBASE_IMAGELINK)));
+						holder.setPublisher(currentObject
+								.getString(CODEBASE_PUBLISHER));
 
 						mDownloadableDataSources.add(holder);
 					}
