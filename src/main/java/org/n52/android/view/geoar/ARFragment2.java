@@ -58,6 +58,7 @@ public class ARFragment2 extends SherlockFragment implements
 	public static final void addARViewComponent(ARViewComponent component) {
 		if (arViewComponents.contains(component))
 			return;
+		// TODO XXX find a better solution...
 		component.setVisualizationHandlerRef(checkedVisualizationHandler);
 		arViewComponents.add(component);
 	}
@@ -78,21 +79,24 @@ public class ARFragment2 extends SherlockFragment implements
 		@Override
 		public void onCheckedChanged(DataSourceInstanceHolder item,
 				boolean newState) {
-			if (newState == true) {
-				DataSourceVisualizationHandler handler = new DataSourceVisualizationHandler(
-						augmentedView, item);
-				checkedVisualizationHandler.add(handler);
-				for (ARViewComponent arViewComponent : arViewComponents) {
-					arViewComponent.onVisualizationHandlerAdded(handler);
-				}
-			} else {
-				for (Iterator<DataSourceVisualizationHandler> it = checkedVisualizationHandler
-						.iterator(); it.hasNext();) {
-					DataSourceVisualizationHandler current = it.next();
-					if (current.getDataSourceHolder() == item) {
-						current.clear();
-						it.remove();
-						break;
+			synchronized (checkedVisualizationHandler) {
+				if (newState == true) {
+					DataSourceVisualizationHandler handler = new DataSourceVisualizationHandler(
+							augmentedView, item);
+
+					checkedVisualizationHandler.add(handler);
+					for (ARViewComponent arViewComponent : arViewComponents) {
+						arViewComponent.onVisualizationHandlerAdded(handler);
+					}
+				} else {
+					for (Iterator<DataSourceVisualizationHandler> it = checkedVisualizationHandler
+							.iterator(); it.hasNext();) {
+						DataSourceVisualizationHandler current = it.next();
+						if (current.getDataSourceHolder() == item) {
+							current.clear();
+							it.remove();
+							// break; maybe there are duplicates somehow
+						}
 					}
 				}
 			}
@@ -103,19 +107,6 @@ public class ARFragment2 extends SherlockFragment implements
 
 	private ARSurfaceView augmentedView;
 	private ARCanvasSurfaceView canvasView;
-
-	/**
-	 * Constructor
-	 */
-	public ARFragment2() {
-		// FIXME Move to sth. like onActivityCreated 
-		for (DataSourceHolder dataSource : PluginLoader.getDataSources()) {
-			dataSource.getInstances().addOnCheckedChangeListener(
-					dataSourceListener);
-		}
-		// TODO Wieder friegeben irgendwann! z.B. onDestroy
-		LocationHandler.addLocationUpdateListener(this);
-	}
 
 	@Override
 	public void onLocationChanged(Location location) {
@@ -146,6 +137,28 @@ public class ARFragment2 extends SherlockFragment implements
 		canvasView = new ARCanvasSurfaceView(getActivity());
 		layout.addView(canvasView, 1, new FrameLayout.LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+
+		// XXX moved here from constructor
+		for (DataSourceHolder dataSource : PluginLoader.getDataSources()) {
+			dataSource.getInstances().addOnCheckedChangeListener(
+					dataSourceListener);
+
+			synchronized (checkedVisualizationHandler) {
+				for (DataSourceInstanceHolder instance : dataSource
+						.getInstances().getCheckedItems()) {
+					// XXX Maybe filter for instances/data sources which really
+					// support an ar visualization
+					DataSourceVisualizationHandler handler = new DataSourceVisualizationHandler(
+							augmentedView, instance);
+					checkedVisualizationHandler.add(handler);
+					for (ARViewComponent arViewComponent : arViewComponents) {
+						arViewComponent.onVisualizationHandlerAdded(handler);
+					}
+				}
+			}
+		}
+
+		// LocationHandler.addLocationUpdateListener(this); why?
 
 		super.onActivityCreated(savedInstanceState);
 	}
@@ -222,6 +235,7 @@ public class ARFragment2 extends SherlockFragment implements
 		super.onDestroy();
 		if (augmentedView != null)
 			augmentedView.destroyDrawingCache();
+
 	}
 
 	@Override

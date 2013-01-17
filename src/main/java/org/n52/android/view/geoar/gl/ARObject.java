@@ -73,6 +73,7 @@ public class ARObject implements OpenGLCallable {
 	private final float[] newPosition = new float[4];
 	private final float[] screenCoordinates = new float[3];
 
+	// XXX Why mapping by Class? Compatible with multiinstancedatasources?
 	private final Map<Class<? extends ItemVisualization>, VisualizationLayer> visualizationLayers = new HashMap<Class<? extends ItemVisualization>, VisualizationLayer>();
 	private final SpatialEntity entity;
 

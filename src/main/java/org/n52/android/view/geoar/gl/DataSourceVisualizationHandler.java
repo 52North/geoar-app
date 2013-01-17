@@ -95,7 +95,7 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 
 			synchronized (mutex) {
 				List<ARObject> arObjects = new ArrayList<ARObject>();
-				List<ItemVisualization> visualizations = dataSourceHolder
+				List<ItemVisualization> visualizations = dataSourceInstanceHolder
 						.getParent()
 						.getVisualizations()
 						.getCheckedItems(
@@ -123,7 +123,7 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 		}
 	};
 
-	private DataSourceInstanceHolder dataSourceHolder;
+	private DataSourceInstanceHolder dataSourceInstanceHolder;
 	protected Object mutex = new Object();
 	protected final ARSurfaceView glSurfaceView;
 
@@ -138,9 +138,9 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 	private RequestHolder currentUpdate;
 
 	public DataSourceVisualizationHandler(final ARSurfaceView glSurfaceView,
-			DataSourceInstanceHolder dataSource) {
+			DataSourceInstanceHolder dataSourceInstance) {
 		this.glSurfaceView = glSurfaceView;
-		this.dataSourceHolder = dataSource;
+		this.dataSourceInstanceHolder = dataSourceInstance;
 
 		GeoLocation loc = new GeoLocation(LocationHandler
 				.getLastKnownLocation().getLatitude(), LocationHandler
@@ -197,7 +197,7 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 				currentUpdate.cancel();
 			}
 			// trigger data request
-			currentUpdate = dataSourceHolder.getDataCache().getDataByBBox(
+			currentUpdate = dataSourceInstanceHolder.getDataCache().getDataByBBox(
 					new MercatorRect(currentCenterMercator.x - pixelRadius,
 							currentCenterMercator.y - pixelRadius,
 							currentCenterMercator.x + pixelRadius,
@@ -221,7 +221,7 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 	}
 
 	public DataSourceInstanceHolder getDataSourceHolder() {
-		return dataSourceHolder;
+		return dataSourceInstanceHolder;
 	}
 
 	@Override

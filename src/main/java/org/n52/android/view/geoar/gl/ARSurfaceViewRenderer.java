@@ -76,7 +76,6 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 	protected Object updateLock = new Object();
 	protected final Context mContext;
-	private GLSurfaceView glSurfaceView;
 
 	private List<DataSourceVisualizationHandler> visualizationHandler = new ArrayList<DataSourceVisualizationHandler>();
 
@@ -86,10 +85,9 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	public static RenderFeature2 test;
 
 	public ARSurfaceViewRenderer(Context context,
-			final GLSurfaceView glSurfaceView) {
+			IRotationMatrixProvider rotationMatrixProvider) {
 		this.mContext = context;
-		this.mRotationProvider = (IRotationMatrixProvider) glSurfaceView;
-		this.glSurfaceView = glSurfaceView;
+		this.mRotationProvider = rotationMatrixProvider;
 		ARFragment2.addARViewComponent(this);
 	}
 
@@ -114,10 +112,12 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 				GLESCamera.viewMatrix, rotationMatrix);
 
 		/** render DataSources data */
-		for (DataSourceVisualizationHandler handler : visualizationHandler) {
-			for (ARObject feature : handler.getARObjects()) {
-				feature.onRender(GLESCamera.projectionMatrix,
-						GLESCamera.viewMatrix, rotationMatrix);
+		synchronized (visualizationHandler) {
+			for (DataSourceVisualizationHandler handler : visualizationHandler) {
+				for (ARObject feature : handler.getARObjects()) {
+					feature.onRender(GLESCamera.projectionMatrix,
+							GLESCamera.viewMatrix, rotationMatrix);
+				}
 			}
 		}
 		/** for testing purposes */
@@ -130,7 +130,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	@Override
 	public void onSurfaceChanged(GL10 glUnused, int width, int height) {
 		GLES20.glViewport(0, 0, width, height);
-//		GLESCamera.createProjectionMatrix(gl, width, height);
+		// GLESCamera.createProjectionMatrix(gl, width, height);
 		GLESCamera.createProjectionMatrix(width, height);
 	}
 
@@ -166,25 +166,25 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		renderFeature = new GridFeature();
 		renderFeature.onCreateInGLESThread();
 		test = new CubeFeature2();
-		test.setRelativePosition(new float[] { 0, 0, -10});
+		test.setRelativePosition(new float[] { 0, 0, -10 });
 		test.onCreateInGLESThread();
 		renderFeatures.add(test);
 
-//		// first cube
-//		RenderFeature2 first = new CubeFeature2();
-//		first.setPosition(new float[] { 1, 0, 5 });
-//		first.onCreateInGLESThread();
-//		renderFeatures.add(first);
-//
-//		RenderFeature2 sec = new CubeFeature2();
-//		sec.setPosition(new float[] { 5, 0, 5 });
-//		sec.onCreateInGLESThread();
-//		renderFeatures.add(sec);
-//
-//		RenderFeature2 third = new CubeFeature2();
-//		third.setPosition(new float[] { 2.5f, 0, 5 });
-//		third.onCreateInGLESThread();
-//		renderFeatures.add(third);
+		// // first cube
+		// RenderFeature2 first = new CubeFeature2();
+		// first.setPosition(new float[] { 1, 0, 5 });
+		// first.onCreateInGLESThread();
+		// renderFeatures.add(first);
+		//
+		// RenderFeature2 sec = new CubeFeature2();
+		// sec.setPosition(new float[] { 5, 0, 5 });
+		// sec.onCreateInGLESThread();
+		// renderFeatures.add(sec);
+		//
+		// RenderFeature2 third = new CubeFeature2();
+		// third.setPosition(new float[] { 2.5f, 0, 5 });
+		// third.onCreateInGLESThread();
+		// renderFeatures.add(third);
 	}
 
 	@Override
@@ -194,9 +194,11 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	}
 
 	public void setCenter(Location location) {
-		for (DataSourceVisualizationHandler handler : visualizationHandler)
-			handler.setCenter(new GeoLocation(location.getLatitude(), location
-					.getLongitude()));
+		synchronized (visualizationHandler) {
+			for (DataSourceVisualizationHandler handler : visualizationHandler)
+				handler.setCenter(new GeoLocation(location.getLatitude(),
+						location.getLongitude()));
+		}
 	}
 
 	/**

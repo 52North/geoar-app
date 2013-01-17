@@ -260,6 +260,8 @@ public class DataSourceHolder implements Parcelable {
 		}
 		if (!hasDefaults) {
 			hasDefaults = true;
+			// FIXME creates defaults before restoring state if manually
+			// reloading plugins
 			createDefaultInstances();
 		}
 		return mDataSourceInstances;
