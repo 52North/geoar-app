@@ -107,6 +107,8 @@ public class DataSourceHolder implements Parcelable {
 	private CheckList<Visualization> visualizations;
 	private Method nameCallbackMethod;
 
+	private boolean hasDefaults;
+
 	/**
 	 * Wrapper for a {@link DataSource}. Provides access to general settings of
 	 * a data source, as well as its {@link Filter} implementation and supported
@@ -256,6 +258,10 @@ public class DataSourceHolder implements Parcelable {
 		if (mDataSourceInstances == null) {
 			initializeInstances();
 		}
+		if (!hasDefaults) {
+			hasDefaults = true;
+			createDefaultInstances();
+		}
 		return mDataSourceInstances;
 	}
 
@@ -401,7 +407,6 @@ public class DataSourceHolder implements Parcelable {
 				dataSourceInstance.restoreState(objectInputStream);
 			}
 		}
-		createDefaultInstances();
 	}
 
 	public void saveState(ObjectOutputStream objectOutputStream)
@@ -417,10 +422,6 @@ public class DataSourceHolder implements Parcelable {
 				dataSourceInstance.saveState(objectOutputStream);
 			}
 		}
-	}
-
-	public void createState() {
-		createDefaultInstances();
 	}
 
 	/**
@@ -505,7 +506,7 @@ public class DataSourceHolder implements Parcelable {
 		try {
 			DataSource<? super Filter> dataSource = dataSourceClass
 					.newInstance();
-			//perfomInjection(dataSource);
+			// perfomInjection(dataSource);
 			final DataSourceInstanceHolder instance = new DataSourceInstanceHolder(
 					this, dataSource);
 			mDataSourceInstances.add(instance);

@@ -245,10 +245,4 @@ public class InstalledPluginHolder extends PluginHolder {
 		}
 	}
 
-	public void createState() {
-		for (DataSourceHolder dataSource : mDataSources) {
-			dataSource.createState();
-		}
-	}
-
 }

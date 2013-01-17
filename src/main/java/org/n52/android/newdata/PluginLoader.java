@@ -110,10 +110,11 @@ public class PluginLoader {
 		public void onCheckedChanged(InstalledPluginHolder item,
 				boolean newState) {
 			for (DataSourceHolder dataSource : item.getDataSources()) {
-				if (newState == true)
+				if (newState == true) {
 					addDataSource(dataSource);
-				else
+				} else {
 					removeDataSource(dataSource);
+				}
 			}
 		}
 	};
@@ -178,8 +179,6 @@ public class PluginLoader {
 				return;
 			}
 
-			List<InstalledPluginHolder> restoredPlugins = new ArrayList<InstalledPluginHolder>();
-
 			// Restore plugin state
 			int count = objectInputStream.readInt();
 			for (int i = 0; i < count; i++) {
@@ -190,15 +189,8 @@ public class PluginLoader {
 				}
 
 				plugin.restoreState(objectInputStream);
-				restoredPlugins.add(plugin);
 			}
 			objectInputStream.close();
-
-			for (InstalledPluginHolder plugin : mInstalledPlugins) {
-				if(!restoredPlugins.contains(plugin)) {
-					plugin.createState();
-				}
-			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			// TODO

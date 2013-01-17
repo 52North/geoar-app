@@ -61,11 +61,11 @@ public class PluginDialogFragment extends DialogFragment {
 				: getString(R.string.unknown_publisher));
 		((TextView) view.findViewById(R.id.textViewVersion)).setText(plugin
 				.getVersion() != null ? "" + plugin.getVersion()
-				: "No Version Information");
+				: getString(R.string.no_value));
 
 		((TextView) view.findViewById(R.id.textViewDescription)).setText(plugin
 				.getDescription() != null ? plugin.getDescription()
-				: "No Description");
+				: getString(R.string.no_value));
 
 		TextView textViewDataSources = (TextView) view
 				.findViewById(R.id.textViewDataSources);
@@ -86,7 +86,7 @@ public class PluginDialogFragment extends DialogFragment {
 		// dialogButton.setAnimation(getActivity().findViewById(android.R.drawable.stat_sys_download));
 		Dialog dsDialog = new AlertDialog.Builder(getActivity())
 				.setTitle(plugin.getName())
-				.setPositiveButton("Add",
+				.setPositiveButton(R.string.add,
 						new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog,
@@ -99,8 +99,8 @@ public class PluginDialogFragment extends DialogFragment {
 											.downloadPlugin((PluginDownloadHolder) plugin);
 								}
 							}
-						}).setNegativeButton("Cancel", null).setView(view)
-				.create();
+						}).setNegativeButton(R.string.cancel, null)
+				.setView(view).create();
 
 		// Asynchronously load and display plugin icon
 		Thread imageThread = new Thread(new Runnable() {

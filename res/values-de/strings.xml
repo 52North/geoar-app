@@ -67,5 +67,6 @@
     <string name="unknown_publisher">Unbekannter Herausgeber</string>
     <string name="no_value"><i>Kein Wert</i></string>
     <string name="update_available">Neue Version</string>
+    <string name="add">Hinzufügen</string>
 
 </resources>
