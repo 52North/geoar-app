@@ -15,7 +15,6 @@
  */
 package org.n52.android.view.geoar;
 
-import org.n52.android.view.geoar.gl.mode.features.HeightMapFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

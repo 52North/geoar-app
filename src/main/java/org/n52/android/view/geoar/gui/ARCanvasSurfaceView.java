@@ -40,6 +40,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
+// TODO XXX
 public class ARCanvasSurfaceView extends View implements CameraUpdateListener,
 		ARViewComponent {
 
@@ -82,7 +83,7 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener,
 	}
 
 	private void init() {
-		ARFragment2.addARViewComponent(this);
+		ARFragment2.addARViewComponent(this); // TODO ...remove?
 		paint = new Paint();
 		paint.setColor(Color.GREEN);
 		paint.setTextSize(25);

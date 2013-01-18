@@ -123,6 +123,10 @@ public class ARFragment2 extends SherlockFragment implements
 		final ConfigurationInfo config = activityManager
 				.getDeviceConfigurationInfo();
 
+		canvasView = new ARCanvasSurfaceView(getActivity());
+		layout.addView(canvasView, LayoutParams.MATCH_PARENT,
+				LayoutParams.MATCH_PARENT);
+
 		if (config.reqGlEsVersion >= 0x20000 || Build.PRODUCT.startsWith("sdk")) {
 			augmentedView = new ARSurfaceView(getActivity());
 			augmentedView.setZOrderMediaOverlay(true);
@@ -134,14 +138,11 @@ public class ARFragment2 extends SherlockFragment implements
 			// .getMetrics(displayMetrics);
 		}
 
-		canvasView = new ARCanvasSurfaceView(getActivity());
-		layout.addView(canvasView, 1, new FrameLayout.LayoutParams(
-				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-
 		// XXX moved here from constructor
 		for (DataSourceHolder dataSource : PluginLoader.getDataSources()) {
 			dataSource.getInstances().addOnCheckedChangeListener(
 					dataSourceListener);
+			// TODO unregister eventually!
 
 			synchronized (checkedVisualizationHandler) {
 				for (DataSourceInstanceHolder instance : dataSource
@@ -166,42 +167,7 @@ public class ARFragment2 extends SherlockFragment implements
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		final View view = inflater.inflate(R.layout.fragment_ar, container,
-				false);
-
-		// // When working with the camera, it's useful to stick to one
-		// orientation.
-		// Activity activity = getActivity();
-		// activity.setRequestedOrientation(
-		// ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE );
-		//
-		// // Next, we disable the application's title bar...
-		// activity.requestWindowFeature( Window.FEATURE_NO_TITLE );
-		// // ...and the notification bar. That way, we can use the full screen.
-		// activity.getWindow().setFlags(
-		// WindowManager.LayoutParams.FLAG_FULLSCREEN,
-		// WindowManager.LayoutParams.FLAG_FULLSCREEN );
-
-		if (savedInstanceState == null) {
-			// TODO
-			// augmentedView = (ARSurfaceView)
-			// view.findViewById(R.id.glNoiseView);
-			// augmentedView.setInfoHandler(mInfoHandler);
-			// augmentedView.setLocationHandler(mLocationHandler);
-
-			// Chart
-			// NoiseChartView diagramView = (NoiseChartView)
-			// view.findViewById(R.id.noiseDiagramView);
-			// diagramView.setNoiseGridValueProvider(augmentedView.getNoiseGridValueProvider());
-			// geoARViews.add(diagramView);
-
-			// Calibration View
-			// CalibrationControlView calibrationView = (CalibrationControlView)
-			// view
-			// .findViewById(R.id.calibrationView);
-			// geoARViews.add(calibrationView);
-		}
-		return view;
+		return inflater.inflate(R.layout.fragment_ar, container, false);
 	}
 
 	@Override
