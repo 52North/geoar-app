@@ -25,6 +25,7 @@ import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.n52.android.utils.GeoLocation;
 import org.n52.android.view.geoar.ARFragment2;
 import org.n52.android.view.geoar.ARFragment2.ARViewComponent;
+import org.n52.android.view.geoar.gl.mode.FeatureShader;
 import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 import org.n52.android.view.geoar.gl.mode.features.CubeFeature2;
 import org.n52.android.view.geoar.gl.mode.features.GridFeature;
@@ -159,6 +160,8 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		 */
 		GLES20.glEnable(GLES20.GL_CULL_FACE);
 		GLES20.glCullFace(GLES20.GL_BACK); // GL_FRONT_AND_BACK for no facets
+
+		FeatureShader.resetShaders();
 		initScene();
 	}
 

@@ -39,7 +39,7 @@ public class HeightMapFeature extends RenderFeature2 {
 			.getLogger(HeightMapFeature.class);
 
 	public HeightMapFeature() {
-		this(new ColoredFeatureShader());
+		this(ColoredFeatureShader.getInstance());
 	}
 
 	public HeightMapFeature(FeatureShader renderer) {

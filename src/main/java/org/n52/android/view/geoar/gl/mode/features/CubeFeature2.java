@@ -185,7 +185,7 @@ public class CubeFeature2 extends RenderFeature2 {
 	 ***************************/
 	public CubeFeature2() {
 		this.drawingMode = GLES20.GL_TRIANGLES; // GLES20.GL_TRIANGLE_FAN;
-		this.renderer = new ColoredFeatureShader();
+		this.renderer = ColoredFeatureShader.getInstance();
 	}
 
 	@Override

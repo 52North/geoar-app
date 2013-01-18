@@ -311,7 +311,7 @@ public abstract class RenderFeature2 extends Spatial implements
 			int bufferPosition = 0;
 			/** defines the array of generic vertex attribute data */
 			strideBuffer.position(bufferPosition);
-			// FIXME caching of handles?!
+			// FIXME caching of handles?! Yes!
 			final int positionhandle = renderer.getPositionHandle();
 			GLES20.glEnableVertexAttribArray(positionhandle);
 			GLES20.glVertexAttribPointer(positionhandle, POSITION_DATA_SIZE,
@@ -378,9 +378,9 @@ public abstract class RenderFeature2 extends Spatial implements
 	protected Float alpha;
 	/** color of the object */
 	protected int androidColor;
-	
-	public RenderFeature2(){
-		
+
+	public RenderFeature2() {
+
 	}
 
 	protected void setRenderObjectives(float[] vertices, float[] colors,
@@ -389,9 +389,9 @@ public abstract class RenderFeature2 extends Spatial implements
 			setRenderObjectives(vertices, colors, normals, textureCoords);
 		} else {
 			if (renderer == null) {
-				renderer = new ColoredFeatureShader();
+				renderer = ColoredFeatureShader.getInstance();
 			}
-			renderer.onCreateInGLESThread();
+			// renderer.onCreateInGLESThread();
 			geometry = new FeatureGeometryVBOandIBO(vertices, colors, normals,
 					textureCoords, indices);
 			boundingBox = new BoundingBox(vertices);
@@ -401,9 +401,9 @@ public abstract class RenderFeature2 extends Spatial implements
 	protected void setRenderObjectives(float[] vertices, float[] colors,
 			float[] normals, float[] textureCoords) {
 		if (renderer == null) {
-			renderer = new ColoredFeatureShader();
+			renderer = ColoredFeatureShader.getInstance();
 		}
-		renderer.onCreateInGLESThread();
+		// renderer.onCreateInGLESThread();
 		geometry = new FeatureGeometryStride(vertices, colors, normals,
 				textureCoords);
 		boundingBox = new BoundingBox(vertices);
@@ -453,12 +453,12 @@ public abstract class RenderFeature2 extends Spatial implements
 		Matrix.multiplyMM(modelMatrix, 0, viewMatrix, 0, modelMatrix, 0);
 		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, modelMatrix, 0);
 
-//		if (position != null) {
-//		float[] vec = new float[] {0,0,0,1};
-//		Matrix.multiplyMV(vec, 0, modelViewMatrix, 0, vec, 0);
-//		if (!GLESCamera.pointInFrustum(vec))
-//			return;
-//	}
+		// if (position != null) {
+		// float[] vec = new float[] {0,0,0,1};
+		// Matrix.multiplyMV(vec, 0, modelViewMatrix, 0, vec, 0);
+		// if (!GLESCamera.pointInFrustum(vec))
+		// return;
+		// }
 
 		/** sets the program object as part of current rendering state */
 		renderer.useProgram();
@@ -467,13 +467,13 @@ public abstract class RenderFeature2 extends Spatial implements
 		/** render the geometry of this feature */
 		geometry.onRenderGeometrie();
 	}
-	
-	public void onRender(float[] mvpMatrix){
+
+	public void onRender(float[] mvpMatrix) {
 		/** sets the program object as part of current rendering state */
 		renderer.useProgram();
 		renderer.setModelViewProjectionMatrix(mvpMatrix);
 		/** render the geometry of this feature */
-		if(geometry != null)
+		if (geometry != null)
 			geometry.onRenderGeometrie();
 	}
 

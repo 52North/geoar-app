@@ -21,8 +21,7 @@ import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 
-public class ReferencedGridFeature extends RenderFeature2{
-
+public class ReferencedGridFeature extends RenderFeature2 {
 
 	static final int SIZE_PER_SIDE = 64;
 	static final float MIN_POSITION = -10f;
@@ -122,57 +121,57 @@ public class ReferencedGridFeature extends RenderFeature2{
 				heightMapIndexData[offset++] = (short) (((y + 1) * yLength) + x);
 			}
 		}
-		renderer = new ColoredFeatureShader();
+		renderer = ColoredFeatureShader.getInstance();
 		drawingMode = GLES20.GL_LINES;
 		setRenderObjectives(vertices, colors, normals, null, heightMapIndexData);
 	}
-	
+
 	@Override
 	public void setOpenGLPreRenderingSettings() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setColor(int androidColor) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setColor(float[] colorArray) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void enableCullface(boolean cullface) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void enableBlending(boolean blending, float alpha) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void enableDepthtest(boolean depthTest) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setDrawingMode(int drawingMode) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onCreateInGLESThread() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

@@ -37,7 +37,7 @@ public class GridFeature extends RenderFeature2 {
 			.getLogger(GridFeature.class);
 
 	public GridFeature() {
-		this(new ColoredFeatureShader());
+		this(ColoredFeatureShader.getInstance());
 	}
 
 	public GridFeature(FeatureShader renderer) {

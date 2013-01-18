@@ -15,10 +15,13 @@
  */
 package org.n52.android.view.geoar.gl.mode;
 
+import java.lang.ref.WeakReference;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.n52.android.newdata.DataCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,65 +58,42 @@ public class FeatureShader {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(FeatureShader.class);
 
-	private static int createAndLinkProgram(final int vertexShader,
-			final int fragmentShader, final String[] attributes) {
-		int programHandle = GLES20.glCreateProgram();
+	private static final Set<WeakReference<FeatureShader>> INSTANCES = new HashSet<WeakReference<FeatureShader>>();
 
-		if (programHandle != 0) {
-			GLES20.glAttachShader(programHandle, vertexShader);
-			GLES20.glAttachShader(programHandle, fragmentShader);
-
-			GLES20.glBindAttribLocation(programHandle, 0, POSITION_ATTRIBUTE);
-			GLES20.glBindAttribLocation(programHandle, 1, NORMAL_ATTRIBUTE);
-			// if (attributes != null) {
-			// for (int i = 0, size = attributes.length; i < size; i++)
-			// GLES20.glBindAttribLocation(programHandle, i+1, attributes[i]);
-			// }
-
-			GLES20.glLinkProgram(programHandle);
-
-			final int[] status = new int[1];
-			GLES20.glGetProgramiv(programHandle, GLES20.GL_LINK_STATUS, status,
-					0);
-
-			if (status[0] == 0) {
-				LOG.error("Error compiling program: "
-						+ GLES20.glGetProgramInfoLog(programHandle));
-				GLES20.glDeleteProgram(programHandle);
-				programHandle = 0;
+	public static void resetShaders() {
+		Iterator<WeakReference<FeatureShader>> iterator = INSTANCES.iterator();
+		while (iterator.hasNext()) {
+			FeatureShader next = iterator.next().get();
+			if (next == null) {
+				iterator.remove();
+			} else {
+				next.reset();
 			}
-		} else {
-			throw new RuntimeException("Error creating Program.");
 		}
-
-		return programHandle;
 	}
 
-	private static int compileShader(final int shaderType,
+	private static void compileShader(final int shaderHandle,
 			final String shaderProgram) {
-		int shaderHandle = GLES20.glCreateShader(shaderType);
-		if (shaderHandle != 0) {
-			GLES20.glShaderSource(shaderHandle, shaderProgram);
-			GLES20.glCompileShader(shaderHandle);
-			final int[] status = new int[1];
-			GLES20.glGetShaderiv(shaderHandle, GLES20.GL_COMPILE_STATUS,
-					status, 0);
-
-			if (status[0] == 0) {
-				LOG.error(
-						"FeatureShader",
-						"Error compiling shader: "
-								+ GLES20.glGetShaderInfoLog(shaderHandle));
-				GLES20.glDeleteShader(shaderHandle);
-				shaderHandle = 0;
-			}
-		} else {
-			throw new RuntimeException("Error creating shader.");
+		if (shaderHandle <= 0) {
+			throw new IllegalArgumentException("Invalid handle");
 		}
-		return shaderHandle;
+
+		GLES20.glShaderSource(shaderHandle, shaderProgram);
+		GLES20.glCompileShader(shaderHandle);
+		final int[] status = new int[1];
+		GLES20.glGetShaderiv(shaderHandle, GLES20.GL_COMPILE_STATUS, status, 0);
+
+		if (status[0] == 0) {
+			LOG.error(
+					"FeatureShader",
+					"Error compiling shader: "
+							+ GLES20.glGetShaderInfoLog(shaderHandle));
+			GLES20.glDeleteShader(shaderHandle);
+		}
+
 	}
 
-	private int programHandle;
+	private int programHandle = -1;
 
 	private int positionHandle = -1;
 	private int colorHandle = -1;
@@ -128,6 +108,8 @@ public class FeatureShader {
 	final boolean supportsNormals;
 	final boolean supportsColors;
 	final boolean supportsTextures;
+	private int vertexShaderHandle = -1;
+	private int fragmentShaderHandle = -1;
 
 	public FeatureShader(String vertexShader, String fragmentShader) {
 		this.vertexShader = vertexShader;
@@ -147,82 +129,44 @@ public class FeatureShader {
 		pattern = Pattern.compile(".*" + TEXTURE_ATTRIBUTE + ".*");
 		matcher = pattern.matcher(vertexShader);
 		supportsTextures = matcher.find();
+
+		INSTANCES.add(new WeakReference<FeatureShader>(this));
 	}
 
-	public void onCreateInGLESThread() {
-		if (vertexShader == null || fragmentShader == null)
-			return;
-
-		final int vertexShaderHandle = compileShader(GLES20.GL_VERTEX_SHADER,
-				vertexShader);
-		final int fragmentShaderHandle = compileShader(
-				GLES20.GL_FRAGMENT_SHADER, fragmentShader);
-
-		programHandle = createAndLinkProgram(vertexShaderHandle,
-				fragmentShaderHandle, new String[] { "a_Position", "a_Normal",
-						"a_Color" });
-		mvpMatrixUniform = GLES20.glGetUniformLocation(programHandle,
-				MVP_MATRIX_UNIFORM);
-		positionHandle = GLES20.glGetAttribLocation(programHandle,
-				POSITION_ATTRIBUTE);
-		if (supportsNormals)
-			normalHandle = GLES20.glGetAttribLocation(programHandle,
-					NORMAL_ATTRIBUTE);
-		if (supportsColors)
-			colorHandle = GLES20.glGetAttribLocation(programHandle,
-					COLOR_ATTRIBUTE);
-	}
-
-	public void useProgram() {
-		/** installs the program object as part of the current rendering */
-		GLES20.glUseProgram(programHandle);
-	}
-
-	public void setVertices(final int vertexBufferHandle) {
-		positionHandle = GLES20.glGetAttribLocation(programHandle,
-				POSITION_ATTRIBUTE);
-		if (vertexBufferHandle >= 0) {
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBufferHandle);
-			GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT,
-					false, 0, 0);
-			GLES20.glEnableVertexAttribArray(positionHandle);
-		} else {
-			LOG.debug("vertexbufferhandle is not a valid handle");
+	public int getColorHandle() {
+		if (programHandle == -1) {
+			initProgram();
 		}
-	}
-
-	public int getPositionHandle() {
-		positionHandle = GLES20.glGetAttribLocation(programHandle,
-				POSITION_ATTRIBUTE);
-		return positionHandle;
-	}
-
-	public void setNormals(final int normalBufferHandle) {
-		if (normalBufferHandle < 0) {
-			LOG.debug("normalbufferhandle is not a valid handle");
-			return;
-		}
-
-		normalHandle = GLES20.glGetAttribLocation(programHandle,
-				NORMAL_ATTRIBUTE);
-		if (normalHandle >= 0) {
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, normalBufferHandle);
-			GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT,
-					false, 0, 0);
-			GLES20.glEnableVertexAttribArray(normalHandle);
-		}
+		colorHandle = GLES20
+				.glGetAttribLocation(programHandle, COLOR_ATTRIBUTE);
+		return colorHandle;
 	}
 
 	public int getNormalHandle() {
+		if (programHandle == -1) {
+			initProgram();
+		}
 		normalHandle = GLES20.glGetAttribLocation(programHandle,
 				NORMAL_ATTRIBUTE);
 		return normalHandle;
+	}
+
+	public int getPositionHandle() {
+		if (programHandle == -1) {
+			initProgram();
+		}
+		positionHandle = GLES20.glGetAttribLocation(programHandle,
+				POSITION_ATTRIBUTE);
+		return positionHandle;
 	}
 
 	public void setColors(final int colorBufferHandle) {
 		if (colorBufferHandle < 0) {
 			LOG.debug("colorbufferhandle is not a valid handle");
 			return;
+		}
+		if (programHandle == -1) {
+			initProgram();
 		}
 
 		colorHandle = GLES20
@@ -235,15 +179,42 @@ public class FeatureShader {
 		}
 	}
 
-	public int getColorHandle() {
-		colorHandle = GLES20
-				.glGetAttribLocation(programHandle, COLOR_ATTRIBUTE);
-		return colorHandle;
+	public void setModelViewProjectionMatrix(float[] mvpMatrix) {
+		if (programHandle == -1) {
+			initProgram();
+		}
+		// combined Matrix
+		mvpMatrixUniform = GLES20.glGetUniformLocation(programHandle,
+				MVP_MATRIX_UNIFORM);
+		if (mvpMatrixUniform >= 0)
+			GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mvpMatrix, 0);
+	}
+
+	public void setNormals(final int normalBufferHandle) {
+		if (normalBufferHandle < 0) {
+			LOG.debug("normalbufferhandle is not a valid handle");
+			return;
+		}
+		if (programHandle == -1) {
+			initProgram();
+		}
+
+		normalHandle = GLES20.glGetAttribLocation(programHandle,
+				NORMAL_ATTRIBUTE);
+		if (normalHandle >= 0) {
+			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, normalBufferHandle);
+			GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT,
+					false, 0, 0);
+			GLES20.glEnableVertexAttribArray(normalHandle);
+		}
 	}
 
 	// FIXME view gibts nicht... genauso wie modematrix
 	public void setRenderMatrices(float[] mvpMatrix, float[] modelMatrix,
 			float[] viewMatrix) {
+		if (programHandle == -1) {
+			initProgram();
+		}
 		// combined Matrix
 		mvpMatrixUniform = GLES20.glGetUniformLocation(programHandle,
 				MVP_MATRIX_UNIFORM);
@@ -261,24 +232,114 @@ public class FeatureShader {
 		// GLES20.glUniformMatrix4fv(vMatrixUniform, 1, false, viewMatrix, 0);
 	}
 
-	public void setModelViewProjectionMatrix(float[] mvpMatrix) {
-		// combined Matrix
-		mvpMatrixUniform = GLES20.glGetUniformLocation(programHandle,
-				MVP_MATRIX_UNIFORM);
-		if (mvpMatrixUniform >= 0)
-			GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mvpMatrix, 0);
+	public void setVertices(final int vertexBufferHandle) {
+		if (programHandle == -1) {
+			initProgram();
+		}
+		positionHandle = GLES20.glGetAttribLocation(programHandle,
+				POSITION_ATTRIBUTE);
+		if (vertexBufferHandle >= 0) {
+			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBufferHandle);
+			GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT,
+					false, 0, 0);
+			GLES20.glEnableVertexAttribArray(positionHandle);
+		} else {
+			LOG.debug("vertexbufferhandle is not a valid handle");
+		}
 	}
 
 	public boolean supportsColors() {
 		return supportsColors;
 	}
 
+	public boolean supportsNormals() {
+		return supportsNormals;
+	}
+
 	public boolean supportsTextures() {
 		return supportsTextures;
 	}
 
-	public boolean supportsNormals() {
-		return supportsNormals;
+	public void useProgram() {
+		if (programHandle == -1) {
+			initProgram();
+		}
+		/** installs the program object as part of the current rendering */
+		GLES20.glUseProgram(programHandle);
+	}
+
+	private void initProgram() {
+		if (vertexShader == null || fragmentShader == null)
+			throw new IllegalStateException("Shaders not set");
+
+		if (vertexShaderHandle == -1) {
+			vertexShaderHandle = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
+		}
+		compileShader(vertexShaderHandle, vertexShader);
+
+		if (fragmentShaderHandle == -1) {
+			fragmentShaderHandle = GLES20
+					.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
+		}
+		compileShader(fragmentShaderHandle, fragmentShader);
+
+		if (programHandle == -1) {
+			programHandle = GLES20.glCreateProgram();
+		}
+		linkProgram(new String[] { "a_Position", "a_Normal", "a_Color" });
+
+		mvpMatrixUniform = GLES20.glGetUniformLocation(programHandle,
+				MVP_MATRIX_UNIFORM);
+		positionHandle = GLES20.glGetAttribLocation(programHandle,
+				POSITION_ATTRIBUTE);
+		if (supportsNormals)
+			normalHandle = GLES20.glGetAttribLocation(programHandle,
+					NORMAL_ATTRIBUTE);
+		if (supportsColors)
+			colorHandle = GLES20.glGetAttribLocation(programHandle,
+					COLOR_ATTRIBUTE);
+	}
+
+	private void linkProgram(final String[] attributes) {
+		if (programHandle <= 0) {
+			throw new IllegalStateException("Invalid program handle");
+		}
+		if (vertexShaderHandle <= 0) {
+			throw new IllegalStateException("Invalid vertex shader handle");
+		}
+		if (fragmentShaderHandle <= 0) {
+			throw new IllegalStateException("Invalid fragment shader handle");
+		}
+		if (programHandle != 0) {
+			GLES20.glAttachShader(programHandle, vertexShaderHandle);
+			GLES20.glAttachShader(programHandle, fragmentShaderHandle);
+
+			GLES20.glBindAttribLocation(programHandle, 0, POSITION_ATTRIBUTE);
+			GLES20.glBindAttribLocation(programHandle, 1, NORMAL_ATTRIBUTE);
+			// if (attributes != null) {
+			// for (int i = 0, size = attributes.length; i < size; i++)
+			// GLES20.glBindAttribLocation(programHandle, i+1, attributes[i]);
+			// }
+
+			GLES20.glLinkProgram(programHandle);
+
+			final int[] status = new int[1];
+			GLES20.glGetProgramiv(programHandle, GLES20.GL_LINK_STATUS, status,
+					0);
+
+			if (status[0] == 0) {
+				LOG.error("Error compiling program: "
+						+ GLES20.glGetProgramInfoLog(programHandle));
+				// GLES20.glDeleteProgram(programHandle);
+				// programHandle = 0;
+			}
+		} else {
+			throw new RuntimeException("Error creating Program.");
+		}
+	}
+
+	private void reset() {
+		programHandle = positionHandle = colorHandle = normalHandle = mvpMatrixUniform = vertexShaderHandle = fragmentShaderHandle = -1;
 	}
 
 }
