@@ -104,6 +104,7 @@ public class PluginLoader {
 	private static CheckList<InstalledPluginHolder> mInstalledPlugins = new CheckList<InstalledPluginHolder>(
 			InstalledPluginHolder.class);
 	private static List<DataSourceHolder> mDataSources = new ArrayList<DataSourceHolder>();
+	private static boolean mReloadingPlugins;
 	// Listener to update the list of currently available data sources
 	private static OnCheckedChangedListener<InstalledPluginHolder> pluginCheckedChangedListener = new OnCheckedChangedListener<InstalledPluginHolder>() {
 		@Override
@@ -116,6 +117,10 @@ public class PluginLoader {
 					removeDataSource(dataSource);
 				}
 			}
+
+			if (newState && !mReloadingPlugins) {
+				item.postConstruct();
+			}
 		}
 	};
 	private static DefaultHttpClient mHttpClient;
@@ -126,8 +131,10 @@ public class PluginLoader {
 	static {
 		mInstalledPlugins
 				.addOnCheckedChangeListener(pluginCheckedChangedListener);
+		mReloadingPlugins = true;
 		loadPlugins();
 		restoreState();
+		mReloadingPlugins = false;
 	}
 
 	/**
@@ -189,6 +196,7 @@ public class PluginLoader {
 				}
 
 				plugin.restoreState(objectInputStream);
+				plugin.postConstruct();
 			}
 			objectInputStream.close();
 		} catch (Exception e) {
@@ -399,7 +407,6 @@ public class PluginLoader {
 	 * dot-separated numbers, e.g. "-1.2.3"
 	 */
 	private static void loadPlugins() {
-
 		String[] apksInDirectory = PLUGIN_DIRECTORY_PATH
 				.list(PLUGIN_FILENAME_FILTER);
 
@@ -453,11 +460,13 @@ public class PluginLoader {
 	 * afterwards.
 	 */
 	public static void reloadPlugins() {
+		mReloadingPlugins = true;
 		saveState();
 		mInstalledPlugins.clear();
 		mDataSources.clear();
 		loadPlugins();
 		restoreState();
+		mReloadingPlugins = false;
 	}
 
 	public static CheckList<InstalledPluginHolder> getInstalledPlugins() {

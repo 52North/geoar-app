@@ -20,6 +20,14 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 
+/**
+ * Specialized {@link ObjectInputStream} allowing to set the {@link ClassLoader}
+ * to use for resolving classes. This is used for instance to load
+ * {@link Filter} object states saved by different data sources. These
+ * {@link Filter} classes are only accessible by the corresponding plugin
+ * {@link ClassLoader}.
+ * 
+ */
 public class PluginStateInputStream extends ObjectInputStream {
 
 	private ClassLoader pluginClassLoader;

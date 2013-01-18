@@ -245,4 +245,14 @@ public class InstalledPluginHolder extends PluginHolder {
 		}
 	}
 
+	/**
+	 * Should be called after all state initialization took place, e.g. after
+	 * {@link InstalledPluginHolder#restoreState(PluginStateInputStream)}
+	 */
+	public void postConstruct() {
+		for (DataSourceHolder dataSource : mDataSources) {
+			dataSource.postConstruct();
+		}
+	}
+
 }

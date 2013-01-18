@@ -107,8 +107,6 @@ public class DataSourceHolder implements Parcelable {
 	private CheckList<Visualization> visualizations;
 	private Method nameCallbackMethod;
 
-	private boolean hasDefaults;
-
 	/**
 	 * Wrapper for a {@link DataSource}. Provides access to general settings of
 	 * a data source, as well as its {@link Filter} implementation and supported
@@ -258,13 +256,15 @@ public class DataSourceHolder implements Parcelable {
 		if (mDataSourceInstances == null) {
 			initializeInstances();
 		}
-		if (!hasDefaults) {
-			hasDefaults = true;
-			// FIXME creates defaults before restoring state if manually
-			// reloading plugins
-			createDefaultInstances();
-		}
 		return mDataSourceInstances;
+	}
+
+	/**
+	 * Should be called after all state initialization took place, e.g. after
+	 * {@link DataSourceHolder#restoreState(PluginStateInputStream)}
+	 */
+	void postConstruct() {
+		createDefaultInstances();
 	}
 
 	public byte getMaxZoomLevel() {
