@@ -199,6 +199,10 @@ public class ARFragment2 extends SherlockFragment implements
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		for (DataSourceHolder dataSource : PluginLoader.getDataSources()) {
+			dataSource.getInstances().removeOnCheckedChangeListener(
+					dataSourceListener);
+		}
 		if (augmentedView != null)
 			augmentedView.destroyDrawingCache();
 
