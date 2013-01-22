@@ -16,8 +16,12 @@
 package org.n52.android.view.geoar.gl.mode;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,7 +29,10 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.opengl.GLES20;
+import android.opengl.GLUtils;
 
 /**
  * 
@@ -33,6 +40,20 @@ import android.opengl.GLES20;
  * 
  */
 public class FeatureShader {
+
+	protected static class TextureDetails {
+		protected final int textureId;
+		protected final int textureUniform;
+
+		protected Bitmap textureBitmap;
+
+		protected int width, height;
+
+		public TextureDetails(final int textureId, final int textureUniform) {
+			this.textureId = textureId;
+			this.textureUniform = textureUniform;
+		}
+	}
 
 	/** Size of the position data in elements. */
 	static final int POSITION_DATA_SIZE = 3;
@@ -44,16 +65,29 @@ public class FeatureShader {
 	private static final int BYTES_PER_SHORT = 2;
 
 	static final int COLOR_DATA_SIZE = 4;
+	static final int TEXTURECOORD_DATA_SIZE = 2;
 
-	/** OpenGL handles to our program uniforms */
-	private static final String MVP_MATRIX_UNIFORM = "u_MVPMatrix";
-	private static final String MV_MATRIX_UNIFORM = "u_MVMatrix";
-	private static final String V_MATRIX_UNIFORM = "u_VMatrix";
+	// /** OpenGL handles to our program uniforms */
+	// private static final String MVP_MATRIX_UNIFORM = "u_MVPMatrix";
+	// private static final String MV_MATRIX_UNIFORM = "u_MVMatrix";
+	// private static final String V_MATRIX_UNIFORM = "u_VMatrix";
+	//
+	// private static final String POSITION_ATTRIBUTE = "a_Position";
+	// private static final String NORMAL_ATTRIBUTE = "a_Normal";
+	// private static final String COLOR_ATTRIBUTE = "a_Color";
+	// private static final String TEXTURE_ATTRIBUTE = "a_TexCoordinate";
 
-	private static final String POSITION_ATTRIBUTE = "a_Position";
-	private static final String NORMAL_ATTRIBUTE = "a_Normal";
-	private static final String COLOR_ATTRIBUTE = "a_Color";
-	private static final String TEXTURE_ATTRIBUTE = "a_TexCoordinate";
+	protected static final String ATTRIBUTE_POSITION = "attr_Position";
+	protected static final String ATTRIBUTE_NORMAL = "attr_Normal";
+	protected static final String ATTRIBUTE_COLOR = "attr_Color";
+	protected static final String ATTRIBUTE_TEXTURE = "attr_TexCoordinate";
+
+	protected static final String UNIFORM_MATRIX_MVP = "unif_MVPMatrix";
+	protected static final String UNIFORM_MATRIX_MV = "unif_MVMatrix";
+	protected static final String UNIFORM_MATRIX_V = "unif_VMatrix";
+
+	protected static final String UNIFORM_VEC3_LIGHTPOS = "unif_LightPos";
+	protected static final String UNIFORM_SAMPLER_TEXTURE = "unif_Texture";
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(FeatureShader.class);
@@ -85,52 +119,158 @@ public class FeatureShader {
 
 		if (status[0] == 0) {
 			LOG.error(
-					"FeatureShader",
+					"FeatureShader " + GLES20.glGetShaderInfoLog(shaderHandle),
 					"Error compiling shader: "
 							+ GLES20.glGetShaderInfoLog(shaderHandle));
 			GLES20.glDeleteShader(shaderHandle);
 		}
+	}
+
+
+
+	private static float calculateIntegralImageKey(Bitmap bitmap) {
+		final int width = bitmap.getWidth();
+		final int height = bitmap.getHeight();
+
+		float sum = 0;
+
+//		for (int i = 0, j = 0; i < height && j < width; i++, j++) {
+//			float[] hueSatBright = new float[3];
+//			int what = bitmap.getPixel(j, i);
+//			Color.RGBToHSV((what >> 16) & 0xff, (what >> 8) & 0xff,
+//					what & 0xff, hueSatBright);
+//			/** we calculate the integral over the brightness */
+//			sum += hueSatBright[2] * 255;
+//		}
+
+		return 12;
+
+		// final float[][] integral = new float[height][width];
+
+		// for(int i = 0; i < height; i++){
+		// float sumOfTheRow = 0;
+		// for(int j = 0; j < width; j++){
+		// float[] hueSatBright = new float[3];
+		// int what = bitmap.getPixel(j, i);
+		// Color.RGBToHSV((what >> 16) & 0xff, (what >> 8) & 0xff, what & 0xff,
+		// hueSatBright);
+		// /** we calculate the integral over the brightness */
+		// sumOfTheRow += hueSatBright[2]*255;
+		// if(i > 0){
+		// integral[i][j] = integral[i-1][j] + sumOfTheRow;
+		// } else {
+		// integral[i][j] = integral[i][j] + sumOfTheRow;
+		// }
+		// }
+		// }
 
 	}
+
+	private static Map<Float, TextureDetails> textureCache = new HashMap<Float, TextureDetails>();
 
 	private int programHandle = -1;
 
 	private int positionHandle = -1;
 	private int colorHandle = -1;
 	private int normalHandle = -1;
+	private int lightPosHandle = -1;
+
+	private int textureCoordinateHandle = -1;
+	private int textureDataHandle;
+
+	private int textureUniform = -1;
 
 	private int mvpMatrixUniform = -1;
 	private int mvMatrixUniform = -1;
 	private int vMatrixUniform = -1;
+
+	private final float[] lightPosInModelSpace = new float[] { 0.0f, 0.0f,
+			0.0f, 1.0f };
+	private final float[] lightPosInWorldSpace = new float[4];
+	private final float[] lightPosInEyeSpace = new float[4];
 
 	private final String vertexShader, fragmentShader;
 
 	final boolean supportsNormals;
 	final boolean supportsColors;
 	final boolean supportsTextures;
+	final boolean supportsLight;
 	private int vertexShaderHandle = -1;
 	private int fragmentShaderHandle = -1;
+
+	private List<TextureDetails> textures = new ArrayList<TextureDetails>();
 
 	public FeatureShader(String vertexShader, String fragmentShader) {
 		this.vertexShader = vertexShader;
 		this.fragmentShader = fragmentShader;
 
 		/** searches with the aid of regex for the normal attribute */
-		Pattern pattern = Pattern.compile(".*" + NORMAL_ATTRIBUTE + ".*");
+		Pattern pattern = Pattern.compile(".*" + ATTRIBUTE_NORMAL + ".*");
 		Matcher matcher = pattern.matcher(vertexShader);
 		supportsNormals = matcher.find();
 
 		/** Searches with the aid of regex for color attribute */
-		pattern = Pattern.compile(".*" + COLOR_ATTRIBUTE + ".*");
+		pattern = Pattern.compile(".*" + ATTRIBUTE_COLOR + ".*");
 		matcher = pattern.matcher(vertexShader);
 		supportsColors = matcher.find();
 
 		/** searches with the aid of regex for texture attribute */
-		pattern = Pattern.compile(".*" + TEXTURE_ATTRIBUTE + ".*");
+		pattern = Pattern.compile(".*" + ATTRIBUTE_TEXTURE + ".*");
 		matcher = pattern.matcher(vertexShader);
 		supportsTextures = matcher.find();
 
+		pattern = Pattern.compile(".*" + UNIFORM_VEC3_LIGHTPOS + ".*");
+		matcher = pattern.matcher(vertexShader);
+		supportsLight = matcher.find();
+
 		INSTANCES.add(new WeakReference<FeatureShader>(this));
+	}
+
+	public TextureDetails addTexture(Bitmap textureBitmap, boolean b) {
+		final float integralKey = calculateIntegralImageKey(textureBitmap);
+		TextureDetails textureDetails = textureCache.get(integralKey);
+
+		if (textureDetails == null) {
+			int[] textures = new int[1];
+			GLES20.glGenTextures(1, textures, 0);
+			int textureId = textures[0];
+			if (textureId > 0) {
+				GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
+
+				// Set filtering
+				GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+						GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+				GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+						GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+
+				GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+						GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+				GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+						GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+
+				// Load the bitmap into the bound texture.
+				GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, textureBitmap, 0);
+				int textureUniformHandle = GLES20.glGetUniformLocation(
+						programHandle, UNIFORM_SAMPLER_TEXTURE);
+				textureDetails = new TextureDetails(textureId,
+						textureUniformHandle);
+				textureCache.put(integralKey, textureDetails);
+			} else {
+				// TODO XXX FIXME log exception
+				// LOG.
+				throw new RuntimeException("Could not generate GL Texture");
+			}
+		}
+		return textureDetails;
+	}
+
+	public void bindTextures() {
+
+	}
+
+	public void unbindTextures() {
+
+		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 	}
 
 	public int getColorHandle() {
@@ -138,7 +278,7 @@ public class FeatureShader {
 			initProgram();
 		}
 		colorHandle = GLES20
-				.glGetAttribLocation(programHandle, COLOR_ATTRIBUTE);
+				.glGetAttribLocation(programHandle, ATTRIBUTE_COLOR);
 		return colorHandle;
 	}
 
@@ -147,7 +287,7 @@ public class FeatureShader {
 			initProgram();
 		}
 		normalHandle = GLES20.glGetAttribLocation(programHandle,
-				NORMAL_ATTRIBUTE);
+				ATTRIBUTE_NORMAL);
 		return normalHandle;
 	}
 
@@ -156,8 +296,69 @@ public class FeatureShader {
 			initProgram();
 		}
 		positionHandle = GLES20.glGetAttribLocation(programHandle,
-				POSITION_ATTRIBUTE);
+				ATTRIBUTE_POSITION);
 		return positionHandle;
+	}
+
+	public int getLightPosHandle() {
+		if (programHandle == -1) {
+			initProgram();
+		}
+		lightPosHandle = GLES20.glGetAttribLocation(programHandle,
+				UNIFORM_VEC3_LIGHTPOS);
+		return lightPosHandle;
+	}
+
+	public int getTextureCoordinateHandle() {
+		if (programHandle == -1) {
+			initProgram();
+		}
+		textureCoordinateHandle = GLES20.glGetAttribLocation(programHandle,
+				ATTRIBUTE_TEXTURE);
+		return textureCoordinateHandle;
+	}
+
+	public int getTextureUniform() {
+		if (programHandle == -1) {
+			initProgram();
+		}
+		textureUniform = GLES20.glGetUniformLocation(programHandle,
+				UNIFORM_SAMPLER_TEXTURE);
+
+		return textureUniform;
+	}
+
+	/******************************************************************
+	 * Methods for setting required object Data
+	 ******************************************************************/
+	public void setVertices(final int vertexBufferHandle) {
+		if (programHandle == -1) {
+			initProgram();
+		}
+		positionHandle = GLES20.glGetAttribLocation(programHandle,
+				ATTRIBUTE_POSITION);
+		if (vertexBufferHandle >= 0) {
+			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBufferHandle);
+			GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT,
+					false, 0, 0);
+			GLES20.glEnableVertexAttribArray(positionHandle);
+		} else {
+			LOG.debug("vertexbufferhandle is not a valid handle");
+		}
+	}
+
+	public void setTextureCoordinates(final int textureBufferHandle) {
+		if (programHandle == -1) {
+			initProgram();
+		}
+		textureCoordinateHandle = GLES20.glGetAttribLocation(programHandle,
+				ATTRIBUTE_TEXTURE);
+		if (textureCoordinateHandle >= 0) {
+			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, textureBufferHandle);
+			GLES20.glEnableVertexAttribArray(textureCoordinateHandle);
+			GLES20.glVertexAttribPointer(textureCoordinateHandle, 2,
+					GLES20.GL_FLOAT, false, 0, 0);
+		}
 	}
 
 	public void setColors(final int colorBufferHandle) {
@@ -170,24 +371,13 @@ public class FeatureShader {
 		}
 
 		colorHandle = GLES20
-				.glGetAttribLocation(programHandle, COLOR_ATTRIBUTE);
+				.glGetAttribLocation(programHandle, ATTRIBUTE_COLOR);
 		if (colorHandle >= 0) {
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, colorBufferHandle);
 			GLES20.glVertexAttribPointer(colorHandle, 4, GLES20.GL_FLOAT,
 					false, 0, 0);
 			GLES20.glEnableVertexAttribArray(colorHandle);
 		}
-	}
-
-	public void setModelViewProjectionMatrix(float[] mvpMatrix) {
-		if (programHandle == -1) {
-			initProgram();
-		}
-		// combined Matrix
-		mvpMatrixUniform = GLES20.glGetUniformLocation(programHandle,
-				MVP_MATRIX_UNIFORM);
-		if (mvpMatrixUniform >= 0)
-			GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mvpMatrix, 0);
 	}
 
 	public void setNormals(final int normalBufferHandle) {
@@ -200,12 +390,46 @@ public class FeatureShader {
 		}
 
 		normalHandle = GLES20.glGetAttribLocation(programHandle,
-				NORMAL_ATTRIBUTE);
+				ATTRIBUTE_NORMAL);
 		if (normalHandle >= 0) {
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, normalBufferHandle);
 			GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT,
 					false, 0, 0);
 			GLES20.glEnableVertexAttribArray(normalHandle);
+		}
+	}
+
+	public void setModelViewProjectionMatrix(float[] mvpMatrix) {
+		if (programHandle == -1) {
+			initProgram();
+		}
+		// combined Matrix
+		mvpMatrixUniform = GLES20.glGetUniformLocation(programHandle,
+				UNIFORM_MATRIX_MVP);
+		if (mvpMatrixUniform >= 0)
+			GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mvpMatrix, 0);
+	}
+
+	public void setModelViewMatrix(float[] mvMatrix) {
+		if (programHandle == -1) {
+			initProgram();
+		}
+
+		mvMatrixUniform = GLES20.glGetUniformLocation(programHandle,
+				UNIFORM_MATRIX_MV);
+		if (mvMatrixUniform >= 0) {
+			GLES20.glUniformMatrix4fv(mvMatrixUniform, 1, false, mvMatrix, 0);
+		}
+	}
+	
+	public void setLightPositionVec(float[] lightPosition){
+		if(programHandle == -1){
+			initProgram();
+		}
+		
+		lightPosHandle = GLES20.glGetUniformLocation(programHandle, UNIFORM_VEC3_LIGHTPOS);
+		if(lightPosHandle >= 0){
+			GLES20.glUniform3f(lightPosHandle, lightPosition[0], lightPosition[1], lightPosition[2]);
 		}
 	}
 
@@ -217,7 +441,7 @@ public class FeatureShader {
 		}
 		// combined Matrix
 		mvpMatrixUniform = GLES20.glGetUniformLocation(programHandle,
-				MVP_MATRIX_UNIFORM);
+				UNIFORM_MATRIX_MVP);
 		if (mvpMatrixUniform >= 0)
 			GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mvpMatrix, 0);
 		// Model view matrix
@@ -230,22 +454,6 @@ public class FeatureShader {
 		// "u_VMatrix");
 		// if(vMatrixUniform >= 0)
 		// GLES20.glUniformMatrix4fv(vMatrixUniform, 1, false, viewMatrix, 0);
-	}
-
-	public void setVertices(final int vertexBufferHandle) {
-		if (programHandle == -1) {
-			initProgram();
-		}
-		positionHandle = GLES20.glGetAttribLocation(programHandle,
-				POSITION_ATTRIBUTE);
-		if (vertexBufferHandle >= 0) {
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBufferHandle);
-			GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT,
-					false, 0, 0);
-			GLES20.glEnableVertexAttribArray(positionHandle);
-		} else {
-			LOG.debug("vertexbufferhandle is not a valid handle");
-		}
 	}
 
 	public boolean supportsColors() {
@@ -286,18 +494,18 @@ public class FeatureShader {
 		if (programHandle == -1) {
 			programHandle = GLES20.glCreateProgram();
 		}
-		linkProgram(new String[] { "a_Position", "a_Normal", "a_Color" });
+		linkProgram(new String[] { "aPosition", "aNormal", "aColor" });
 
 		mvpMatrixUniform = GLES20.glGetUniformLocation(programHandle,
-				MVP_MATRIX_UNIFORM);
+				UNIFORM_MATRIX_MVP);
 		positionHandle = GLES20.glGetAttribLocation(programHandle,
-				POSITION_ATTRIBUTE);
+				ATTRIBUTE_POSITION);
 		if (supportsNormals)
 			normalHandle = GLES20.glGetAttribLocation(programHandle,
-					NORMAL_ATTRIBUTE);
+					ATTRIBUTE_NORMAL);
 		if (supportsColors)
 			colorHandle = GLES20.glGetAttribLocation(programHandle,
-					COLOR_ATTRIBUTE);
+					ATTRIBUTE_COLOR);
 	}
 
 	private void linkProgram(final String[] attributes) {
@@ -314,8 +522,10 @@ public class FeatureShader {
 			GLES20.glAttachShader(programHandle, vertexShaderHandle);
 			GLES20.glAttachShader(programHandle, fragmentShaderHandle);
 
-			GLES20.glBindAttribLocation(programHandle, 0, POSITION_ATTRIBUTE);
-			GLES20.glBindAttribLocation(programHandle, 1, NORMAL_ATTRIBUTE);
+			GLES20.glBindAttribLocation(programHandle, 0, ATTRIBUTE_POSITION);
+			// GLES20.glBindAttribLocation(programHandle, 1, ATTRIBUTE_COLOR);
+			GLES20.glBindAttribLocation(programHandle, 1, ATTRIBUTE_NORMAL);
+			// GLES20.glBindAttribLocation(programHandle, 3, ATTRIBUTE_TEXTURE);
 			// if (attributes != null) {
 			// for (int i = 0, size = attributes.length; i < size; i++)
 			// GLES20.glBindAttribLocation(programHandle, i+1, attributes[i]);

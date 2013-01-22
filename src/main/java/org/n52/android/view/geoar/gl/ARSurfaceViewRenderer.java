@@ -21,6 +21,8 @@ import java.util.List;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import org.n52.android.GeoARApplication;
+import org.n52.android.R;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.n52.android.utils.GeoLocation;
 import org.n52.android.view.geoar.ARFragment2;
@@ -31,9 +33,13 @@ import org.n52.android.view.geoar.gl.mode.features.CubeFeature2;
 import org.n52.android.view.geoar.gl.mode.features.GridFeature;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.LightingColorFilter;
 import android.location.Location;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
 
 /**
  * 
@@ -50,8 +56,8 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	public interface OpenGLCallable {
 		void onPreRender();
 
-		void onRender(float[] projectionMatrix, float[] viewMatrix,
-				final float[] parentMatrix);
+		void onRender(final float[] projectionMatrix, final float[] viewMatrix,
+				final float[] parentMatrix, final float[] lightPosition);
 	}
 
 	public interface OnInitializeInGLThread {
@@ -84,6 +90,13 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 	private RenderFeature2 renderFeature;
 	public static RenderFeature2 test;
+	
+	
+	/** light paramters */	
+	private final float[] lightDirection = new float[] { 3.0f, 10.0f,
+			2.0f, 1.0f };
+	
+	private final float[] lightDirectionMVP = new float[4];
 
 	public ARSurfaceViewRenderer(Context context,
 			IRotationMatrixProvider rotationMatrixProvider) {
@@ -107,24 +120,27 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 		/** extrinsic camera parameters for matching camera- with virtual view */
 		float[] rotationMatrix = mRotationProvider.getRotationMatrix();
+		
+		/** calculate the light position in eye space */
+		Matrix.multiplyMV(lightDirectionMVP, 0, rotationMatrix, 0, lightDirection, 0);
 
 		/** render grid */
 		renderFeature.onRender(GLESCamera.projectionMatrix,
-				GLESCamera.viewMatrix, rotationMatrix);
+				GLESCamera.viewMatrix, rotationMatrix, lightDirection);
 
 		/** render DataSources data */
-		synchronized (visualizationHandler) {
+//		synchronized (visualizationHandler) {
 			for (DataSourceVisualizationHandler handler : visualizationHandler) {
 				for (ARObject feature : handler.getARObjects()) {
 					feature.onRender(GLESCamera.projectionMatrix,
-							GLESCamera.viewMatrix, rotationMatrix);
+							GLESCamera.viewMatrix, rotationMatrix, lightDirection);
 				}
 			}
-		}
+//		}
 		/** for testing purposes */
 		for (RenderFeature2 r : renderFeatures) {
 			r.onRender(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
-					rotationMatrix);
+					rotationMatrix, lightDirection);
 		}
 	}
 
@@ -148,6 +164,9 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		GLES20.glClearDepthf(1.0f);
 		GLES20.glDepthFunc(GLES20.GL_LESS);
 		GLES20.glDepthMask(true);
+		
+		/** Enable texture mapping */
+		GLES20.glEnable(GLES20.GL_TEXTURE_2D);
 
 		/** Enable blending */
 		GLES20.glEnable(GLES20.GL_BLEND);
@@ -169,10 +188,16 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		renderFeature = new GridFeature();
 		renderFeature.onCreateInGLESThread();
 		test = new CubeFeature2();
-		test.setRelativePosition(new float[] { 0, 0, -10 });
+		test.setTexture(			// Read in the resource
+				BitmapFactory.decodeResource(GeoARApplication.applicationContext.getResources(), R.drawable.n52_logo_highreso));
+		test.setRelativePosition(new float[] { 0, 0, -4 });
 		test.onCreateInGLESThread();
 		renderFeatures.add(test);
+		
+		
 
+
+		
 		// // first cube
 		// RenderFeature2 first = new CubeFeature2();
 		// first.setPosition(new float[] { 1, 0, 5 });

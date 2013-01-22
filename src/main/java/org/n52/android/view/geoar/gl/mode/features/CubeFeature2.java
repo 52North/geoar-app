@@ -15,16 +15,232 @@
  */
 package org.n52.android.view.geoar.gl.mode.features;
 
-import org.n52.android.view.geoar.gl.mode.ColoredFeatureShader;
 import org.n52.android.view.geoar.gl.mode.RenderFeature2;
-import org.n52.android.view.geoar.gl.model.primitives.Cube;
 
 import android.opengl.GLES20;
 
 public class CubeFeature2 extends RenderFeature2 {
 	
 
-
+	// X, Y, Z
+	final float[] cubePositionData =
+	{
+			// In OpenGL counter-clockwise winding is default. This means that when we look at a triangle, 
+			// if the points are counter-clockwise we are looking at the "front". If not we are looking at
+			// the back. OpenGL has an optimization where all back-facing triangles are culled, since they
+			// usually represent the backside of an object and aren't visible anyways.
+			
+			// Front face
+			-1.0f, 1.0f, 1.0f,				
+			-1.0f, -1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 
+			-1.0f, -1.0f, 1.0f, 				
+			1.0f, -1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f,
+			
+			// Right face
+			1.0f, 1.0f, 1.0f,				
+			1.0f, -1.0f, 1.0f,
+			1.0f, 1.0f, -1.0f,
+			1.0f, -1.0f, 1.0f,				
+			1.0f, -1.0f, -1.0f,
+			1.0f, 1.0f, -1.0f,
+			
+			// Back face
+			1.0f, 1.0f, -1.0f,				
+			1.0f, -1.0f, -1.0f,
+			-1.0f, 1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f,				
+			-1.0f, -1.0f, -1.0f,
+			-1.0f, 1.0f, -1.0f,
+			
+			// Left face
+			-1.0f, 1.0f, -1.0f,				
+			-1.0f, -1.0f, -1.0f,
+			-1.0f, 1.0f, 1.0f, 
+			-1.0f, -1.0f, -1.0f,				
+			-1.0f, -1.0f, 1.0f, 
+			-1.0f, 1.0f, 1.0f, 
+			
+			// Top face
+			-1.0f, 1.0f, -1.0f,				
+			-1.0f, 1.0f, 1.0f, 
+			1.0f, 1.0f, -1.0f, 
+			-1.0f, 1.0f, 1.0f, 				
+			1.0f, 1.0f, 1.0f, 
+			1.0f, 1.0f, -1.0f,
+			
+			// Bottom face
+			1.0f, -1.0f, -1.0f,				
+			1.0f, -1.0f, 1.0f, 
+			-1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f, 1.0f, 				
+			-1.0f, -1.0f, 1.0f,
+			-1.0f, -1.0f, -1.0f,
+	};	
+	
+	// R, G, B, A
+	final float[] cubeColorData =
+	{				
+			// Front face (red)
+			1.0f, 0.0f, 0.0f, 1.0f,				
+			1.0f, 0.0f, 0.0f, 1.0f,
+			1.0f, 0.0f, 0.0f, 1.0f,
+			1.0f, 0.0f, 0.0f, 1.0f,				
+			1.0f, 0.0f, 0.0f, 1.0f,
+			1.0f, 0.0f, 0.0f, 1.0f,
+			
+			// Right face (green)
+			0.0f, 1.0f, 0.0f, 1.0f,				
+			0.0f, 1.0f, 0.0f, 1.0f,
+			0.0f, 1.0f, 0.0f, 1.0f,
+			0.0f, 1.0f, 0.0f, 1.0f,				
+			0.0f, 1.0f, 0.0f, 1.0f,
+			0.0f, 1.0f, 0.0f, 1.0f,
+			
+			// Back face (blue)
+			0.0f, 0.0f, 1.0f, 1.0f,				
+			0.0f, 0.0f, 1.0f, 1.0f,
+			0.0f, 0.0f, 1.0f, 1.0f,
+			0.0f, 0.0f, 1.0f, 1.0f,				
+			0.0f, 0.0f, 1.0f, 1.0f,
+			0.0f, 0.0f, 1.0f, 1.0f,
+			
+			// Left face (yellow)
+			1.0f, 1.0f, 0.0f, 1.0f,				
+			1.0f, 1.0f, 0.0f, 1.0f,
+			1.0f, 1.0f, 0.0f, 1.0f,
+			1.0f, 1.0f, 0.0f, 1.0f,				
+			1.0f, 1.0f, 0.0f, 1.0f,
+			1.0f, 1.0f, 0.0f, 1.0f,
+			
+			// Top face (cyan)
+			0.0f, 1.0f, 1.0f, 1.0f,				
+			0.0f, 1.0f, 1.0f, 1.0f,
+			0.0f, 1.0f, 1.0f, 1.0f,
+			0.0f, 1.0f, 1.0f, 1.0f,				
+			0.0f, 1.0f, 1.0f, 1.0f,
+			0.0f, 1.0f, 1.0f, 1.0f,
+			
+			// Bottom face (magenta)
+			1.0f, 0.0f, 1.0f, 1.0f,				
+			1.0f, 0.0f, 1.0f, 1.0f,
+			1.0f, 0.0f, 1.0f, 1.0f,
+			1.0f, 0.0f, 1.0f, 1.0f,				
+			1.0f, 0.0f, 1.0f, 1.0f,
+			1.0f, 0.0f, 1.0f, 1.0f
+	};
+	
+	// X, Y, Z
+	// The normal is used in light calculations and is a vector which points
+	// orthogonal to the plane of the surface. For a cube model, the normals
+	// should be orthogonal to the points of each face.
+	final float[] cubeNormalData =
+	{												
+			// Front face
+			0.0f, 0.0f, 1.0f,				
+			0.0f, 0.0f, 1.0f,
+			0.0f, 0.0f, 1.0f,
+			0.0f, 0.0f, 1.0f,				
+			0.0f, 0.0f, 1.0f,
+			0.0f, 0.0f, 1.0f,
+			
+			// Right face 
+			1.0f, 0.0f, 0.0f,				
+			1.0f, 0.0f, 0.0f,
+			1.0f, 0.0f, 0.0f,
+			1.0f, 0.0f, 0.0f,				
+			1.0f, 0.0f, 0.0f,
+			1.0f, 0.0f, 0.0f,
+			
+			// Back face 
+			0.0f, 0.0f, -1.0f,				
+			0.0f, 0.0f, -1.0f,
+			0.0f, 0.0f, -1.0f,
+			0.0f, 0.0f, -1.0f,				
+			0.0f, 0.0f, -1.0f,
+			0.0f, 0.0f, -1.0f,
+			
+			// Left face 
+			-1.0f, 0.0f, 0.0f,				
+			-1.0f, 0.0f, 0.0f,
+			-1.0f, 0.0f, 0.0f,
+			-1.0f, 0.0f, 0.0f,				
+			-1.0f, 0.0f, 0.0f,
+			-1.0f, 0.0f, 0.0f,
+			
+			// Top face 
+			0.0f, 1.0f, 0.0f,			
+			0.0f, 1.0f, 0.0f,
+			0.0f, 1.0f, 0.0f,
+			0.0f, 1.0f, 0.0f,				
+			0.0f, 1.0f, 0.0f,
+			0.0f, 1.0f, 0.0f,
+			
+			// Bottom face 
+			0.0f, -1.0f, 0.0f,			
+			0.0f, -1.0f, 0.0f,
+			0.0f, -1.0f, 0.0f,
+			0.0f, -1.0f, 0.0f,				
+			0.0f, -1.0f, 0.0f,
+			0.0f, -1.0f, 0.0f
+	};
+	
+	// S, T (or X, Y)
+	// Texture coordinate data.
+	// Because images have a Y axis pointing downward (values increase as you move down the image) while
+	// OpenGL has a Y axis pointing upward, we adjust for that here by flipping the Y axis.
+	// What's more is that the texture coordinates are the same for every face.
+	final float[] cubeTextureCoordinateData =
+	{												
+			// Front face
+			0.0f, 0.0f, 				
+			0.0f, 1.0f,
+			1.0f, 0.0f,
+			0.0f, 1.0f,
+			1.0f, 1.0f,
+			1.0f, 0.0f,				
+			
+			// Right face 
+			0.0f, 0.0f, 				
+			0.0f, 1.0f,
+			1.0f, 0.0f,
+			0.0f, 1.0f,
+			1.0f, 1.0f,
+			1.0f, 0.0f,	
+			
+			// Back face 
+			0.0f, 0.0f, 				
+			0.0f, 1.0f,
+			1.0f, 0.0f,
+			0.0f, 1.0f,
+			1.0f, 1.0f,
+			1.0f, 0.0f,	
+			
+			// Left face 
+			0.0f, 0.0f, 				
+			0.0f, 1.0f,
+			1.0f, 0.0f,
+			0.0f, 1.0f,
+			1.0f, 1.0f,
+			1.0f, 0.0f,	
+			
+			// Top face 
+			0.0f, 0.0f, 				
+			0.0f, 1.0f,
+			1.0f, 0.0f,
+			0.0f, 1.0f,
+			1.0f, 1.0f,
+			1.0f, 0.0f,	
+			
+			// Bottom face 
+			0.0f, 0.0f, 				
+			0.0f, 1.0f,
+			1.0f, 0.0f,
+			0.0f, 1.0f,
+			1.0f, 1.0f,
+			1.0f, 0.0f
+	};
 
 	/*****************************
 	 * static variables
@@ -82,6 +298,60 @@ public class CubeFeature2 extends RenderFeature2 {
 			1.0f, 0.0f, 1.0f, 1.0f
 	};
 
+	// R, G, B, A
+	private final float[] whitecolors =
+	{				
+			// Front face (red)
+			1.0f, 1.0f, 1.0f, 1.0f,				
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,				
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,
+			
+			// Right face (green)
+			1.0f, 1.0f, 1.0f, 1.0f,				
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,				
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,
+			
+			// Back face (blue)
+			1.0f, 1.0f, 1.0f, 1.0f,				
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,				
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,
+			
+			// Left face (yellow)
+			1.0f, 1.0f, 1.0f, 1.0f,				
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,				
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,
+			
+			// Top face (cyan)
+			1.0f, 1.0f, 1.0f, 1.0f,				
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,				
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,
+			
+			// Bottom face (magenta)
+			1.0f, 1.0f, 1.0f, 1.0f,				
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f,				
+			1.0f, 1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f
+	};
+
+	
+	
 	private final float[] vertices =
 	{
 			// In OpenGL counter-clockwise winding is default. This means that when we look at a triangle, 
@@ -141,40 +411,54 @@ public class CubeFeature2 extends RenderFeature2 {
 	/** standard vertices array */
 	private final float[] normals = {
 			// Front face
-			0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-			1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+			0.0f, 0.0f,
+			1.0f,
+			0.0f,
+			0.0f,
 			1.0f,
 			0.0f,
 			0.0f,
 			1.0f,
 
 			// Right face
-			1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-			0.0f, 1.0f, 0.0f, 0.0f,
+			1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+			1.0f, 0.0f, 0.0f,
+			1.0f,
+			0.0f,
+			0.0f,
 			1.0f,
 			0.0f,
 			0.0f,
 
 			// Back face
-			0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f,
-			0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f,
+			0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+			-1.0f, 0.0f, 0.0f, -1.0f, 0.0f,
+			0.0f,
+			-1.0f,
+			0.0f,
 			0.0f,
 			-1.0f,
 
 			// Left face
-			-1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f,
-			0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f,
+			-1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f,
+			0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+			-1.0f,
+			0.0f,
 			0.0f,
 
 			// Top face
-			0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-			0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+			0.0f,
 
 			// Bottom face
-			0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-			-1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f };
+			0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f,
+			0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+			-1.0f, 0.0f };
 
 
+	
 //	/** standard indices array */
 //	private static final short[] indices = { 0, 4, 5, 0, 5, 1, 1, 5, 6, 1, 6,
 //			2, 2, 6, 7, 2, 7, 3, 3, 7, 4, 3, 4, 0, 4, 7, 6, 4, 6, 5, 3, 0, 1,
@@ -185,12 +469,14 @@ public class CubeFeature2 extends RenderFeature2 {
 	 ***************************/
 	public CubeFeature2() {
 		this.drawingMode = GLES20.GL_TRIANGLES; // GLES20.GL_TRIANGLE_FAN;
-		this.renderer = ColoredFeatureShader.getInstance();
+//		this.renderer = ColoredFeatureShader.getInstance();
 	}
 
 	@Override
 	public void onCreateInGLESThread() {
-		setRenderObjectives(vertices, colors, normals, null);
+//		setRenderObjectives(vertices, colors, normals, null);
+//		drawingMode = GLES20.GL_TRIANGLES;
+		setRenderObjectives(vertices, whitecolors, normals, cubeTextureCoordinateData);
 	}
 
 	@Override
@@ -202,10 +488,12 @@ public class CubeFeature2 extends RenderFeature2 {
 	public void onPreRender() {
 
 	}
+
+
 	
 	
 //	/** standard color array */
-//	private static final float[] colors = { 
+//	private static final float[] whitecolors = { 
 //		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 //		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
 //		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 

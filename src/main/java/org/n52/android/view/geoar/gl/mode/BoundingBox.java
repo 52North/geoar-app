@@ -17,23 +17,14 @@ package org.n52.android.view.geoar.gl.mode;
 
 import java.nio.FloatBuffer;
 
-import org.n52.android.view.geoar.gl.model.Geometry;
-
 /**
  * 
  * @author Arne de Wall
  *
  */
 public class BoundingBox {
-
-	private Geometry geometry;
+	
 	private float[][] boundingPoints;
-
-	public BoundingBox(Geometry geometry) {
-		this.geometry = geometry;
-		this.boundingPoints = new float[8][3];
-		generateBoundingBox();
-	}
 	
 	public BoundingBox(float[] vertices){
 		this.boundingPoints = new float[8][3];
@@ -67,9 +58,10 @@ public class BoundingBox {
 		boundingPoints[7] = new float[] { max[0], max[1], min[2] };
 	}
 
+	@Deprecated
 	private void generateBoundingBox() {
 		// get vertices of geometry
-		FloatBuffer vertices = geometry.getVerticesBuffer();
+		FloatBuffer vertices = null; // geometry.getVerticesBuffer();
 		vertices.rewind(); // set position to zero
 
 		float[] min = { Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE };

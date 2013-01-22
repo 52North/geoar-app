@@ -38,6 +38,8 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.location.Location;
+import android.opengl.GLES20;
+import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.GLU;
 import android.opengl.Matrix;
 import android.view.View;
@@ -61,7 +63,7 @@ public class ARObject implements OpenGLCallable {
 	}
 
 	/** Model Matrix of this feature */
-	private final float[] modelMatrix2 = new float[16];
+	private final float[] modelMatrix = new float[16];
 	/** Model view Matrix of this feature */
 	private final float[] modelViewMatrix = new float[16];
 	/** Model-View-Projection Matrix of our feature */
@@ -73,8 +75,11 @@ public class ARObject implements OpenGLCallable {
 	private final float[] newPosition = new float[4];
 	private final float[] screenCoordinates = new float[3];
 
+	private volatile boolean isInFrustum = false;
+
 	// XXX Why mapping by Class? Compatible with multiinstancedatasources?
 	private final Map<Class<? extends ItemVisualization>, VisualizationLayer> visualizationLayers = new HashMap<Class<? extends ItemVisualization>, VisualizationLayer>();
+
 	private final SpatialEntity entity;
 
 	// TODO FIXME XXX task: ARObject gains most functionalities of RenderFeature
@@ -89,44 +94,48 @@ public class ARObject implements OpenGLCallable {
 		// TODO Auto-generated method stub
 
 	}
+	
 
 	@Override
-	public void onRender(float[] projectionMatrix, float[] viewMatrix,
-			float[] parentMatrix) {
+	public void onRender(final float[] projectionMatrix, final float[] viewMatrix,
+			final float[] parentMatrix, final float[] lightPosition) {
 
 		/** set the matrices to identity matrix */
-		Matrix.setIdentityM(modelMatrix2, 0);
+		Matrix.setIdentityM(modelMatrix, 0);
 		Matrix.setIdentityM(modelViewMatrix, 0);
 		Matrix.setIdentityM(mvpMatrix, 0);
 		Matrix.setIdentityM(tmpMatrix, 0);
 
 		// TODO i think position[0] must be translated negatively -> Check
-		Matrix.translateM(modelMatrix2, 0, -newPosition[0], newPosition[1],
+		Matrix.translateM(modelMatrix, 0, -newPosition[0], newPosition[1],
 				newPosition[2]);
 
 		if (parentMatrix != null) {
-			Matrix.multiplyMM(tmpMatrix, 0, parentMatrix, 0, modelMatrix2, 0);
-			System.arraycopy(tmpMatrix, 0, modelMatrix2, 0, 16);
+			Matrix.multiplyMM(tmpMatrix, 0, parentMatrix, 0, modelMatrix, 0);
+			System.arraycopy(tmpMatrix, 0, modelMatrix, 0, 16);
 			Matrix.setIdentityM(tmpMatrix, 0);
 		}
 
-		Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix2, 0);
-		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, modelMatrix2, 0);
+		Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
 		// TODO XXX FIXME frustum test
 		if (newPosition != null) {
-			float[] vec = new float[] {0,0,0,1};
-			Matrix.multiplyMV(vec, 0, modelMatrix2, 0, vec, 0);
-			if (!GLESCamera.frustumCulling(vec))
+			float[] vec = new float[] { 0, 0, 0, 1 };
+			Matrix.multiplyMV(vec, 0, modelMatrix, 0, vec, 0);
+			if (!GLESCamera.frustumCulling(vec)) {
+				isInFrustum = false;
 				return;
+			}
+			/** object is in Frustum - update screen coordinates */
+			isInFrustum = true;
+			updateScreenCoordinates();
 		}
-		
-		updateScreenCoordinates();
 
 		// TODO XXX FIXME are just active visualizations called !? -> check
 		for (VisualizationLayer layer : visualizationLayers.values()) {
 			for (RenderFeature2 feature : layer.renderFeatureList) {
-				feature.onRender(mvpMatrix);
+				feature.onRender(mvpMatrix, modelViewMatrix, lightPosition);
 			}
 		}
 	}
@@ -148,11 +157,11 @@ public class ARObject implements OpenGLCallable {
 
 	}
 
-	public void updateScreenCoordinates() {
+	private final void updateScreenCoordinates() {
 		float[] screenPos = new float[3];
 		// TODO FIXME XXX i think newPosition[2] has to be negative
 		int result = GLU.gluProject(-newPosition[0], newPosition[1],
-				newPosition[2], modelMatrix2, 0, GLESCamera.projectionMatrix,
+				newPosition[2], modelMatrix, 0, GLESCamera.projectionMatrix,
 				0, GLESCamera.viewPortMatrix, 0, screenPos, 0);
 
 		if (result == GL10.GL_TRUE) {
@@ -257,12 +266,18 @@ public class ARObject implements OpenGLCallable {
 	public void renderCanvas(Paint poiRenderer, Canvas canvas) {
 		for (VisualizationLayer layer : visualizationLayers.values()) {
 			// FIXME TODO XXX distanceTo has to be in the Settings
-			if (distanceTo < 1000)
+			if (isInFrustum)
 				for (RenderFeature2 renderFeature : layer.renderFeatureList) {
 					layer.canvasFeature.onRender(screenCoordinates[0],
 							screenCoordinates[1], canvas);
 				}
 		}
+	}
+
+	public void setLightPosition(float[] lightPosInEyeSpace) {
+//		GLES20.glUniform3f(renderfe, lightPosInEyeSpace[0],
+//				lightPosInEyeSpace[1], lightPosInEyeSpace[2]);
+		
 	}
 
 }

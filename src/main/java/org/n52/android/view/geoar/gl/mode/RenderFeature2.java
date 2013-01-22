@@ -24,13 +24,20 @@ import java.nio.ShortBuffer;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import org.n52.android.GeoARApplication;
+import org.n52.android.R;
 import org.n52.android.newdata.vis.DataSourceVisualization.DataSourceVisualizationGL;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OnInitializeInGLThread;
 import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OpenGLCallable;
 import org.n52.android.view.geoar.gl.GLESCamera;
+import org.n52.android.view.geoar.gl.mode.FeatureShader.TextureDetails;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLU;
+import android.opengl.GLUtils;
 import android.opengl.Matrix;
 
 public abstract class RenderFeature2 extends Spatial implements
@@ -305,9 +312,14 @@ public abstract class RenderFeature2 extends Spatial implements
 
 		@Override
 		void onRenderGeometrie() {
-			final int stride = (POSITION_DATA_SIZE + COLOR_DATA_SIZE)
+			//@formatter:off
+			final int stride = (POSITION_DATA_SIZE
+					+ (hasColors ? COLOR_DATA_SIZE : 0)
+					+ (hasNormals ? NORMAL_DATA_SIZE : 0) 
+					+ (hasTextureCoords ? TEXTURE_DATA_SIZE	: 0))
 					* BYTES_PER_FLOAT;
-
+			//@formatter:on
+			
 			int bufferPosition = 0;
 			/** defines the array of generic vertex attribute data */
 			strideBuffer.position(bufferPosition);
@@ -329,7 +341,7 @@ public abstract class RenderFeature2 extends Spatial implements
 			}
 
 			if (hasNormals) {
-				/** defines the array of vertices normals attribute data */
+				/** defines the array of vertices normals */
 				strideBuffer.position(bufferPosition);
 				final int normalhandle = renderer.getNormalHandle();
 				GLES20.glEnableVertexAttribArray(normalhandle);
@@ -340,13 +352,14 @@ public abstract class RenderFeature2 extends Spatial implements
 
 			if (hasTextureCoords) {
 				// FIXME texture handling here
-				// strideBuffer.position(bufferPosition);
-				// final int textureHandle = renderer.getTextureHandle();
-				// GLES20.glEnableVertexAttribArray(textureHandle);
-				// GLES20.glVertexAttribPointer(textureHandle,
-				// TEXTURE_DATA_SIZE,
-				// GLES20.GL_FLOAT, false, stride, strideBuffer);
-				// bufferPosition += TEXTURE_DATA_SIZE;
+				strideBuffer.position(bufferPosition);
+				final int textureCoordniateHandle = renderer
+						.getTextureCoordinateHandle();
+				GLES20.glEnableVertexAttribArray(textureCoordniateHandle);
+				GLES20.glVertexAttribPointer(textureCoordniateHandle,
+						TEXTURE_DATA_SIZE, GLES20.GL_FLOAT, false, stride,
+						strideBuffer);
+				bufferPosition += TEXTURE_DATA_SIZE;
 			}
 
 			/** render primitives from array data */
@@ -379,17 +392,25 @@ public abstract class RenderFeature2 extends Spatial implements
 	/** color of the object */
 	protected int androidColor;
 
-	public RenderFeature2() {
+	// protected int textureDataHandle;
 
+	private Bitmap textureBitmap;
+	private TextureDetails textureDetails;
+
+	public RenderFeature2() {
+		// textureDataHandle = loadTexture(GeoARApplication.applicationContext,
+		// R.drawable.n52_logo_highreso);
 	}
 
+	@Deprecated 
 	protected void setRenderObjectives(float[] vertices, float[] colors,
 			float[] normals, float[] textureCoords, short[] indices) {
 		if (indices == null || indices.length == 0) {
 			setRenderObjectives(vertices, colors, normals, textureCoords);
 		} else {
+
 			if (renderer == null) {
-				renderer = ColoredFeatureShader.getInstance();
+				renderer = ShabbyColorShader.getInstance();
 			}
 			// renderer.onCreateInGLESThread();
 			geometry = new FeatureGeometryVBOandIBO(vertices, colors, normals,
@@ -400,9 +421,16 @@ public abstract class RenderFeature2 extends Spatial implements
 
 	protected void setRenderObjectives(float[] vertices, float[] colors,
 			float[] normals, float[] textureCoords) {
-		if (renderer == null) {
-			renderer = ColoredFeatureShader.getInstance();
+		// TODO XXX FIXME not elegant here, maybe this is
+		if (renderer == null){
+			if(textureCoords != null && textureBitmap != null){
+				renderer = TextureFeatureShader.getInstance();
+				renderer.addTexture(textureBitmap, false);
+			} else {
+				renderer = LightFeatureShader.getInstance();
+			}
 		}
+
 		// renderer.onCreateInGLESThread();
 		geometry = new FeatureGeometryStride(vertices, colors, normals,
 				textureCoords);
@@ -434,8 +462,12 @@ public abstract class RenderFeature2 extends Spatial implements
 	}
 
 	@Override
-	public void onRender(float[] projectionMatrix, float[] viewMatrix,
-			float[] parentMatrix) {
+	public void onRender(final float[] projectionMatrix, final float[] viewMatrix,
+			final float[] parentMatrix, final float[] lightPosition) {
+		
+		
+		
+		GLES20.glDisable(GLES20.GL_BLEND);
 		/** set the matrices to identity matrix */
 		Matrix.setIdentityM(modelMatrix, 0);
 		Matrix.setIdentityM(mvpMatrix, 0);
@@ -453,25 +485,47 @@ public abstract class RenderFeature2 extends Spatial implements
 		Matrix.multiplyMM(modelMatrix, 0, viewMatrix, 0, modelMatrix, 0);
 		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, modelMatrix, 0);
 
-		// if (position != null) {
-		// float[] vec = new float[] {0,0,0,1};
-		// Matrix.multiplyMV(vec, 0, modelViewMatrix, 0, vec, 0);
-		// if (!GLESCamera.pointInFrustum(vec))
-		// return;
-		// }
-
-		/** sets the program object as part of current rendering state */
-		renderer.useProgram();
-		renderer.setModelViewProjectionMatrix(mvpMatrix);
-		// onScreenCoordsUpdate();
-		/** render the geometry of this feature */
-		geometry.onRenderGeometrie();
+		onRender(mvpMatrix, modelMatrix, lightPosition);
 	}
 
 	public void onRender(float[] mvpMatrix) {
 		/** sets the program object as part of current rendering state */
 		renderer.useProgram();
+
+		if (textureDetails != null) {
+			// Set the active texture unit to texture unit 0.
+			GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+
+			// Bind the texture to this unit.
+			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureDetails.textureId);
+
+			GLES20.glUniform1i(renderer.getTextureUniform(), 0);
+		}
 		renderer.setModelViewProjectionMatrix(mvpMatrix);
+		/** render the geometry of this feature */
+		if (geometry != null)
+			geometry.onRenderGeometrie();
+	}
+
+	public void onRender(float[] mvpMatrix, float[] mvMatrix, float[] lightPosition) {
+		/** sets the program object as part of current rendering state */
+		renderer.useProgram();
+		
+		renderer.setLightPositionVec(lightPosition);
+
+		if (textureDetails != null) {
+			// Set the active texture unit to texture unit 0.
+			GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+
+			// Bind the texture to this unit.
+			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureDetails.textureId);
+
+			GLES20.glUniform1i(renderer.getTextureUniform(), 0);
+		}
+
+		renderer.setModelViewMatrix(mvMatrix);
+		renderer.setModelViewProjectionMatrix(mvpMatrix);
+
 		/** render the geometry of this feature */
 		if (geometry != null)
 			geometry.onRenderGeometrie();
@@ -506,5 +560,15 @@ public abstract class RenderFeature2 extends Spatial implements
 	@Override
 	public void setColor(float[] colorArray) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setTexture(Bitmap bitmap) {
+		this.textureBitmap = bitmap;
+	}
+
+	public void setLightPosition(float[] lightPosInEyeSpace) {
+		GLES20.glUniform3f(renderer.getLightPosHandle(), lightPosInEyeSpace[0],
+				lightPosInEyeSpace[1], lightPosInEyeSpace[2]);
 	}
 }
