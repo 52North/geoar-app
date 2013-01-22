@@ -119,18 +119,20 @@ public class ARObject implements OpenGLCallable {
 		Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
 		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
+
 		// TODO XXX FIXME frustum test
 		if (newPosition != null) {
 			float[] vec = new float[] { 0, 0, 0, 1 };
 			Matrix.multiplyMV(vec, 0, modelMatrix, 0, vec, 0);
 			if (!GLESCamera.frustumCulling(vec)) {
 				isInFrustum = false;
-				return;
+//				return;
 			}
 			/** object is in Frustum - update screen coordinates */
 			isInFrustum = true;
 			updateScreenCoordinates();
 		}
+		isInFrustum = true;
 
 		// TODO XXX FIXME are just active visualizations called !? -> check
 		for (VisualizationLayer layer : visualizationLayers.values()) {
@@ -215,10 +217,10 @@ public class ARObject implements OpenGLCallable {
 			altitude = (int) location.getAltitude();
 		// testen
 
-		newPosition[0] = x[0] / 10f;
+		newPosition[0] = x[0] / 10;
 		newPosition[1] = (float) (altitude - location.getAltitude());
 		// FIXME XXX TODO and here the third position has to be negative i think
-		newPosition[2] = z[0] / 10f;
+		newPosition[2] = z[0] / 10;
 
 		for (VisualizationLayer layer : visualizationLayers.values()) {
 			for (RenderFeature2 renderFeature : layer.renderFeatureList)

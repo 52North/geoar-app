@@ -391,6 +391,8 @@ public abstract class RenderFeature2 extends Spatial implements
 	protected Float alpha;
 	/** color of the object */
 	protected int androidColor;
+	
+	boolean isInitialized = false;
 
 	// protected int textureDataHandle;
 
@@ -435,6 +437,8 @@ public abstract class RenderFeature2 extends Spatial implements
 		geometry = new FeatureGeometryStride(vertices, colors, normals,
 				textureCoords);
 		boundingBox = new BoundingBox(vertices);
+		
+		isInitialized = true;
 	}
 
 	public float[] onScreenCoordsUpdate() {
@@ -464,8 +468,8 @@ public abstract class RenderFeature2 extends Spatial implements
 	@Override
 	public void onRender(final float[] projectionMatrix, final float[] viewMatrix,
 			final float[] parentMatrix, final float[] lightPosition) {
-		
-		
+		if(!isInitialized)
+			return;
 		
 		GLES20.glDisable(GLES20.GL_BLEND);
 		/** set the matrices to identity matrix */

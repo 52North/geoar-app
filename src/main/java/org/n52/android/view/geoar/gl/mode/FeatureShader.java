@@ -242,7 +242,7 @@ public class FeatureShader {
 				textureCache.put(integralKey, textureDetails);
 			} else {
 				// TODO XXX FIXME log exception
-				// LOG.
+				LOG.warn(GLES20.glGetProgramInfoLog(programHandle));
 				throw new RuntimeException("Could not generate GL Texture");
 			}
 		}

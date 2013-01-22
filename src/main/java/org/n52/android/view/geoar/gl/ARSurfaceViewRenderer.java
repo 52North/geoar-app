@@ -127,14 +127,14 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 				GLESCamera.viewMatrix, rotationMatrix, lightDirection);
 
 		/** render DataSources data */
-//		synchronized (visualizationHandler) {
+		synchronized (visualizationHandler) {
 			for (DataSourceVisualizationHandler handler : visualizationHandler) {
 				for (ARObject feature : handler.getARObjects()) {
 					feature.onRender(GLESCamera.projectionMatrix,
 							GLESCamera.viewMatrix, rotationMatrix, lightDirection);
 				}
 			}
-//		}
+		}
 		/** for testing purposes */
 		for (RenderFeature2 r : renderFeatures) {
 			r.onRender(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
