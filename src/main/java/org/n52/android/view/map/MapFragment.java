@@ -47,7 +47,7 @@ import com.actionbarsherlock.app.SherlockFragment;
 
 public class MapFragment extends SherlockFragment {
 
-//	private MapView mapView;
+	private MapView mapView;
 
 	private MapActivityContext mapActivity; // Special context to use MapView
 											// without MapActivity
@@ -57,27 +57,27 @@ public class MapFragment extends SherlockFragment {
 	private DataSourcesOverlay dataSourcesOverlay;
 
 	// Listener for data source enabled state
-//	private OnCheckedChangedListener<DataSourceInstanceHolder> dataSourceListener = new OnCheckedChangedListener<DataSourceInstanceHolder>() {
-//
-//		@Override
-//		public void onCheckedChanged(DataSourceInstanceHolder item,
-//				boolean newState) {
-//			if (newState == true && !overlayHandlerMap.containsKey(item)) {
-//				// new data source selected -> add new overlay handler
-//				DataSourceOverlayHandler overlayHandler = new DataSourceOverlayHandler(
-//						dataSourcesOverlay, item);
-//				overlayHandlerMap.put(item, overlayHandler);
-//				overlayHandler.updateOverlay(mapView, true);
-//			} else if (newState == false) {
-//				// data source disabled -> remove corresponding overlay handler
-//				DataSourceOverlayHandler overlayHandler = overlayHandlerMap
-//						.remove(item);
-//				if (overlayHandler != null) {
-//					overlayHandler.destroy();
-//				}
-//			}
-//		}
-//	};
+	private OnCheckedChangedListener<DataSourceInstanceHolder> dataSourceListener = new OnCheckedChangedListener<DataSourceInstanceHolder>() {
+
+		@Override
+		public void onCheckedChanged(DataSourceInstanceHolder item,
+				boolean newState) {
+			if (newState == true && !overlayHandlerMap.containsKey(item)) {
+				// new data source selected -> add new overlay handler
+				DataSourceOverlayHandler overlayHandler = new DataSourceOverlayHandler(
+						dataSourcesOverlay, item);
+				overlayHandlerMap.put(item, overlayHandler);
+				overlayHandler.updateOverlay(mapView, true);
+			} else if (newState == false) {
+				// data source disabled -> remove corresponding overlay handler
+				DataSourceOverlayHandler overlayHandler = overlayHandlerMap
+						.remove(item);
+				if (overlayHandler != null) {
+					overlayHandler.destroy();
+				}
+			}
+		}
+	};
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -94,103 +94,103 @@ public class MapFragment extends SherlockFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-//
-//		// Add MapView programmatically, since it needs a special context
-//		// depending on a call to getActivity, so it happens here and not in
-//		// onCreateView.
-//
-//		mapActivity = new MapActivityContext(getActivity());
-//		mapView = new MapView(mapActivity);
-//
-//		// Offline rendering here
-//		// setMapFile(new File(Environment.getExternalStorageDirectory()
-//		// + "/GeoAR/map.map"));
-//		mapView.setClickable(true);
-//		// setRenderTheme(DEFAULT_RENDER_THEME);
-//
-//		mapView.setMapGenerator(new MapnikTileDownloader());
-//		mapView.setBuiltInZoomControls(true);
-//
-//		// Center and zoom
-//		MapController controller = mapView.getController();
-//		controller.setZoom(15);
-//		controller.setCenter(new GeoPoint(51.965344, 7.600003)); // Coesfelder
-//																	// Kreuz
-//		LocationHandler.setManualLocation(new GeoLocation(51.965344, 7.600003));
-//		// Data source handling
-//		overlayHandlerMap = new HashMap<DataSourceInstanceHolder, DataSourceOverlayHandler>();
-//
-//		dataSourcesOverlay = new DataSourcesOverlay();
-//		dataSourcesOverlay
-//				.setOverlayItemTapListener(new OnOverlayItemTapListener() {
-//
-//					@Override
-//					public boolean onOverlayItemTap(
-//							VisualizationOverlayItem item) {
-//						Builder builder = new AlertDialog.Builder(getActivity());
-//						builder.setTitle(item.getTitle())
-//								.setMessage(item.getSnippet())
-//								.setNeutralButton(R.string.cancel, null);
-//
-//						// TODO use view caching with convertView parameter
-//						View featureView = item.getVisualization()
-//								.getFeatureView(item.getSpatialEntity(), null,
-//										null, getActivity());
-//
-//						if (featureView != null) {
-//							builder.setView(featureView);
-//						}
-//						builder.show();
-//						return true;
-//					}
-//				});
-//
-//		mapView.getOverlays().add(dataSourcesOverlay);
-//
-//		mapView.setOnTouchListener(new OnTouchListener() {
-//			@Override
-//			public boolean onTouch(View arg0, MotionEvent motionEvent) {
-//				// Use motion event to inform overlay handlers that they
-//				// should
-//				// update their data if needed
-//				for (DataSourceOverlayHandler handler : overlayHandlerMap
-//						.values()) {
-//					handler.onTouchEvent(motionEvent, mapView);
-//				}
-//				return false;
-//			}
-//		});
-//
-//		// Update all overlays after layouting the mapview
-//		new Handler().post(new Runnable() {
-//			@Override
-//			public void run() {
-//				for (DataSourceOverlayHandler handler : overlayHandlerMap
-//						.values()) {
-//					handler.updateOverlay(mapView, true);
-//				}
-//			}
-//		});
-//		// Get Layout root
-//		ViewGroup layout = (ViewGroup) getView();
-//		layout.addView(mapView, LayoutParams.MATCH_PARENT,
-//				LayoutParams.MATCH_PARENT);
-//		layout.requestLayout();
-//
-//		// add overlay handler for each enabled data source
-//		for (DataSourceHolder dataSource : PluginLoader.getDataSources()) {
-//			CheckList<DataSourceInstanceHolder> instances = dataSource
-//					.getInstances();
-//			for (DataSourceInstanceHolder instance : instances
-//					.getCheckedItems()) {
-//				DataSourceOverlayHandler overlayHandler = new DataSourceOverlayHandler(
-//						dataSourcesOverlay, instance);
-//				overlayHandlerMap.put(instance, overlayHandler);
-//			}
-//
-//			// register for update events
-//			instances.addOnCheckedChangeListener(dataSourceListener);
-//		}
+
+		// Add MapView programmatically, since it needs a special context
+		// depending on a call to getActivity, so it happens here and not in
+		// onCreateView.
+
+		mapActivity = new MapActivityContext(getActivity());
+		mapView = new MapView(mapActivity);
+
+		// Offline rendering here
+		// setMapFile(new File(Environment.getExternalStorageDirectory()
+		// + "/GeoAR/map.map"));
+		mapView.setClickable(true);
+		// setRenderTheme(DEFAULT_RENDER_THEME);
+
+		mapView.setMapGenerator(new MapnikTileDownloader());
+		mapView.setBuiltInZoomControls(true);
+
+		// Center and zoom
+		MapController controller = mapView.getController();
+		controller.setZoom(15);
+		controller.setCenter(new GeoPoint(51.965344, 7.600003)); // Coesfelder
+																	// Kreuz
+		LocationHandler.setManualLocation(new GeoLocation(51.965344, 7.600003));
+		// Data source handling
+		overlayHandlerMap = new HashMap<DataSourceInstanceHolder, DataSourceOverlayHandler>();
+
+		dataSourcesOverlay = new DataSourcesOverlay();
+		dataSourcesOverlay
+				.setOverlayItemTapListener(new OnOverlayItemTapListener() {
+
+					@Override
+					public boolean onOverlayItemTap(
+							VisualizationOverlayItem item) {
+						Builder builder = new AlertDialog.Builder(getActivity());
+						builder.setTitle(item.getTitle())
+								.setMessage(item.getSnippet())
+								.setNeutralButton(R.string.cancel, null);
+
+						// TODO use view caching with convertView parameter
+						View featureView = item.getVisualization()
+								.getFeatureView(item.getSpatialEntity(), null,
+										null, getActivity());
+
+						if (featureView != null) {
+							builder.setView(featureView);
+						}
+						builder.show();
+						return true;
+					}
+				});
+
+		mapView.getOverlays().add(dataSourcesOverlay);
+
+		mapView.setOnTouchListener(new OnTouchListener() {
+			@Override
+			public boolean onTouch(View arg0, MotionEvent motionEvent) {
+				// Use motion event to inform overlay handlers that they
+				// should
+				// update their data if needed
+				for (DataSourceOverlayHandler handler : overlayHandlerMap
+						.values()) {
+					handler.onTouchEvent(motionEvent, mapView);
+				}
+				return false;
+			}
+		});
+
+		// Update all overlays after layouting the mapview
+		new Handler().post(new Runnable() {
+			@Override
+			public void run() {
+				for (DataSourceOverlayHandler handler : overlayHandlerMap
+						.values()) {
+					handler.updateOverlay(mapView, true);
+				}
+			}
+		});
+		// Get Layout root
+		ViewGroup layout = (ViewGroup) getView();
+		layout.addView(mapView, LayoutParams.MATCH_PARENT,
+				LayoutParams.MATCH_PARENT);
+		layout.requestLayout();
+
+		// add overlay handler for each enabled data source
+		for (DataSourceHolder dataSource : PluginLoader.getDataSources()) {
+			CheckList<DataSourceInstanceHolder> instances = dataSource
+					.getInstances();
+			for (DataSourceInstanceHolder instance : instances
+					.getCheckedItems()) {
+				DataSourceOverlayHandler overlayHandler = new DataSourceOverlayHandler(
+						dataSourcesOverlay, instance);
+				overlayHandlerMap.put(instance, overlayHandler);
+			}
+
+			// register for update events
+			instances.addOnCheckedChangeListener(dataSourceListener);
+		}
 
 	}
 
@@ -203,38 +203,38 @@ public class MapFragment extends SherlockFragment {
 
 	@Override
 	public void onDestroy() {
-//		for (DataSourceHolder dataSource : PluginLoader.getDataSources()) {
-//			dataSource.getInstances().removeOnCheckedChangeListener(
-//					dataSourceListener);
-//		}
-//		for (DataSourceOverlayHandler handler : overlayHandlerMap.values()) {
-//			handler.destroy();
-//		}
-//		overlayHandlerMap.clear();
+		for (DataSourceHolder dataSource : PluginLoader.getDataSources()) {
+			dataSource.getInstances().removeOnCheckedChangeListener(
+					dataSourceListener);
+		}
+		for (DataSourceOverlayHandler handler : overlayHandlerMap.values()) {
+			handler.destroy();
+		}
+		overlayHandlerMap.clear();
 		super.onDestroy();
 	}
 
 	@Override
 	public void onDestroyView() {
-//		mapActivity.destroy();
-//
-//		((ViewGroup) getView()).removeView(mapView);
-//		dataSourcesOverlay.clear();
+		mapActivity.destroy();
+
+		((ViewGroup) getView()).removeView(mapView);
+		dataSourcesOverlay.clear();
 		super.onDestroyView();
 	}
 
 	@Override
 	public void onPause() {
-//		mapActivity.pause();
-//		for (DataSourceOverlayHandler handler : overlayHandlerMap.values()) {
-//			handler.cancel();
-//		}
+		mapActivity.pause();
+		for (DataSourceOverlayHandler handler : overlayHandlerMap.values()) {
+			handler.cancel();
+		}
 		super.onPause();
 	}
 
 	@Override
 	public void onResume() {
-//		mapActivity.resume();
+		mapActivity.resume();
 		super.onResume();
 	}
 }

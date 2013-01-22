@@ -33,16 +33,14 @@ import org.n52.android.view.geoar.gl.mode.features.CubeFeature2;
 import org.n52.android.view.geoar.gl.mode.features.GridFeature;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.LightingColorFilter;
 import android.location.Location;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 
 /**
- * 
+ *  
  * @author Arne de Wall
  * 
  */
@@ -193,11 +191,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		test.setRelativePosition(new float[] { 0, 0, -4 });
 		test.onCreateInGLESThread();
 		renderFeatures.add(test);
-		
-		
 
-
-		
 		// // first cube
 		// RenderFeature2 first = new CubeFeature2();
 		// first.setPosition(new float[] { 1, 0, 5 });

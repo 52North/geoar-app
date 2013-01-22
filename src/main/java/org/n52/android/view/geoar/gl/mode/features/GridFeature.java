@@ -17,7 +17,7 @@ package org.n52.android.view.geoar.gl.mode.features;
 
 import org.apache.http.MethodNotSupportedException;
 import org.n52.android.newdata.DataCache;
-import org.n52.android.view.geoar.gl.mode.ShabbyColorShader;
+import org.n52.android.view.geoar.gl.mode.BilligerColorShader;
 import org.n52.android.view.geoar.gl.mode.FeatureShader;
 import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 import org.slf4j.Logger;
@@ -37,7 +37,7 @@ public class GridFeature extends RenderFeature2 {
 			.getLogger(GridFeature.class);
 
 	public GridFeature() {
-		this(ShabbyColorShader.getInstance());
+		this(BilligerColorShader.getInstance());
 	}
 
 	public GridFeature(FeatureShader renderer) {
@@ -116,7 +116,7 @@ public class GridFeature extends RenderFeature2 {
 			colors[i + 3] = 1.0f;
 		}
 
-		setRenderObjectives(vertices, colors, null, null);
+		setRenderObjectives(vertices, colors, normals, null);
 	}
 
 	@Override

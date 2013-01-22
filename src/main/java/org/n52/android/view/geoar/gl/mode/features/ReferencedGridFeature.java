@@ -15,7 +15,7 @@
  */
 package org.n52.android.view.geoar.gl.mode.features;
 
-import org.n52.android.view.geoar.gl.mode.ShabbyColorShader;
+import org.n52.android.view.geoar.gl.mode.BilligerColorShader;
 import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 
 import android.opengl.GLES20;
@@ -121,7 +121,7 @@ public class ReferencedGridFeature extends RenderFeature2 {
 				heightMapIndexData[offset++] = (short) (((y + 1) * yLength) + x);
 			}
 		}
-		renderer = ShabbyColorShader.getInstance();
+		renderer = BilligerColorShader.getInstance();
 		drawingMode = GLES20.GL_LINES;
 		setRenderObjectives(vertices, colors, normals, null, heightMapIndexData);
 	}

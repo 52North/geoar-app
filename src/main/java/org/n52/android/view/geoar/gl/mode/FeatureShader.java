@@ -55,28 +55,15 @@ public class FeatureShader {
 		}
 	}
 
-	/** Size of the position data in elements. */
-	static final int POSITION_DATA_SIZE = 3;
-	/** Size of the normal data in elements. */
-	static final int NORMAL_DATA_SIZE = 3;
-	/** How many bytes per float. */
-	static final int BYTES_PER_FLOAT = 4;
-
-	private static final int BYTES_PER_SHORT = 2;
-
-	static final int COLOR_DATA_SIZE = 4;
-	static final int TEXTURECOORD_DATA_SIZE = 2;
-
-	// /** OpenGL handles to our program uniforms */
-	// private static final String MVP_MATRIX_UNIFORM = "u_MVPMatrix";
-	// private static final String MV_MATRIX_UNIFORM = "u_MVMatrix";
-	// private static final String V_MATRIX_UNIFORM = "u_VMatrix";
-	//
-	// private static final String POSITION_ATTRIBUTE = "a_Position";
-	// private static final String NORMAL_ATTRIBUTE = "a_Normal";
-	// private static final String COLOR_ATTRIBUTE = "a_Color";
-	// private static final String TEXTURE_ATTRIBUTE = "a_TexCoordinate";
-
+	static final int SIZE_OF_VERTEX_ELEMENT = 3;
+	static final int SIZE_OF_NORMAL_ELEMENT = 3;
+	static final int SIZE_OF_COLOR_ELEMENT = 4;
+	static final int SIZE_OF_TEXTURECOORD_ELEMENT = 2;
+	
+	static final int SIZE_OF_FLOAT = 4;
+	static final int SIZE_OF_SHORT = 2;
+	
+	/** OpenGL handles and uniforms to our program */
 	protected static final String ATTRIBUTE_POSITION = "attr_Position";
 	protected static final String ATTRIBUTE_NORMAL = "attr_Normal";
 	protected static final String ATTRIBUTE_COLOR = "attr_Color";
@@ -125,8 +112,6 @@ public class FeatureShader {
 			GLES20.glDeleteShader(shaderHandle);
 		}
 	}
-
-
 
 	private static float calculateIntegralImageKey(Bitmap bitmap) {
 		final int width = bitmap.getWidth();
@@ -421,15 +406,17 @@ public class FeatureShader {
 			GLES20.glUniformMatrix4fv(mvMatrixUniform, 1, false, mvMatrix, 0);
 		}
 	}
-	
-	public void setLightPositionVec(float[] lightPosition){
-		if(programHandle == -1){
+
+	public void setLightPositionVec(float[] lightPosition) {
+		if (programHandle == -1) {
 			initProgram();
 		}
-		
-		lightPosHandle = GLES20.glGetUniformLocation(programHandle, UNIFORM_VEC3_LIGHTPOS);
-		if(lightPosHandle >= 0){
-			GLES20.glUniform3f(lightPosHandle, lightPosition[0], lightPosition[1], lightPosition[2]);
+
+		lightPosHandle = GLES20.glGetUniformLocation(programHandle,
+				UNIFORM_VEC3_LIGHTPOS);
+		if (lightPosHandle >= 0) {
+			GLES20.glUniform3f(lightPosHandle, lightPosition[0],
+					lightPosition[1], lightPosition[2]);
 		}
 	}
 

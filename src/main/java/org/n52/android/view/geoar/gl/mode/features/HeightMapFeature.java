@@ -15,7 +15,7 @@
  */
 package org.n52.android.view.geoar.gl.mode.features;
 
-import org.n52.android.view.geoar.gl.mode.ShabbyColorShader;
+import org.n52.android.view.geoar.gl.mode.BilligerColorShader;
 import org.n52.android.view.geoar.gl.mode.FeatureShader;
 import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ public class HeightMapFeature extends RenderFeature2 {
 			.getLogger(HeightMapFeature.class);
 
 	public HeightMapFeature() {
-		this(ShabbyColorShader.getInstance());
+		this(BilligerColorShader.getInstance());
 	}
 
 	public HeightMapFeature(FeatureShader renderer) {

@@ -410,7 +410,7 @@ public abstract class RenderFeature2 extends Spatial implements
 		} else {
 
 			if (renderer == null) {
-				renderer = ShabbyColorShader.getInstance();
+				renderer = BilligerColorShader.getInstance();
 			}
 			// renderer.onCreateInGLESThread();
 			geometry = new FeatureGeometryVBOandIBO(vertices, colors, normals,
@@ -427,7 +427,7 @@ public abstract class RenderFeature2 extends Spatial implements
 				renderer = TextureFeatureShader.getInstance();
 				renderer.addTexture(textureBitmap, false);
 			} else {
-				renderer = LightFeatureShader.getInstance();
+				renderer = BilligerLightShader.getInstance();
 			}
 		}
 

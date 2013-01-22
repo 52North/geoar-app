@@ -15,7 +15,7 @@
  */
 package org.n52.android.view.geoar.gl.mode;
 
-public class ShabbyColorShader extends FeatureShader {
+public class BilligerColorShader extends FeatureShader {
 
 	//@formatter:off
 	static final String vertexShader = "" +
@@ -52,7 +52,7 @@ public class ShabbyColorShader extends FeatureShader {
 	private static FeatureShader instance;
 
 	/** not used */
-	private ShabbyColorShader() {
+	private BilligerColorShader() {
 		super(vertexShader, fragmentShader);
 	}
 
