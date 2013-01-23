@@ -86,7 +86,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 	private List<RenderFeature2> renderFeatures = new ArrayList<RenderFeature2>();
 
-	private RenderFeature2 renderFeature;
+	private RenderFeature2 grid;
 	public static RenderFeature2 test;
 	
 	
@@ -123,7 +123,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		Matrix.multiplyMV(lightDirectionMVP, 0, rotationMatrix, 0, lightDirection, 0);
 
 		/** render grid */
-		renderFeature.onRender(GLESCamera.projectionMatrix,
+		grid.onRender(GLESCamera.projectionMatrix,
 				GLESCamera.viewMatrix, rotationMatrix, lightDirection);
 
 		/** render DataSources data */
@@ -183,8 +183,8 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	}
 
 	private void initScene() {
-		renderFeature = new GridFeature();
-		renderFeature.onCreateInGLESThread();
+		grid = new GridFeature();
+		grid.onCreateInGLESThread();
 		test = new CubeFeature2();
 		test.setTexture(			// Read in the resource
 				BitmapFactory.decodeResource(GeoARApplication.applicationContext.getResources(), R.drawable.n52_logo_highreso));

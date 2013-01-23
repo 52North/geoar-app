@@ -126,13 +126,13 @@ public class ARObject implements OpenGLCallable {
 			Matrix.multiplyMV(vec, 0, modelMatrix, 0, vec, 0);
 			if (!GLESCamera.frustumCulling(vec)) {
 				isInFrustum = false;
-//				return;
+				return;
 			}
 			/** object is in Frustum - update screen coordinates */
 			isInFrustum = true;
 			updateScreenCoordinates();
 		}
-		isInFrustum = true;
+//		isInFrustum = true;
 
 		// TODO XXX FIXME are just active visualizations called !? -> check
 		for (VisualizationLayer layer : visualizationLayers.values()) {

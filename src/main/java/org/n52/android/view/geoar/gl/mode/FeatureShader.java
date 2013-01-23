@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 
@@ -40,6 +39,10 @@ import android.opengl.GLUtils;
  * 
  */
 public class FeatureShader {
+	
+	private boolean hasLight;
+	private boolean hasColor;
+	private boolean hasTexture;
 
 	protected static class TextureDetails {
 		protected final int textureId;
@@ -159,9 +162,12 @@ public class FeatureShader {
 	private int colorHandle = -1;
 	private int normalHandle = -1;
 	private int lightPosHandle = -1;
+	
+	private int vertexShaderHandle = -1;
+	private int fragmentShaderHandle = -1;
 
 	private int textureCoordinateHandle = -1;
-	private int textureDataHandle;
+	private int textureDataHandle = -1;
 
 	private int textureUniform = -1;
 
@@ -180,10 +186,8 @@ public class FeatureShader {
 	final boolean supportsColors;
 	final boolean supportsTextures;
 	final boolean supportsLight;
-	private int vertexShaderHandle = -1;
-	private int fragmentShaderHandle = -1;
 
-	private List<TextureDetails> textures = new ArrayList<TextureDetails>();
+
 
 	public FeatureShader(String vertexShader, String fragmentShader) {
 		this.vertexShader = vertexShader;
@@ -217,7 +221,8 @@ public class FeatureShader {
 
 		if (textureDetails == null) {
 			int[] textures = new int[1];
-			GLES20.glGenTextures(1, textures, 0);
+			while(!(textures[0] > 0))
+				GLES20.glGenTextures(1, textures, 0);
 			int textureId = textures[0];
 			if (textureId > 0) {
 				GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
@@ -249,14 +254,7 @@ public class FeatureShader {
 		return textureDetails;
 	}
 
-	public void bindTextures() {
 
-	}
-
-	public void unbindTextures() {
-
-		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-	}
 
 	public int getColorHandle() {
 		if (programHandle == -1) {

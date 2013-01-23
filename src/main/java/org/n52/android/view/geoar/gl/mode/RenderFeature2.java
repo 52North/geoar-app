@@ -495,6 +495,8 @@ public abstract class RenderFeature2 extends Spatial implements
 
 	public void onRender(float[] mvpMatrix) {
 		/** sets the program object as part of current rendering state */
+		if(!isInitialized)
+			return;
 		renderer.useProgram();
 
 		if (textureDetails != null) {
