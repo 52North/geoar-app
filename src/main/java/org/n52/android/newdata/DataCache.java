@@ -388,30 +388,32 @@ public class DataCache {
 	}
 
 	private void removeUnusedTiles() {
-		synchronized (mQueryIndex) {
-			LOG.debug("Removing unused Tiles");
-			if (mQueryIndex.size() <= MAX_TILES_TO_REMOVE * 2) {
-				return;
-			}
-
-			@SuppressWarnings("unchecked")
-			List<DataTile> dataTiles = mQueryIndex.queryAll();
-			Collections.sort(dataTiles, new Comparator<DataTile>() {
-				@Override
-				public int compare(DataTile lhs, DataTile rhs) {
-					if (lhs.lastUsage == rhs.lastUsage) {
-						return 0;
-					} else {
-						return lhs.lastUsage < rhs.lastUsage ? -1 : 1;
-					}
-				}
-			});
-
-			for (int i = 0, len = Math.min(dataTiles.size(),
-					MAX_TILES_TO_REMOVE); i < len; i++) {
-				removeTile(dataTiles.get(i));
-			}
-		}
+		return;
+		// TODO
+		// synchronized (mQueryIndex) {
+		// LOG.debug("Removing unused Tiles");
+		// if (mQueryIndex.size() <= MAX_TILES_TO_REMOVE * 2) {
+		// return;
+		// }
+		//
+		// @SuppressWarnings("unchecked")
+		// List<DataTile> dataTiles = mQueryIndex.queryAll();
+		// Collections.sort(dataTiles, new Comparator<DataTile>() {
+		// @Override
+		// public int compare(DataTile lhs, DataTile rhs) {
+		// if (lhs.lastUsage == rhs.lastUsage) {
+		// return 0;
+		// } else {
+		// return lhs.lastUsage < rhs.lastUsage ? -1 : 1;
+		// }
+		// }
+		// });
+		//
+		// for (int i = 0, len = Math.min(dataTiles.size(),
+		// MAX_TILES_TO_REMOVE); i < len; i++) {
+		// removeTile(dataTiles.get(i));
+		// }
+		// }
 
 	}
 
