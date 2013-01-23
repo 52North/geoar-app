@@ -100,6 +100,11 @@ public class DataSourceInstanceSettingsDialogActivity extends SherlockActivity {
 		final DataSourceInstanceHolder dataSourceInstance = getIntent()
 				.getParcelableExtra("dataSourceInstance");
 		resultListener = getIntent().getParcelableExtra("resultListener");
+		generalSettingsView.setStringsContext(dataSourceInstance.getParent()
+				.getPluginHolder().getPluginContext());
+		filterSettingsView.setStringsContext(dataSourceInstance.getParent()
+				.getPluginHolder().getPluginContext());
+
 		generalSettingsView.setSettingsObject(dataSourceInstance
 				.getDataSource());
 		filterSettingsView.setSettingsObject(dataSourceInstance

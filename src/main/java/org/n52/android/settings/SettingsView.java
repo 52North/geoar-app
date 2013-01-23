@@ -43,6 +43,7 @@ public class SettingsView extends LinearLayout {
 	private LayoutInflater mInflater;
 	// Assigning Fields to groups
 	final Map<String, List<SettingsViewField<?>>> groupFieldMap = new TreeMap<String, List<SettingsViewField<?>>>();
+	private Context mStringsContext;
 
 	public SettingsView(Context context) {
 		super(context);
@@ -57,6 +58,11 @@ public class SettingsView extends LinearLayout {
 	private void init() {
 		mInflater = LayoutInflater.from(getContext());
 		setOrientation(LinearLayout.VERTICAL);
+		mStringsContext = getContext();
+	}
+
+	public void setStringsContext(Context stringsContext) {
+		this.mStringsContext = stringsContext;
 	}
 
 	public void setSettingsObject(Object settingsObject) {
@@ -126,7 +132,8 @@ public class SettingsView extends LinearLayout {
 
 			for (SettingsViewField<?> filterView : viewList) {
 				Field field = filterView.getField();
-				if (field.getAnnotation(Name.class) != null) {
+				Name nameAnnotation = field.getAnnotation(Name.class);
+				if (nameAnnotation != null) {
 
 					// TextView labelView = new TextView(this, null,
 					// R.style.formLabel);
@@ -135,7 +142,12 @@ public class SettingsView extends LinearLayout {
 
 					TextView labelView = (TextView) mInflater.inflate(
 							R.layout.textview_label, null);
-					labelView.setText(field.getAnnotation(Name.class).value());
+					if (nameAnnotation.resId() >= 0) {
+						labelView.setText(mStringsContext
+								.getString(nameAnnotation.resId()));
+					} else {
+						labelView.setText(nameAnnotation.value());
+					}
 					addView(labelView, LayoutParams.WRAP_CONTENT,
 							LayoutParams.WRAP_CONTENT);
 				}

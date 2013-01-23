@@ -131,7 +131,12 @@ public class DataSourceHolder implements Parcelable {
 		}
 		mInstanceable = SettingsHelper.hasSettings(dataSourceClass);
 
-		name = dataSourceAnnotation.name();
+		if (dataSourceAnnotation.name().resId() >= 0) {
+			name = pluginHolder.getPluginContext().getString(
+					dataSourceAnnotation.name().resId());
+		} else {
+			name = dataSourceAnnotation.name().value();
+		}
 		description = dataSourceAnnotation.description();
 		minReloadInterval = dataSourceAnnotation.minReloadInterval();
 		cacheZoomLevel = dataSourceAnnotation.cacheZoomLevel();
@@ -257,6 +262,10 @@ public class DataSourceHolder implements Parcelable {
 			initializeInstances();
 		}
 		return mDataSourceInstances;
+	}
+	
+	public InstalledPluginHolder getPluginHolder() {
+		return mPluginHolder;
 	}
 
 	/**
