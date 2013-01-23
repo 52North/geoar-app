@@ -31,6 +31,7 @@ import org.n52.android.newdata.PluginLoader;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.utils.GeoLocation;
 import org.n52.android.view.map.DataSourcesOverlay.OnOverlayItemTapListener;
+import org.n52.android.view.map.GeoARMapView.OnZoomChangeListener;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -47,7 +48,7 @@ import com.actionbarsherlock.app.SherlockFragment;
 
 public class MapFragment extends SherlockFragment {
 
-	private MapView mapView;
+	private GeoARMapView mapView;
 
 	private MapActivityContext mapActivity; // Special context to use MapView
 											// without MapActivity
@@ -100,7 +101,7 @@ public class MapFragment extends SherlockFragment {
 		// onCreateView.
 
 		mapActivity = new MapActivityContext(getActivity());
-		mapView = new MapView(mapActivity);
+		mapView = new GeoARMapView(mapActivity);
 
 		// Offline rendering here
 		// setMapFile(new File(Environment.getExternalStorageDirectory()
@@ -151,13 +152,26 @@ public class MapFragment extends SherlockFragment {
 			@Override
 			public boolean onTouch(View arg0, MotionEvent motionEvent) {
 				// Use motion event to inform overlay handlers that they
-				// should
-				// update their data if needed
-				for (DataSourceOverlayHandler handler : overlayHandlerMap
-						.values()) {
-					handler.onTouchEvent(motionEvent, mapView);
+				// should update their data if needed
+				if (motionEvent.getAction() == MotionEvent.ACTION_UP
+						|| motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
+
+					for (DataSourceOverlayHandler handler : overlayHandlerMap
+							.values()) {
+						handler.updateOverlay(mapView, false);
+					}
 				}
 				return false;
+			}
+		});
+
+		mapView.setOnZoomChangeListener(new OnZoomChangeListener() {
+			@Override
+			public void onZoomChange() {
+				for (DataSourceOverlayHandler handler : overlayHandlerMap
+						.values()) {
+					handler.updateOverlay(mapView, false);
+				}
 			}
 		});
 

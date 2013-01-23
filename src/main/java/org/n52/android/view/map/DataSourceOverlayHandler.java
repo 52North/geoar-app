@@ -202,13 +202,6 @@ public class DataSourceOverlayHandler implements
 		return dataSourceInstance;
 	}
 
-	public void onTouchEvent(android.view.MotionEvent e, MapView mapView) {
-		if (e.getAction() == MotionEvent.ACTION_UP
-				|| e.getAction() == MotionEvent.ACTION_CANCEL) {
-			updateOverlay(mapView, false);
-		}
-	};
-
 	public void clear() {
 		synchronized (updateLock) {
 			LOG.info(dataSourceInstance.getName() + " clearing map overlay");
