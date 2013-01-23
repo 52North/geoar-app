@@ -90,7 +90,7 @@ public class DataSourceInstanceHolder implements Parcelable {
 					"Referenced filter has no appropriate constructor");
 		}
 
-		dataCache = new BalancingDataCache(this);
+		dataCache = new DataCache(this);
 	}
 
 	@CheckedChangedListener

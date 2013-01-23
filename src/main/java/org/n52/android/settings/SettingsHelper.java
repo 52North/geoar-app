@@ -21,8 +21,11 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import org.n52.android.newdata.Annotations.DefaultSetting;
 import org.n52.android.newdata.Annotations.DefaultSettingsSet;
@@ -219,6 +222,18 @@ public class SettingsHelper {
 	private static Object getObjectFromStringValue(Field field, String value) {
 		if (String.class.isAssignableFrom(field.getType())) {
 			return value;
+		} else if (Integer.class.isAssignableFrom(field.getType())) {
+			return Integer.parseInt(value);
+		} else if (Float.class.isAssignableFrom(field.getType())) {
+			return Float.parseFloat(value);
+		} else if (Double.class.isAssignableFrom(field.getType())) {
+			return Double.parseDouble(value);
+		} else if (Date.class.isAssignableFrom(field.getType())) {
+			return DateUtils.getDateFromISOString(value);
+		} else if (Calendar.class.isAssignableFrom(field.getType())) {
+			Calendar instance = Calendar.getInstance();
+			instance.setTime(DateUtils.getDateFromISOString(value));
+			return instance;
 		}
 
 		throw new RuntimeException(field.getType()
@@ -269,8 +284,8 @@ public class SettingsHelper {
 		return true;
 	}
 
-	public static boolean isEqualSettings(DefaultSettingsSet defaultSettingsSet,
-			Object settingsObject) {
+	public static boolean isEqualSettings(
+			DefaultSettingsSet defaultSettingsSet, Object settingsObject) {
 
 		Class<? extends Object> settingsClass = settingsObject.getClass();
 		try {

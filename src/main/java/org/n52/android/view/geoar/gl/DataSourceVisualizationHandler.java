@@ -26,7 +26,7 @@ import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.newdata.DataCache;
 import org.n52.android.newdata.DataCache.DataSourceErrorType;
 import org.n52.android.newdata.DataCache.GetDataBoundsCallback;
-import org.n52.android.newdata.DataCache.RequestHolder;
+import org.n52.android.newdata.DataCache.Cancelable;
 import org.n52.android.newdata.DataSourceInstanceHolder;
 import org.n52.android.newdata.RenderFeatureFactory;
 import org.n52.android.newdata.SpatialEntity;
@@ -55,22 +55,22 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 	protected GetDataBoundsCallback callback = new GetDataBoundsCallback() {
 
 		@Override
-		public void onProgressUpdate(int progress, int maxProgress, int step) {
+		public void onProgressUpdate(int progress, int maxProgress) {
 			String stepTitle = "";
-			switch (step) {
-			// case NoiseInterpolation.STEP_CLUSTERING:
-			// stepTitle = mContext.getString(R.string.clustering);
+			// switch (step) {
+			// // case NoiseInterpolation.STEP_CLUSTERING:
+			// // stepTitle = mContext.getString(R.string.clustering);
+			// // break;
+			// // case NoiseInterpolation.STEP_INTERPOLATION:
+			// // stepTitle =
+			// // mContext.getString(R.string.interpolation);
+			// // break;
+			// case DataCache.STEP_REQUEST:
+			// stepTitle = "Request Data";
 			// break;
-			// case NoiseInterpolation.STEP_INTERPOLATION:
-			// stepTitle =
-			// mContext.getString(R.string.interpolation);
-			// break;
-			case DataCache.STEP_REQUEST:
-				stepTitle = "Request Data";
-				break;
-			}
+			// }
 
-			InfoView.setProgressTitle(stepTitle,
+			InfoView.setProgressTitle(R.string.requesting_data,
 					DataSourceVisualizationHandler.this);
 			InfoView.setProgress(progress, maxProgress,
 					DataSourceVisualizationHandler.this);
@@ -135,7 +135,7 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 	private float currentGroundResolution;
 	private MercatorRect currentRect;
 
-	private RequestHolder currentUpdate;
+	private Cancelable currentUpdate;
 
 	public DataSourceVisualizationHandler(final ARSurfaceView glSurfaceView,
 			DataSourceInstanceHolder dataSourceInstance) {
@@ -197,12 +197,14 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 				currentUpdate.cancel();
 			}
 			// trigger data request
-			currentUpdate = dataSourceInstanceHolder.getDataCache().getDataByBBox(
-					new MercatorRect(currentCenterMercator.x - pixelRadius,
-							currentCenterMercator.y - pixelRadius,
-							currentCenterMercator.x + pixelRadius,
-							currentCenterMercator.y + pixelRadius,
-							Settings.ZOOM_AR), callback, false);
+			currentUpdate = dataSourceInstanceHolder.getDataCache()
+					.getDataByBBox(
+							new MercatorRect(currentCenterMercator.x
+									- pixelRadius, currentCenterMercator.y
+									- pixelRadius, currentCenterMercator.x
+									+ pixelRadius, currentCenterMercator.y
+									+ pixelRadius, Settings.ZOOM_AR), callback,
+							false);
 		}
 
 	}

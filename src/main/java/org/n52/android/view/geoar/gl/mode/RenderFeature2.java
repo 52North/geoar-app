@@ -312,14 +312,14 @@ public abstract class RenderFeature2 extends Spatial implements
 
 		@Override
 		void onRenderGeometrie() {
-			//@formatter:off
+			// @formatter:off
 			final int stride = (POSITION_DATA_SIZE
 					+ (hasColors ? COLOR_DATA_SIZE : 0)
-					+ (hasNormals ? NORMAL_DATA_SIZE : 0) 
-					+ (hasTextureCoords ? TEXTURE_DATA_SIZE	: 0))
+					+ (hasNormals ? NORMAL_DATA_SIZE : 0) + (hasTextureCoords ? TEXTURE_DATA_SIZE
+						: 0))
 					* BYTES_PER_FLOAT;
-			//@formatter:on
-			
+			// @formatter:on
+
 			int bufferPosition = 0;
 			/** defines the array of generic vertex attribute data */
 			strideBuffer.position(bufferPosition);
@@ -391,7 +391,7 @@ public abstract class RenderFeature2 extends Spatial implements
 	protected Float alpha;
 	/** color of the object */
 	protected int androidColor;
-	
+
 	boolean isInitialized = false;
 
 	// protected int textureDataHandle;
@@ -404,7 +404,7 @@ public abstract class RenderFeature2 extends Spatial implements
 		// R.drawable.n52_logo_highreso);
 	}
 
-	@Deprecated 
+	@Deprecated
 	protected void setRenderObjectives(float[] vertices, float[] colors,
 			float[] normals, float[] textureCoords, short[] indices) {
 		if (indices == null || indices.length == 0) {
@@ -424,8 +424,8 @@ public abstract class RenderFeature2 extends Spatial implements
 	protected void setRenderObjectives(float[] vertices, float[] colors,
 			float[] normals, float[] textureCoords) {
 		// TODO XXX FIXME not elegant here, maybe this is
-		if (renderer == null){
-			if(textureCoords != null && textureBitmap != null){
+		if (renderer == null) {
+			if (textureCoords != null && textureBitmap != null) {
 				renderer = TextureFeatureShader.getInstance();
 				renderer.addTexture(textureBitmap, false);
 			} else {
@@ -437,7 +437,7 @@ public abstract class RenderFeature2 extends Spatial implements
 		geometry = new FeatureGeometryStride(vertices, colors, normals,
 				textureCoords);
 		boundingBox = new BoundingBox(vertices);
-		
+
 		isInitialized = true;
 	}
 
@@ -466,11 +466,12 @@ public abstract class RenderFeature2 extends Spatial implements
 	}
 
 	@Override
-	public void onRender(final float[] projectionMatrix, final float[] viewMatrix,
-			final float[] parentMatrix, final float[] lightPosition) {
-		if(!isInitialized)
+	public void onRender(final float[] projectionMatrix,
+			final float[] viewMatrix, final float[] parentMatrix,
+			final float[] lightPosition) {
+		if (!isInitialized)
 			return;
-		
+
 		GLES20.glDisable(GLES20.GL_BLEND);
 		/** set the matrices to identity matrix */
 		Matrix.setIdentityM(modelMatrix, 0);
@@ -511,10 +512,11 @@ public abstract class RenderFeature2 extends Spatial implements
 			geometry.onRenderGeometrie();
 	}
 
-	public void onRender(float[] mvpMatrix, float[] mvMatrix, float[] lightPosition) {
+	public void onRender(float[] mvpMatrix, float[] mvMatrix,
+			float[] lightPosition) {
 		/** sets the program object as part of current rendering state */
 		renderer.useProgram();
-		
+
 		renderer.setLightPositionVec(lightPosition);
 
 		if (textureDetails != null) {

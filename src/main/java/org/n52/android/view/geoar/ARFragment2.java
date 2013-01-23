@@ -205,7 +205,7 @@ public class ARFragment2 extends SherlockFragment implements
 		}
 		if (augmentedView != null)
 			augmentedView.destroyDrawingCache();
-
+		arViewComponents.clear();
 	}
 
 	@Override

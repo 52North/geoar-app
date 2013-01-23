@@ -25,7 +25,7 @@ import org.n52.android.R;
 import org.n52.android.alg.proj.MercatorRect;
 import org.n52.android.newdata.DataCache.DataSourceErrorType;
 import org.n52.android.newdata.DataCache.GetDataBoundsCallback;
-import org.n52.android.newdata.DataCache.RequestHolder;
+import org.n52.android.newdata.DataCache.Cancelable;
 import org.n52.android.newdata.DataSourceInstanceHolder;
 import org.n52.android.newdata.DataSourceInstanceHolder.DataSourceSettingsChangedListener;
 import org.n52.android.newdata.SpatialEntity;
@@ -63,12 +63,12 @@ public class DataSourceOverlayHandler implements
 		protected boolean canceled;
 		protected MercatorRect bounds;
 		// protected MapView mapView;
-		protected RequestHolder requestHolder;
+		protected Cancelable requestHolder;
 
 		protected GetDataBoundsCallback callback = new GetDataBoundsCallback() {
 
 			@Override
-			public void onProgressUpdate(int progress, int maxProgress, int step) {
+			public void onProgressUpdate(int progress, int maxProgress) {
 
 				InfoView.setProgressTitle(
 						"Requesting " + dataSourceInstance.getName(),
@@ -114,8 +114,8 @@ public class DataSourceOverlayHandler implements
 			@Override
 			public void onReceiveDataUpdate(MercatorRect bounds,
 					List<? extends SpatialEntity> data) {
-				synchronized (updateLock) {
-					if (!canceled) {
+				if (!canceled) {
+					synchronized (updateLock) {
 						List<VisualizationOverlayItem> overlayItems = new ArrayList<VisualizationOverlayItem>();
 						List<ItemVisualization> visualizations = dataSourceInstance
 								.getParent().getVisualizations()
@@ -239,7 +239,7 @@ public class DataSourceOverlayHandler implements
 	 *            request data without verification
 	 */
 	public void updateOverlay(MapView mapView, boolean force) {
-		byte zoom = (byte) (mapView.getMapPosition().getZoomLevel() - 1);
+		byte zoom = mapView.getMapPosition().getZoomLevel();
 
 		zoom = (byte) Math.min(zoom, dataSourceInstance.getParent()
 				.getMaxZoomLevel());
@@ -265,7 +265,7 @@ public class DataSourceOverlayHandler implements
 			if (currentUpdate == null
 					|| !currentUpdate.bounds.contains(newBounds)) {
 				// no data or data outside viewport
-				updateDelay = 2500;
+				updateDelay = 1000;
 			}
 			if (currentUpdate != null
 					&& currentUpdate.bounds.contains(newBounds)

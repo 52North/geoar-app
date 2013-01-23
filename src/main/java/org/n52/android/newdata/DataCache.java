@@ -16,50 +16,57 @@
 
 package org.n52.android.newdata;
 
-import java.lang.ref.SoftReference;
-import java.net.ConnectException;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorRect;
-import org.n52.android.data.Tile;
+import org.n52.android.utils.GeoLocationRect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import android.os.SystemClock;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.index.ItemVisitor;
+import com.vividsolutions.jts.index.quadtree.Quadtree;
+
 /**
- * Interface to request measurements from a specific {@link DataSource}. Builds
- * an automatic tile based cache of measurements to reduce data transfer. Update
- * interval of cached tiles is controlled by, cache gets freed as required by
- * the VM
+ * Interface to request data from a specific {@link DataSource}. Builds an
+ * automatic tile based cache of measurements to reduce data transfer.
  * 
  * @author Holger Hopmann
  * @author Arne de Wall
  */
 public class DataCache {
 
+	private static final int MAX_TILES_TO_REMOVE = 20;
+
 	/**
 	 * Future-like interface for cancellation of requests
 	 * 
 	 */
-	public interface RequestHolder {
+	public interface Cancelable {
 		void cancel();
 	}
 
 	public interface OnProgressUpdateListener {
-		void onProgressUpdate(int progress, int size, int stepRequest);
+		void onProgressUpdate(int progress, int size);
 	}
 
 	public interface GetDataCallback {
-		void onReceiveMeasurements(Tile tile, List<? extends SpatialEntity> data);
+		void onReceiveMeasurements(List<? extends SpatialEntity> data);
 
-		void onAbort(Tile tile, DataSourceErrorType reason);
+		void onAbort(DataSourceErrorType reason);
 	}
 
 	public abstract interface GetDataBoundsCallback extends
@@ -70,53 +77,172 @@ public class DataCache {
 		void onAbort(MercatorRect bbox, DataSourceErrorType reason);
 	}
 
+	private static Cancelable NOOPCANCELABLE = new Cancelable() {
+
+		@Override
+		public void cancel() {
+		}
+	};
+
+	private interface DataCallback {
+		void onDataReceived();
+
+		void onAbort(DataSourceErrorType reason);
+	}
+
 	/**
 	 * A tile in the cache
 	 */
 	public class DataTile {
-		public Tile tile;
-		public long lastUpdate;
-		public boolean updatePending;
-		public Runnable fetchRunnable;
-		public List<? extends SpatialEntity> data;
 
-		protected List<GetDataCallback> getDataCallbacks = new ArrayList<GetDataCallback>();
+		private static final int CLEANUP_TILES_MIN_COUNT = 50;
+		private Envelope tileEnvelope;
+		private long lastUpdate;
+		private long lastUsage;
+		private boolean updateRequired = true;
+		private int numEntities;
 
-		public void addCallback(GetDataCallback callback) {
-			synchronized (getDataCallbacks) {
-				getDataCallbacks.add(callback);
+		private List<DataCallback> awaitDataCallbacks = new ArrayList<DataCallback>();
+		private final Runnable fetchRunnable = new Runnable() {
+
+			@Override
+			public void run() {
+				Filter filter = dataFilter.clone().setBoundingBox(
+						new GeoLocationRect((float) tileEnvelope.getMinX(),
+								(float) tileEnvelope.getMaxY(),
+								(float) tileEnvelope.getMaxX(),
+								(float) tileEnvelope.getMinY()));
+
+				try {
+					// Actual access to DataSource interface
+					LOG.debug("Requesting data from data source");
+					List<? extends SpatialEntity> data = dataSourceInstance
+							.getDataSource().getMeasurements(filter);
+					numEntities = data.size();
+					addData(tileEnvelope, data);
+					data.clear();
+				} catch (Exception e) {
+					LOG.error(logTag + " Exception on request", e);
+					dataSourceInstance.reportError(e);
+					if (e instanceof SocketException) {
+						abort(DataSourceErrorType.CONNECTION);
+					} else {
+						abort(DataSourceErrorType.UNKNOWN);
+					}
+					return;
+				}
+
+				synchronized (awaitDataCallbacks) {
+					for (DataCallback callback : awaitDataCallbacks) {
+						callback.onDataReceived();
+					}
+					awaitDataCallbacks.clear();
+
+					lastUpdate = SystemClock.uptimeMillis();
+					updateRequired = false;
+					LOG.debug("Tile update finished");
+				}
+			}
+		};
+
+		private void addCallback(DataCallback callback) {
+			synchronized (awaitDataCallbacks) {
+				awaitDataCallbacks.add(callback);
+
+				if (awaitDataCallbacks.size() == 1) {
+					fetchingThreadPool.execute(fetchRunnable);
+				}
 			}
 		}
 
-		public void setMeasurements(List<? extends SpatialEntity> measurements) {
-			lastUpdate = System.currentTimeMillis();
-			this.data = measurements;
-
-			synchronized (getDataCallbacks) {
-				updatePending = false;
-				for (GetDataCallback callback : getDataCallbacks) {
-					callback.onReceiveMeasurements(this.tile, this.data);
+		private void removeCallback(DataCallback callback) {
+			synchronized (awaitDataCallbacks) {
+				awaitDataCallbacks.remove(callback);
+				if (awaitDataCallbacks.isEmpty()) {
+					fetchingThreadPool.remove(fetchRunnable);
 				}
-				getDataCallbacks.clear();
 			}
+		}
+
+		public Cancelable awaitData(final DataCallback callback,
+				boolean forceUpdate) {
+			lastUsage = SystemClock.uptimeMillis();
+
+			cleanupTilesCounter++;
+			if (cleanupTilesCounter >= CLEANUP_TILES_MIN_COUNT) {
+				cleanupTilesCounter = 0;
+				removeUnusedTiles();
+			}
+
+			if (forceUpdate || requiresUpdate()) {
+				updateRequired = true;
+			}
+			if (updateRequired) {
+				addCallback(callback);
+				return new Cancelable() {
+					@Override
+					public void cancel() {
+						removeCallback(callback);
+						callback.onAbort(DataSourceErrorType.CANCELED);
+					}
+				};
+			} else {
+				callback.onDataReceived();
+				return NOOPCANCELABLE;
+			}
+		}
+
+		public Cancelable getData(final Envelope envelope,
+				final GetDataCallback callback, boolean forceUpdate) {
+			return awaitData(new DataCallback() {
+
+				@Override
+				public void onDataReceived() {
+					final List<SpatialEntity> resultList = new ArrayList<SpatialEntity>();
+					synchronized (mEntityIndex) {
+						mEntityIndex.query(envelope, new ItemVisitor() {
+							@Override
+							public void visitItem(Object item) {
+								SpatialEntity entity = (SpatialEntity) item;
+								if (envelope.contains(entity.getLongitude(),
+										entity.getLatitude())) {
+									resultList.add(entity);
+								}
+							}
+						});
+					}
+					callback.onReceiveMeasurements(resultList);
+				}
+
+				@Override
+				public void onAbort(DataSourceErrorType reason) {
+					callback.onAbort(reason);
+				}
+			}, forceUpdate);
+		}
+
+		public Cancelable getData(final GetDataCallback callback,
+				boolean forceUpdate) {
+			return getData(tileEnvelope, callback, forceUpdate);
 		}
 
 		public void abort(DataSourceErrorType reason) {
-			synchronized (getDataCallbacks) {
-				updatePending = false;
-				for (GetDataCallback callback : getDataCallbacks) {
-					callback.onAbort(this.tile, reason);
+			synchronized (awaitDataCallbacks) {
+				// updatePending = false; // XXX
+				for (DataCallback callback : awaitDataCallbacks) {
+					callback.onAbort(reason);
 				}
-				getDataCallbacks.clear();
+				awaitDataCallbacks.clear();
+				fetchingThreadPool.remove(fetchRunnable);
 			}
 		}
 
-		public DataTile(Tile tile) {
-			this.tile = tile;
+		public DataTile(Envelope tileEnvelope) {
+			this.tileEnvelope = tileEnvelope;
 		}
 
-		public boolean hasMeasurements() {
-			return data != null;
+		public boolean requiresUpdate() {
+			return lastUpdate <= SystemClock.uptimeMillis() - minReloadInterval;
 		}
 
 	}
@@ -125,22 +251,23 @@ public class DataCache {
 		UNKNOWN, CONNECTION, CANCELED
 	}
 
-	public static final int STEP_REQUEST = 3;
-
 	private static final long MIN_RELOAD_INTERVAL = 60000;
 
 	private static ThreadPoolExecutor SHARED_THREAD_POOL = (ThreadPoolExecutor) Executors
 			.newFixedThreadPool(3);
 
-	protected Map<Tile, SoftReference<DataTile>> tileCacheMapping = new HashMap<Tile, SoftReference<DataTile>>();
-	protected DataSourceInstanceHolder dataSourceInstance;
+	private DataSourceInstanceHolder dataSourceInstance;
 	private ThreadPoolExecutor fetchingThreadPool;
-	protected byte tileZoom; // Zoom level for the tiling system of this
-								// cache
-	protected Filter dataFilter;
-	protected String logTag;
+	// protected byte tileZoom; // Zoom level for the tiling system of this
+	// cache
+	private Filter dataFilter;
+	private String logTag;
 	private long minReloadInterval;
 
+	private long cleanupTilesCounter;
+
+	private Quadtree mQueryIndex = new Quadtree();
+	private Quadtree mEntityIndex = new Quadtree();
 	private static final Logger LOG = LoggerFactory.getLogger(DataCache.class);
 
 	public DataCache(DataSourceInstanceHolder dataSource) {
@@ -156,7 +283,7 @@ public class DataCache {
 	public DataCache(DataSourceInstanceHolder dataSource, byte tileZoom,
 			ThreadPoolExecutor fetchingThreadPool) {
 		this.dataSourceInstance = dataSource;
-		this.tileZoom = tileZoom;
+		// this.tileZoom = tileZoom;
 		this.logTag = getClass().getSimpleName() + " " + dataSource.getName();
 		this.fetchingThreadPool = fetchingThreadPool;
 		minReloadInterval = this.dataSourceInstance.getParent()
@@ -194,154 +321,141 @@ public class DataCache {
 	 * Cancels all fetching operations and clears the cache
 	 */
 	public void clearCache() {
-		synchronized (tileCacheMapping) {
-			LOG.info(logTag + " Clearing cache");
-			// Cancel all operation
-			for (SoftReference<DataTile> cacheReference : tileCacheMapping
-					.values()) {
-				if (cacheReference.get() != null) {
-					cacheReference.get().abort(DataSourceErrorType.CANCELED);
+		synchronized (mEntityIndex) {
+			synchronized (mQueryIndex) {
+				@SuppressWarnings("unchecked")
+				List<DataTile> dataTiles = mQueryIndex.queryAll();
+				for (DataTile dataTile : dataTiles) {
+					dataTile.abort(DataSourceErrorType.CANCELED);
 				}
+				mQueryIndex = new Quadtree();
 			}
-			tileCacheMapping.clear();
+
+			mEntityIndex = new Quadtree();
 		}
 	}
 
-	/**
-	 * Method to request data by spatial index {@link Tile}. This method will
-	 * automatically fetch new data if the specified {@link Tile} is (no longer)
-	 * cached and based on the expiration settings of the underlying
-	 * {@link DataSource}.
-	 * 
-	 * @param tile
-	 * @param callback
-	 *            The callback which will receive the requested data
-	 * @param forceUpdate
-	 *            Allows to force requesting of new data instead of returning
-	 *            cached date
-	 * @return Holder to cancel this request
-	 */
-	public RequestHolder getDataByTile(Tile tile, GetDataCallback callback,
-			boolean forceUpdate) {
-		return getDataByTile(tile, callback, forceUpdate, true);
-	}
+	private Cancelable getDataByEnvelope(Envelope envelope,
+			GetDataCallback callback, boolean forceUpdate) {
+		DataTile containingDataTile = null;
+		synchronized (mQueryIndex) {
+			@SuppressWarnings("unchecked")
+			List<DataTile> queryResult = mQueryIndex.query(envelope);
 
-	/**
-	 * Method to request data by spatial index {@link Tile}. This method will
-	 * automatically fetch new data if the specified {@link Tile} is (no longer)
-	 * cached and based on the expiration settings of the underlying
-	 * {@link DataSource}.
-	 * 
-	 * @param tile
-	 * @param callback
-	 *            The callback which will receive the requested data
-	 * @param forceUpdate
-	 *            Allows to force requesting of new data instead of returning
-	 *            cached date
-	 * @return Holder to cancel this request
-	 */
-	private RequestHolder getDataByTile(Tile tile, GetDataCallback callback,
-			boolean forceUpdate, boolean async) {
-		RequestHolder requestHolder = null;
-
-		synchronized (tileCacheMapping) {
-			if (forceUpdate) {
-				// Log.i(logTag, "Forcing update");
+			for (DataTile dataTile : queryResult) {
+				if (dataTile.tileEnvelope.contains(envelope)) {
+					containingDataTile = dataTile;
+					break;
+				}
 			}
 
-			SoftReference<DataTile> cacheReference = tileCacheMapping.get(tile);
-			DataTile cachedTile = cacheReference != null ? cacheReference.get()
-					: null;
-			if (cachedTile != null) {
-				// Tile bereits vorhanden
-				if (cachedTile.hasMeasurements() && !forceUpdate) {
-					// Log.i(logTag, "Tile Cache direct hit " + tile.x + ", "
-					// + tile.y);
-
-					callback.onReceiveMeasurements(cachedTile.tile,
-							cachedTile.data);
-				}
-				if (!cachedTile.hasMeasurements()
-						|| cachedTile.lastUpdate <= System.currentTimeMillis()
-								- minReloadInterval || forceUpdate) {
-					// Log.i(logTag, "Tile Cache hit " + tile.x + ", " +
-					// tile.y);
-					cachedTile.addCallback(callback);
-					requestHolder = fetchMeasurements(cachedTile, async);
-				}
-			} else {
-				// Log.i(logTag, "Tile Cache miss " + tile.x + ", " + tile.y);
-				cachedTile = new DataTile(tile);
-				cachedTile.addCallback(callback);
-				tileCacheMapping.put(tile, new SoftReference<DataTile>(
-						cachedTile));
-
-				requestHolder = fetchMeasurements(cachedTile, async);
+			if (containingDataTile == null) {
+				containingDataTile = new DataTile(envelope);
+				mQueryIndex.insert(envelope, containingDataTile);
 			}
 		}
 
-		return requestHolder;
+		return containingDataTile.getData(envelope, callback, forceUpdate);
 	}
 
-	/**
-	 * Queues fetching of data for a {@link DataTile} using the currently set
-	 * {@link Filter}.
-	 * 
-	 * @param dataTile
-	 * @return Holder to dequeue the request
-	 */
-	private RequestHolder fetchMeasurements(final DataTile dataTile,
-			boolean async) {
-
-		if (!dataTile.updatePending) {
-
-			dataTile.updatePending = true;
-			dataTile.fetchRunnable = new Runnable() {
-				public void run() {
-					// try {
-
-					LOG.debug(logTag + " Requesting Data " + dataTile.tile.x
-							+ ", " + dataTile.tile.y);
-
-					try {
-						requestDataForTile(dataTile);
-						// Maybe too unreliable for getDataByBBox
-						dataSourceInstance.clearError();
-					} catch (Exception e) {
-						LOG.error(logTag + " Exception on request", e);
-						dataSourceInstance.reportError(e);
-						if (e instanceof SocketException) {
-							dataTile.abort(DataSourceErrorType.CONNECTION);
-						} else {
-							dataTile.abort(DataSourceErrorType.UNKNOWN);
-						}
+	private void addData(final Envelope envelope,
+			List<? extends SpatialEntity> data) {
+		synchronized (mEntityIndex) {
+			final List<SpatialEntity> entitiesToReplace = new ArrayList<SpatialEntity>();
+			mEntityIndex.query(envelope, new ItemVisitor() {
+				@Override
+				public void visitItem(Object item) {
+					SpatialEntity entity = (SpatialEntity) item;
+					if (envelope.contains(entity.getLongitude(),
+							entity.getLatitude())) {
+						entitiesToReplace.add(entity);
 					}
-					// TODO exception handling
-
-					
 				}
-			};
-			if (async) {
-				fetchingThreadPool.execute(dataTile.fetchRunnable);
-			} else {
-				dataTile.fetchRunnable.run();
+			});
+
+			for (SpatialEntity entity : entitiesToReplace) {
+				// Simply remove features of overlapping regions
+				mEntityIndex.remove(envelope, entity);
+			}
+
+			for (SpatialEntity entity : data) {
+				mEntityIndex.insert(
+						new Envelope(new Coordinate(entity.getLongitude(),
+								entity.getLatitude())), entity);
 			}
 		}
 
-		return new RequestHolder() {
-			public void cancel() {
-				fetchingThreadPool.remove(dataTile.fetchRunnable);
-			}
-		};
 	}
 
-	protected void requestDataForTile(DataTile dataTile) throws Exception {
-		Filter filter = dataFilter.clone().setBoundingBox(
-				dataTile.tile.getGeoLocationRect());
+	private void removeUnusedTiles() {
+		synchronized (mQueryIndex) {
+			LOG.debug("Removing unused Tiles");
+			if (mQueryIndex.size() <= MAX_TILES_TO_REMOVE * 2) {
+				return;
+			}
 
-		// Actual access to DataSoure interface
-		dataTile.setMeasurements(dataSourceInstance.getDataSource()
-				.getMeasurements(filter));
+			@SuppressWarnings("unchecked")
+			List<DataTile> dataTiles = mQueryIndex.queryAll();
+			Collections.sort(dataTiles, new Comparator<DataTile>() {
+				@Override
+				public int compare(DataTile lhs, DataTile rhs) {
+					if (lhs.lastUsage == rhs.lastUsage) {
+						return 0;
+					} else {
+						return lhs.lastUsage < rhs.lastUsage ? -1 : 1;
+					}
+				}
+			});
+
+			for (int i = 0, len = Math.min(dataTiles.size(),
+					MAX_TILES_TO_REMOVE); i < len; i++) {
+				removeTile(dataTiles.get(i));
+			}
+		}
+
+	}
+
+	private void removeTile(final DataTile tile) {
+		synchronized (mQueryIndex) {
+			mQueryIndex.remove(tile.tileEnvelope, tile);
+		}
+		synchronized (mEntityIndex) {
+			final List<SpatialEntity> resultList = new ArrayList<SpatialEntity>();
+			mEntityIndex.query(tile.tileEnvelope, new ItemVisitor() {
+				@Override
+				public void visitItem(Object item) {
+					SpatialEntity entity = (SpatialEntity) item;
+					if (tile.tileEnvelope.contains(entity.getLongitude(),
+							entity.getLatitude())) {
+						resultList.add(entity);
+					}
+				}
+			});
+
+			for (SpatialEntity entity : resultList) {
+				mEntityIndex.remove(tile.tileEnvelope, entity);
+			}
+		}
+
+	}
+
+	/**
+	 * Method to request data by spatial index {@link Tile}. This method will
+	 * automatically fetch new data if the specified {@link Tile} is (no longer)
+	 * cached and based on the expiration settings of the underlying
+	 * {@link DataSource}.
+	 * 
+	 * @param tile
+	 * @param callback
+	 *            The callback which will receive the requested data
+	 * @param forceUpdate
+	 *            Allows to force requesting of new data instead of returning
+	 *            cached date
+	 * @return Holder to cancel this request
+	 */
+	public Cancelable getDataByTile(Tile tile, GetDataCallback callback,
+			boolean forceUpdate) {
+		return getDataByEnvelope(tile.getEnvelope(), callback, forceUpdate);
 	}
 
 	/**
@@ -363,8 +477,10 @@ public class DataCache {
 	 */
 	// TODO ByGeoLocationRect
 	// TODO reuse of result arrays, less allocations
-	public RequestHolder getDataByBBox(final MercatorRect bounds,
+	public Cancelable getDataByBBox(final MercatorRect bounds,
 			final GetDataBoundsCallback callback, final boolean forceUpdate) {
+
+		byte tileZoom = (byte) Math.max(0, bounds.zoom);
 		// Transform provided bounds into tile bounds using the zoom level of
 		// this cache
 		final int tileLeftX = (int) MercatorProj
@@ -382,45 +498,49 @@ public class DataCache {
 						tileZoom), tileZoom);
 		final int tileGridWidth = tileRightX - tileLeftX + 1;
 		final int tileCount = tileGridWidth * (tileBottomY - tileTopY + 1);
-		// List to monitor loading of all data for all required tiles
+		// Bitset to monitor loading of all data for all required tiles
 		final BitSet tileMonitorSet = new BitSet(tileCount);
 		tileMonitorSet.set(0, tileCount);
 
-		// final Vector<List<? extends SpatialEntity>> tileDataList = new
-		// Vector<List<? extends SpatialEntity>>();
-		// tileDataList.setSize(tileGridWidth * (tileBottomY - tileTopY + 1));
-
 		// Callback for data of a tile
-		final GetDataCallback measureCallback = new GetDataCallback() {
-			boolean active = true;
-			private int progress;
-			List<SpatialEntity> measurementsList = new ArrayList<SpatialEntity>();
+		final AtomicBoolean active = new AtomicBoolean(true);
+		final AtomicInteger progress = new AtomicInteger();
+		final List<SpatialEntity> measurementsList = new ArrayList<SpatialEntity>();
 
-			public void onReceiveMeasurements(Tile tile,
-					List<? extends SpatialEntity> data) {
+		class IndexedGetDataCallback implements GetDataCallback {
+			private int x, y;
 
-				if (!active) {
+			public IndexedGetDataCallback(int x, int y) {
+				this.x = x;
+				this.y = y;
+			}
+
+			public void onReceiveMeasurements(List<? extends SpatialEntity> data) {
+
+				if (!active.get()) {
 					return;
 				}
 
-				int checkIndex = ((tile.y - tileTopY) * tileGridWidth)
-						+ (tile.x - tileLeftX);
+				int checkIndex = ((y - tileTopY) * tileGridWidth)
+						+ (x - tileLeftX);
 
 				if (tileMonitorSet.get(checkIndex)) {
 					// Still waiting for that tile
 					tileMonitorSet.clear(checkIndex);
-					progress++;
+					progress.incrementAndGet();
 					if (data != null) {
 						measurementsList.addAll(data);
 					}
-					callback.onProgressUpdate(progress, tileCount, STEP_REQUEST);
+					callback.onProgressUpdate(progress.get(), tileCount);
+					LOG.debug("Loaded Tile " + x + "," + y);
+
 				}
 				if (tileMonitorSet.isEmpty()) {
 					// All tiles loaded
-
+					LOG.debug("Loaded all Tiles");
 					// new Thread(new Runnable() {
 					// public void run() {
-					if (active) {
+					if (active.get()) {
 						callback.onReceiveDataUpdate(bounds, measurementsList);
 					}
 					// }
@@ -428,44 +548,37 @@ public class DataCache {
 				}
 			}
 
-			public void onAbort(Tile tile, DataSourceErrorType reason) {
+			public void onAbort(DataSourceErrorType reason) {
 				callback.onAbort(bounds, reason);
 				if (reason == DataSourceErrorType.CANCELED) {
-					active = false;
+					active.set(false);
 				}
 			}
 
-		};
-
-		callback.onProgressUpdate(0, tileCount, STEP_REQUEST);
+		}
+		callback.onProgressUpdate(0, tileCount);
 
 		// Actually request data
 
-		Runnable getAllTilesRunnable = new Runnable() {
+		LOG.debug("Loading " + tileCount + " Tiles");
+		final List<Cancelable> cancelableList = new ArrayList<DataCache.Cancelable>();
+		for (int y = tileTopY; y <= tileBottomY; y++)
+			for (int x = tileLeftX; x <= tileRightX; x++) {
+				Tile tile = new Tile(x, y, tileZoom);
 
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
+				cancelableList
+						.add(getDataByTile(tile, new IndexedGetDataCallback(
+								tile.x, tile.y), forceUpdate));
 
-				// Log.i(logTag, "DataByBBox, " + tileCount +
-				// " Tiles affected ");
-				for (int y = tileTopY; y <= tileBottomY; y++)
-					for (int x = tileLeftX; x <= tileRightX; x++) {
-						Tile tile = new Tile(x, y, tileZoom);
-
-						getDataByTile(tile, measureCallback, forceUpdate, false);
-						// TODO! cache return value to allow proper cancellation
-						// behavior
-					}
 			}
-		};
-		fetchingThreadPool.execute(getAllTilesRunnable);
 
-		return new RequestHolder() {
+		return new Cancelable() {
 			public void cancel() {
-				measureCallback.onAbort(null, DataSourceErrorType.CANCELED);
+				// FIXME deadlock!
+				for (Cancelable cancelable : cancelableList) {
+					cancelable.cancel();
+				}
 			}
 		};
 	}
-
 }

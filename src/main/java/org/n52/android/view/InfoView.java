@@ -247,6 +247,11 @@ public class InfoView extends LinearLayout {
 		}
 	}
 
+	public static void setProgressTitle(int stringId, Object id) {
+		setProgressTitle(GeoARApplication.applicationContext.getString(stringId),
+				id);
+	}
+
 	/**
 	 * Sets status text for id
 	 * 

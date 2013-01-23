@@ -15,8 +15,6 @@
  */
 package org.n52.android.view.geoar;
 
-import org.osmdroid.util.GeoPoint;
-
 import android.content.Context;
 
 public class ARViewController {
@@ -29,8 +27,6 @@ public class ARViewController {
 	public interface IRenderable {
 		// renders the current Frame
 		public void onDrawFrame();
-
-		public void onLocationUpdate(GeoPoint locationUpdate);
 
 		public void onCreateSurface();
 
