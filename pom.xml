@@ -52,7 +52,7 @@
 			<artifactId>jts</artifactId>
 			<version>1.13</version>
 		</dependency>
-		
+
 		<!-- Logging -->
 		<dependency>
 			<groupId>com.github.tony19</groupId>
@@ -68,6 +68,10 @@
 					<artifactId>slf4j-api</artifactId>
 					<groupId>org.slf4j</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>dom4j</artifactId>
+					<groupId>dom4j</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -80,7 +84,17 @@
 			<artifactId>log4j</artifactId>
 			<version>1.2.16</version>
 		</dependency>
-
+		<dependency>
+			<groupId>dom4j</groupId>
+			<artifactId>dom4j</artifactId>
+			<version>1.6.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		<!-- ABS -->
 		<dependency>
 			<groupId>com.actionbarsherlock</groupId>
@@ -324,15 +338,6 @@
 			<id>lib-repository</id>
 			<name>Local Repository</name>
 			<url>file:///${basedir}/lib-repository/</url>
-		</repository>
-
-		<repository>
-			<releases>
-				<checksumPolicy>fail</checksumPolicy>
-			</releases>
-			<id>jsi.sourceforge.net</id>
-			<name>sourceforge jsi repository</name>
-			<url>http://sourceforge.net/projects/jsi/files/m2_repo</url>
 		</repository>
 	</repositories>
 </project>
