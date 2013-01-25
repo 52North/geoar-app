@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.android.view.geoar.gl;
+package org.n52.android.ar.view.gl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -23,10 +24,9 @@ import javax.microedition.khronos.opengles.GL10;
 
 import org.n52.android.GeoARApplication;
 import org.n52.android.R;
+import org.n52.android.ar.view.ARObject2;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
-import org.n52.android.utils.GeoLocation;
-import org.n52.android.view.geoar.ARFragment2;
-import org.n52.android.view.geoar.ARFragment2.ARViewComponent;
+import org.n52.android.view.geoar.gl.GLESCamera;
 import org.n52.android.view.geoar.gl.mode.FeatureShader;
 import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 import org.n52.android.view.geoar.gl.mode.features.CubeFeature2;
@@ -38,14 +38,15 @@ import android.location.Location;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.opengl.GLSurfaceView.Renderer;
 
 /**
- *  
+ * 
  * @author Arne de Wall
  * 
  */
 public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
-		CameraUpdateListener, ARViewComponent {
+		CameraUpdateListener {
 
 	/**
 	 * Interface for the Methods which are called inside the OpenGL specific
@@ -80,61 +81,99 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	private final IRotationMatrixProvider mRotationProvider;
 
 	protected Object updateLock = new Object();
-	protected final Context mContext;
-
-	private List<DataSourceVisualizationHandler> visualizationHandler = new ArrayList<DataSourceVisualizationHandler>();
 
 	private List<RenderFeature2> renderFeatures = new ArrayList<RenderFeature2>();
 
 	private RenderFeature2 grid;
 	public static RenderFeature2 test;
-	
-	
-	/** light paramters */	
-	private final float[] lightDirection = new float[] { 3.0f, 10.0f,
-			2.0f, 1.0f };
-	
+
+	/** light parameters */
+	private final float[] lightDirection = new float[] { 3.0f, 10.0f, 2.0f,
+			1.0f };
+
 	private final float[] lightDirectionMVP = new float[4];
 
-	public ARSurfaceViewRenderer(Context context,
+	private boolean mARObjectsChanged;
+
+	private ARSurfaceView mSurfaceView;
+
+	// Currently always a copy of ARView's ARObjects
+	private List<ARObject2> mARObjects = new ArrayList<ARObject2>();
+
+	private boolean mLocationChanged;
+
+	private Location mUserLocation;
+
+	public ARSurfaceViewRenderer(ARSurfaceView surfaceView,
 			IRotationMatrixProvider rotationMatrixProvider) {
-		this.mContext = context;
+		this.mSurfaceView = surfaceView;
 		this.mRotationProvider = rotationMatrixProvider;
-		ARFragment2.addARViewComponent(this);
+		mLocationChanged = true;
+		mARObjectsChanged = true;
 	}
 
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
+		// Update ARObjects if required
+		if (mARObjectsChanged) {
+			// Copy list of ARObjects to avoid the need for synchronization
+			mARObjects.clear();
+			mARObjects.addAll(mSurfaceView.getARObjects());
+			for (ARObject2 feature : mARObjects) {
+				feature.initializeRendering();
+			}
+			mARObjectsChanged = false;
+		}
+		if (mARObjects == null) {
+			// Not all information available
+			return;
+		}
+
+		// Update location information if required
+		if (mLocationChanged) {
+			mUserLocation = mSurfaceView.getUserLocation();
+			// TODO evaluate synchronized vs. copying list; list is reused by
+			// mSurfaceView for because of performance reasons
+
+			for (ARObject2 feature : mARObjects) {
+				feature.onLocationUpdate(mUserLocation);
+			}
+
+			mLocationChanged = false;
+		}
+		if (mUserLocation == null) {
+			// Not all information available
+			return;
+		}
+
 		/** clear color buffer and depth buffer iff activated */
 		int clearMask = GLES20.GL_COLOR_BUFFER_BIT;
-		if (true) { // enableDepthMask = true
-			clearMask |= GLES20.GL_DEPTH_BUFFER_BIT;
-			GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-			GLES20.glDepthFunc(GLES20.GL_LESS);
-			GLES20.glDepthMask(true);
-			GLES20.glClearDepthf(1.f);
-		}
+		// if (true) { // enableDepthMask == true
+		clearMask |= GLES20.GL_DEPTH_BUFFER_BIT;
+		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+		GLES20.glDepthFunc(GLES20.GL_LESS);
+		GLES20.glDepthMask(true);
+		GLES20.glClearDepthf(1.f);
+		// }
 		GLES20.glClear(clearMask);
 
 		/** extrinsic camera parameters for matching camera- with virtual view */
 		float[] rotationMatrix = mRotationProvider.getRotationMatrix();
-		
+
 		/** calculate the light position in eye space */
-		Matrix.multiplyMV(lightDirectionMVP, 0, rotationMatrix, 0, lightDirection, 0);
+		Matrix.multiplyMV(lightDirectionMVP, 0, rotationMatrix, 0,
+				lightDirection, 0);
 
 		/** render grid */
-		grid.onRender(GLESCamera.projectionMatrix,
-				GLESCamera.viewMatrix, rotationMatrix, lightDirection);
+		grid.onRender(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
+				rotationMatrix, lightDirection);
 
 		/** render DataSources data */
-		synchronized (visualizationHandler) {
-			for (DataSourceVisualizationHandler handler : visualizationHandler) {
-				for (ARObject feature : handler.getARObjects()) {
-					feature.onRender(GLESCamera.projectionMatrix,
-							GLESCamera.viewMatrix, rotationMatrix, lightDirection);
-				}
-			}
+		for (ARObject2 feature : mARObjects) {
+			feature.onRender(GLESCamera.projectionMatrix,
+					GLESCamera.viewMatrix, rotationMatrix, lightDirection);
 		}
+
 		/** for testing purposes */
 		for (RenderFeature2 r : renderFeatures) {
 			r.onRender(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
@@ -162,7 +201,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		GLES20.glClearDepthf(1.0f);
 		GLES20.glDepthFunc(GLES20.GL_LESS);
 		GLES20.glDepthMask(true);
-		
+
 		/** Enable texture mapping */
 		GLES20.glEnable(GLES20.GL_TEXTURE_2D);
 
@@ -186,8 +225,10 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		grid = new GridFeature();
 		grid.onCreateInGLESThread();
 		test = new CubeFeature2();
-		test.setTexture(			// Read in the resource
-				BitmapFactory.decodeResource(GeoARApplication.applicationContext.getResources(), R.drawable.n52_logo_highreso));
+		test.setTexture( // Read in the resource
+		BitmapFactory.decodeResource(
+				GeoARApplication.applicationContext.getResources(),
+				R.drawable.n52_logo_highreso));
 		test.setRelativePosition(new float[] { 0, 0, -4 });
 		test.onCreateInGLESThread();
 		renderFeatures.add(test);
@@ -215,34 +256,29 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 	}
 
-	public void setCenter(Location location) {
-		synchronized (visualizationHandler) {
-			for (DataSourceVisualizationHandler handler : visualizationHandler)
-				handler.setCenter(new GeoLocation(location.getLatitude(),
-						location.getLongitude()));
-		}
+	/**
+	 * Ask renderer to reload
+	 */
+	public void reload() {
+		mARObjectsChanged = true;
 	}
 
 	/**
-	 * Ask renderer to reload its interpolation
+	 * Notification for this {@link Renderer} that the objects to display were
+	 * changed. The renderer will schedule an update of the features to draw for
+	 * the next draw cycle.
 	 */
-	public void reload() {
-		// if (currentCenterGPoint != null)
-		// for (DataSourceVisualizationHandler handler : visualizationHandler)
-		// handler.setCenter(currentCenterGPoint);
+	public void notifyARObjectsChanged() {
+		mARObjectsChanged = true;
 	}
 
-	@Override
-	public void onVisualizationHandlerAdded(
-			DataSourceVisualizationHandler handler) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setVisualizationHandlerRef(
-			List<DataSourceVisualizationHandler> handlers) {
-		this.visualizationHandler = handlers;
+	/**
+	 * Notification for this {@link Renderer} that the user location changed.
+	 * The renderer will schedule an update of the relative positions of its
+	 * displayed features for the next draw cycle.
+	 */
+	public void notifyLocationChanged() {
+		mLocationChanged = true;
 	}
 
 }

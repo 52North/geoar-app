@@ -156,10 +156,7 @@ public class MapFragment extends SherlockFragment {
 				if (motionEvent.getAction() == MotionEvent.ACTION_UP
 						|| motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
 
-					for (DataSourceOverlayHandler handler : overlayHandlerMap
-							.values()) {
-						handler.updateOverlay(mapView, false);
-					}
+					updateOverlays();
 				}
 				return false;
 			}
@@ -168,10 +165,7 @@ public class MapFragment extends SherlockFragment {
 		mapView.setOnZoomChangeListener(new OnZoomChangeListener() {
 			@Override
 			public void onZoomChange() {
-				for (DataSourceOverlayHandler handler : overlayHandlerMap
-						.values()) {
-					handler.updateOverlay(mapView, false);
-				}
+				updateOverlays();
 			}
 		});
 
@@ -179,10 +173,7 @@ public class MapFragment extends SherlockFragment {
 		new Handler().post(new Runnable() {
 			@Override
 			public void run() {
-				for (DataSourceOverlayHandler handler : overlayHandlerMap
-						.values()) {
-					handler.updateOverlay(mapView, true);
-				}
+				updateOverlays();
 			}
 		});
 		// Get Layout root
@@ -206,6 +197,12 @@ public class MapFragment extends SherlockFragment {
 			instances.addOnCheckedChangeListener(dataSourceListener);
 		}
 
+	}
+
+	private void updateOverlays() {
+		for (DataSourceOverlayHandler handler : overlayHandlerMap.values()) {
+			handler.updateOverlay(mapView, false);
+		}
 	}
 
 	@Override

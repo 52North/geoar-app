@@ -30,7 +30,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.opengl.GLES20;
+import android.opengl.GLU;
 import android.opengl.GLUtils;
 
 /**
@@ -222,7 +224,7 @@ public class FeatureShader {
 		if (textureDetails == null) {
 			int[] textures = new int[1];
 			while(!(textures[0] > 0))
-				GLES20.glGenTextures(1, textures, 0);
+				GLES20.glGenTextures(1, textures, 0); // XXX
 			int textureId = textures[0];
 			if (textureId > 0) {
 				GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);

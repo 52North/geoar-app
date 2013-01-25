@@ -13,23 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.android.view.geoar.gl;
+package org.n52.android.ar.view;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import org.n52.android.GeoARApplication;
 import org.n52.android.R;
+import org.n52.android.ar.view.gl.ARSurfaceViewRenderer.OpenGLCallable;
 import org.n52.android.newdata.SpatialEntity;
+import org.n52.android.newdata.Visualization;
 import org.n52.android.newdata.Visualization.ARVisualization.ItemVisualization;
+import org.n52.android.newdata.Visualization.FeatureVisualization;
 import org.n52.android.newdata.vis.DataSourceVisualization.DataSourceVisualizationCanvas;
+import org.n52.android.newdata.vis.DataSourceVisualization.DataSourceVisualizationGL;
 import org.n52.android.tracking.location.LocationHandler;
-import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OpenGLCallable;
+import org.n52.android.view.geoar.gl.GLESCamera;
 import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 
 import android.app.AlertDialog;
@@ -38,13 +42,11 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.location.Location;
-import android.opengl.GLES20;
-import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.GLU;
 import android.opengl.Matrix;
 import android.view.View;
 
-public class ARObject implements OpenGLCallable {
+public class ARObject2 implements OpenGLCallable {
 
 	protected class VisualizationLayer {
 		final Class<? extends ItemVisualization> clazz;
@@ -78,14 +80,26 @@ public class ARObject implements OpenGLCallable {
 	private volatile boolean isInFrustum = false;
 
 	// XXX Why mapping by Class? Compatible with multiinstancedatasources?
-	private final Map<Class<? extends ItemVisualization>, VisualizationLayer> visualizationLayers = new HashMap<Class<? extends ItemVisualization>, VisualizationLayer>();
+	// private final Map<Class<? extends ItemVisualization>, VisualizationLayer>
+	// visualizationLayers = new HashMap<Class<? extends ItemVisualization>,
+	// VisualizationLayer>();
 
 	private final SpatialEntity entity;
+	private DataSourceVisualizationCanvas canvasFeature;
+	private List<RenderFeature2> renderFeatures;
+	private FeatureVisualization visualization;
 
 	// TODO FIXME XXX task: ARObject gains most functionalities of RenderFeature
 	// (-> RenderFeature to be more optional)
-	public ARObject(SpatialEntity entity) {
+	public ARObject2(SpatialEntity entity,
+			Visualization.FeatureVisualization visualization,
+			List<RenderFeature2> features,
+			DataSourceVisualizationCanvas canvasFeature) {
 		this.entity = entity;
+		this.renderFeatures = features;
+		this.canvasFeature = canvasFeature;
+		this.visualization = visualization;
+
 		onLocationUpdate(LocationHandler.getLastKnownLocation());
 	}
 
@@ -94,11 +108,11 @@ public class ARObject implements OpenGLCallable {
 		// TODO Auto-generated method stub
 
 	}
-	
 
 	@Override
-	public void onRender(final float[] projectionMatrix, final float[] viewMatrix,
-			final float[] parentMatrix, final float[] lightPosition) {
+	public void onRender(final float[] projectionMatrix,
+			final float[] viewMatrix, final float[] parentMatrix,
+			final float[] lightPosition) {
 
 		/** set the matrices to identity matrix */
 		Matrix.setIdentityM(modelMatrix, 0);
@@ -119,7 +133,6 @@ public class ARObject implements OpenGLCallable {
 		Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
 		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
-
 		// TODO XXX FIXME frustum test
 		if (newPosition != null) {
 			float[] vec = new float[] { 0, 0, 0, 1 };
@@ -132,39 +145,48 @@ public class ARObject implements OpenGLCallable {
 			isInFrustum = true;
 			updateScreenCoordinates();
 		}
-//		isInFrustum = true;
+		// isInFrustum = true;
 
 		// TODO XXX FIXME are just active visualizations called !? -> check
-		for (VisualizationLayer layer : visualizationLayers.values()) {
-			for (RenderFeature2 feature : layer.renderFeatureList) {
-				feature.onRender(mvpMatrix, modelViewMatrix, lightPosition);
-			}
+		// for (VisualizationLayer layer : visualizationLayers.values()) {
+		for (RenderFeature2 feature : renderFeatures) {
+			feature.onRender(mvpMatrix, modelViewMatrix, lightPosition);
+		}
+		// }
+	}
+
+	public void initializeRendering() {
+		for (RenderFeature2 feature : renderFeatures) {
+			feature.onCreateInGLESThread();
 		}
 	}
 
 	public void onItemClicked(Context context) {
-		Builder builder = new AlertDialog.Builder(context);
-		builder.setTitle("entity").setMessage("entitysnippet")
-				.setNeutralButton(R.string.cancel, null);
-
-		// TODO use view caching with convertView parameter
-		// FIXME NoSuchElementException
-		View featureView = visualizationLayers.values().iterator().next().itemVisualization
-				.getFeatureView(entity, null, null, context);
-
+		View featureView = visualization.getFeatureView(entity, null, null,
+				context);
 		if (featureView != null) {
-			builder.setView(featureView);
+			String title = visualization.getTitle(entity);
+			if (title == null || title.isEmpty()) {
+				title = "";
+			}
+			String message = visualization.getDescription(entity);
+			if (message == null || message.isEmpty()) {
+				message = "";
+			}
+			Builder builder = new AlertDialog.Builder(context);
+			builder.setTitle(title).setMessage(message)
+					.setNeutralButton(R.string.cancel, null)
+					.setView(featureView);
+			builder.create().show();
 		}
-		builder.create().show();
-
 	}
 
 	private final void updateScreenCoordinates() {
 		float[] screenPos = new float[3];
 		// TODO FIXME XXX i think newPosition[2] has to be negative
 		int result = GLU.gluProject(-newPosition[0], newPosition[1],
-				newPosition[2], modelMatrix, 0, GLESCamera.projectionMatrix,
-				0, GLESCamera.viewPortMatrix, 0, screenPos, 0);
+				newPosition[2], modelMatrix, 0, GLESCamera.projectionMatrix, 0,
+				GLESCamera.viewPortMatrix, 0, screenPos, 0);
 
 		if (result == GL10.GL_TRUE) {
 			screenCoordinates[0] = screenPos[0];
@@ -192,7 +214,7 @@ public class ARObject implements OpenGLCallable {
 		final double latitude = entity.getLatitude();
 		int altitude = entity.getAltitude();
 
-		/** calc the distance */
+		/** calc the distance XXX */
 		final float[] x = new float[1];
 		Location.distanceBetween(location.getLatitude(),
 				location.getLongitude(), latitude, longitude, x);
@@ -222,64 +244,28 @@ public class ARObject implements OpenGLCallable {
 		// FIXME XXX TODO and here the third position has to be negative i think
 		newPosition[2] = z[0] / 10;
 
-		for (VisualizationLayer layer : visualizationLayers.values()) {
-			for (RenderFeature2 renderFeature : layer.renderFeatureList)
-				renderFeature.setRelativePosition(newPosition);
-		}
+		for (RenderFeature2 renderFeature : renderFeatures)
+			renderFeature.setRelativePosition(newPosition);
 
 		this.newPosition[0] = newPosition[0] - GLESCamera.cameraPosition[0];
 		this.newPosition[1] = newPosition[1] - GLESCamera.cameraPosition[1];
 		this.newPosition[2] = newPosition[2] - GLESCamera.cameraPosition[2];
 	}
 
-	public void addRenderFeature(ItemVisualization itemVisualization,
-			Collection<RenderFeature2> features) {
-		if (visualizationLayers.containsKey(itemVisualization.getClass())) {
-			visualizationLayers.get(itemVisualization.getClass())
-					.addRenderFeatures(features);
-		} else {
-			VisualizationLayer layer = new VisualizationLayer(itemVisualization);
-			layer.addRenderFeatures(features);
-			// FIXME XXX TODO brauchen wir nicht
-			for (RenderFeature2 feature : features) {
-				feature.setRelativePosition(newPosition);
-			}
-			visualizationLayers.put(itemVisualization.getClass(), layer);
-		}
-	}
-
-	public void addCanvasFeature(ItemVisualization itemVisualization,
-			DataSourceVisualizationCanvas canvasFeature) {
-		if (canvasFeature == null)
-			return;
-
-		if (visualizationLayers.containsKey(itemVisualization.getClass())) {
-			visualizationLayers.get(itemVisualization.getClass()).canvasFeature = canvasFeature;
-		} else {
-			VisualizationLayer layer = new VisualizationLayer(itemVisualization);
-			layer.canvasFeature = canvasFeature;
-			// for (RenderFeature2 feature : features) {
-			// feature.setRelativePosition(newPosition);
-			// }
-			visualizationLayers.put(itemVisualization.getClass(), layer);
-		}
-	}
-
 	public void renderCanvas(Paint poiRenderer, Canvas canvas) {
-		for (VisualizationLayer layer : visualizationLayers.values()) {
-			// FIXME TODO XXX distanceTo has to be in the Settings
-			if (isInFrustum)
-				for (RenderFeature2 renderFeature : layer.renderFeatureList) {
-					layer.canvasFeature.onRender(screenCoordinates[0],
-							screenCoordinates[1], canvas);
-				}
-		}
+		// FIXME TODO XXX distanceTo has to be in the Settings
+		if (isInFrustum)
+			// for (RenderFeature2 renderFeature : renderFeatures) {
+			canvasFeature.onRender(screenCoordinates[0], screenCoordinates[1],
+					canvas);
+		// }
+
 	}
 
 	public void setLightPosition(float[] lightPosInEyeSpace) {
-//		GLES20.glUniform3f(renderfe, lightPosInEyeSpace[0],
-//				lightPosInEyeSpace[1], lightPosInEyeSpace[2]);
-		
+		// GLES20.glUniform3f(renderfe, lightPosInEyeSpace[0],
+		// lightPosInEyeSpace[1], lightPosInEyeSpace[2]);
+
 	}
 
 }

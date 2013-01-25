@@ -5,6 +5,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+    <org.n52.android.ar.view.ARView
+ 	    android:id="@+id/arview"
+ 	    android:layout_width="match_parent"
+ 	    android:layout_height="match_parent" />
+    
     <!-- <org.n52.android.tracking.camera.CameraView
         android:id="@+id/CameraView"
         android:layout_width="match_parent"

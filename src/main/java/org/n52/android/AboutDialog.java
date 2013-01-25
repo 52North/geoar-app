@@ -36,8 +36,7 @@ public class AboutDialog extends Dialog {
 	protected void onCreate(Bundle savedInstanceState) {
 		setContentView(R.layout.about_dialog);
 
-		// TODO externalize strings
-		this.setTitle("About GeoAR");
+		this.setTitle(R.string.about_geoar);
 
 		ImageView im = (ImageView) findViewById(R.id.imageView52n);
 		im.setOnClickListener(createLinkOnClickLister("http://52north.org/"));

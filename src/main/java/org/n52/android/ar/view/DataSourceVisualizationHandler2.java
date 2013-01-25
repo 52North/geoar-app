@@ -13,39 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.android.view.geoar.gl;
+package org.n52.android.ar.view;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.n52.android.R;
 import org.n52.android.alg.proj.MercatorPoint;
 import org.n52.android.alg.proj.MercatorProj;
 import org.n52.android.alg.proj.MercatorRect;
-import org.n52.android.newdata.DataCache;
+import org.n52.android.newdata.DataCache.Cancelable;
 import org.n52.android.newdata.DataCache.DataSourceErrorType;
 import org.n52.android.newdata.DataCache.GetDataBoundsCallback;
-import org.n52.android.newdata.DataCache.Cancelable;
 import org.n52.android.newdata.DataSourceInstanceHolder;
+import org.n52.android.newdata.DataSourceInstanceHolder.DataSourceSettingsChangedListener;
 import org.n52.android.newdata.RenderFeatureFactory;
 import org.n52.android.newdata.SpatialEntity;
 import org.n52.android.newdata.Visualization.ARVisualization;
 import org.n52.android.newdata.Visualization.ARVisualization.ItemVisualization;
 import org.n52.android.newdata.vis.DataSourceVisualization.DataSourceVisualizationGL;
-import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.utils.GeoLocation;
 import org.n52.android.view.InfoView;
-import org.n52.android.view.geoar.ARSurfaceView;
 import org.n52.android.view.geoar.Settings;
-import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OnInitializeInGLThread;
 import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 import org.n52.android.view.geoar.gl.mode.features.CubeFeature2;
 import org.n52.android.view.geoar.gl.mode.features.SphereFeature;
 
-import android.location.Location;
-
-public class DataSourceVisualizationHandler implements RenderFeatureFactory {
+public class DataSourceVisualizationHandler2 implements RenderFeatureFactory,
+		DataSourceSettingsChangedListener {
 
 	public interface OnProgressUpdateListener extends
 			org.n52.android.newdata.DataCache.OnProgressUpdateListener {
@@ -56,36 +51,22 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 
 		@Override
 		public void onProgressUpdate(int progress, int maxProgress) {
-			String stepTitle = "";
-			// switch (step) {
-			// // case NoiseInterpolation.STEP_CLUSTERING:
-			// // stepTitle = mContext.getString(R.string.clustering);
-			// // break;
-			// // case NoiseInterpolation.STEP_INTERPOLATION:
-			// // stepTitle =
-			// // mContext.getString(R.string.interpolation);
-			// // break;
-			// case DataCache.STEP_REQUEST:
-			// stepTitle = "Request Data";
-			// break;
-			// }
-
 			InfoView.setProgressTitle(R.string.requesting_data,
-					DataSourceVisualizationHandler.this);
+					DataSourceVisualizationHandler2.this);
 			InfoView.setProgress(progress, maxProgress,
-					DataSourceVisualizationHandler.this);
+					DataSourceVisualizationHandler2.this);
 
 		}
 
 		@Override
 		public void onAbort(MercatorRect bounds, DataSourceErrorType reason) {
-			InfoView.clearProgress(DataSourceVisualizationHandler.this);
+			InfoView.clearProgress(DataSourceVisualizationHandler2.this);
 			if (reason == DataSourceErrorType.CONNECTION) {
 				InfoView.setStatus(R.string.connection_error, 5000,
-						DataSourceVisualizationHandler.this);
+						DataSourceVisualizationHandler2.this);
 			} else if (reason == DataSourceErrorType.UNKNOWN) {
 				InfoView.setStatus(R.string.unknown_error, 5000,
-						DataSourceVisualizationHandler.this);
+						DataSourceVisualizationHandler2.this);
 			}
 		}
 
@@ -94,64 +75,60 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 				List<? extends SpatialEntity> data) {
 
 			synchronized (mutex) {
-				List<ARObject> arObjects = new ArrayList<ARObject>();
-				List<ItemVisualization> visualizations = dataSourceInstanceHolder
+				List<ARObject2> arObjects = new ArrayList<ARObject2>();
+				List<ItemVisualization> visualizations = dataSourceInstance
 						.getParent()
 						.getVisualizations()
 						.getCheckedItems(
 								ARVisualization.ItemVisualization.class);
 
 				for (SpatialEntity entity : data) {
-					ARObject arObject = new ARObject(entity);
+
 					for (ItemVisualization visualization : visualizations) {
-						Collection<RenderFeature2> features = new ArrayList<RenderFeature2>();
+
+						List<RenderFeature2> features = new ArrayList<RenderFeature2>();
 						for (DataSourceVisualizationGL feature : visualization
 								.getEntityVisualization(entity,
-										DataSourceVisualizationHandler.this)) {
+										DataSourceVisualizationHandler2.this)) {
 							features.add((RenderFeature2) feature);
-							glSurfaceView
-									.addRenderableToScene((OnInitializeInGLThread) feature);
 						}
-						arObject.addRenderFeature(visualization, features);
-						arObject.addCanvasFeature(visualization,
+						ARObject2 arObject = new ARObject2(entity,
+								visualization, features,
 								visualization.getEntityVisualization(entity));
+						// TODO maybe just use entity + visualization
+						arObjects.add(arObject);
 					}
-					arObjects.add(arObject);
+
 				}
-				DataSourceVisualizationHandler.this.arObjects = arObjects;
+
+				arView.setARObjects(arObjects, dataSourceInstance);
+				currentRect = bounds;
 			}
 		}
 	};
 
-	private DataSourceInstanceHolder dataSourceInstanceHolder;
-	protected Object mutex = new Object();
-	protected final ARSurfaceView glSurfaceView;
+	private DataSourceInstanceHolder dataSourceInstance;
+	private Object mutex = new Object();
 
 	// public List<RenderFeature> renderFeatures = new
 	// ArrayList<RenderFeature>();
-	private List<ARObject> arObjects = new ArrayList<ARObject>();
 	private GeoLocation currentCenterGPoint;
 	private MercatorPoint currentCenterMercator;
-	private float currentGroundResolution;
 	private MercatorRect currentRect;
 
 	private Cancelable currentUpdate;
 
-	public DataSourceVisualizationHandler(final ARSurfaceView glSurfaceView,
+	private ARView arView;
+
+	public DataSourceVisualizationHandler2(ARView arView,
 			DataSourceInstanceHolder dataSourceInstance) {
-		this.glSurfaceView = glSurfaceView;
-		this.dataSourceInstanceHolder = dataSourceInstance;
+		this.arView = arView;
+		this.dataSourceInstance = dataSourceInstance;
 
-		GeoLocation loc = new GeoLocation(LocationHandler
-				.getLastKnownLocation().getLatitude(), LocationHandler
-				.getLastKnownLocation().getLongitude());
-		setCenter(loc);
-	}
-
-	public void clear() {
-		synchronized (mutex) {
-			arObjects.clear();
-		}
+		// GeoLocation loc = new GeoLocation(LocationHandler
+		// .getLastKnownLocation().getLatitude(), LocationHandler
+		// .getLastKnownLocation().getLongitude());
+		// setCenter(loc);
 	}
 
 	public void setCenter(GeoLocation gPoint) {
@@ -171,8 +148,9 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 		currentCenterMercator = new MercatorPoint(centerPixelX, centerPixelY,
 				Settings.ZOOM_AR);
 
-		currentGroundResolution = (float) MercatorProj.getGroundResolution(
-				currentCenterGPoint.getLatitudeE6() / 1E6f, Settings.ZOOM_AR);
+		// currentGroundResolution = (float) MercatorProj.getGroundResolution(
+		// currentCenterGPoint.getLatitudeE6() / 1E6f, Settings.ZOOM_AR);
+		// Needed for ground raster data
 
 		// determination if data request is needed or if just a simple shift is
 		// enough
@@ -197,35 +175,50 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 				currentUpdate.cancel();
 			}
 			// trigger data request
-			currentUpdate = dataSourceInstanceHolder.getDataCache()
-					.getDataByBBox(
-							new MercatorRect(currentCenterMercator.x
-									- pixelRadius, currentCenterMercator.y
-									- pixelRadius, currentCenterMercator.x
-									+ pixelRadius, currentCenterMercator.y
-									+ pixelRadius, Settings.ZOOM_AR), callback,
-							false);
+			currentUpdate = dataSourceInstance.getDataCache().getDataByBBox(
+					new MercatorRect(currentCenterMercator.x - pixelRadius,
+							currentCenterMercator.y - pixelRadius,
+							currentCenterMercator.x + pixelRadius,
+							currentCenterMercator.y + pixelRadius,
+							Settings.ZOOM_AR), callback, false);
 		}
 
 	}
 
-	public void reload() {
-
+	public void clear() {
+		synchronized (mutex) {
+			// LOG.info(dataSourceInstance.getName() +
+			// " clearing ar visualization");
+			cancel();
+			arView.clearARObjects(dataSourceInstance);
+		}
 	}
 
-	public void onRenderGL() {
-		// for(ARObject object : arObjects)
-		// object.onRender(projectionMatrix, viewMatrix, parentMatrix)
+	public void cancel() {
+		synchronized (mutex) {
+			if (currentUpdate != null) {
+				currentUpdate.cancel();
+				currentUpdate = null;
+			}
+
+		}
 	}
 
-	public List<ARObject> getARObjects() {
-		return arObjects;
+	public void destroy() {
+		clear();
+		dataSourceInstance.removeOnSettingsChangedListener(this);
 	}
 
-	public DataSourceInstanceHolder getDataSourceHolder() {
-		return dataSourceInstanceHolder;
+	@Override
+	public void onDataSourceSettingsChanged() {
+		if (currentUpdate != null) {
+			currentUpdate.cancel();
+			currentUpdate = null;
+		}
+		setCenter(currentCenterGPoint);
 	}
 
+	// TODO Move!
 	@Override
 	public DataSourceVisualizationGL createCube() {
 		CubeFeature2 cube = new CubeFeature2();
@@ -238,8 +231,4 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory {
 		return sphere;
 	}
 
-	public void onLocationChanged(Location location) {
-		for (ARObject object : arObjects)
-			object.onLocationUpdate(location);
-	}
 }

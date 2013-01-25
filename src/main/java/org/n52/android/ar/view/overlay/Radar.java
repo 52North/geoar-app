@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.android.view.geoar.gui;
+package org.n52.android.ar.view.overlay;
 
 import android.graphics.Canvas;
 import android.graphics.Color;

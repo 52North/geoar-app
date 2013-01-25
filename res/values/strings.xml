@@ -67,5 +67,6 @@
     <string name="update_available">New Version</string>
     <string name="add">Add</string>
     <string name="requesting_data">Requesting Data</string>
+    <string name="about_geoar">About GeoAR</string>
 
 </resources>

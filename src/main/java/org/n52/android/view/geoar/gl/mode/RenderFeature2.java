@@ -26,9 +26,9 @@ import javax.microedition.khronos.opengles.GL10;
 
 import org.n52.android.GeoARApplication;
 import org.n52.android.R;
+import org.n52.android.ar.view.gl.ARSurfaceViewRenderer.OnInitializeInGLThread;
+import org.n52.android.ar.view.gl.ARSurfaceViewRenderer.OpenGLCallable;
 import org.n52.android.newdata.vis.DataSourceVisualization.DataSourceVisualizationGL;
-import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OnInitializeInGLThread;
-import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OpenGLCallable;
 import org.n52.android.view.geoar.gl.GLESCamera;
 import org.n52.android.view.geoar.gl.mode.FeatureShader.TextureDetails;
 
@@ -424,6 +424,7 @@ public abstract class RenderFeature2 extends Spatial implements
 	protected void setRenderObjectives(float[] vertices, float[] colors,
 			float[] normals, float[] textureCoords) {
 		// TODO XXX FIXME not elegant here, maybe this is
+		// Jep
 		if (renderer == null) {
 			if (textureCoords != null && textureBitmap != null) {
 				renderer = TextureFeatureShader.getInstance();

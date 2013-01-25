@@ -13,20 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.android.view.geoar.gui;
+package org.n52.android.ar.view.overlay;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.n52.android.GeoARApplication;
+import org.n52.android.ar.view.ARObject2;
+import org.n52.android.ar.view.ARView;
+import org.n52.android.ar.view.gl.ARSurfaceViewRenderer;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.n52.android.tracking.location.LocationHandler;
-import org.n52.android.view.geoar.ARFragment2;
-import org.n52.android.view.geoar.ARFragment2.ARViewComponent;
-import org.n52.android.view.geoar.gl.ARObject;
-import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer;
-import org.n52.android.view.geoar.gl.DataSourceVisualizationHandler;
 
-import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
@@ -35,21 +32,16 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.location.Location;
-import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
 // TODO XXX
-public class ARCanvasSurfaceView extends View implements CameraUpdateListener,
-		ARViewComponent {
+public class ARCanvasSurfaceView extends View implements CameraUpdateListener {
 
 	private static final float SIZE = 40;
 	private final Location lastLocation = LocationHandler
 			.getLastKnownLocation();
-
-	private final int width;
-	private final int height;
 
 	private Paint paint;
 	private float rangeOfView;
@@ -61,48 +53,41 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener,
 	private Paint poiRenderer;
 
 	private boolean init;
-	private Context context;
 
 	GUIDrawable drawable;
-	private List<DataSourceVisualizationHandler> visualizationHandler;
 
-	public ARCanvasSurfaceView(Context context) {
-		super(context);
-		this.context = context;
-		this.width = getWidth();
-		this.height = getHeight();
-		init();
-	}
+	private List<ARObject2> mARObjects = new ArrayList<ARObject2>(0);
+	private boolean mARObjectsChanged;
+	private ARView mARView;
 
-	public ARCanvasSurfaceView(Context context, AttributeSet attrs) {
-		super(context, attrs);
-		this.context = context;
-		this.width = getWidth();
-		this.height = getHeight();
+	public ARCanvasSurfaceView(ARView arView) {
+		super(arView.getContext());
+		this.mARView = arView;
+
 		init();
 	}
 
 	private void init() {
-		ARFragment2.addARViewComponent(this); // TODO ...remove?
 		paint = new Paint();
 		paint.setColor(Color.GREEN);
 		paint.setTextSize(25);
 		paint.setAntiAlias(true);
-		
+
 		this.setOnTouchListener(new OnTouchListener() {
-			
+
 			@Override
 			public boolean onTouch(View v, MotionEvent motionEvent) {
-				if(MotionEvent.ACTION_DOWN == motionEvent.getAction()){
-					for(DataSourceVisualizationHandler visHandler : visualizationHandler){
-						for(ARObject object : visHandler.getARObjects()){
-							if(object.thisObjectHitted(motionEvent.getX(), motionEvent.getY())){
-								Toast.makeText(GeoARApplication.applicationContext, "omg yea", Toast.LENGTH_SHORT).show();
-								object.onItemClicked(context);
+				if (MotionEvent.ACTION_DOWN == motionEvent.getAction()) {
+					synchronized (mARObjects) {
+						for (ARObject2 object : mARObjects) {
+							if (object.thisObjectHitted(motionEvent.getX(),
+									motionEvent.getY())) {
+								Toast.makeText(getContext(), "Hit! (Debug)",
+										Toast.LENGTH_SHORT).show();
+								object.onItemClicked(getContext());
 							}
 						}
 					}
-//					Toast.makeText(GeoARApplication.applicationContext, "omg yea", Toast.LENGTH_SHORT).show();
 				}
 				return false;
 			}
@@ -114,15 +99,19 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener,
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
+		if (mARObjectsChanged) {
+			mARObjects = mARView.getARObjects();
+		}
 
 		if (!init) {
+			// TODO move initialization to the correct event handlers
 			float scale = (float) getWidth() / 4;
 			drawable = new Radar(new RectF(0, 0, scale, scale));
 			drawable.initDrawingTools();
 			init = true;
 		}
 
-//		drawCoordinates(canvas);
+		// drawCoordinates(canvas);
 
 		// drawable.onRenderCanvas(canvas);
 		// now the outer rim circle
@@ -137,12 +126,11 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener,
 				canvas.drawCircle(screenCoord[0], 690 - screenCoord[1], 10f,
 						poiRenderer);
 		}
-		for (DataSourceVisualizationHandler handler : visualizationHandler) {
-			for (ARObject arObject : handler.getARObjects()) {
+		synchronized (mARObjects) {
+			for (ARObject2 arObject : mARObjects) {
 				arObject.renderCanvas(poiRenderer, canvas);
 			}
 		}
-
 		invalidate();
 	}
 
@@ -220,22 +208,13 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener,
 	}
 
 	@Override
-	public void onVisualizationHandlerAdded(
-			DataSourceVisualizationHandler handler) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setVisualizationHandlerRef(
-			List<DataSourceVisualizationHandler> handlers) {
-		this.visualizationHandler = handlers;
-	}
-
-	@Override
 	public void onCameraUpdate() {
 		// TODO Auto-generated method stub
 
+	}
+
+	public void notifyARObjectsChanged() {
+		mARObjectsChanged = true;
 	}
 
 }

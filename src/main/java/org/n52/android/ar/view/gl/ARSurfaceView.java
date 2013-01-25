@@ -13,18 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.n52.android.view.geoar;
+package org.n52.android.ar.view.gl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.n52.android.R;
+import org.n52.android.ar.view.ARObject2;
+import org.n52.android.ar.view.ARView;
+import org.n52.android.ar.view.gl.ARSurfaceViewRenderer.IRotationMatrixProvider;
+import org.n52.android.ar.view.gl.ARSurfaceViewRenderer.OnInitializeInGLThread;
 import org.n52.android.tracking.camera.RealityCamera;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.tracking.location.LocationHandler.OnLocationUpdateListener;
 import org.n52.android.tracking.location.LowPassSensorBuffer;
 import org.n52.android.tracking.location.SensorBuffer;
 import org.n52.android.view.InfoView;
-import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer;
-import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.IRotationMatrixProvider;
-import org.n52.android.view.geoar.gl.ARSurfaceViewRenderer.OnInitializeInGLThread;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
@@ -66,13 +72,12 @@ public class ARSurfaceView extends GLSurfaceView implements
 	private boolean updateMagneticVector = true;
 	private boolean sensorValuesChanged;
 
-	public ARSurfaceView(Context context) {
-		super(context);
-		init();
-	}
+	private Location mLastLocation;
+	private ARView mARView;
 
-	public ARSurfaceView(Context context, AttributeSet attrs) {
-		super(context, attrs);
+	public ARSurfaceView(ARView arView) {
+		super(arView.getContext());
+		mARView = arView;
 		init();
 	}
 
@@ -85,14 +90,14 @@ public class ARSurfaceView extends GLSurfaceView implements
 		display = ((WindowManager) getContext().getSystemService(
 				Context.WINDOW_SERVICE)).getDefaultDisplay();
 
-		renderer = new ARSurfaceViewRenderer(getContext(), this);
+		renderer = new ARSurfaceViewRenderer(this, this);
 		setEGLContextClientVersion(2);
 		setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Forces to make translucent
 		// drawing available
 		getHolder().setFormat(PixelFormat.TRANSLUCENT);
 		setRenderer(renderer);
 	}
-	
+
 	public void addRenderableToScene(final OnInitializeInGLThread renderNode) {
 		queueEvent(new Runnable() {
 			@Override
@@ -100,7 +105,7 @@ public class ARSurfaceView extends GLSurfaceView implements
 				renderNode.onCreateInGLESThread();
 			}
 		});
-	} 
+	}
 
 	/**
 	 * Get a {@link NoiseGridValueProvider} to access the raw noise
@@ -178,9 +183,8 @@ public class ARSurfaceView extends GLSurfaceView implements
 	@Override
 	public void onPause() {
 		RealityCamera.removeCameraUpdateListener(renderer);
-		mSensorManager.unregisterListener(this);
-
 		LocationHandler.removeLocationUpdateListener(this);
+		mSensorManager.unregisterListener(this);
 
 		super.onPause();
 	}
@@ -188,6 +192,7 @@ public class ARSurfaceView extends GLSurfaceView implements
 	@Override
 	public void onResume() {
 		RealityCamera.addCameraUpdateListener(renderer);
+		LocationHandler.addLocationUpdateListener(this);
 		if (!mSensorManager.registerListener(this, magnet,
 				SensorManager.SENSOR_DELAY_GAME)) {
 			InfoView.setStatus(R.string.magnetic_field_not_started, 5000,
@@ -197,8 +202,6 @@ public class ARSurfaceView extends GLSurfaceView implements
 				SensorManager.SENSOR_DELAY_GAME)) {
 			InfoView.setStatus(R.string.accel_not_started, 5000, accel);
 		}
-
-		LocationHandler.addLocationUpdateListener(this);
 
 		super.onResume();
 	}
@@ -225,8 +228,21 @@ public class ARSurfaceView extends GLSurfaceView implements
 		sensorValuesChanged = true;
 	}
 
-	public void onLocationChanged(Location location) {
-		renderer.setCenter(location);
+	public Location getUserLocation() {
+		return mLastLocation;
 	}
 
+	@Override
+	public void onLocationChanged(Location location) {
+		mLastLocation = location;
+		renderer.notifyLocationChanged();
+	}
+
+	public void notifyARObjectsChanged() {
+		renderer.notifyARObjectsChanged();
+	}
+
+	public List<ARObject2> getARObjects() {
+		return mARView.getARObjects();
+	}
 }
