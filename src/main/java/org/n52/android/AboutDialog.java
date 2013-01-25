@@ -36,6 +36,7 @@ public class AboutDialog extends Dialog {
 	protected void onCreate(Bundle savedInstanceState) {
 		setContentView(R.layout.about_dialog);
 
+		// TODO externalize strings
 		this.setTitle("About GeoAR");
 
 		ImageView im = (ImageView) findViewById(R.id.imageView52n);

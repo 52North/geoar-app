@@ -116,6 +116,7 @@ public class PluginDownloader {
 				new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 	}
 
+	// TODO externalize string
 	static final String SERVER_URL = "http://geoviqua.dev.52north.org/geoar/codebase";
 
 	private static final String CODEBASE_ID = "id";
