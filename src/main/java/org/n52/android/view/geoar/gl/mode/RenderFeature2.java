@@ -21,23 +21,18 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
+import java.util.concurrent.Callable;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import org.n52.android.GeoARApplication;
-import org.n52.android.R;
 import org.n52.android.ar.view.gl.ARSurfaceViewRenderer.OnInitializeInGLThread;
 import org.n52.android.ar.view.gl.ARSurfaceViewRenderer.OpenGLCallable;
 import org.n52.android.newdata.vis.DataSourceVisualization.DataSourceVisualizationGL;
 import org.n52.android.view.geoar.gl.GLESCamera;
-import org.n52.android.view.geoar.gl.mode.FeatureShader.TextureDetails;
 
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLU;
-import android.opengl.GLUtils;
 import android.opengl.Matrix;
 
 public abstract class RenderFeature2 extends Spatial implements
@@ -70,7 +65,7 @@ public abstract class RenderFeature2 extends Spatial implements
 		protected boolean hasColors;
 		protected boolean hasTextureCoords;
 
-		abstract void onRenderGeometrie();
+		abstract void render();
 	}
 
 	/**
@@ -216,7 +211,7 @@ public abstract class RenderFeature2 extends Spatial implements
 		}
 
 		@Override
-		void onRenderGeometrie() {
+		void render() {
 			/** bind the named vertices buffer object */
 			renderer.setVertices(verticesDetails.bufferHandle);
 			if (hasColors) {
@@ -311,7 +306,7 @@ public abstract class RenderFeature2 extends Spatial implements
 		}
 
 		@Override
-		void onRenderGeometrie() {
+		void render() {
 			// @formatter:off
 			final int stride = (POSITION_DATA_SIZE
 					+ (hasColors ? COLOR_DATA_SIZE : 0)
@@ -323,7 +318,6 @@ public abstract class RenderFeature2 extends Spatial implements
 			int bufferPosition = 0;
 			/** defines the array of generic vertex attribute data */
 			strideBuffer.position(bufferPosition);
-			// FIXME caching of handles?! Yes!
 			final int positionhandle = renderer.getPositionHandle();
 			GLES20.glEnableVertexAttribArray(positionhandle);
 			GLES20.glVertexAttribPointer(positionhandle, POSITION_DATA_SIZE,
@@ -353,10 +347,10 @@ public abstract class RenderFeature2 extends Spatial implements
 			if (hasTextureCoords) {
 				// FIXME texture handling here
 				strideBuffer.position(bufferPosition);
-				final int textureCoordniateHandle = renderer
+				final int textureCoordinateHandle = renderer
 						.getTextureCoordinateHandle();
-				GLES20.glEnableVertexAttribArray(textureCoordniateHandle);
-				GLES20.glVertexAttribPointer(textureCoordniateHandle,
+				GLES20.glEnableVertexAttribArray(textureCoordinateHandle);
+				GLES20.glVertexAttribPointer(textureCoordinateHandle,
 						TEXTURE_DATA_SIZE, GLES20.GL_FLOAT, false, stride,
 						strideBuffer);
 				bufferPosition += TEXTURE_DATA_SIZE;
@@ -396,13 +390,7 @@ public abstract class RenderFeature2 extends Spatial implements
 
 	// protected int textureDataHandle;
 
-	private Bitmap textureBitmap;
-	private TextureDetails textureDetails;
-
-	public RenderFeature2() {
-		// textureDataHandle = loadTexture(GeoARApplication.applicationContext,
-		// R.drawable.n52_logo_highreso);
-	}
+	private Texture texture;
 
 	@Deprecated
 	protected void setRenderObjectives(float[] vertices, float[] colors,
@@ -426,9 +414,8 @@ public abstract class RenderFeature2 extends Spatial implements
 		// TODO XXX FIXME not elegant here, maybe this is
 		// Jep
 		if (renderer == null) {
-			if (textureCoords != null && textureBitmap != null) {
+			if (textureCoords != null && texture != null) {
 				renderer = TextureFeatureShader.getInstance();
-				renderer.addTexture(textureBitmap, false);
 			} else {
 				renderer = BilligerLightShader.getInstance();
 			}
@@ -467,7 +454,7 @@ public abstract class RenderFeature2 extends Spatial implements
 	}
 
 	@Override
-	public void onRender(final float[] projectionMatrix,
+	public void render(final float[] projectionMatrix,
 			final float[] viewMatrix, final float[] parentMatrix,
 			final float[] lightPosition) {
 		if (!isInitialized)
@@ -491,45 +478,49 @@ public abstract class RenderFeature2 extends Spatial implements
 		Matrix.multiplyMM(modelMatrix, 0, viewMatrix, 0, modelMatrix, 0);
 		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, modelMatrix, 0);
 
-		onRender(mvpMatrix, modelMatrix, lightPosition);
+		render(mvpMatrix, modelMatrix, lightPosition);
 	}
 
-	public void onRender(float[] mvpMatrix) {
+	public void render(float[] mvpMatrix) {
 		/** sets the program object as part of current rendering state */
-		if(!isInitialized)
+		if (!isInitialized)
 			return;
 		renderer.useProgram();
 
-		if (textureDetails != null) {
+		if (texture != null) {
 			// Set the active texture unit to texture unit 0.
 			GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-
-			// Bind the texture to this unit.
-			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureDetails.textureId);
-
 			GLES20.glUniform1i(renderer.getTextureUniform(), 0);
+
+			// // Bind the texture to this unit.
+			// GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
+			// textureDetails.textureId);
+
+			texture.bindTexture();
 		}
 		renderer.setModelViewProjectionMatrix(mvpMatrix);
 		/** render the geometry of this feature */
 		if (geometry != null)
-			geometry.onRenderGeometrie();
+			geometry.render();
 	}
 
-	public void onRender(float[] mvpMatrix, float[] mvMatrix,
+	public void render(float[] mvpMatrix, float[] mvMatrix,
 			float[] lightPosition) {
 		/** sets the program object as part of current rendering state */
 		renderer.useProgram();
 
 		renderer.setLightPositionVec(lightPosition);
 
-		if (textureDetails != null) {
+		if (texture != null) {
 			// Set the active texture unit to texture unit 0.
 			GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-
-			// Bind the texture to this unit.
-			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureDetails.textureId);
-
 			GLES20.glUniform1i(renderer.getTextureUniform(), 0);
+
+			// // Bind the texture to this unit.
+			// GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
+			// textureDetails.textureId);
+
+			texture.bindTexture();
 		}
 
 		renderer.setModelViewMatrix(mvMatrix);
@@ -537,7 +528,7 @@ public abstract class RenderFeature2 extends Spatial implements
 
 		/** render the geometry of this feature */
 		if (geometry != null)
-			geometry.onRenderGeometrie();
+			geometry.render();
 	}
 
 	@Override
@@ -572,8 +563,8 @@ public abstract class RenderFeature2 extends Spatial implements
 	}
 
 	@Override
-	public void setTexture(Bitmap bitmap) {
-		this.textureBitmap = bitmap;
+	public void setTextureCallback(Callable<Bitmap> callback) {
+		this.texture = Texture.createInstance(callback);
 	}
 
 	public void setLightPosition(float[] lightPosInEyeSpace) {

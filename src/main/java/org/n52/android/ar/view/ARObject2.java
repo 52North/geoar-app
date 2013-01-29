@@ -110,7 +110,7 @@ public class ARObject2 implements OpenGLCallable {
 	}
 
 	@Override
-	public void onRender(final float[] projectionMatrix,
+	public void render(final float[] projectionMatrix,
 			final float[] viewMatrix, final float[] parentMatrix,
 			final float[] lightPosition) {
 
@@ -150,7 +150,7 @@ public class ARObject2 implements OpenGLCallable {
 		// TODO XXX FIXME are just active visualizations called !? -> check
 		// for (VisualizationLayer layer : visualizationLayers.values()) {
 		for (RenderFeature2 feature : renderFeatures) {
-			feature.onRender(mvpMatrix, modelViewMatrix, lightPosition);
+			feature.render(mvpMatrix, modelViewMatrix, lightPosition);
 		}
 		// }
 	}

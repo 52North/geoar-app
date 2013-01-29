@@ -49,7 +49,7 @@ import com.vividsolutions.jts.index.quadtree.Quadtree;
  */
 public class DataCache {
 
-	private static final int MAX_TILES_TO_REMOVE = 20;
+	private static final int MAX_TILES_TO_REMOVE = 25;
 
 	/**
 	 * Future-like interface for cancellation of requests
@@ -388,38 +388,56 @@ public class DataCache {
 	}
 
 	private void removeUnusedTiles() {
-		return;
 		// TODO
-		// synchronized (mQueryIndex) {
-		// LOG.debug("Removing unused Tiles");
-		// if (mQueryIndex.size() <= MAX_TILES_TO_REMOVE * 2) {
-		// return;
-		// }
-		//
-		// @SuppressWarnings("unchecked")
-		// List<DataTile> dataTiles = mQueryIndex.queryAll();
-		// Collections.sort(dataTiles, new Comparator<DataTile>() {
-		// @Override
-		// public int compare(DataTile lhs, DataTile rhs) {
-		// if (lhs.lastUsage == rhs.lastUsage) {
-		// return 0;
-		// } else {
-		// return lhs.lastUsage < rhs.lastUsage ? -1 : 1;
-		// }
-		// }
-		// });
-		//
-		// for (int i = 0, len = Math.min(dataTiles.size(),
-		// MAX_TILES_TO_REMOVE); i < len; i++) {
-		// removeTile(dataTiles.get(i));
-		// }
-		// }
+		synchronized (mQueryIndex) {
+			LOG.debug("Removing unused Tiles");
+			if (mQueryIndex.size() <= MAX_TILES_TO_REMOVE * 2) {
+				return;
+			}
+
+			@SuppressWarnings("unchecked")
+			List<DataTile> dataTiles = mQueryIndex.queryAll();
+			Collections.sort(dataTiles, new Comparator<DataTile>() {
+				@Override
+				public int compare(DataTile lhs, DataTile rhs) {
+					if (lhs.lastUsage == rhs.lastUsage) {
+						return 0;
+					} else {
+						return lhs.lastUsage < rhs.lastUsage ? -1 : 1;
+					}
+				}
+			});
+
+			for (int i = 0, len = Math.min(dataTiles.size(),
+					MAX_TILES_TO_REMOVE); i < len; i++) {
+				removeTile(dataTiles.get(i));
+			}
+		}
 
 	}
 
+	/**
+	 * Removes all cached data for the {@link Envelope} of the specified
+	 * {@link DataTile}. Also updates the query index.
+	 * 
+	 * @param tile
+	 */
 	private void removeTile(final DataTile tile) {
 		synchronized (mQueryIndex) {
-			mQueryIndex.remove(tile.tileEnvelope, tile);
+			final List<DataTile> dataTilesToReload = new ArrayList<DataTile>();
+			mQueryIndex.query(tile.tileEnvelope, new ItemVisitor() {
+				@Override
+				public void visitItem(Object item) {
+					DataTile visitedTile = (DataTile) item;
+					if (tile.tileEnvelope.intersects(visitedTile.tileEnvelope)) {
+						dataTilesToReload.add(visitedTile);
+					}
+				}
+			});
+
+			for (DataTile tileToReload : dataTilesToReload) {
+				mQueryIndex.remove(tileToReload.tileEnvelope, tileToReload);
+			}
 		}
 		synchronized (mEntityIndex) {
 			final List<SpatialEntity> resultList = new ArrayList<SpatialEntity>();

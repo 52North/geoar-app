@@ -42,9 +42,17 @@ public class GeoARMapView extends MapView {
 	public boolean zoom(byte arg0, float arg1) {
 		boolean returnValue = super.zoom(arg0, arg1);
 		if (mZoomChangeListener != null) {
-			// TODO find out if mapsforge will report correct zoom values in
-			// onZoomChange handler
-			mZoomChangeListener.onZoomChange();
+			post(new Runnable() {
+				@Override
+				public void run() {
+					// XXX
+					// Posting a Runnable ensures that event handlers will be
+					// called after zoom got handled by mapsforge API
+					if (mZoomChangeListener != null) {
+						mZoomChangeListener.onZoomChange();
+					}
+				}
+			});
 		}
 		return returnValue;
 	}

@@ -18,13 +18,13 @@ package org.n52.android;
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
 import org.n52.android.ar.view.ARFragment2;
+import org.n52.android.map.view.MapFragment;
 import org.n52.android.newdata.PluginFragment;
 import org.n52.android.newdata.PluginLoader;
 import org.n52.android.newdata.Visualization;
 import org.n52.android.tracking.camera.RealityCamera;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.utils.GeoLocation;
-import org.n52.android.view.map.MapFragment;
 
 import android.app.Activity;
 import android.app.AlertDialog;

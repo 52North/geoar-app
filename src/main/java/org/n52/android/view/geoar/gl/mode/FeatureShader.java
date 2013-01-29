@@ -41,33 +41,19 @@ import android.opengl.GLUtils;
  * 
  */
 public class FeatureShader {
-	
+
 	private boolean hasLight;
 	private boolean hasColor;
 	private boolean hasTexture;
-
-	protected static class TextureDetails {
-		protected final int textureId;
-		protected final int textureUniform;
-
-		protected Bitmap textureBitmap;
-
-		protected int width, height;
-
-		public TextureDetails(final int textureId, final int textureUniform) {
-			this.textureId = textureId;
-			this.textureUniform = textureUniform;
-		}
-	}
 
 	static final int SIZE_OF_VERTEX_ELEMENT = 3;
 	static final int SIZE_OF_NORMAL_ELEMENT = 3;
 	static final int SIZE_OF_COLOR_ELEMENT = 4;
 	static final int SIZE_OF_TEXTURECOORD_ELEMENT = 2;
-	
+
 	static final int SIZE_OF_FLOAT = 4;
 	static final int SIZE_OF_SHORT = 2;
-	
+
 	/** OpenGL handles and uniforms to our program */
 	protected static final String ATTRIBUTE_POSITION = "attr_Position";
 	protected static final String ATTRIBUTE_NORMAL = "attr_Normal";
@@ -124,14 +110,14 @@ public class FeatureShader {
 
 		float sum = 0;
 
-//		for (int i = 0, j = 0; i < height && j < width; i++, j++) {
-//			float[] hueSatBright = new float[3];
-//			int what = bitmap.getPixel(j, i);
-//			Color.RGBToHSV((what >> 16) & 0xff, (what >> 8) & 0xff,
-//					what & 0xff, hueSatBright);
-//			/** we calculate the integral over the brightness */
-//			sum += hueSatBright[2] * 255;
-//		}
+		// for (int i = 0, j = 0; i < height && j < width; i++, j++) {
+		// float[] hueSatBright = new float[3];
+		// int what = bitmap.getPixel(j, i);
+		// Color.RGBToHSV((what >> 16) & 0xff, (what >> 8) & 0xff,
+		// what & 0xff, hueSatBright);
+		// /** we calculate the integral over the brightness */
+		// sum += hueSatBright[2] * 255;
+		// }
 
 		return 12;
 
@@ -156,22 +142,20 @@ public class FeatureShader {
 
 	}
 
-	private static Map<Float, TextureDetails> textureCache = new HashMap<Float, TextureDetails>();
-
 	private int programHandle = -1;
 
 	private int positionHandle = -1;
 	private int colorHandle = -1;
 	private int normalHandle = -1;
 	private int lightPosHandle = -1;
-	
+
 	private int vertexShaderHandle = -1;
 	private int fragmentShaderHandle = -1;
 
 	private int textureCoordinateHandle = -1;
-	private int textureDataHandle = -1;
+	// private int textureDataHandle = -1;
 
-	private int textureUniform = -1;
+	private int textureUniformHandle = -1;
 
 	private int mvpMatrixUniform = -1;
 	private int mvMatrixUniform = -1;
@@ -188,8 +172,6 @@ public class FeatureShader {
 	final boolean supportsColors;
 	final boolean supportsTextures;
 	final boolean supportsLight;
-
-
 
 	public FeatureShader(String vertexShader, String fragmentShader) {
 		this.vertexShader = vertexShader;
@@ -217,53 +199,11 @@ public class FeatureShader {
 		INSTANCES.add(new WeakReference<FeatureShader>(this));
 	}
 
-	public TextureDetails addTexture(Bitmap textureBitmap, boolean b) {
-		final float integralKey = calculateIntegralImageKey(textureBitmap);
-		TextureDetails textureDetails = textureCache.get(integralKey);
-
-		if (textureDetails == null) {
-			int[] textures = new int[1];
-			while(!(textures[0] > 0))
-				GLES20.glGenTextures(1, textures, 0); // XXX
-			int textureId = textures[0];
-			if (textureId > 0) {
-				GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
-
-				// Set filtering
-				GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-						GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
-				GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-						GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-
-				GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-						GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
-				GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-						GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
-
-				// Load the bitmap into the bound texture.
-				GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, textureBitmap, 0);
-				int textureUniformHandle = GLES20.glGetUniformLocation(
-						programHandle, UNIFORM_SAMPLER_TEXTURE);
-				textureDetails = new TextureDetails(textureId,
-						textureUniformHandle);
-				textureCache.put(integralKey, textureDetails);
-			} else {
-				// TODO XXX FIXME log exception
-				LOG.warn(GLES20.glGetProgramInfoLog(programHandle));
-				throw new RuntimeException("Could not generate GL Texture");
-			}
-		}
-		return textureDetails;
-	}
-
-
-
 	public int getColorHandle() {
 		if (programHandle == -1) {
 			initProgram();
 		}
-		colorHandle = GLES20
-				.glGetAttribLocation(programHandle, ATTRIBUTE_COLOR);
+
 		return colorHandle;
 	}
 
@@ -271,8 +211,6 @@ public class FeatureShader {
 		if (programHandle == -1) {
 			initProgram();
 		}
-		normalHandle = GLES20.glGetAttribLocation(programHandle,
-				ATTRIBUTE_NORMAL);
 		return normalHandle;
 	}
 
@@ -280,8 +218,6 @@ public class FeatureShader {
 		if (programHandle == -1) {
 			initProgram();
 		}
-		positionHandle = GLES20.glGetAttribLocation(programHandle,
-				ATTRIBUTE_POSITION);
 		return positionHandle;
 	}
 
@@ -289,8 +225,6 @@ public class FeatureShader {
 		if (programHandle == -1) {
 			initProgram();
 		}
-		lightPosHandle = GLES20.glGetAttribLocation(programHandle,
-				UNIFORM_VEC3_LIGHTPOS);
 		return lightPosHandle;
 	}
 
@@ -298,8 +232,6 @@ public class FeatureShader {
 		if (programHandle == -1) {
 			initProgram();
 		}
-		textureCoordinateHandle = GLES20.glGetAttribLocation(programHandle,
-				ATTRIBUTE_TEXTURE);
 		return textureCoordinateHandle;
 	}
 
@@ -307,10 +239,8 @@ public class FeatureShader {
 		if (programHandle == -1) {
 			initProgram();
 		}
-		textureUniform = GLES20.glGetUniformLocation(programHandle,
-				UNIFORM_SAMPLER_TEXTURE);
 
-		return textureUniform;
+		return textureUniformHandle;
 	}
 
 	/******************************************************************
@@ -320,8 +250,7 @@ public class FeatureShader {
 		if (programHandle == -1) {
 			initProgram();
 		}
-		positionHandle = GLES20.glGetAttribLocation(programHandle,
-				ATTRIBUTE_POSITION);
+
 		if (vertexBufferHandle >= 0) {
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBufferHandle);
 			GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT,
@@ -336,8 +265,7 @@ public class FeatureShader {
 		if (programHandle == -1) {
 			initProgram();
 		}
-		textureCoordinateHandle = GLES20.glGetAttribLocation(programHandle,
-				ATTRIBUTE_TEXTURE);
+
 		if (textureCoordinateHandle >= 0) {
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, textureBufferHandle);
 			GLES20.glEnableVertexAttribArray(textureCoordinateHandle);
@@ -355,8 +283,6 @@ public class FeatureShader {
 			initProgram();
 		}
 
-		colorHandle = GLES20
-				.glGetAttribLocation(programHandle, ATTRIBUTE_COLOR);
 		if (colorHandle >= 0) {
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, colorBufferHandle);
 			GLES20.glVertexAttribPointer(colorHandle, 4, GLES20.GL_FLOAT,
@@ -374,8 +300,6 @@ public class FeatureShader {
 			initProgram();
 		}
 
-		normalHandle = GLES20.glGetAttribLocation(programHandle,
-				ATTRIBUTE_NORMAL);
 		if (normalHandle >= 0) {
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, normalBufferHandle);
 			GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT,
@@ -493,6 +417,15 @@ public class FeatureShader {
 		if (supportsColors)
 			colorHandle = GLES20.glGetAttribLocation(programHandle,
 					ATTRIBUTE_COLOR);
+		if (supportsLight)
+			lightPosHandle = GLES20.glGetUniformLocation(programHandle,
+					UNIFORM_VEC3_LIGHTPOS);
+		if (supportsTextures) {
+			textureCoordinateHandle = GLES20.glGetAttribLocation(programHandle,
+					ATTRIBUTE_TEXTURE);
+			textureUniformHandle = GLES20.glGetUniformLocation(programHandle,
+					UNIFORM_SAMPLER_TEXTURE);
+		}
 	}
 
 	private void linkProgram(final String[] attributes) {

@@ -18,6 +18,7 @@ package org.n52.android.ar.view.gl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -29,10 +30,12 @@ import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.n52.android.view.geoar.gl.GLESCamera;
 import org.n52.android.view.geoar.gl.mode.FeatureShader;
 import org.n52.android.view.geoar.gl.mode.RenderFeature2;
+import org.n52.android.view.geoar.gl.mode.Texture;
 import org.n52.android.view.geoar.gl.mode.features.CubeFeature2;
 import org.n52.android.view.geoar.gl.mode.features.GridFeature;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.opengl.GLES20;
@@ -55,7 +58,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	public interface OpenGLCallable {
 		void onPreRender();
 
-		void onRender(final float[] projectionMatrix, final float[] viewMatrix,
+		void render(final float[] projectionMatrix, final float[] viewMatrix,
 				final float[] parentMatrix, final float[] lightPosition);
 	}
 
@@ -165,18 +168,18 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 				lightDirection, 0);
 
 		/** render grid */
-		grid.onRender(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
+		grid.render(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
 				rotationMatrix, lightDirection);
 
 		/** render DataSources data */
 		for (ARObject2 feature : mARObjects) {
-			feature.onRender(GLESCamera.projectionMatrix,
-					GLESCamera.viewMatrix, rotationMatrix, lightDirection);
+			feature.render(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
+					rotationMatrix, lightDirection);
 		}
 
 		/** for testing purposes */
 		for (RenderFeature2 r : renderFeatures) {
-			r.onRender(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
+			r.render(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
 					rotationMatrix, lightDirection);
 		}
 	}
@@ -218,6 +221,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		GLES20.glCullFace(GLES20.GL_BACK); // GL_FRONT_AND_BACK for no facets
 
 		FeatureShader.resetShaders();
+		Texture.resetTextures();
 		initScene();
 	}
 
@@ -225,10 +229,14 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		grid = new GridFeature();
 		grid.onCreateInGLESThread();
 		test = new CubeFeature2();
-		test.setTexture( // Read in the resource
-		BitmapFactory.decodeResource(
-				GeoARApplication.applicationContext.getResources(),
-				R.drawable.n52_logo_highreso));
+		test.setTextureCallback(new Callable<Bitmap>() {
+			@Override
+			public Bitmap call() throws Exception {
+				return BitmapFactory.decodeResource(
+						GeoARApplication.applicationContext.getResources(),
+						R.drawable.n52_logo_highreso);
+			}
+		});
 		test.setRelativePosition(new float[] { 0, 0, -4 });
 		test.onCreateInGLESThread();
 		renderFeatures.add(test);
