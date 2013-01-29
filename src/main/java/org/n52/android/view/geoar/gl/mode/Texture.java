@@ -50,6 +50,7 @@ public class Texture {
 		Texture cachedTexture = TEXTURE_CACHE.get(bitmapCallback);
 		if (cachedTexture == null) {
 			cachedTexture = new Texture(bitmapCallback);
+			TEXTURE_CACHE.put(bitmapCallback, cachedTexture);
 		}
 
 		return cachedTexture;
