@@ -43,7 +43,6 @@ public class Texture {
 			handle.set(-1);
 		}
 		HANDLE_CACHE.clear();
-		TEXTURE_CACHE.clear();
 	}
 
 	public static Texture createInstance(Callable<Bitmap> bitmapCallback) {

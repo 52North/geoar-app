@@ -174,7 +174,7 @@ public class DataSourceInstanceHolder implements Parcelable {
 	 * TODO
 	 */
 	void notifySettingsChanged() {
-		dataCache.clearCache();
+		dataCache.setFilter(currentFilter);
 		for (DataSourceSettingsChangedListener listener : mSettingsChangedListeners) {
 			listener.onDataSourceSettingsChanged();
 		}
@@ -260,6 +260,7 @@ public class DataSourceInstanceHolder implements Parcelable {
 		try {
 			// restore filter, serializable
 			currentFilter = (Filter) objectInputStream.readObject();
+			dataCache.setFilter(currentFilter);
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

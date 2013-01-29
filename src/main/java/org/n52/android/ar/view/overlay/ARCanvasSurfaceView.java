@@ -101,6 +101,7 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener {
 		super.onDraw(canvas);
 		if (mARObjectsChanged) {
 			mARObjects = mARView.getARObjects();
+			mARObjectsChanged = false;
 		}
 
 		if (!init) {
