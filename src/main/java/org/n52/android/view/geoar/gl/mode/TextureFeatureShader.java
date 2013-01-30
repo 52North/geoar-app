@@ -71,8 +71,11 @@ public class TextureFeatureShader extends FeatureShader {
 			
 //			"	vec3 lightVec = normalize(" + UNIFORM_VEC3_LIGHTPOS + " - vPosition); \n" +
 //			"	float lightVec \n" +
-			
-			"	gl_FragColor = (vColor * diffuse * texture2D(" + UNIFORM_SAMPLER_TEXTURE + ", vTexCoordinate)); \n" +
+
+			// Removed alpha from lighting
+			"   vec4 color = vColor * texture2D(" + UNIFORM_SAMPLER_TEXTURE + ", vTexCoordinate);\n" +
+			"   color.rgb = color.rgb * diffuse; \n" +
+			"	gl_FragColor = color; \n" +
 			"}												\n";				
 	//@formatter:on
 	

@@ -23,6 +23,7 @@ import java.util.Map;
 import org.n52.android.ar.view.gl.ARSurfaceView;
 import org.n52.android.ar.view.overlay.ARCanvasSurfaceView;
 import org.n52.android.newdata.DataSourceInstanceHolder;
+import org.n52.android.tracking.camera.CameraView;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -37,6 +38,7 @@ public class ARView extends FrameLayout {
 	private ARSurfaceView mARSurfaceView;
 	private Map<Object, List<ARObject2>> mARObjectMap = new HashMap<Object, List<ARObject2>>();
 	private ArrayList<ARObject2> mARObjectsReusableList = new ArrayList<ARObject2>();
+	private CameraView mCameraView;
 
 	public ARView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -53,8 +55,8 @@ public class ARView extends FrameLayout {
 			return;
 		}
 
-		mCanvasOverlayView = new ARCanvasSurfaceView(this);
-		addView(mCanvasOverlayView, LayoutParams.MATCH_PARENT,
+		mCameraView = new CameraView(getContext());
+		addView(mCameraView, LayoutParams.MATCH_PARENT,
 				LayoutParams.MATCH_PARENT);
 
 		final ActivityManager activityManager = (ActivityManager) getContext()
@@ -65,14 +67,19 @@ public class ARView extends FrameLayout {
 		if (config.reqGlEsVersion >= 0x20000 || Build.PRODUCT.startsWith("sdk")) {
 			// Add ARSurfaceView only if OpenGL ES Version 2 supported
 			mARSurfaceView = new ARSurfaceView(this);
+			mARSurfaceView.setKeepScreenOn(true);
 			mARSurfaceView.setZOrderMediaOverlay(true);
-			addView(mARSurfaceView, 0, new FrameLayout.LayoutParams(
+			addView(mARSurfaceView, new FrameLayout.LayoutParams(
 					LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
 			// final DisplayMetrics displayMetrics = new DisplayMetrics();
 			// getActivity().getWindowManager().getDefaultDisplay()
 			// .getMetrics(displayMetrics);
 		}
+
+		mCanvasOverlayView = new ARCanvasSurfaceView(this);
+		addView(mCanvasOverlayView, LayoutParams.MATCH_PARENT,
+				LayoutParams.MATCH_PARENT);
 	}
 
 	/**

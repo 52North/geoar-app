@@ -91,7 +91,9 @@ public class Texture {
 				GLES20.GL_CLAMP_TO_EDGE);
 
 		// Load the bitmap into the bound texture.
-		GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmapCallback.call(), 0);
+		Bitmap bitmap = bitmapCallback.call();
+		GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+		bitmap.recycle();
 	}
 
 	public void bindTexture() {

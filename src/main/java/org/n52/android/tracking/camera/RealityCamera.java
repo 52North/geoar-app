@@ -18,8 +18,12 @@ package org.n52.android.tracking.camera;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.n52.android.GeoARApplication;
 import org.n52.android.view.geoar.Settings;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.hardware.Camera.Size;
 
 /**
@@ -30,11 +34,14 @@ import android.hardware.Camera.Size;
  * 
  */
 public class RealityCamera {
+	private static final String CAMERA_HEIGHT_PREF = "cameraHeight";
+
 	public interface CameraUpdateListener {
 		void onCameraUpdate();
 	}
 
-	public static float height = 1.6f;
+	public static float height = 1.6f; // "usage height", distance between
+										// ground and device
 	public static float fovY = 42.5f;
 	public static float scale = 1f;
 	// Viewport of camera preview
@@ -94,5 +101,21 @@ public class RealityCamera {
 	public static void setHeight(float height) {
 		RealityCamera.height = height;
 		onUpdate();
+	}
+
+	public static void saveState() {
+		SharedPreferences preferences = GeoARApplication.applicationContext
+				.getSharedPreferences(GeoARApplication.PREFERENCES_FILE,
+						Context.MODE_PRIVATE);
+		Editor editor = preferences.edit();
+		editor.putFloat(CAMERA_HEIGHT_PREF, RealityCamera.height);
+		editor.commit();
+	}
+
+	public static void restoreState() {
+		SharedPreferences prefs = GeoARApplication.applicationContext
+				.getSharedPreferences(GeoARApplication.PREFERENCES_FILE,
+						Context.MODE_PRIVATE);
+		RealityCamera.setHeight(prefs.getFloat(CAMERA_HEIGHT_PREF, 1.6f));
 	}
 }

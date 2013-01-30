@@ -133,14 +133,13 @@ public class GeoARActivity extends SherlockFragmentActivity {
 		}
 		showFragment(fragmentToShow);
 
-		// Reset camera height if set
-		SharedPreferences prefs = getSharedPreferences("NoiseAR", MODE_PRIVATE);
-		RealityCamera.setHeight(prefs.getFloat("cameraHeight", 1.6f));
+		RealityCamera.restoreState();
 
 		if (savedInstanceState != null) {
 			// restore manual positioning
 			LocationHandler.onRestoreInstanceState(savedInstanceState);
 		}
+		// TODO debug purposes!
 		LocationHandler.setManualLocation(new GeoLocation(51.965344, 7.600003));
 	}
 
@@ -187,14 +186,8 @@ public class GeoARActivity extends SherlockFragmentActivity {
 	@Override
 	protected void onStop() {
 		super.onStop();
-
-		SharedPreferences prefs = getSharedPreferences("NoiseAR", MODE_PRIVATE);
-		SharedPreferences.Editor editor = prefs.edit();
-		editor.putFloat("cameraHeight", RealityCamera.height);
-		editor.commit();
-
+		RealityCamera.saveState();
 		PluginLoader.saveState();
-
 	}
 
 	@Override

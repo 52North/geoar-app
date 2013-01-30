@@ -25,10 +25,10 @@ import java.util.concurrent.Callable;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import org.n52.android.ar.view.gl.GLESCamera;
 import org.n52.android.ar.view.gl.ARSurfaceViewRenderer.OnInitializeInGLThread;
 import org.n52.android.ar.view.gl.ARSurfaceViewRenderer.OpenGLCallable;
 import org.n52.android.newdata.vis.DataSourceVisualization.DataSourceVisualizationGL;
-import org.n52.android.view.geoar.gl.GLESCamera;
 
 import android.graphics.Bitmap;
 import android.opengl.GLES20;
@@ -431,13 +431,13 @@ public abstract class RenderFeature2 extends Spatial implements
 
 	public float[] onScreenCoordsUpdate() {
 		if (modelMatrix == null || GLESCamera.projectionMatrix == null
-				|| GLESCamera.viewPortMatrix == null) {
+				|| GLESCamera.viewportMatrix == null) {
 			return null;
 		}
 		float[] output = new float[3];
 		int res = GLU.gluProject(position[0], position[1], position[2],
 				modelMatrix, 0, GLESCamera.projectionMatrix, 0,
-				GLESCamera.viewPortMatrix, 0, output, 0);
+				GLESCamera.viewportMatrix, 0, output, 0);
 
 		if (res == GL10.GL_FALSE)
 			return null;
@@ -465,7 +465,7 @@ public abstract class RenderFeature2 extends Spatial implements
 		Matrix.setIdentityM(modelMatrix, 0);
 		Matrix.setIdentityM(mvpMatrix, 0);
 		Matrix.setIdentityM(tmpMatrix, 0);
-		/** translate feature to the position relative to the devices place */
+		/** translate feature to the position relative to the device */
 		// TODO i think position[0] must be translated negatively -> Check
 		Matrix.translateM(modelMatrix, 0, position[0], position[1], position[2]);
 

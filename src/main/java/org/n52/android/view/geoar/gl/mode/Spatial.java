@@ -15,69 +15,68 @@
  */
 package org.n52.android.view.geoar.gl.mode;
 
-import org.n52.android.view.geoar.gl.GLESCamera;
-
 
 public abstract class Spatial {
-	
+
 	protected double longitude;
 	protected double latitude;
 	@Deprecated
 	protected double altitude;
-	
-	protected final float[] position 	= new float[4];
-	protected final float[] rotation 	= new float[4];
-	protected final float[] scale		= new float[3];
-	
-	public Spatial(){
-		float[] cameraPosition = GLESCamera.cameraPosition;
-		position[0] = -cameraPosition[0];
-		position[1] = -cameraPosition[1];
-		position[2] = -cameraPosition[2];
+
+	protected final float[] position = new float[4];
+	protected final float[] rotation = new float[4];
+	protected final float[] scale = new float[3];
+
+	public Spatial() {
+		// float[] cameraPosition = GLESCamera.cameraPosition;
+		// position[0] = -cameraPosition[0];
+		// position[1] = -cameraPosition[1];
+		// position[2] = -cameraPosition[2];
+
 		position[3] = 1;
 	}
-	
-	public float[] getPosition(){
+
+	public float[] getPosition() {
 		return position;
 	}
-	
-	public void setRelativePosition(float[] position){
-		this.position[0] = position[0] - GLESCamera.cameraPosition[0];
-		this.position[1] = position[1] - GLESCamera.cameraPosition[1];
-		this.position[2] = position[2] - GLESCamera.cameraPosition[2];
+
+	public void setRelativePosition(float[] position) {
+		this.position[0] = position[0]; // - GLESCamera.cameraPosition[0];
+		this.position[1] = position[1]; // - GLESCamera.cameraPosition[1];
+		this.position[2] = position[2]; // - GLESCamera.cameraPosition[2];
 	}
-	
-	public float getX(){
+
+	public float getX() {
 		return position[0];
 	}
-	
-	public float getY(){
+
+	public float getY() {
 		return position[1];
 	}
-	
-	public float getZ(){
+
+	public float getZ() {
 		return position[2];
 	}
-	
-	public void setX(float x){
+
+	public void setX(float x) {
 		position[0] = x;
 	}
-	
-	public void setY(float y){
+
+	public void setY(float y) {
 		position[1] = y;
 	}
-	
-	public void setZ(float z){
+
+	public void setZ(float z) {
 		position[2] = z;
 	}
-	
-	public void setScale(float scaleX, float scaleY, float scaleZ){
+
+	public void setScale(float scaleX, float scaleY, float scaleZ) {
 		scale[0] = scaleX;
 		scale[1] = scaleY;
 		scale[2] = scaleZ;
 	}
-	
-	public float[] getScale(){
+
+	public float[] getScale() {
 		return scale;
 	}
 
@@ -89,7 +88,8 @@ public abstract class Spatial {
 	}
 
 	/**
-	 * @param longitude the longitude to set
+	 * @param longitude
+	 *            the longitude to set
 	 */
 	public void setLongitude(double longitude) {
 		this.longitude = longitude;
@@ -103,7 +103,8 @@ public abstract class Spatial {
 	}
 
 	/**
-	 * @param latitude the latitude to set
+	 * @param latitude
+	 *            the latitude to set
 	 */
 	public void setLatitude(double latitude) {
 		this.latitude = latitude;
@@ -117,7 +118,8 @@ public abstract class Spatial {
 	}
 
 	/**
-	 * @param altitude the altitude to set
+	 * @param altitude
+	 *            the altitude to set
 	 */
 	public void setAltitude(double altitude) {
 		this.altitude = altitude;

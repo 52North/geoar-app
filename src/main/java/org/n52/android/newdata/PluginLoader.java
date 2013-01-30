@@ -189,18 +189,23 @@ public class PluginLoader {
 			// Restore plugin state
 			int count = objectInputStream.readInt();
 			for (int i = 0; i < count; i++) {
+
 				InstalledPluginHolder plugin = getPluginByIdentifier(objectInputStream
 						.readUTF());
 				if (plugin == null) {
 					return;
 				}
-
-				plugin.restoreState(objectInputStream);
-				plugin.postConstruct();
+				try {
+					plugin.restoreState(objectInputStream);
+					plugin.postConstruct();
+				} catch (IOException e) {
+					LOG.warn("Exception while restoring state of plugin "
+							+ plugin.getName(), e);
+				}
 			}
 			objectInputStream.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOG.error("Exception while restoring state ", e);
 			// TODO
 		}
 	}

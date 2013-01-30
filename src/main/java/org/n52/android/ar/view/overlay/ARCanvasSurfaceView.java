@@ -100,6 +100,7 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener {
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 		if (mARObjectsChanged) {
+			// XXX will be the same instance anyway...
 			mARObjects = mARView.getARObjects();
 			mARObjectsChanged = false;
 		}
@@ -120,13 +121,6 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener {
 
 		canvas.drawCircle(100, 100, 1, poiRenderer);
 
-		if (ARSurfaceViewRenderer.test != null) {
-			float[] screenCoord = ARSurfaceViewRenderer.test
-					.onScreenCoordsUpdate();
-			if (screenCoord != null)
-				canvas.drawCircle(screenCoord[0], 690 - screenCoord[1], 10f,
-						poiRenderer);
-		}
 		synchronized (mARObjects) {
 			for (ARObject2 arObject : mARObjects) {
 				arObject.renderCanvas(poiRenderer, canvas);

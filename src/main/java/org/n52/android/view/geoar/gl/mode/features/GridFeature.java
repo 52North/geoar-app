@@ -16,7 +16,6 @@
 package org.n52.android.view.geoar.gl.mode.features;
 
 import org.apache.http.MethodNotSupportedException;
-import org.n52.android.newdata.DataCache;
 import org.n52.android.view.geoar.gl.mode.BilligerColorShader;
 import org.n52.android.view.geoar.gl.mode.FeatureShader;
 import org.n52.android.view.geoar.gl.mode.RenderFeature2;
@@ -41,7 +40,6 @@ public class GridFeature extends RenderFeature2 {
 	}
 
 	public GridFeature(FeatureShader renderer) {
-		super();
 		gridSize = 80;
 		this.drawingMode = GLES20.GL_LINES;
 		this.renderer = renderer;

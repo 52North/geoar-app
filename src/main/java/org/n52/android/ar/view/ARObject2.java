@@ -25,6 +25,7 @@ import java.util.Set;
 import javax.microedition.khronos.opengles.GL10;
 
 import org.n52.android.R;
+import org.n52.android.ar.view.gl.GLESCamera;
 import org.n52.android.ar.view.gl.ARSurfaceViewRenderer.OpenGLCallable;
 import org.n52.android.newdata.SpatialEntity;
 import org.n52.android.newdata.Visualization;
@@ -33,7 +34,6 @@ import org.n52.android.newdata.Visualization.FeatureVisualization;
 import org.n52.android.newdata.vis.DataSourceVisualization.DataSourceVisualizationCanvas;
 import org.n52.android.newdata.vis.DataSourceVisualization.DataSourceVisualizationGL;
 import org.n52.android.tracking.location.LocationHandler;
-import org.n52.android.view.geoar.gl.GLESCamera;
 import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 
 import android.app.AlertDialog;
@@ -186,11 +186,11 @@ public class ARObject2 implements OpenGLCallable {
 		// TODO FIXME XXX i think newPosition[2] has to be negative
 		int result = GLU.gluProject(-newPosition[0], newPosition[1],
 				newPosition[2], modelMatrix, 0, GLESCamera.projectionMatrix, 0,
-				GLESCamera.viewPortMatrix, 0, screenPos, 0);
+				GLESCamera.viewportMatrix, 0, screenPos, 0);
 
 		if (result == GL10.GL_TRUE) {
 			screenCoordinates[0] = screenPos[0];
-			screenCoordinates[1] = GLESCamera.glViewportHeight - screenPos[1];
+			screenCoordinates[1] = GLESCamera.viewportMatrix[3] - screenPos[1];
 		}
 	}
 
@@ -239,17 +239,17 @@ public class ARObject2 implements OpenGLCallable {
 			altitude = (int) location.getAltitude();
 		// testen
 
-		newPosition[0] = x[0] / 10;
+		newPosition[0] = x[0]; // / 10;
 		newPosition[1] = (float) (altitude - location.getAltitude());
 		// FIXME XXX TODO and here the third position has to be negative i think
-		newPosition[2] = z[0] / 10;
+		newPosition[2] = z[0]; // / 10;
 
 		for (RenderFeature2 renderFeature : renderFeatures)
 			renderFeature.setRelativePosition(newPosition);
 
-		this.newPosition[0] = newPosition[0] - GLESCamera.cameraPosition[0];
-		this.newPosition[1] = newPosition[1] - GLESCamera.cameraPosition[1];
-		this.newPosition[2] = newPosition[2] - GLESCamera.cameraPosition[2];
+		this.newPosition[0] = newPosition[0]; // - GLESCamera.cameraPosition[0];
+		this.newPosition[1] = newPosition[1]; // - GLESCamera.cameraPosition[1];
+		this.newPosition[2] = newPosition[2]; // - GLESCamera.cameraPosition[2];
 	}
 
 	public void renderCanvas(Paint poiRenderer, Canvas canvas) {

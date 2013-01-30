@@ -15,10 +15,7 @@
  */
 package org.n52.android.ar.view.gl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.n52.android.R;
 import org.n52.android.ar.view.ARObject2;
@@ -26,9 +23,9 @@ import org.n52.android.ar.view.ARView;
 import org.n52.android.ar.view.gl.ARSurfaceViewRenderer.IRotationMatrixProvider;
 import org.n52.android.ar.view.gl.ARSurfaceViewRenderer.OnInitializeInGLThread;
 import org.n52.android.tracking.camera.RealityCamera;
+import org.n52.android.tracking.location.AdaptiveLowPassSensorBuffer;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.tracking.location.LocationHandler.OnLocationUpdateListener;
-import org.n52.android.tracking.location.LowPassSensorBuffer;
 import org.n52.android.tracking.location.SensorBuffer;
 import org.n52.android.view.InfoView;
 
@@ -41,7 +38,6 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
-import android.util.AttributeSet;
 import android.view.Display;
 import android.view.Surface;
 import android.view.View;
@@ -52,13 +48,16 @@ import android.view.WindowManager;
  * performs sensor based tracking
  * 
  * @author Arne de Wall
+ * @author Holger Hopmann
  */
 public class ARSurfaceView extends GLSurfaceView implements
 		SensorEventListener, IRotationMatrixProvider, OnLocationUpdateListener {
 
 	// Sensor related
-	private SensorBuffer magnetValues = new LowPassSensorBuffer(3, 0.05f);
-	private SensorBuffer accelValues = new LowPassSensorBuffer(3, 0.15f);
+	private SensorBuffer magnetValues = new AdaptiveLowPassSensorBuffer(3, 1,
+			10, 0.002f, 0.1f);	// new LowPassSensorBuffer(3, 0.05f);
+	private SensorBuffer accelValues = new AdaptiveLowPassSensorBuffer(3, 0.5f, 4,
+			0.01f, 0.15f); // new LowPassSensorBuffer(3, 0.15f);
 	private Sensor magnet, accel;
 	private SensorManager mSensorManager;
 	private Display display;

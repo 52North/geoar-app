@@ -26,8 +26,8 @@ import javax.microedition.khronos.opengles.GL10;
 import org.n52.android.GeoARApplication;
 import org.n52.android.R;
 import org.n52.android.ar.view.ARObject2;
+import org.n52.android.tracking.camera.RealityCamera;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
-import org.n52.android.view.geoar.gl.GLESCamera;
 import org.n52.android.view.geoar.gl.mode.FeatureShader;
 import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 import org.n52.android.view.geoar.gl.mode.Texture;
@@ -88,13 +88,15 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	private List<RenderFeature2> renderFeatures = new ArrayList<RenderFeature2>();
 
 	private RenderFeature2 grid;
-	public static RenderFeature2 test;
+	private RenderFeature2 test;
 
 	/** light parameters */
 	private final float[] lightDirection = new float[] { 3.0f, 10.0f, 2.0f,
 			1.0f };
 
 	private final float[] lightDirectionMVP = new float[4];
+
+	private final float[] mvMatrix = new float[16];
 
 	private boolean mARObjectsChanged;
 
@@ -107,6 +109,8 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 	private Location mUserLocation;
 
+	private boolean mProjectionChanged;
+
 	public ARSurfaceViewRenderer(ARSurfaceView surfaceView,
 			IRotationMatrixProvider rotationMatrixProvider) {
 		this.mSurfaceView = surfaceView;
@@ -117,6 +121,14 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
+		if (mProjectionChanged) {
+			// Camera may get initialized after creating the GL surface,
+			// projection matrix will be reset here if camera settings changed
+			GLESCamera.resetProjectionMatrix();
+			GLESCamera.resetViewMatrix();
+			mProjectionChanged = false;
+		}
+
 		// Update ARObjects if required
 		if (mARObjectsChanged) {
 			// Copy list of ARObjects to avoid the need for synchronization
@@ -149,46 +161,50 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 			return;
 		}
 
-		/** clear color buffer and depth buffer iff activated */
-		int clearMask = GLES20.GL_COLOR_BUFFER_BIT;
-		// if (true) { // enableDepthMask == true
-		clearMask |= GLES20.GL_DEPTH_BUFFER_BIT;
-		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-		GLES20.glDepthFunc(GLES20.GL_LESS);
-		GLES20.glDepthMask(true);
-		GLES20.glClearDepthf(1.f);
-		// }
-		GLES20.glClear(clearMask);
+		/** clear color buffer and depth buffer */
+		// GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+		// GLES20.glDepthFunc(GLES20.GL_LESS);
+		// GLES20.glDepthMask(true);
+		// GLES20.glClearDepthf(1.f);
+		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
 		/** extrinsic camera parameters for matching camera- with virtual view */
-		float[] rotationMatrix = mRotationProvider.getRotationMatrix();
+		System.arraycopy(mRotationProvider.getRotationMatrix(), 0, mvMatrix, 0,
+				16);
+		Matrix.translateM(mvMatrix, 0, 0, -RealityCamera.height, 0);
 
 		/** calculate the light position in eye space */
-		Matrix.multiplyMV(lightDirectionMVP, 0, rotationMatrix, 0,
-				lightDirection, 0);
+		Matrix.multiplyMV(lightDirectionMVP, 0, mvMatrix, 0, lightDirection, 0);
 
 		/** render grid */
 		grid.render(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
-				rotationMatrix, lightDirection);
+				mvMatrix, lightDirection);
 
 		/** render DataSources data */
 		for (ARObject2 feature : mARObjects) {
 			feature.render(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
-					rotationMatrix, lightDirection);
+					mvMatrix, lightDirection);
 		}
 
 		/** for testing purposes */
 		for (RenderFeature2 r : renderFeatures) {
 			r.render(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
-					rotationMatrix, lightDirection);
+					mvMatrix, lightDirection);
 		}
 	}
 
 	@Override
 	public void onSurfaceChanged(GL10 glUnused, int width, int height) {
 		GLES20.glViewport(0, 0, width, height);
-		// GLESCamera.createProjectionMatrix(gl, width, height);
-		GLESCamera.createProjectionMatrix(width, height);
+		if (RealityCamera.cameraViewportHeight == 0
+				|| RealityCamera.cameraViewportWidth == 0) {
+			// Set camera viewport if none exists
+			RealityCamera.setViewportSize(width, height);
+			RealityCamera.setAspect((float) width / (float) height);
+		}
+
+		GLESCamera.resetViewportMatrix(width, height);
+		GLESCamera.resetProjectionMatrix();
 	}
 
 	@Override
@@ -197,7 +213,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 		/** set up the view matrix */
-		GLESCamera.createViewMatrix();
+		GLESCamera.resetViewMatrix();
 
 		/** Enable depth testing */
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
@@ -220,6 +236,8 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		GLES20.glEnable(GLES20.GL_CULL_FACE);
 		GLES20.glCullFace(GLES20.GL_BACK); // GL_FRONT_AND_BACK for no facets
 
+		// Resets all cached handlers because the context was lost so that they
+		// are recreated later on demand.
 		FeatureShader.resetShaders();
 		Texture.resetTextures();
 		initScene();
@@ -260,8 +278,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 	@Override
 	public void onCameraUpdate() {
-		// resetProjection = true;
-
+		mProjectionChanged = true;
 	}
 
 	/**
