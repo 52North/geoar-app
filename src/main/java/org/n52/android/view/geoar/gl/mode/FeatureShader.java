@@ -46,6 +46,7 @@ public class FeatureShader {
 	private boolean hasColor;
 	private boolean hasTexture;
 
+	// TODO unused!
 	static final int SIZE_OF_VERTEX_ELEMENT = 3;
 	static final int SIZE_OF_NORMAL_ELEMENT = 3;
 	static final int SIZE_OF_COLOR_ELEMENT = 4;

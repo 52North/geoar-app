@@ -47,11 +47,6 @@ import android.view.MotionEvent;
 public class DataSourceOverlayHandler implements
 		DataSourceSettingsChangedListener {
 
-	public interface OnProgressUpdateListener extends
-			org.n52.android.newdata.DataCache.OnProgressUpdateListener {
-		void onAbort(int reason);
-	}
-
 	/**
 	 * An instance of this class describes a measurement request order which
 	 * will be performed in the future, just to make sure that the user will
@@ -59,13 +54,13 @@ public class DataSourceOverlayHandler implements
 	 * overlays data if it got canceled before
 	 * 
 	 */
-	protected class UpdateHolder implements Runnable {
-		protected boolean canceled;
-		protected MercatorRect bounds;
+	private class UpdateHolder implements Runnable {
+		private boolean canceled;
+		private MercatorRect bounds;
 		// protected MapView mapView;
-		protected Cancelable requestHolder;
+		private Cancelable requestHolder;
 
-		protected GetDataBoundsCallback callback = new GetDataBoundsCallback() {
+		private GetDataBoundsCallback callback = new GetDataBoundsCallback() {
 
 			@Override
 			public void onProgressUpdate(int progress, int maxProgress) {
@@ -148,7 +143,7 @@ public class DataSourceOverlayHandler implements
 			}
 		};
 
-		public UpdateHolder(MercatorRect bounds) {
+		private UpdateHolder(MercatorRect bounds) {
 			this.bounds = bounds;
 		}
 
@@ -179,13 +174,13 @@ public class DataSourceOverlayHandler implements
 		}
 	}
 
-	protected UpdateHolder currentUpdate;
-	protected UpdateHolder nextUpdate;
-	protected Handler updateHandler = new Handler();
+	private UpdateHolder currentUpdate;
+	private UpdateHolder nextUpdate;
+	private Handler updateHandler = new Handler();
 
-	protected Object updateLock = new Object();
+	private Object updateLock = new Object();
 
-	protected DataSourcesOverlay overlay;
+	private DataSourcesOverlay overlay;
 	private DataSourceInstanceHolder dataSourceInstance;
 
 	private static final Logger LOG = LoggerFactory

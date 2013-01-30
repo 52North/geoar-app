@@ -56,7 +56,7 @@ public class CameraView extends SurfaceView implements Callback {
 	private void init() {
 		holder = getHolder();
 		holder.addCallback(this);
-		holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS); // TODO?
+		holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS); // kept for older versions
 	}
 
 	/**

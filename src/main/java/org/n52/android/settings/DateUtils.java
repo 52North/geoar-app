@@ -23,7 +23,7 @@ import java.util.Locale;
 
 public class DateUtils {
 
-	static SimpleDateFormat dateFormatter = new SimpleDateFormat(
+	private static SimpleDateFormat dateFormatter = new SimpleDateFormat(
 			"yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.getDefault());
 
 	public static String getISOString(Date date) {

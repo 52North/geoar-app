@@ -39,34 +39,29 @@ import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 import org.n52.android.view.geoar.gl.mode.features.CubeFeature2;
 import org.n52.android.view.geoar.gl.mode.features.SphereFeature;
 
-public class DataSourceVisualizationHandler2 implements RenderFeatureFactory,
+public class DataSourceVisualizationHandler implements RenderFeatureFactory,
 		DataSourceSettingsChangedListener {
 
-	public interface OnProgressUpdateListener extends
-			org.n52.android.newdata.DataCache.OnProgressUpdateListener {
-		void onAbort(int reason);
-	}
-
-	protected GetDataBoundsCallback callback = new GetDataBoundsCallback() {
+	private GetDataBoundsCallback callback = new GetDataBoundsCallback() {
 
 		@Override
 		public void onProgressUpdate(int progress, int maxProgress) {
 			InfoView.setProgressTitle(R.string.requesting_data,
-					DataSourceVisualizationHandler2.this);
+					DataSourceVisualizationHandler.this);
 			InfoView.setProgress(progress, maxProgress,
-					DataSourceVisualizationHandler2.this);
+					DataSourceVisualizationHandler.this);
 
 		}
 
 		@Override
 		public void onAbort(MercatorRect bounds, DataSourceErrorType reason) {
-			InfoView.clearProgress(DataSourceVisualizationHandler2.this);
+			InfoView.clearProgress(DataSourceVisualizationHandler.this);
 			if (reason == DataSourceErrorType.CONNECTION) {
 				InfoView.setStatus(R.string.connection_error, 5000,
-						DataSourceVisualizationHandler2.this);
+						DataSourceVisualizationHandler.this);
 			} else if (reason == DataSourceErrorType.UNKNOWN) {
 				InfoView.setStatus(R.string.unknown_error, 5000,
-						DataSourceVisualizationHandler2.this);
+						DataSourceVisualizationHandler.this);
 			}
 		}
 
@@ -75,7 +70,7 @@ public class DataSourceVisualizationHandler2 implements RenderFeatureFactory,
 				List<? extends SpatialEntity> data) {
 
 			synchronized (mutex) {
-				List<ARObject2> arObjects = new ArrayList<ARObject2>();
+				List<ARObject> arObjects = new ArrayList<ARObject>();
 				List<ItemVisualization> visualizations = dataSourceInstance
 						.getParent()
 						.getVisualizations()
@@ -89,10 +84,10 @@ public class DataSourceVisualizationHandler2 implements RenderFeatureFactory,
 						List<RenderFeature2> features = new ArrayList<RenderFeature2>();
 						for (DataSourceVisualizationGL feature : visualization
 								.getEntityVisualization(entity,
-										DataSourceVisualizationHandler2.this)) {
+										DataSourceVisualizationHandler.this)) {
 							features.add((RenderFeature2) feature);
 						}
-						ARObject2 arObject = new ARObject2(entity,
+						ARObject arObject = new ARObject(entity,
 								visualization, features,
 								visualization.getEntityVisualization(entity));
 						// TODO maybe just use entity + visualization
@@ -120,7 +115,7 @@ public class DataSourceVisualizationHandler2 implements RenderFeatureFactory,
 
 	private ARView arView;
 
-	public DataSourceVisualizationHandler2(ARView arView,
+	public DataSourceVisualizationHandler(ARView arView,
 			DataSourceInstanceHolder dataSourceInstance) {
 		this.arView = arView;
 		this.dataSourceInstance = dataSourceInstance;

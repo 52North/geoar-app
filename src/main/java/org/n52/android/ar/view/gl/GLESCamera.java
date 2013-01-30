@@ -18,6 +18,7 @@ package org.n52.android.ar.view.gl;
 import java.util.Arrays;
 
 import org.n52.android.tracking.camera.RealityCamera;
+import org.n52.android.view.geoar.Settings;
 
 import android.opengl.Matrix;
 
@@ -72,14 +73,13 @@ public class GLESCamera {
 		}
 	}
 
-	public static float zFar;
-
+	public static float zNear = 1.f;
+	public static float zFar = Settings.SIZE_AR_INTERPOLATION
+			+ Settings.RELOAD_DIST_AR;
 	// // Viewport of OpenGL Viewport
 	// public static int glViewportWidth;
 	// public static int glViewportHeight;
 
-	public static float zNear; // TODO FIXME XXX this has to be in this class,
-								// not RealityCamera
 	public static float[] projectionMatrix = new float[16];
 
 	// Store the view matrix. This matrix transforms world space to eye space;
@@ -112,7 +112,7 @@ public class GLESCamera {
 
 	public static boolean frustumCulling(float[] positionVec) {
 		float z = -positionVec[2];
-		if (z > RealityCamera.zFar || z < RealityCamera.zNear)
+		if (z > zFar || z < zNear)
 			return false;
 		return true;
 		// float h = z * 2 * Math.tan(RealityCamera.)
@@ -188,7 +188,7 @@ public class GLESCamera {
 	public static void resetProjectionMatrix() {
 		Matrix.setIdentityM(projectionMatrix, 0);
 		perspectiveMatrix(projectionMatrix, 0, RealityCamera.fovY,
-				RealityCamera.aspect, RealityCamera.zNear, RealityCamera.zFar);
+				RealityCamera.aspect, zNear, zFar);
 	}
 
 	public static void resetViewMatrix() {

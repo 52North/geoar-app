@@ -23,6 +23,7 @@ public class CubeFeature2 extends RenderFeature2 {
 	
 
 	// X, Y, Z
+	// Unused
 	final float[] cubePositionData =
 	{
 			// In OpenGL counter-clockwise winding is default. This means that when we look at a triangle, 
@@ -80,6 +81,7 @@ public class CubeFeature2 extends RenderFeature2 {
 	};	
 	
 	// R, G, B, A
+	// TODO unused
 	final float[] cubeColorData =
 	{				
 			// Front face (red)
@@ -135,6 +137,7 @@ public class CubeFeature2 extends RenderFeature2 {
 	// The normal is used in light calculations and is a vector which points
 	// orthogonal to the plane of the surface. For a cube model, the normals
 	// should be orthogonal to the points of each face.
+	// TODO Unused
 	final float[] cubeNormalData =
 	{												
 			// Front face

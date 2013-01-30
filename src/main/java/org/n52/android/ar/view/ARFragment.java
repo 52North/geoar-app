@@ -42,10 +42,10 @@ import com.actionbarsherlock.app.SherlockFragment;
  * @author Arne de Wall
  * 
  */
-public class ARFragment2 extends SherlockFragment implements
+public class ARFragment extends SherlockFragment implements
 		OnLocationUpdateListener {
 
-	private Map<DataSourceInstanceHolder, DataSourceVisualizationHandler2> mVisualizationHandlerMap = new HashMap<DataSourceInstanceHolder, DataSourceVisualizationHandler2>();
+	private Map<DataSourceInstanceHolder, DataSourceVisualizationHandler> mVisualizationHandlerMap = new HashMap<DataSourceInstanceHolder, DataSourceVisualizationHandler>();
 
 	// Listener for data source enabled state
 	private OnCheckedChangedListener<DataSourceInstanceHolder> dataSourceListener = new OnCheckedChangedListener<DataSourceInstanceHolder>() {
@@ -55,7 +55,7 @@ public class ARFragment2 extends SherlockFragment implements
 				boolean newState) {
 			if (newState == true && !mVisualizationHandlerMap.containsKey(item)) {
 				// new data source selected -> add new overlay handler
-				DataSourceVisualizationHandler2 visualizationHandler = new DataSourceVisualizationHandler2(
+				DataSourceVisualizationHandler visualizationHandler = new DataSourceVisualizationHandler(
 						mARView, item);
 				mVisualizationHandlerMap.put(item, visualizationHandler);
 				GeoLocation loc = new GeoLocation(LocationHandler
@@ -64,7 +64,7 @@ public class ARFragment2 extends SherlockFragment implements
 				visualizationHandler.setCenter(loc);
 			} else if (newState == false) {
 				// data source disabled -> remove corresponding overlay handler
-				DataSourceVisualizationHandler2 visualizationHandler = mVisualizationHandlerMap
+				DataSourceVisualizationHandler visualizationHandler = mVisualizationHandlerMap
 						.remove(item);
 				if (visualizationHandler != null) {
 					visualizationHandler.destroy();
@@ -87,7 +87,7 @@ public class ARFragment2 extends SherlockFragment implements
 	}
 
 	private void updateVisualizationHandlers(GeoLocation location) {
-		for (DataSourceVisualizationHandler2 handler : mVisualizationHandlerMap
+		for (DataSourceVisualizationHandler handler : mVisualizationHandlerMap
 				.values()) {
 			handler.setCenter(location);
 		}
@@ -112,7 +112,7 @@ public class ARFragment2 extends SherlockFragment implements
 					.getInstances();
 			for (DataSourceInstanceHolder instance : instances
 					.getCheckedItems()) {
-				DataSourceVisualizationHandler2 visualizationHandler = new DataSourceVisualizationHandler2(
+				DataSourceVisualizationHandler visualizationHandler = new DataSourceVisualizationHandler(
 						mARView, instance);
 				mVisualizationHandlerMap.put(instance, visualizationHandler);
 			}
@@ -161,7 +161,7 @@ public class ARFragment2 extends SherlockFragment implements
 			dataSource.getInstances().removeOnCheckedChangeListener(
 					dataSourceListener);
 		}
-		for (DataSourceVisualizationHandler2 handler : mVisualizationHandlerMap.values()) {
+		for (DataSourceVisualizationHandler handler : mVisualizationHandlerMap.values()) {
 			handler.destroy();
 		}
 		mVisualizationHandlerMap.clear();

@@ -32,28 +32,6 @@ public class Settings {
 	// Zoom used in AR view for interpolation
 	public static final byte ZOOM_AR = 15;
 
-	// Interpolation settings
-	// Min zoom value used in clustering measurements. Accuracy concerns
-	public static final byte MIN_ZOOM_CLUSTERING_COORDINATES = 12;
-	// Min zoom value used in finding measurement positions. Accuracy concerns
-	public static final byte MIN_ZOOM_MEASUREMENT_POSITION = 12;
-	// Max radius of a Cluster
-	public static final float MAX_CLUSTER_SIZE_METER = 25f;
-	// Max number of iterations for kMeans
-	public static final int MAX_KMEANS_COUNT = 15;
-	// Minimal accuracy required for measurement
-	public static final int MIN_MEASUREMENT_LOCATION_ACCURACY = 200;
-
-	// Settings for diagram
-	public static final float MAX_NOISE_DIAGRAM = 100;
-	public static final float MIN_NOISE_DIAGRAM = 30;
-	public static final int NUM_SLICES_DIAGRAM = 20;
-
-	// Settings for the mapview
-	// Max zoom to use for interpolation, scales for higher zoom
-	public static final byte MAX_ZOOM_MAPINTERPOLATION = 15;
-	// Min zoom required to perform interpolation
-	public static final byte MIN_ZOOM_MAPINTERPOLATION = 13;
 	// Buffer in px to request in advance around map extent
 	public static final int BUFFER_MAPINTERPOLATION = 100;
 

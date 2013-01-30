@@ -62,8 +62,9 @@ public class PluginDownloader {
 
 	private static DefaultHttpClient mHttpClient;
 	private static DownloadManager mDownloadManager;
-	private static List<Long> currentDownloads = new ArrayList<Long>();
-	static BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+	private static List<Long> currentDownloads = new ArrayList<Long>(0);
+	
+	private static BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
@@ -129,7 +130,7 @@ public class PluginDownloader {
 
 	private static Set<PluginDownloadHolder> mDownloadableDataSources = new HashSet<PluginDownloadHolder>();
 
-	static class DownloadTask extends AsyncTask<Void, Void, Void> {
+	private static class DownloadTask extends AsyncTask<Void, Void, Void> {
 
 		@Override
 		protected void onPostExecute(Void result) {

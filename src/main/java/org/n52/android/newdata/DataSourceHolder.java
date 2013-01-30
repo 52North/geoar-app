@@ -215,6 +215,7 @@ public class DataSourceHolder implements Parcelable {
 	 * Prevents datasource from getting unloaded. Should be called when
 	 * datasource is added to map/ar.
 	 */
+	@Deprecated
 	public void activate() {
 		LOG.info("Activating data source " + getName());
 
@@ -229,6 +230,7 @@ public class DataSourceHolder implements Parcelable {
 	/**
 	 * Queues unloading of datasource and cached data
 	 */
+	@Deprecated
 	public void deactivate() {
 		LOG.info("Deactivating data source " + getName());
 		dataSourceHandler.sendMessageDelayed(

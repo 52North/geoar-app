@@ -47,11 +47,7 @@ import android.widget.TextView;
  */
 public class InfoView extends LinearLayout {
 
-	public static final int STEP_CLUSTERING = 1;
-	public static final int STEP_INTERPOLATION = 2;
-	public static final int STEP_REQUEST = 3;
-
-	public static final int MESSAGE_REFRESH = 1;
+	private static final int MESSAGE_REFRESH = 1;
 
 	private static class ProgressHolder {
 		private int progress, maxProgress;
@@ -248,8 +244,8 @@ public class InfoView extends LinearLayout {
 	}
 
 	public static void setProgressTitle(int stringId, Object id) {
-		setProgressTitle(GeoARApplication.applicationContext.getString(stringId),
-				id);
+		setProgressTitle(
+				GeoARApplication.applicationContext.getString(stringId), id);
 	}
 
 	/**

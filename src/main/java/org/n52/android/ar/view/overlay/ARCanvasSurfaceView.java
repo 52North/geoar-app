@@ -18,7 +18,7 @@ package org.n52.android.ar.view.overlay;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.n52.android.ar.view.ARObject2;
+import org.n52.android.ar.view.ARObject;
 import org.n52.android.ar.view.ARView;
 import org.n52.android.ar.view.gl.ARSurfaceViewRenderer;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
@@ -56,7 +56,7 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener {
 
 	GUIDrawable drawable;
 
-	private List<ARObject2> mARObjects = new ArrayList<ARObject2>(0);
+	private List<ARObject> mARObjects = new ArrayList<ARObject>(0);
 	private boolean mARObjectsChanged;
 	private ARView mARView;
 
@@ -79,7 +79,7 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener {
 			public boolean onTouch(View v, MotionEvent motionEvent) {
 				if (MotionEvent.ACTION_DOWN == motionEvent.getAction()) {
 					synchronized (mARObjects) {
-						for (ARObject2 object : mARObjects) {
+						for (ARObject object : mARObjects) {
 							if (object.thisObjectHitted(motionEvent.getX(),
 									motionEvent.getY())) {
 								Toast.makeText(getContext(), "Hit! (Debug)",
@@ -122,7 +122,7 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener {
 		canvas.drawCircle(100, 100, 1, poiRenderer);
 
 		synchronized (mARObjects) {
-			for (ARObject2 arObject : mARObjects) {
+			for (ARObject arObject : mARObjects) {
 				arObject.renderCanvas(poiRenderer, canvas);
 			}
 		}

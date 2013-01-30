@@ -25,7 +25,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import org.n52.android.GeoARApplication;
 import org.n52.android.R;
-import org.n52.android.ar.view.ARObject2;
+import org.n52.android.ar.view.ARObject;
 import org.n52.android.tracking.camera.RealityCamera;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.n52.android.view.geoar.gl.mode.FeatureShader;
@@ -56,7 +56,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	 * thread.
 	 */
 	public interface OpenGLCallable {
-		void onPreRender();
+		void onPreRender();	//unused
 
 		void render(final float[] projectionMatrix, final float[] viewMatrix,
 				final float[] parentMatrix, final float[] lightPosition);
@@ -83,8 +83,6 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 	private final IRotationMatrixProvider mRotationProvider;
 
-	protected Object updateLock = new Object();
-
 	private List<RenderFeature2> renderFeatures = new ArrayList<RenderFeature2>();
 
 	private RenderFeature2 grid;
@@ -103,7 +101,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	private ARSurfaceView mSurfaceView;
 
 	// Currently always a copy of ARView's ARObjects
-	private List<ARObject2> mARObjects = new ArrayList<ARObject2>();
+	private List<ARObject> mARObjects = new ArrayList<ARObject>();
 
 	private boolean mLocationChanged;
 
@@ -134,7 +132,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 			// Copy list of ARObjects to avoid the need for synchronization
 			mARObjects.clear();
 			mARObjects.addAll(mSurfaceView.getARObjects());
-			for (ARObject2 feature : mARObjects) {
+			for (ARObject feature : mARObjects) {
 				feature.initializeRendering();
 			}
 			mARObjectsChanged = false;
@@ -150,7 +148,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 			// TODO evaluate synchronized vs. copying list; list is reused by
 			// mSurfaceView for because of performance reasons
 
-			for (ARObject2 feature : mARObjects) {
+			for (ARObject feature : mARObjects) {
 				feature.onLocationUpdate(mUserLocation);
 			}
 
@@ -181,7 +179,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 				mvMatrix, lightDirection);
 
 		/** render DataSources data */
-		for (ARObject2 feature : mARObjects) {
+		for (ARObject feature : mARObjects) {
 			feature.render(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
 					mvMatrix, lightDirection);
 		}

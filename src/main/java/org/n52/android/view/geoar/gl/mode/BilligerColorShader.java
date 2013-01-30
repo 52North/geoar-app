@@ -18,7 +18,7 @@ package org.n52.android.view.geoar.gl.mode;
 public class BilligerColorShader extends FeatureShader {
 
 	//@formatter:off
-	static final String vertexShader = "" +
+	private static final String vertexShader = "" +
 			"uniform mat4 "+ UNIFORM_MATRIX_MVP +";      	\n" + 
 			"attribute vec4 "+ ATTRIBUTE_POSITION +";     	\n" + 
 			"attribute vec4 "+ ATTRIBUTE_COLOR +";        	\n" + 
@@ -37,7 +37,7 @@ public class BilligerColorShader extends FeatureShader {
 			
 			"}                              \n"; 
 
-	static final String fragmentShader = 
+	private static final String fragmentShader = 
 			"precision mediump float;       		\n" + 
 			"varying vec4 vColor;           		\n" + 
 					

@@ -43,14 +43,9 @@ public class RealityCamera {
 	public static float height = 1.6f; // "usage height", distance between
 										// ground and device
 	public static float fovY = 42.5f;
-	public static float scale = 1f;
 	// Viewport of camera preview
 	public static int cameraViewportWidth;
 	public static int cameraViewportHeight;
-
-	public static float zNear = 1.f;
-	public static float zFar = Settings.SIZE_AR_INTERPOLATION
-			+ Settings.RELOAD_DIST_AR;
 
 	private static List<CameraUpdateListener> listeners = new ArrayList<CameraUpdateListener>();
 	public static float aspect;
@@ -71,11 +66,6 @@ public class RealityCamera {
 
 	public static void setFovY(float fov) {
 		RealityCamera.fovY = fov;
-		onUpdate();
-	}
-
-	public static void setScale(float scale) {
-		RealityCamera.scale = scale;
 		onUpdate();
 	}
 

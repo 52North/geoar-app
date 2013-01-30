@@ -364,7 +364,7 @@ public abstract class RenderFeature2 extends Spatial implements
 	/** Feature geometries and shader settings */
 	protected FeatureGeometry geometry;
 	protected FeatureShader renderer;
-	protected BoundingBox boundingBox;
+	protected BoundingBox boundingBox;	//unused
 
 	/** Model Matrix of this feature */
 	private final float[] modelMatrix = new float[16];
@@ -376,17 +376,19 @@ public abstract class RenderFeature2 extends Spatial implements
 	/** GL drawing mode - default triangles */
 	protected int drawingMode = GLES20.GL_TRIANGLES;
 	/** GL for features rendering */
+	
+	// unused
 	protected boolean enableBlending = true;
 	protected boolean enableDepthTest = true;
 	protected boolean enableDepthMask = true;
 	protected boolean enableCullFace = false;
 
 	/** alpha value for Blending */
-	protected Float alpha;
+	protected Float alpha;	// unused
 	/** color of the object */
-	protected int androidColor;
+	protected int androidColor;	//unused
 
-	boolean isInitialized = false;
+	protected boolean isInitialized = false;
 
 	// protected int textureDataHandle;
 

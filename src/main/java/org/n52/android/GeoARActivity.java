@@ -17,7 +17,7 @@ package org.n52.android;
 
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
-import org.n52.android.ar.view.ARFragment2;
+import org.n52.android.ar.view.ARFragment;
 import org.n52.android.map.view.MapFragment;
 import org.n52.android.newdata.PluginFragment;
 import org.n52.android.newdata.PluginLoader;
@@ -66,7 +66,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 
 	private static final String CURRENT_FRAGMENT_KEY = "current_fragment";
 	private MapFragment mMapFragment = new MapFragment();
-	private ARFragment2 mARFragment = new ARFragment2();
+	private ARFragment mARFragment = new ARFragment();
 	private PluginFragment mPluginFragment = new PluginFragment();
 	private Fragment[] mFragments = new Fragment[] { mMapFragment, mARFragment,
 			mPluginFragment };

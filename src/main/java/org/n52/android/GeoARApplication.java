@@ -47,9 +47,9 @@ public class GeoARApplication extends Application {
 	public static Context applicationContext;
 
 	public static final String PREFERENCES_FILE = "GeoAR";
-	public static final String STACKTRACE_FILENAME = "stacktrace.log";
-	public static final String LOG_FILENAME = "logfile.log";
-	public static final String REPORT_EMAIL = "geoar@52north.org";
+	private static final String STACKTRACE_FILENAME = "stacktrace.log";
+	private static final String LOG_FILEPATH = "logs/logfile.txt";
+	private static final String REPORT_EMAIL = "geoar@52north.org";
 
 	private UncaughtExceptionHandler defaultUncaughtExceptionHandler;
 
@@ -66,7 +66,7 @@ public class GeoARApplication extends Application {
 				STACKTRACE_FILENAME);
 		// File path to logfile
 		logFile = new File(applicationContext.getFilesDir()
-				+ "/logs/logfile.txt");
+				+ "/"+LOG_FILEPATH);
 		// Set system properties with log file, logback config references to these,
 		// so do not use LoggerFactory before this point
 		System.setProperty("LOG_DIR", logFile.getParent());

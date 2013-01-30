@@ -54,10 +54,10 @@ public class CheckList<T> extends ArrayList<T> {
 		};
 	}
 
-	public class Checker {
+	class Checker {
 		private T item;
 
-		public Checker(T item) {
+		private Checker(T item) {
 			this.item = item;
 		}
 

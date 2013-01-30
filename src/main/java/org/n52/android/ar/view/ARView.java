@@ -36,8 +36,8 @@ public class ARView extends FrameLayout {
 
 	private ARCanvasSurfaceView mCanvasOverlayView;
 	private ARSurfaceView mARSurfaceView;
-	private Map<Object, List<ARObject2>> mARObjectMap = new HashMap<Object, List<ARObject2>>();
-	private ArrayList<ARObject2> mARObjectsReusableList = new ArrayList<ARObject2>();
+	private Map<Object, List<ARObject>> mARObjectMap = new HashMap<Object, List<ARObject>>();
+	private ArrayList<ARObject> mARObjectsReusableList = new ArrayList<ARObject>();
 	private CameraView mCameraView;
 
 	public ARView(Context context, AttributeSet attrs) {
@@ -89,9 +89,9 @@ public class ARView extends FrameLayout {
 	 * @param arObjects
 	 * @param key
 	 */
-	public void setARObjects(final List<ARObject2> arObjects, final Object key) {
+	public void setARObjects(final List<ARObject> arObjects, final Object key) {
 		synchronized (this.mARObjectMap) {
-			List<ARObject2> previousMapping = this.mARObjectMap.put(key,
+			List<ARObject> previousMapping = this.mARObjectMap.put(key,
 					arObjects);
 			if (previousMapping != null) {
 				previousMapping.clear();
@@ -118,10 +118,12 @@ public class ARView extends FrameLayout {
 
 	/**
 	 * Removes all ARObjects
+	 * 
 	 */
+	// TODO usage?
 	public void clearARObjects() {
 		synchronized (this.mARObjectMap) {
-			for (List<ARObject2> itemList : mARObjectMap.values()) {
+			for (List<ARObject> itemList : mARObjectMap.values()) {
 				itemList.clear();
 			}
 			mARObjectMap.clear();
@@ -131,11 +133,11 @@ public class ARView extends FrameLayout {
 		mCanvasOverlayView.notifyARObjectsChanged();
 	}
 
-	public List<ARObject2> getARObjects() {
+	public List<ARObject> getARObjects() {
 		synchronized (mARObjectsReusableList) {
 			synchronized (this.mARObjectMap) {
 				mARObjectsReusableList.clear();
-				for (List<ARObject2> itemList : mARObjectMap.values()) {
+				for (List<ARObject> itemList : mARObjectMap.values()) {
 					mARObjectsReusableList.addAll(itemList);
 				}
 				return mARObjectsReusableList;

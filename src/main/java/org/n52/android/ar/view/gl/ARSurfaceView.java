@@ -18,7 +18,7 @@ package org.n52.android.ar.view.gl;
 import java.util.List;
 
 import org.n52.android.R;
-import org.n52.android.ar.view.ARObject2;
+import org.n52.android.ar.view.ARObject;
 import org.n52.android.ar.view.ARView;
 import org.n52.android.ar.view.gl.ARSurfaceViewRenderer.IRotationMatrixProvider;
 import org.n52.android.ar.view.gl.ARSurfaceViewRenderer.OnInitializeInGLThread;
@@ -95,15 +95,6 @@ public class ARSurfaceView extends GLSurfaceView implements
 		// drawing available
 		getHolder().setFormat(PixelFormat.TRANSLUCENT);
 		setRenderer(renderer);
-	}
-
-	public void addRenderableToScene(final OnInitializeInGLThread renderNode) {
-		queueEvent(new Runnable() {
-			@Override
-			public void run() {
-				renderNode.onCreateInGLESThread();
-			}
-		});
 	}
 
 	/**
@@ -241,7 +232,7 @@ public class ARSurfaceView extends GLSurfaceView implements
 		renderer.notifyARObjectsChanged();
 	}
 
-	public List<ARObject2> getARObjects() {
+	public List<ARObject> getARObjects() {
 		return mARView.getARObjects();
 	}
 }

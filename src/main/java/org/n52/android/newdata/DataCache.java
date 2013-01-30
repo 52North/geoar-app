@@ -121,6 +121,9 @@ public class DataCache {
 					numEntities = data.size();
 					addData(tileEnvelope, data);
 					data.clear();
+					dataSourceInstance.clearError(); // XXX no error reporting
+														// if following request
+														// does not fail
 				} catch (Exception e) {
 					LOG.error(logTag + " Exception on request", e);
 					dataSourceInstance.reportError(e);
@@ -530,7 +533,7 @@ public class DataCache {
 		class IndexedGetDataCallback implements GetDataCallback {
 			private int x, y;
 
-			public IndexedGetDataCallback(int x, int y) {
+			private IndexedGetDataCallback(int x, int y) {
 				this.x = x;
 				this.y = y;
 			}

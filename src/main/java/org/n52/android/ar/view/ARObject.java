@@ -15,24 +15,17 @@
  */
 package org.n52.android.ar.view;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.microedition.khronos.opengles.GL10;
 
 import org.n52.android.R;
-import org.n52.android.ar.view.gl.GLESCamera;
 import org.n52.android.ar.view.gl.ARSurfaceViewRenderer.OpenGLCallable;
+import org.n52.android.ar.view.gl.GLESCamera;
 import org.n52.android.newdata.SpatialEntity;
 import org.n52.android.newdata.Visualization;
-import org.n52.android.newdata.Visualization.ARVisualization.ItemVisualization;
 import org.n52.android.newdata.Visualization.FeatureVisualization;
 import org.n52.android.newdata.vis.DataSourceVisualization.DataSourceVisualizationCanvas;
-import org.n52.android.newdata.vis.DataSourceVisualization.DataSourceVisualizationGL;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 
@@ -46,23 +39,7 @@ import android.opengl.GLU;
 import android.opengl.Matrix;
 import android.view.View;
 
-public class ARObject2 implements OpenGLCallable {
-
-	protected class VisualizationLayer {
-		final Class<? extends ItemVisualization> clazz;
-		final ItemVisualization itemVisualization;
-		private Set<RenderFeature2> renderFeatureList = new HashSet<RenderFeature2>();
-		private DataSourceVisualizationCanvas canvasFeature;
-
-		VisualizationLayer(ItemVisualization itemVisualization) {
-			this.itemVisualization = itemVisualization;
-			this.clazz = itemVisualization.getClass();
-		}
-
-		void addRenderFeatures(Collection<RenderFeature2> renderFeatures) {
-			renderFeatureList.addAll(renderFeatures);
-		}
-	}
+public class ARObject implements OpenGLCallable {
 
 	/** Model Matrix of this feature */
 	private final float[] modelMatrix = new float[16];
@@ -91,7 +68,7 @@ public class ARObject2 implements OpenGLCallable {
 
 	// TODO FIXME XXX task: ARObject gains most functionalities of RenderFeature
 	// (-> RenderFeature to be more optional)
-	public ARObject2(SpatialEntity entity,
+	public ARObject(SpatialEntity entity,
 			Visualization.FeatureVisualization visualization,
 			List<RenderFeature2> features,
 			DataSourceVisualizationCanvas canvasFeature) {
