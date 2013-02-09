@@ -195,7 +195,7 @@ public class ARObject implements OpenGLCallable {
 		final float[] x = new float[1];
 		Location.distanceBetween(location.getLatitude(),
 				location.getLongitude(), latitude, longitude, x);
-		distanceTo = x[0];
+		distanceTo = x[0]; x[0] = 0;
 
 		/** just the distance -> length 1 */
 		Location.distanceBetween(location.getLatitude(),
@@ -216,16 +216,16 @@ public class ARObject implements OpenGLCallable {
 			altitude = (int) location.getAltitude();
 		// testen
 
-		newPosition[0] = x[0]; // / 10;
+		newPosition[0] = x[0] / 10;
 		newPosition[1] = (float) (altitude - location.getAltitude());
 		// FIXME XXX TODO and here the third position has to be negative i think
-		newPosition[2] = z[0]; // / 10;
+		newPosition[2] = z[0] / 10;
 
 		for (RenderFeature2 renderFeature : renderFeatures)
 			renderFeature.setRelativePosition(newPosition);
 
 		this.newPosition[0] = newPosition[0]; // - GLESCamera.cameraPosition[0];
-		this.newPosition[1] = newPosition[1]; // - GLESCamera.cameraPosition[1];
+		this.newPosition[1] = newPosition[1]- GLESCamera.cameraPosition[1];
 		this.newPosition[2] = newPosition[2]; // - GLESCamera.cameraPosition[2];
 	}
 

@@ -74,7 +74,6 @@ public class Texture {
 	}
 
 	private void initTexture() throws Exception {
-
 		textureHandle = createTextureHandle();
 
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureHandle.get());

@@ -74,8 +74,9 @@ public class GLESCamera {
 	}
 
 	public static float zNear = 1.f;
-	public static float zFar = Settings.SIZE_AR_INTERPOLATION
-			+ Settings.RELOAD_DIST_AR;
+	public static float zFar = 2000.f; 
+//			Settings.SIZE_AR_INTERPOLATION
+//			+ Settings.RELOAD_DIST_AR;
 	// // Viewport of OpenGL Viewport
 	// public static int glViewportWidth;
 	// public static int glViewportHeight;
@@ -87,6 +88,8 @@ public class GLESCamera {
 	public static float[] viewMatrix = new float[16];
 	// public static float[] cameraPosition = new float[] { 0.f, 0f, 0.f };
 	public static int[] viewportMatrix = new int[4];
+	
+	public static float[] cameraPosition = new float[]{0.0f, 1.6f, 0.0f};
 
 	// public static int[] viewPortMatrix;
 

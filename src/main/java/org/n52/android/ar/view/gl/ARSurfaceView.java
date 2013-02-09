@@ -74,6 +74,8 @@ public class ARSurfaceView extends GLSurfaceView implements
 	private Location mLastLocation;
 	private ARView mARView;
 
+	private MultisampleConfigs configChooser;
+	
 	public ARSurfaceView(ARView arView) {
 		super(arView.getContext());
 		mARView = arView;
@@ -88,10 +90,11 @@ public class ARSurfaceView extends GLSurfaceView implements
 		accel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 		display = ((WindowManager) getContext().getSystemService(
 				Context.WINDOW_SERVICE)).getDefaultDisplay();
-
+		
 		renderer = new ARSurfaceViewRenderer(this, this);
 		setEGLContextClientVersion(2);
-		setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Forces to make translucent
+		setEGLConfigChooser(configChooser = new MultisampleConfigs());
+//		setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Forces to make translucent
 		// drawing available
 		getHolder().setFormat(PixelFormat.TRANSLUCENT);
 		setRenderer(renderer);

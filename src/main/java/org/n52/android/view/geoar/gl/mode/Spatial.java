@@ -15,6 +15,8 @@
  */
 package org.n52.android.view.geoar.gl.mode;
 
+import org.n52.android.ar.view.gl.GLESCamera;
+
 
 public abstract class Spatial {
 
@@ -23,15 +25,15 @@ public abstract class Spatial {
 	@Deprecated
 	protected double altitude;
 
-	protected final float[] position = new float[4];
-	protected final float[] rotation = new float[4];
-	protected final float[] scale = new float[3];
+	protected final float[] position = new float[]{0.0f, -1.6f, 0.0f, 1.0f};
+	protected final float[] rotation = new float[]{0.0f, 0.0f, 0.0f, 1.0f};
+	protected final float[] scale = new float[]{1.0f, 1.0f, 1.0f};
 
 	public Spatial() {
-		// float[] cameraPosition = GLESCamera.cameraPosition;
-		// position[0] = -cameraPosition[0];
-		// position[1] = -cameraPosition[1];
-		// position[2] = -cameraPosition[2];
+		float[] cameraPosition = GLESCamera.cameraPosition;
+		position[0] = -cameraPosition[0];
+		position[1] = -cameraPosition[1];
+		position[2] = -cameraPosition[2];
 
 		position[3] = 1;
 	}
@@ -42,8 +44,13 @@ public abstract class Spatial {
 
 	public void setRelativePosition(float[] position) {
 		this.position[0] = position[0]; // - GLESCamera.cameraPosition[0];
-		this.position[1] = position[1]; // - GLESCamera.cameraPosition[1];
+		this.position[1] = position[1] - GLESCamera.cameraPosition[1];
 		this.position[2] = position[2]; // - GLESCamera.cameraPosition[2];
+	}
+	
+	public float getMinimumYCoordinate(){
+		
+		return 0;
 	}
 
 	public float getX() {

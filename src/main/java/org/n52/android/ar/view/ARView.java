@@ -38,7 +38,7 @@ public class ARView extends FrameLayout {
 	private ARSurfaceView mARSurfaceView;
 	private Map<Object, List<ARObject>> mARObjectMap = new HashMap<Object, List<ARObject>>();
 	private ArrayList<ARObject> mARObjectsReusableList = new ArrayList<ARObject>();
-	private CameraView mCameraView;
+//	private CameraView mCameraView;
 
 	public ARView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -55,9 +55,9 @@ public class ARView extends FrameLayout {
 			return;
 		}
 
-		mCameraView = new CameraView(getContext());
-		addView(mCameraView, LayoutParams.MATCH_PARENT,
-				LayoutParams.MATCH_PARENT);
+//		mCameraView = new CameraView(getContext());
+//		addView(mCameraView, LayoutParams.MATCH_PARENT,
+//				LayoutParams.MATCH_PARENT);
 
 		final ActivityManager activityManager = (ActivityManager) getContext()
 				.getSystemService(Context.ACTIVITY_SERVICE);

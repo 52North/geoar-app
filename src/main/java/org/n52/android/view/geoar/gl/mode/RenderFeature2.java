@@ -21,6 +21,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
+import java.util.Stack;
 import java.util.concurrent.Callable;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -35,23 +36,24 @@ import android.opengl.GLES20;
 import android.opengl.GLU;
 import android.opengl.Matrix;
 
+/**
+ * 
+ * @author Arne de Wall
+ *
+ */
 public abstract class RenderFeature2 extends Spatial implements
 		DataSourceVisualizationGL, OpenGLCallable, OnInitializeInGLThread {
 
-	/** Size of the position data in elements. */
-	static final int POSITION_DATA_SIZE = 3;
-	/** Size of the normal data in elements. */
-	static final int NORMAL_DATA_SIZE = 3;
 
-	static final int COLOR_DATA_SIZE = 4;
-
-	static final int TEXTURE_DATA_SIZE = 2;
-	/** How many bytes per float. */
-	static final int BYTES_PER_FLOAT = 4;
-
-	static final int BYTES_PER_INT = 4;
-
-	static final int BYTES_PER_SHORT = 2;
+	/** Static constants */
+	private static final int SIZE_OF_POSITION = 3;
+	private static final int SIZE_OF_NORMAL = 3;
+	private static final int SIZE_OF_COLOR = 4;
+	private static final int SIZE_OF_TEXCOORD = 2;
+	
+	private static final int SIZE_OF_FLOAT = 4;
+	private static final int SIZE_OF_INT = 4;
+	private static final int SIZE_OF_SHORT = 2;
 
 	/**
 	 * 
@@ -86,12 +88,12 @@ public abstract class RenderFeature2 extends Spatial implements
 			public BufferDetails(final float[] data, final int bufferHandle,
 					final int target) {
 				final FloatBuffer floatBuffer = ByteBuffer
-						.allocateDirect(data.length * BYTES_PER_FLOAT)
+						.allocateDirect(data.length * SIZE_OF_FLOAT)
 						.order(ByteOrder.nativeOrder()).asFloatBuffer();
 				floatBuffer.put(data).compact().position(0);
 				this.buffer = floatBuffer;
 				this.bufferType = FLOAT_BUFFER;
-				this.byteSize = BYTES_PER_FLOAT;
+				this.byteSize = SIZE_OF_FLOAT;
 				this.target = target;
 				this.bufferHandle = bufferHandle;
 			}
@@ -100,12 +102,12 @@ public abstract class RenderFeature2 extends Spatial implements
 			public BufferDetails(final int[] data, final int bufferHandle,
 					final int target) {
 				final IntBuffer integerBuffer = ByteBuffer
-						.allocateDirect(data.length * BYTES_PER_INT)
+						.allocateDirect(data.length * SIZE_OF_INT)
 						.order(ByteOrder.nativeOrder()).asIntBuffer();
 				integerBuffer.put(data).compact().position(0);
 				this.buffer = integerBuffer;
 				this.bufferType = INT_BUFFER;
-				this.byteSize = BYTES_PER_INT;
+				this.byteSize = SIZE_OF_INT;
 				this.target = target;
 				this.bufferHandle = bufferHandle;
 			}
@@ -113,12 +115,12 @@ public abstract class RenderFeature2 extends Spatial implements
 			public BufferDetails(final short[] data, final int bufferHandle,
 					final int target) {
 				final ShortBuffer shortBuffer = ByteBuffer
-						.allocateDirect(data.length * BYTES_PER_SHORT)
+						.allocateDirect(data.length * SIZE_OF_SHORT)
 						.order(ByteOrder.nativeOrder()).asShortBuffer();
 				shortBuffer.put(data).compact().position(0);
 				this.buffer = shortBuffer;
 				this.bufferType = SHORT_BUFFER;
-				this.byteSize = BYTES_PER_SHORT;
+				this.byteSize = SIZE_OF_SHORT;
 				this.target = target;
 				this.bufferHandle = bufferHandle;
 			}
@@ -153,7 +155,7 @@ public abstract class RenderFeature2 extends Spatial implements
 			this.hasNormals = (normals != null && renderer.supportsNormals);
 			this.hasTextureCoords = (textureCoords != null && renderer.supportsTextures);
 
-			this.verticesCount = vertices.length / POSITION_DATA_SIZE;
+			this.verticesCount = vertices.length / SIZE_OF_POSITION;
 			initBuffers(vertices, colors, normals, textureCoords, indices);
 		}
 
@@ -258,7 +260,7 @@ public abstract class RenderFeature2 extends Spatial implements
 			this.hasNormals = (normals != null && renderer.supportsNormals);
 			this.hasTextureCoords = (textureCoords != null && renderer.supportsTextures);
 
-			this.verticesCount = vertices.length / POSITION_DATA_SIZE;
+			this.verticesCount = vertices.length / SIZE_OF_POSITION;
 			this.strideBuffer = initInterleavedBuffer(vertices, colors,
 					normals, textureCoords);
 		}
@@ -278,27 +280,27 @@ public abstract class RenderFeature2 extends Spatial implements
 			int texturesOffset = 0;
 
 			final FloatBuffer interleavedBuffer = ByteBuffer
-					.allocateDirect(bufferLength * BYTES_PER_FLOAT)
+					.allocateDirect(bufferLength * SIZE_OF_FLOAT)
 					.order(ByteOrder.nativeOrder()).asFloatBuffer();
 
 			for (int i = 0; i < verticesCount; i++) {
 				interleavedBuffer.put(vertices, verticesOffset,
-						POSITION_DATA_SIZE);
-				verticesOffset += POSITION_DATA_SIZE;
+						SIZE_OF_POSITION);
+				verticesOffset += SIZE_OF_POSITION;
 				if (hasColors) {
 					interleavedBuffer
-							.put(colors, colorsOffset, COLOR_DATA_SIZE);
-					colorsOffset += COLOR_DATA_SIZE;
+							.put(colors, colorsOffset, SIZE_OF_COLOR);
+					colorsOffset += SIZE_OF_COLOR;
 				}
 				if (hasNormals) {
 					interleavedBuffer.put(normals, normalsOffset,
-							NORMAL_DATA_SIZE);
-					normalsOffset += NORMAL_DATA_SIZE;
+							SIZE_OF_NORMAL);
+					normalsOffset += SIZE_OF_NORMAL;
 				}
 				if (hasTextureCoords) {
 					interleavedBuffer.put(textureCoords, texturesOffset,
-							TEXTURE_DATA_SIZE);
-					texturesOffset += TEXTURE_DATA_SIZE;
+							SIZE_OF_TEXCOORD);
+					texturesOffset += SIZE_OF_TEXCOORD;
 				}
 			}
 			interleavedBuffer.position(0);
@@ -308,11 +310,11 @@ public abstract class RenderFeature2 extends Spatial implements
 		@Override
 		void render() {
 			// @formatter:off
-			final int stride = (POSITION_DATA_SIZE
-					+ (hasColors ? COLOR_DATA_SIZE : 0)
-					+ (hasNormals ? NORMAL_DATA_SIZE : 0) + (hasTextureCoords ? TEXTURE_DATA_SIZE
-						: 0))
-					* BYTES_PER_FLOAT;
+			final int stride = (SIZE_OF_POSITION
+					+ (hasColors ? SIZE_OF_COLOR : 0)
+					+ (hasNormals ? SIZE_OF_NORMAL : 0) 
+					+ (hasTextureCoords ? SIZE_OF_TEXCOORD : 0))
+					* SIZE_OF_FLOAT;
 			// @formatter:on
 
 			int bufferPosition = 0;
@@ -320,18 +322,18 @@ public abstract class RenderFeature2 extends Spatial implements
 			strideBuffer.position(bufferPosition);
 			final int positionhandle = renderer.getPositionHandle();
 			GLES20.glEnableVertexAttribArray(positionhandle);
-			GLES20.glVertexAttribPointer(positionhandle, POSITION_DATA_SIZE,
+			GLES20.glVertexAttribPointer(positionhandle, SIZE_OF_POSITION,
 					GLES20.GL_FLOAT, false, stride, strideBuffer);
-			bufferPosition += POSITION_DATA_SIZE;
+			bufferPosition += SIZE_OF_POSITION;
 
 			if (hasColors) {
 				/** defines the array of color attribute data */
 				strideBuffer.position(bufferPosition);
 				final int colorhandle = renderer.getColorHandle();
 				GLES20.glEnableVertexAttribArray(colorhandle);
-				GLES20.glVertexAttribPointer(colorhandle, COLOR_DATA_SIZE,
+				GLES20.glVertexAttribPointer(colorhandle, SIZE_OF_COLOR,
 						GLES20.GL_FLOAT, false, stride, strideBuffer);
-				bufferPosition += COLOR_DATA_SIZE;
+				bufferPosition += SIZE_OF_COLOR;
 			}
 
 			if (hasNormals) {
@@ -339,9 +341,9 @@ public abstract class RenderFeature2 extends Spatial implements
 				strideBuffer.position(bufferPosition);
 				final int normalhandle = renderer.getNormalHandle();
 				GLES20.glEnableVertexAttribArray(normalhandle);
-				GLES20.glVertexAttribPointer(normalhandle, NORMAL_DATA_SIZE,
+				GLES20.glVertexAttribPointer(normalhandle, SIZE_OF_NORMAL,
 						GLES20.GL_FLOAT, false, stride, strideBuffer);
-				bufferPosition += NORMAL_DATA_SIZE;
+				bufferPosition += SIZE_OF_NORMAL;
 			}
 
 			if (hasTextureCoords) {
@@ -351,9 +353,9 @@ public abstract class RenderFeature2 extends Spatial implements
 						.getTextureCoordinateHandle();
 				GLES20.glEnableVertexAttribArray(textureCoordinateHandle);
 				GLES20.glVertexAttribPointer(textureCoordinateHandle,
-						TEXTURE_DATA_SIZE, GLES20.GL_FLOAT, false, stride,
+						SIZE_OF_TEXCOORD, GLES20.GL_FLOAT, false, stride,
 						strideBuffer);
-				bufferPosition += TEXTURE_DATA_SIZE;
+				bufferPosition += SIZE_OF_TEXCOORD;
 			}
 
 			/** render primitives from array data */
@@ -364,7 +366,9 @@ public abstract class RenderFeature2 extends Spatial implements
 	/** Feature geometries and shader settings */
 	protected FeatureGeometry geometry;
 	protected FeatureShader renderer;
-	protected BoundingBox boundingBox;	//unused
+	protected BoundingBox boundingBox; // unused
+
+	protected final Stack<OpenGLCallable> childrenFeatures = new Stack<OpenGLCallable>();
 
 	/** Model Matrix of this feature */
 	private final float[] modelMatrix = new float[16];
@@ -376,7 +380,7 @@ public abstract class RenderFeature2 extends Spatial implements
 	/** GL drawing mode - default triangles */
 	protected int drawingMode = GLES20.GL_TRIANGLES;
 	/** GL for features rendering */
-	
+
 	// unused
 	protected boolean enableBlending = true;
 	protected boolean enableDepthTest = true;
@@ -384,9 +388,9 @@ public abstract class RenderFeature2 extends Spatial implements
 	protected boolean enableCullFace = false;
 
 	/** alpha value for Blending */
-	protected Float alpha;	// unused
+	protected Float alpha; // unused
 	/** color of the object */
-	protected int androidColor;	//unused
+	protected int androidColor; // unused
 
 	protected boolean isInitialized = false;
 
@@ -462,7 +466,7 @@ public abstract class RenderFeature2 extends Spatial implements
 		if (!isInitialized)
 			return;
 
-		GLES20.glDisable(GLES20.GL_BLEND);
+//		GLES20.glDisable(GLES20.GL_BLEND);
 		/** set the matrices to identity matrix */
 		Matrix.setIdentityM(modelMatrix, 0);
 		Matrix.setIdentityM(mvpMatrix, 0);
@@ -481,6 +485,10 @@ public abstract class RenderFeature2 extends Spatial implements
 		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, modelMatrix, 0);
 
 		render(mvpMatrix, modelMatrix, lightPosition);
+		
+		for(OpenGLCallable childFeature : childrenFeatures){
+			childFeature.render(projectionMatrix, viewMatrix, modelMatrix, lightPosition);
+		}
 	}
 
 	public void render(float[] mvpMatrix) {
@@ -504,6 +512,8 @@ public abstract class RenderFeature2 extends Spatial implements
 		/** render the geometry of this feature */
 		if (geometry != null)
 			geometry.render();
+		
+
 	}
 
 	public void render(float[] mvpMatrix, float[] mvMatrix,
@@ -567,6 +577,13 @@ public abstract class RenderFeature2 extends Spatial implements
 	@Override
 	public void setTextureCallback(Callable<Bitmap> callback) {
 		this.texture = Texture.createInstance(callback);
+	}
+
+	@Override
+	public void setSubVisualization(DataSourceVisualizationGL subVisualizationGL) {
+		if (this.childrenFeatures.contains(subVisualizationGL))
+			return;
+		this.childrenFeatures.add((OpenGLCallable) subVisualizationGL);
 	}
 
 	public void setLightPosition(float[] lightPosInEyeSpace) {

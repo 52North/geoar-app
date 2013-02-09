@@ -32,7 +32,9 @@ import org.n52.android.view.geoar.gl.mode.FeatureShader;
 import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 import org.n52.android.view.geoar.gl.mode.Texture;
 import org.n52.android.view.geoar.gl.mode.features.CubeFeature2;
+import org.n52.android.view.geoar.gl.mode.features.FlatCircleFeature;
 import org.n52.android.view.geoar.gl.mode.features.GridFeature;
+import org.n52.android.view.geoar.gl.mode.features.TriangleFeature;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -102,6 +104,10 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 	// Currently always a copy of ARView's ARObjects
 	private List<ARObject> mARObjects = new ArrayList<ARObject>();
+	
+	FlatCircleFeature circleFeature;
+	
+	TriangleFeature triangle;
 
 	private boolean mLocationChanged;
 
@@ -169,14 +175,20 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		/** extrinsic camera parameters for matching camera- with virtual view */
 		System.arraycopy(mRotationProvider.getRotationMatrix(), 0, mvMatrix, 0,
 				16);
-		Matrix.translateM(mvMatrix, 0, 0, -RealityCamera.height, 0);
 
 		/** calculate the light position in eye space */
 		Matrix.multiplyMV(lightDirectionMVP, 0, mvMatrix, 0, lightDirection, 0);
 
 		/** render grid */
+//		triangle.render(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
+//				mvMatrix, lightDirection);
 		grid.render(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
 				mvMatrix, lightDirection);
+		
+		GLES20.glDisable(GLES20.GL_CULL_FACE);
+		circleFeature.render(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
+				mvMatrix, lightDirection);
+		
 
 		/** render DataSources data */
 		for (ARObject feature : mARObjects) {
@@ -245,16 +257,27 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		grid = new GridFeature();
 		grid.onCreateInGLESThread();
 		test = new CubeFeature2();
-		test.setTextureCallback(new Callable<Bitmap>() {
-			@Override
-			public Bitmap call() throws Exception {
-				return BitmapFactory.decodeResource(
-						GeoARApplication.applicationContext.getResources(),
-						R.drawable.n52_logo_highreso);
-			}
-		});
-		test.setRelativePosition(new float[] { 0, 0, -4 });
+//		test.setTextureCallback(new Callable<Bitmap>() {
+//			@Override
+//			public Bitmap call() throws Exception {
+//				return BitmapFactory.decodeResource(
+//						GeoARApplication.applicationContext.getResources(),
+//						R.drawable.n52_logo_highreso);
+//			}
+//		});
+		test.setRelativePosition(new float[] { 0, 0, -6});
 		test.onCreateInGLESThread();
+		circleFeature = new FlatCircleFeature();
+		circleFeature.setRelativePosition(new float[] {2, 0, -6});
+		circleFeature.onCreateInGLESThread();
+//		test.setSubVisualization(circleFeature);
+		
+		triangle = new TriangleFeature();
+		triangle.setRelativePosition(new float[] {-2, 0, -6});
+		triangle.onCreateInGLESThread();
+		
+		test.setSubVisualization(triangle);
+		
 		renderFeatures.add(test);
 
 		// // first cube
@@ -290,7 +313,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	 * Notification for this {@link Renderer} that the objects to display were
 	 * changed. The renderer will schedule an update of the features to draw for
 	 * the next draw cycle.
-	 */
+	 */	
 	public void notifyARObjectsChanged() {
 		mARObjectsChanged = true;
 	}
