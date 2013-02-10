@@ -20,7 +20,6 @@ import java.util.List;
 
 import org.n52.android.ar.view.ARObject;
 import org.n52.android.ar.view.ARView;
-import org.n52.android.ar.view.gl.ARSurfaceViewRenderer;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.n52.android.tracking.location.LocationHandler;
 
@@ -34,6 +33,7 @@ import android.graphics.Shader;
 import android.location.Location;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 // TODO XXX
@@ -63,7 +63,6 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener {
 	public ARCanvasSurfaceView(ARView arView) {
 		super(arView.getContext());
 		this.mARView = arView;
-
 		init();
 	}
 
@@ -120,10 +119,14 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener {
 		// canvas.drawOval(rimRect, rimCirclePaint);
 
 		canvas.drawCircle(100, 100, 1, poiRenderer);
+		
+
+		
 
 		synchronized (mARObjects) {
 			for (ARObject arObject : mARObjects) {
 				arObject.renderCanvas(poiRenderer, canvas);
+				arObject.renderFeatureDetailView(mARView);
 			}
 		}
 		invalidate();

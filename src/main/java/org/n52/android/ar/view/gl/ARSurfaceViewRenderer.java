@@ -273,7 +273,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 //		test.setSubVisualization(circleFeature);
 		
 		triangle = new TriangleFeature();
-		triangle.setRelativePosition(new float[] {-2, 0, -6});
+//		triangle.setRelativePosition(new float[] {-2, 0, -6});
 		triangle.onCreateInGLESThread();
 		
 		test.setSubVisualization(triangle);

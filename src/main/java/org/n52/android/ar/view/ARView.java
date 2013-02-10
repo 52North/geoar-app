@@ -20,19 +20,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.n52.android.R;
 import org.n52.android.ar.view.gl.ARSurfaceView;
 import org.n52.android.ar.view.overlay.ARCanvasSurfaceView;
-import org.n52.android.newdata.DataSourceInstanceHolder;
-import org.n52.android.tracking.camera.CameraView;
 
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
-public class ARView extends FrameLayout {
+public class ARView extends RelativeLayout {
 
 	private ARCanvasSurfaceView mCanvasOverlayView;
 	private ARSurfaceView mARSurfaceView;

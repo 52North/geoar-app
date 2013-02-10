@@ -32,12 +32,17 @@ import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.location.Location;
 import android.opengl.GLU;
 import android.opengl.Matrix;
 import android.view.View;
+import android.view.View.MeasureSpec;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.RelativeLayout;
 
 public class ARObject implements OpenGLCallable {
 
@@ -65,6 +70,8 @@ public class ARObject implements OpenGLCallable {
 	private DataSourceVisualizationCanvas canvasFeature;
 	private List<RenderFeature2> renderFeatures;
 	private FeatureVisualization visualization;
+	private View featureDetailView;
+	private Bitmap featureDetailBitmap;
 
 	// TODO FIXME XXX task: ARObject gains most functionalities of RenderFeature
 	// (-> RenderFeature to be more optional)
@@ -76,6 +83,39 @@ public class ARObject implements OpenGLCallable {
 		this.renderFeatures = features;
 		this.canvasFeature = canvasFeature;
 		this.visualization = visualization;
+
+		onLocationUpdate(LocationHandler.getLastKnownLocation());
+	}
+	
+	public ARObject(SpatialEntity entity,
+			Visualization.FeatureVisualization visualization,
+			List<RenderFeature2> features,
+			DataSourceVisualizationCanvas canvasFeature, View featureDetailView) {
+		this.entity = entity;
+		this.renderFeatures = features;
+		this.canvasFeature = canvasFeature;
+		this.visualization = visualization;
+		
+		this.featureDetailView = featureDetailView;
+
+		this.featureDetailView.setLayoutParams(new LayoutParams(
+				RelativeLayout.LayoutParams.WRAP_CONTENT,
+				RelativeLayout.LayoutParams.WRAP_CONTENT));
+
+		this.featureDetailView.setDrawingCacheEnabled(true);
+		this.featureDetailView.measure(
+				MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
+				MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+		
+		this.featureDetailView.layout(0, 0,
+				this.featureDetailView.getMeasuredWidth(),
+				this.featureDetailView.getMeasuredHeight());
+		
+		this.featureDetailView.buildDrawingCache(true);
+
+		featureDetailBitmap = Bitmap.createBitmap(this.featureDetailView
+				.getDrawingCache());
+		this.featureDetailView.setDrawingCacheEnabled(false);
 
 		onLocationUpdate(LocationHandler.getLastKnownLocation());
 	}
@@ -195,7 +235,8 @@ public class ARObject implements OpenGLCallable {
 		final float[] x = new float[1];
 		Location.distanceBetween(location.getLatitude(),
 				location.getLongitude(), latitude, longitude, x);
-		distanceTo = x[0]; x[0] = 0;
+		distanceTo = x[0];
+		x[0] = 0;
 
 		/** just the distance -> length 1 */
 		Location.distanceBetween(location.getLatitude(),
@@ -225,16 +266,46 @@ public class ARObject implements OpenGLCallable {
 			renderFeature.setRelativePosition(newPosition);
 
 		this.newPosition[0] = newPosition[0]; // - GLESCamera.cameraPosition[0];
-		this.newPosition[1] = newPosition[1]- GLESCamera.cameraPosition[1];
+		this.newPosition[1] = newPosition[1] - GLESCamera.cameraPosition[1];
 		this.newPosition[2] = newPosition[2]; // - GLESCamera.cameraPosition[2];
 	}
 
 	public void renderCanvas(Paint poiRenderer, Canvas canvas) {
 		// FIXME TODO XXX distanceTo has to be in the Settings
-		if (isInFrustum)
-			// for (RenderFeature2 renderFeature : renderFeatures) {
+		if (isInFrustum) {
 			canvasFeature.onRender(screenCoordinates[0], screenCoordinates[1],
 					canvas);
+			canvas.drawBitmap(featureDetailBitmap, screenCoordinates[0],
+					screenCoordinates[1], null);
+
+		}
+
+	}
+
+	private boolean added;
+
+	public void renderFeatureDetailView(ViewGroup parent) {
+
+		// featureDetailView.buildDrawingCache();
+		// if(isInFrustum)
+		// if(this.featureDetailView != null){
+		// if(!added){
+		// FrameLayout.LayoutParams params = new
+		// FrameLayout.LayoutParams(30,40);
+		// params.leftMargin = (int) screenCoordinates[0];
+		// params.topMargin = (int) screenCoordinates[1];
+		//
+		// featureDetailView.setLayoutParams(params);
+		// parent.addView(featureDetailView);
+		// added = true;
+		// }
+		// else{
+		// RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)
+		// featureDetailView.getLayoutParams();
+		// params.leftMargin = (int) screenCoordinates[0];
+		// params.topMargin = (int) screenCoordinates[1];
+		// }
+		//
 		// }
 
 	}

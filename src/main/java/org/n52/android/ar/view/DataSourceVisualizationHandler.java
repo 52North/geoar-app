@@ -18,6 +18,7 @@ package org.n52.android.ar.view;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.n52.android.GeoARApplication;
 import org.n52.android.R;
 import org.n52.android.alg.proj.MercatorPoint;
 import org.n52.android.alg.proj.MercatorProj;
@@ -80,16 +81,23 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory,
 				for (SpatialEntity entity : data) {
 
 					for (ItemVisualization visualization : visualizations) {
-
+						// XXX FIXME TODO List is no longer needed
 						List<RenderFeature2> features = new ArrayList<RenderFeature2>();
-						for (DataSourceVisualizationGL feature : visualization
+						RenderFeature2 feature = (RenderFeature2) visualization
 								.getEntityVisualization(entity,
-										DataSourceVisualizationHandler.this)) {
-							features.add((RenderFeature2) feature);
-						}
-						ARObject arObject = new ARObject(entity,
-								visualization, features,
-								visualization.getEntityVisualization(entity));
+										DataSourceVisualizationHandler.this);
+						features.add(feature);
+						// for (DataSourceVisualizationGL feature :
+						// visualization
+						// .getEntityVisualization(entity,
+						// DataSourceVisualizationHandler.this)) {
+						// features.add((RenderFeature2) feature);
+						// }
+						ARObject arObject = new ARObject(entity, visualization,
+								features,
+								visualization.getEntityVisualization(entity),
+								visualization.getFeatureDetailView(entity,
+										null, null, GeoARApplication.applicationContext));
 						// TODO maybe just use entity + visualization
 						arObjects.add(arObject);
 					}
