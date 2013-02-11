@@ -15,6 +15,36 @@
  */
 package org.n52.android.ar.view.gl;
 
+import org.n52.android.tracking.camera.RealityCamera;
+
+import android.opengl.Matrix;
+
 public class SurfaceTopology {
 	
+	protected abstract class TopologyFunction{
+		abstract float getHeightValue(float x, float z);
+	}
+	
+	private TopologyFunction topology;
+	
+	private float cameraLandOffset = RealityCamera.height;
+	
+	private final float[] modelToWorldMatrix = new float[16];
+	
+	public SurfaceTopology(){
+		
+		Matrix.setIdentityM(modelToWorldMatrix, 0);
+		Matrix.translateM(modelToWorldMatrix, 0, 0, cameraLandOffset, 0);
+		
+		this.topology = new TopologyFunction(){
+			@Override
+			float getHeightValue(float x, float z) {
+				return 0;
+			}
+		};
+	}
+	
+	public float[] getModelToWorldModelMatrix(){
+		return modelToWorldMatrix;
+	}
 }

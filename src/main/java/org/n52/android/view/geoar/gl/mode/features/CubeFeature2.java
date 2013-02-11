@@ -471,14 +471,12 @@ public class CubeFeature2 extends RenderFeature2 {
 	 * Constructor
 	 ***************************/
 	public CubeFeature2() {
-		this.drawingMode = GLES20.GL_TRIANGLES; // GLES20.GL_TRIANGLE_FAN;
-//		this.renderer = ColoredFeatureShader.getInstance();
+		this.drawingMode = GLES20.GL_TRIANGLES;
+		this.heightOffset = -0.5f;
 	}
 
 	@Override
 	public void onCreateInGLESThread() {
-//		setRenderObjectives(vertices, colors, normals, null);
-//		drawingMode = GLES20.GL_TRIANGLES;
 		setRenderObjectives(vertices, whitecolors, normals, cubeTextureCoordinateData);
 	}
 

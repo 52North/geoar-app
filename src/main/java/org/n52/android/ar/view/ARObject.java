@@ -86,7 +86,7 @@ public class ARObject implements OpenGLCallable {
 
 		onLocationUpdate(LocationHandler.getLastKnownLocation());
 	}
-	
+
 	public ARObject(SpatialEntity entity,
 			Visualization.FeatureVisualization visualization,
 			List<RenderFeature2> features,
@@ -95,7 +95,7 @@ public class ARObject implements OpenGLCallable {
 		this.renderFeatures = features;
 		this.canvasFeature = canvasFeature;
 		this.visualization = visualization;
-		
+
 		this.featureDetailView = featureDetailView;
 
 		this.featureDetailView.setLayoutParams(new LayoutParams(
@@ -106,11 +106,11 @@ public class ARObject implements OpenGLCallable {
 		this.featureDetailView.measure(
 				MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
 				MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
-		
+
 		this.featureDetailView.layout(0, 0,
 				this.featureDetailView.getMeasuredWidth(),
 				this.featureDetailView.getMeasuredHeight());
-		
+
 		this.featureDetailView.buildDrawingCache(true);
 
 		featureDetailBitmap = Bitmap.createBitmap(this.featureDetailView
@@ -275,39 +275,10 @@ public class ARObject implements OpenGLCallable {
 		if (isInFrustum) {
 			canvasFeature.onRender(screenCoordinates[0], screenCoordinates[1],
 					canvas);
-			canvas.drawBitmap(featureDetailBitmap, screenCoordinates[0],
-					screenCoordinates[1], null);
-
+			if (featureDetailBitmap != null)
+				canvas.drawBitmap(featureDetailBitmap, screenCoordinates[0],
+						screenCoordinates[1], null);
 		}
-
-	}
-
-	private boolean added;
-
-	public void renderFeatureDetailView(ViewGroup parent) {
-
-		// featureDetailView.buildDrawingCache();
-		// if(isInFrustum)
-		// if(this.featureDetailView != null){
-		// if(!added){
-		// FrameLayout.LayoutParams params = new
-		// FrameLayout.LayoutParams(30,40);
-		// params.leftMargin = (int) screenCoordinates[0];
-		// params.topMargin = (int) screenCoordinates[1];
-		//
-		// featureDetailView.setLayoutParams(params);
-		// parent.addView(featureDetailView);
-		// added = true;
-		// }
-		// else{
-		// RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)
-		// featureDetailView.getLayoutParams();
-		// params.leftMargin = (int) screenCoordinates[0];
-		// params.topMargin = (int) screenCoordinates[1];
-		// }
-		//
-		// }
-
 	}
 
 	public void setLightPosition(float[] lightPosInEyeSpace) {

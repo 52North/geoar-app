@@ -111,22 +111,10 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener {
 			drawable.initDrawingTools();
 			init = true;
 		}
-
-		// drawCoordinates(canvas);
-
-		// drawable.onRenderCanvas(canvas);
-		// now the outer rim circle
-		// canvas.drawOval(rimRect, rimCirclePaint);
-
-		canvas.drawCircle(100, 100, 1, poiRenderer);
 		
-
-		
-
 		synchronized (mARObjects) {
 			for (ARObject arObject : mARObjects) {
 				arObject.renderCanvas(poiRenderer, canvas);
-				arObject.renderFeatureDetailView(mARView);
 			}
 		}
 		invalidate();

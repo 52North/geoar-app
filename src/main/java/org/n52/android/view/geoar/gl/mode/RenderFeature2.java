@@ -380,22 +380,18 @@ public abstract class RenderFeature2 extends Spatial implements
 	/** GL drawing mode - default triangles */
 	protected int drawingMode = GLES20.GL_TRIANGLES;
 	/** GL for features rendering */
-
-	// unused
 	protected boolean enableBlending = true;
 	protected boolean enableDepthTest = true;
 	protected boolean enableDepthMask = true;
 	protected boolean enableCullFace = false;
-
+	
+	protected float heightOffset = 0.0f;
 	/** alpha value for Blending */
-	protected Float alpha; // unused
+	protected Float alpha; 
 	/** color of the object */
-	protected int androidColor; // unused
+	protected int androidColor; 
 
 	protected boolean isInitialized = false;
-
-	// protected int textureDataHandle;
-
 	private Texture texture;
 
 	@Deprecated
@@ -465,8 +461,7 @@ public abstract class RenderFeature2 extends Spatial implements
 			final float[] lightPosition) {
 		if (!isInitialized)
 			return;
-
-//		GLES20.glDisable(GLES20.GL_BLEND);
+		
 		/** set the matrices to identity matrix */
 		Matrix.setIdentityM(modelMatrix, 0);
 		Matrix.setIdentityM(mvpMatrix, 0);
@@ -496,6 +491,13 @@ public abstract class RenderFeature2 extends Spatial implements
 		if (!isInitialized)
 			return;
 		renderer.useProgram();
+		
+		if(enableBlending){
+			GLES20.glEnable(GLES20.GL_BLEND);
+		}
+		if(enableCullFace){
+			GLES20.glEnable(GLES20.GL_CULL_FACE);
+		}
 
 		if (texture != null) {
 			// Set the active texture unit to texture unit 0.
@@ -509,20 +511,27 @@ public abstract class RenderFeature2 extends Spatial implements
 			texture.bindTexture();
 		}
 		renderer.setModelViewProjectionMatrix(mvpMatrix);
+		
 		/** render the geometry of this feature */
 		if (geometry != null)
 			geometry.render();
-		
-
 	}
+	
 
 	public void render(float[] mvpMatrix, float[] mvMatrix,
 			float[] lightPosition) {
 		/** sets the program object as part of current rendering state */
 		renderer.useProgram();
+		
+		if(enableBlending){
+			GLES20.glEnable(GLES20.GL_BLEND);
+		}
+		if(enableCullFace){
+			GLES20.glEnable(GLES20.GL_CULL_FACE);
+		}
 
 		renderer.setLightPositionVec(lightPosition);
-
+		
 		if (texture != null) {
 			// Set the active texture unit to texture unit 0.
 			GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
@@ -541,6 +550,9 @@ public abstract class RenderFeature2 extends Spatial implements
 		/** render the geometry of this feature */
 		if (geometry != null)
 			geometry.render();
+		
+		GLES20.glDisable(GLES20.GL_BLEND);
+		GLES20.glDisable(GLES20.GL_CULL_FACE);
 	}
 
 	@Override

@@ -90,8 +90,8 @@ public class GridFeature extends RenderFeature2 {
 			indices[index] = index;
 
 		/** init normals array **/
-		for (int normalIndex = 2, length = normals.length; normalIndex < length; normalIndex += 3)
-			normals[normalIndex] = 1;
+		for (int normalIndex = 1, length = normals.length; normalIndex < length; normalIndex += 3)
+			normals[normalIndex] = 1.0f;
 
 		final float r, g, b, a;
 
@@ -108,10 +108,10 @@ public class GridFeature extends RenderFeature2 {
 		}
 
 		for (int i = 0, length = gridSize * 16; i < length; i += 4) {
-			colors[i] = 1.0f;
-			colors[i + 1] = 1.0f;
-			colors[i + 2] = 1.0f;
-			colors[i + 3] = 1.0f;
+			colors[i] = r;
+			colors[i + 1] = g;
+			colors[i + 2] = b;
+			colors[i + 3] = a;
 		}
 
 		setRenderObjectives(vertices, colors, normals, null);
