@@ -8,7 +8,7 @@
         android:layout_height="wrap_content"
         android:background="#ffffffff"
         android:orientation="vertical"
-        android:padding="8dp"
+        android:padding="14dp"
         android:scrollbarAlwaysDrawVerticalTrack="true"
         android:scrollbars="vertical" >
 
@@ -24,6 +24,7 @@
             android:id="@+id/imageView52n"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:src="@drawable/n52_logo_highreso" />
 
         <TextView
@@ -82,7 +83,9 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:src="@drawable/fp7" />
+
     </LinearLayout>
 
 </ScrollView>

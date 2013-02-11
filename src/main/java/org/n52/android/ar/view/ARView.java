@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.n52.android.R;
 import org.n52.android.ar.view.gl.ARSurfaceView;
 import org.n52.android.ar.view.overlay.ARCanvasSurfaceView;
 
@@ -29,18 +28,16 @@ import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 
-public class ARView extends RelativeLayout {
+public class ARView extends FrameLayout {
 
 	private ARCanvasSurfaceView mCanvasOverlayView;
 	private ARSurfaceView mARSurfaceView;
 	private Map<Object, List<ARObject>> mARObjectMap = new HashMap<Object, List<ARObject>>();
 	private ArrayList<ARObject> mARObjectsReusableList = new ArrayList<ARObject>();
-//	private CameraView mCameraView;
+
+	// private CameraView mCameraView;
 
 	public ARView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -57,9 +54,9 @@ public class ARView extends RelativeLayout {
 			return;
 		}
 
-//		mCameraView = new CameraView(getContext());
-//		addView(mCameraView, LayoutParams.MATCH_PARENT,
-//				LayoutParams.MATCH_PARENT);
+		// mCameraView = new CameraView(getContext());
+		// addView(mCameraView, LayoutParams.MATCH_PARENT,
+		// LayoutParams.MATCH_PARENT);
 
 		final ActivityManager activityManager = (ActivityManager) getContext()
 				.getSystemService(Context.ACTIVITY_SERVICE);
