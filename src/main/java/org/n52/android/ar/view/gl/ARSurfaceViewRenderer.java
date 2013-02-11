@@ -16,15 +16,11 @@
 package org.n52.android.ar.view.gl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import org.n52.android.GeoARApplication;
-import org.n52.android.R;
 import org.n52.android.ar.view.ARObject;
 import org.n52.android.tracking.camera.RealityCamera;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
@@ -33,17 +29,14 @@ import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 import org.n52.android.view.geoar.gl.mode.Texture;
 import org.n52.android.view.geoar.gl.mode.features.CubeFeature2;
 import org.n52.android.view.geoar.gl.mode.features.FlatCircleFeature;
-import org.n52.android.view.geoar.gl.mode.features.GridFeature;
+import org.n52.android.view.geoar.gl.mode.features.NewGridFeature;
 import org.n52.android.view.geoar.gl.mode.features.TriangleFeature;
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.opengl.Matrix;
 import android.opengl.GLSurfaceView.Renderer;
+import android.opengl.Matrix;
 
 /**
  * 
@@ -254,7 +247,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	}
 
 	private void initScene() {
-		grid = new GridFeature();
+		grid = new NewGridFeature();
 		grid.onCreateInGLESThread();
 		test = new CubeFeature2();
 //		test.setTextureCallback(new Callable<Bitmap>() {

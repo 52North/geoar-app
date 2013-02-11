@@ -46,14 +46,14 @@ public abstract class RenderFeature2 extends Spatial implements
 
 
 	/** Static constants */
-	private static final int SIZE_OF_POSITION = 3;
-	private static final int SIZE_OF_NORMAL = 3;
-	private static final int SIZE_OF_COLOR = 4;
-	private static final int SIZE_OF_TEXCOORD = 2;
+	protected static final int SIZE_OF_POSITION = 3;
+	protected static final int SIZE_OF_NORMAL = 3;
+	protected static final int SIZE_OF_COLOR = 4;
+	protected static final int SIZE_OF_TEXCOORD = 2;
 	
-	private static final int SIZE_OF_FLOAT = 4;
-	private static final int SIZE_OF_INT = 4;
-	private static final int SIZE_OF_SHORT = 2;
+	protected static final int SIZE_OF_FLOAT = 4;
+	protected static final int SIZE_OF_INT = 4;
+	protected static final int SIZE_OF_SHORT = 2;
 
 	/**
 	 * 
