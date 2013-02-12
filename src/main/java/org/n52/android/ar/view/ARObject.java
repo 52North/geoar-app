@@ -36,6 +36,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.location.Location;
+import android.media.audiofx.BassBoost.Settings;
 import android.opengl.GLU;
 import android.opengl.Matrix;
 import android.view.View;
@@ -60,6 +61,11 @@ public class ARObject implements OpenGLCallable {
 	private final float[] screenCoordinates = new float[3];
 
 	private volatile boolean isInFrustum = false;
+	
+	private static float getScaleByDistance(float distance){
+		int x = org.n52.android.view.geoar.Settings.BUFFER_MAPINTERPOLATION;
+		return (float) (x-distance)/x;
+	}
 
 	// XXX Why mapping by Class? Compatible with multiinstancedatasources?
 	// private final Map<Class<? extends ItemVisualization>, VisualizationLayer>
@@ -96,27 +102,29 @@ public class ARObject implements OpenGLCallable {
 		this.canvasFeature = canvasFeature;
 		this.visualization = visualization;
 
-		this.featureDetailView = featureDetailView;
+		if (featureDetailView != null) {
+			this.featureDetailView = featureDetailView;
 
-		this.featureDetailView.setLayoutParams(new LayoutParams(
-				RelativeLayout.LayoutParams.WRAP_CONTENT,
-				RelativeLayout.LayoutParams.WRAP_CONTENT));
+			this.featureDetailView.setLayoutParams(new LayoutParams(
+					RelativeLayout.LayoutParams.WRAP_CONTENT,
+					RelativeLayout.LayoutParams.WRAP_CONTENT));
 
-		this.featureDetailView.setDrawingCacheEnabled(true);
-		this.featureDetailView.measure(
-				MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
-				MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+			this.featureDetailView.setDrawingCacheEnabled(true);
+			this.featureDetailView.measure(
+					MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
+					MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
 
-		this.featureDetailView.layout(0, 0,
-				this.featureDetailView.getMeasuredWidth(),
-				this.featureDetailView.getMeasuredHeight());
+			this.featureDetailView.layout(0, 0,
+					this.featureDetailView.getMeasuredWidth(),
+					this.featureDetailView.getMeasuredHeight());
 
-		this.featureDetailView.buildDrawingCache(true);
+			this.featureDetailView.buildDrawingCache(true);
 
-		featureDetailBitmap = Bitmap.createBitmap(this.featureDetailView
-				.getDrawingCache());
-		this.featureDetailView.setDrawingCacheEnabled(false);
+			featureDetailBitmap = Bitmap.createBitmap(this.featureDetailView
+					.getDrawingCache());
+			this.featureDetailView.setDrawingCacheEnabled(false);
 
+		}
 		onLocationUpdate(LocationHandler.getLastKnownLocation());
 	}
 
@@ -257,10 +265,10 @@ public class ARObject implements OpenGLCallable {
 			altitude = (int) location.getAltitude();
 		// testen
 
-		newPosition[0] = x[0] / 10;
+		newPosition[0] = x[0];
 		newPosition[1] = (float) (altitude - location.getAltitude());
 		// FIXME XXX TODO and here the third position has to be negative i think
-		newPosition[2] = z[0] / 10;
+		newPosition[2] = z[0];
 
 		for (RenderFeature2 renderFeature : renderFeatures)
 			renderFeature.setRelativePosition(newPosition);
@@ -273,8 +281,12 @@ public class ARObject implements OpenGLCallable {
 	public void renderCanvas(Paint poiRenderer, Canvas canvas) {
 		// FIXME TODO XXX distanceTo has to be in the Settings
 		if (isInFrustum) {
+			float scale = getScaleByDistance(distanceTo);
+			canvas.save(Canvas.MATRIX_SAVE_FLAG);
+			canvas.scale(scale, scale, screenCoordinates[0], screenCoordinates[1]);
 			canvasFeature.onRender(screenCoordinates[0], screenCoordinates[1],
 					canvas);
+			canvas.restore();
 			if (featureDetailBitmap != null)
 				canvas.drawBitmap(featureDetailBitmap, screenCoordinates[0],
 						screenCoordinates[1], null);

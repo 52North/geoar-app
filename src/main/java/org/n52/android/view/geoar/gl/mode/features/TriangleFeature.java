@@ -67,7 +67,7 @@ public class TriangleFeature extends RenderFeature2{
 		colors[3] = 1.0f;
 		for (int i = 4; i < numOfColors; i += 4) {
 			colors[i] = 1.0f;
-			colors[i + 3] = 0.4f;
+			colors[i + 3] = 0.1f;
 		}
 		
 		setRenderObjectives(vertices, colors, normals, null);

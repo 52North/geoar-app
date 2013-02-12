@@ -81,7 +81,7 @@ public class FlatCircleFeature extends RenderFeature2 {
 			colors[i] = 1.0f;
 			colors[i + 1] = 0.0f;
 			colors[i + 2] = 0.0f;
-			colors[i + 3] = 0.5f;
+			colors[i + 3] = 0.1f;
 		}
 		
 //		// circle center, we want no triangulation from the border

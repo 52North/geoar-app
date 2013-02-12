@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.n52.android.ar.view.gl.ARSurfaceView;
 import org.n52.android.ar.view.overlay.ARCanvasSurfaceView;
+import org.n52.android.tracking.camera.CameraView;
 
 import android.app.ActivityManager;
 import android.content.Context;

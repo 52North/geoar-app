@@ -26,7 +26,7 @@ public class Settings {
 	
 	// AR view settings
 	// Radius in meters for the interpolation in AR view
-	public static final int SIZE_AR_INTERPOLATION = 150;
+	public static final int SIZE_AR_INTERPOLATION = 3000;
 	// Threshold in position to request new interpolation
 	public static final int RELOAD_DIST_AR = 50;
 	// Zoom used in AR view for interpolation
