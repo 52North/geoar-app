@@ -43,6 +43,7 @@ public class CameraView extends SurfaceView implements Callback {
 
 	private SurfaceHolder holder;
 	private Camera camera;
+	private int cameraId;
 
 	public CameraView(Context context) {
 		super(context);
@@ -142,20 +143,23 @@ public class CameraView extends SurfaceView implements Callback {
 			break;
 		}
 
-//		// Annahme, dass Kamera 90� verdreht zu Standardausrichtung platziert
-//		// ist. Tats�chlicher Wert erst ab Android 2.3 abrufbar. TODO
-//		int cameraRotation = (90 - degrees + 360) % 360;
+		// // Annahme, dass Kamera 90� verdreht zu Standardausrichtung
+		// platziert
+		// // ist. Tats�chlicher Wert erst ab Android 2.3 abrufbar. TODO
+		// int cameraRotation = (90 - degrees + 360) % 360;
 		CameraInfo info = new CameraInfo();
+		Camera.getCameraInfo(cameraId, info);
 
 		int cameraRotation;
 		if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
 			cameraRotation = (info.orientation + degrees) % 360;
-			cameraRotation = (360 - cameraRotation) % 360; // compensate the mirror
+			cameraRotation = (360 - cameraRotation) % 360; // compensate the
+															// mirror
 		} else { // back-facing
 			cameraRotation = (info.orientation - degrees + 360) % 360;
 		}
-		
-		cameraRotation = (90 - cameraRotation + 360) % 360;
+
+//		cameraRotation = (90 - cameraRotation + 360) % 360;
 
 		camera.setDisplayOrientation(cameraRotation);
 
@@ -185,7 +189,17 @@ public class CameraView extends SurfaceView implements Callback {
 	public void surfaceCreated(SurfaceHolder holder) {
 		try {
 			// Kameraobjekt erzeugen
-			camera = Camera.open();
+			int numCameras = Camera.getNumberOfCameras();
+			CameraInfo cameraInfo = new CameraInfo();
+			for (int i = 0; i < numCameras; i++) {
+				Camera.getCameraInfo(i, cameraInfo);
+				if (cameraInfo.facing == CameraInfo.CAMERA_FACING_BACK) {
+					camera = Camera.open(i);
+					cameraId = i;
+					break;
+				}
+			}
+
 			if (camera == null) {
 				throw new RuntimeException(); // jump to exception block
 			}
