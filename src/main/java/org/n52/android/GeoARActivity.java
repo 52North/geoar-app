@@ -76,6 +76,9 @@ public class GeoARActivity extends SherlockFragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
+		// TODO Debug only
+		LocationHandler.setManualLocation(new GeoLocation(51.965344, 7.600003));
+
 		if (savedInstanceState == null) {
 			// First time init
 			Builder builder = new AlertDialog.Builder(this);

@@ -55,9 +55,9 @@ public class ARSurfaceView extends GLSurfaceView implements
 
 	// Sensor related
 	private SensorBuffer magnetValues = new AdaptiveLowPassSensorBuffer(3, 1,
-			10, 0.002f, 0.1f);	// new LowPassSensorBuffer(3, 0.05f);
-	private SensorBuffer accelValues = new AdaptiveLowPassSensorBuffer(3, 0.5f, 4,
-			0.01f, 0.15f); // new LowPassSensorBuffer(3, 0.15f);
+			10, 0.002f, 0.1f); // new LowPassSensorBuffer(3, 0.05f);
+	private SensorBuffer accelValues = new AdaptiveLowPassSensorBuffer(3, 0.5f,
+			4, 0.01f, 0.15f); // new LowPassSensorBuffer(3, 0.15f);
 	private Sensor magnet, accel;
 	private SensorManager mSensorManager;
 	private Display display;
@@ -74,8 +74,6 @@ public class ARSurfaceView extends GLSurfaceView implements
 	private Location mLastLocation;
 	private ARView mARView;
 
-	private MultisampleConfigs configChooser;
-	
 	public ARSurfaceView(ARView arView) {
 		super(arView.getContext());
 		mARView = arView;
@@ -90,11 +88,13 @@ public class ARSurfaceView extends GLSurfaceView implements
 		accel = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 		display = ((WindowManager) getContext().getSystemService(
 				Context.WINDOW_SERVICE)).getDefaultDisplay();
-		
+
 		renderer = new ARSurfaceViewRenderer(this, this);
 		setEGLContextClientVersion(2);
-		setEGLConfigChooser(configChooser = new MultisampleConfigs());
-//		setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Forces to make translucent
+		// setEGLConfigChooser(new MultisampleConfigs());
+		// XXX Does this support transparent background?
+		
+		setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Forces to make translucent
 		// drawing available
 		getHolder().setFormat(PixelFormat.TRANSLUCENT);
 		setRenderer(renderer);
