@@ -226,7 +226,7 @@ public class MapFragment extends SherlockFragment {
 						location.getLongitude());
 				locationOverlay.setLocation(center,
 						location.hasAccuracy() ? location.getAccuracy() : 50);
-
+				mapView.getController().setZoom(13);
 				mapView.getController().setCenter(center);
 			}
 		};
