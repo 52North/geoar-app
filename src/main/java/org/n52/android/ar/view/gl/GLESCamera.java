@@ -89,7 +89,7 @@ public class GLESCamera {
 	// public static float[] cameraPosition = new float[] { 0.f, 0f, 0.f };
 	public static int[] viewportMatrix = new int[4];
 	
-	public static float[] cameraPosition = new float[]{0.0f, 1.6f, 0.0f};
+	public static float[] cameraPosition = new float[]{0.0f, 1.6f, 0.0f};	// TODO XXX 1.6 is no constant!
 
 	// public static int[] viewPortMatrix;
 

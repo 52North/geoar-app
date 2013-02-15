@@ -1,96 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="org.n52.android" android:versionCode="3" android:versionName="0.5-SNAPSHOT">
+    package="org.n52.android"
+    android:versionCode="3"
+    android:versionName="0.5-SNAPSHOT" >
 
-	<!-- reduce minSdkVersion if ABS works correctly with maven etc. -->
-	<uses-sdk android:minSdkVersion="11" android:targetSdkVersion="13" />
+    <!-- reduce minSdkVersion if ABS works correctly with maven etc. -->
+    <uses-sdk
+        android:minSdkVersion="11"
+        android:targetSdkVersion="13" />
 
-	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-	<uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-	<uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
-	<uses-feature android:glEsVersion="0x00020000"
-		android:required="true" />
-	<uses-feature android:name="android.hardware.camera" />
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
+    <uses-feature android:name="android.hardware.camera" />
 
-	<application android:name="org.n52.android.GeoARApplication"
-		android:allowBackup="false" android:hardwareAccelerated="false"
-		android:icon="@drawable/icon3" android:label="@string/app_name">
-		<activity android:name="org.n52.android.GeoARActivity"
-			android:screenOrientation="portrait" android:label="@string/app_name">
+    <application
+        android:name="org.n52.android.GeoARApplication"
+        android:allowBackup="false"
+        android:icon="@drawable/icon3"
+        android:label="@string/app_name" >
+        <activity
+            android:name="org.n52.android.GeoARActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="org.n52.android.newdata.DataSourceInstanceSettingsDialogActivity"
+            android:label="Data Source Settings"
+            android:theme="@android:style/Theme.Holo.Dialog" >
+        </activity>
+    </application>
 
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-
-				<category android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>
-		</activity>
-		<activity
-			android:name="org.n52.android.newdata.DataSourceInstanceSettingsDialogActivity"
-			android:label="Data Source Settings" android:theme="@android:style/Theme.Holo.Dialog">
-		</activity>
-	</application>
-
-	<logback>
-		<configuration>
-			<appender name="LOGCAT"
-				class="ch.qos.logback.classic.android.LogcatAppender">
-				<tagEncoder>
-					<pattern>
+    <logback>
+        <configuration>
+            <appender
+                name="LOGCAT"
+                class="ch.qos.logback.classic.android.LogcatAppender" >
+                <tagEncoder>
+                    <pattern>
 						%logger{0}
-					</pattern>
-				</tagEncoder>
+                    </pattern>
+                </tagEncoder>
 
-				<encoder>
-					<pattern>
+                <encoder>
+                    <pattern>
 						[%method] > %msg%n
-					</pattern>
-				</encoder>
-			</appender>
+                    </pattern>
+                </encoder>
+            </appender>
 
-			<root level="TRACE">
-				<appender-ref ref="LOGCAT" />
-			</root>
-		</configuration>
-		<configuration>
+            <root level="TRACE" >
+                <appender-ref ref="LOGCAT" />
+            </root>
+        </configuration>
+        <configuration>
+            <appender
+                name="FILE"
+                class="ch.qos.logback.core.rolling.RollingFileAppender" >
 
-			<appender name="FILE"
-				class="ch.qos.logback.core.rolling.RollingFileAppender">
-				<!-- <file> ${DATA_DIR}/logFile.log </file> -->
-				<!-- <file> /mnt/sdcard/Android/data/org.n52.android/files/logs/logFile.log 
-					</file> -->
-				<file>${LOG_DIR}/${LOG_NAME}.${LOG_EXT}</file>
+                <!-- <file> ${DATA_DIR}/logFile.log </file> -->
+                <!--
+                     <file> /mnt/sdcard/Android/data/org.n52.android/files/logs/logFile.log 
+					</file>
+                -->
+                <file>
+${LOG_DIR}/${LOG_NAME}.${LOG_EXT}
+                </file>
 
-				<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy" >
 
-					<!-- daily rollover -->
-					<fileNamePattern>
+                    <!-- daily rollover -->
+                    <fileNamePattern>
 						${LOG_DIR}/${LOG_NAME}.%d{yyyy-MM-dd}.${LOG_EXT}
-					</fileNamePattern>
+                    </fileNamePattern>
 
-					<maxHistory>
+                    <maxHistory>
 						7
-					</maxHistory>
+                    </maxHistory>
 
-					<cleanHistoryOnStart>
+                    <cleanHistoryOnStart>
 						true
-					</cleanHistoryOnStart>
-				</rollingPolicy>
+                    </cleanHistoryOnStart>
+                </rollingPolicy>
 
-				<encoder>
-					<pattern>
+                <encoder>
+                    <pattern>
 						%d %-4relative [%thread] %-5level %logger{35} - %msg%n
-					</pattern>
-				</encoder>
-			</appender>
+                    </pattern>
+                </encoder>
+            </appender>
 
-			<root level="INFO">
-				<appender-ref ref="FILE" />
-			</root>
-		</configuration>
-	</logback>
+            <root level="INFO" >
+                <appender-ref ref="FILE" />
+            </root>
+        </configuration>
+    </logback>
 
 </manifest>
