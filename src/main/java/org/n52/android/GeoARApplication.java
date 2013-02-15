@@ -65,9 +65,10 @@ public class GeoARApplication extends Application {
 		stacktraceFile = new File(applicationContext.getFilesDir(),
 				STACKTRACE_FILENAME);
 		// File path to logfile
-		logFile = new File(applicationContext.getFilesDir()
-				+ "/"+LOG_FILEPATH);
-		// Set system properties with log file, logback config references to these,
+		logFile = new File(applicationContext.getFilesDir() + "/"
+				+ LOG_FILEPATH);
+		// Set system properties with log file, logback config references to
+		// these,
 		// so do not use LoggerFactory before this point
 		System.setProperty("LOG_DIR", logFile.getParent());
 		int sepIndex = logFile.getName().lastIndexOf(".");

@@ -23,14 +23,15 @@ package org.n52.android.view.geoar;
  * @author Holger Hopmann
  */
 public class Settings {
-	
+
 	// AR view settings
 	// Radius in meters for the interpolation in AR view
-	public static final int SIZE_AR_INTERPOLATION = 3000;
+	public static final int SIZE_AR_INTERPOLATION = 1500;
 	// Threshold in position to request new interpolation
 	public static final int RELOAD_DIST_AR = 50;
-	// Zoom used in AR view for interpolation
-	public static final byte ZOOM_AR = 15;
+	// Zoom used in AR view for interpolation, please make sure it fits somehow
+	// with SIZE_AR_INTERPOLATION...
+	public static final byte ZOOM_AR = 12;
 
 	// Buffer in px to request in advance around map extent
 	public static final int BUFFER_MAPINTERPOLATION = 100;

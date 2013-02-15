@@ -35,6 +35,7 @@ import org.n52.android.utils.GeoLocation;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Gravity;
@@ -115,12 +116,12 @@ public class MapFragment extends SherlockFragment {
 		mapView.getMapZoomControls().setZoomControlsGravity(
 				Gravity.LEFT | Gravity.TOP);
 
-		// Center and zoom
-		MapController controller = mapView.getController();
-		controller.setZoom(15);
-		controller.setCenter(new GeoPoint(51.965344, 7.600003)); // Coesfelder
-																	// Kreuz
-		LocationHandler.setManualLocation(new GeoLocation(51.965344, 7.600003));
+		// controller.setZoom(15);
+		// controller.setCenter(new GeoPoint(51.965344, 7.600003)); //
+		// Coesfelder
+		// Kreuz
+		// LocationHandler.setManualLocation(new GeoLocation(51.965344,
+		// 7.600003));
 		// Data source handling
 		overlayHandlerMap = new HashMap<DataSourceInstanceHolder, DataSourceOverlayHandler>();
 

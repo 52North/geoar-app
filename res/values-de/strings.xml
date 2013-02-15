@@ -68,5 +68,6 @@
     <string name="no_value"><i>Kein Wert</i></string>
     <string name="update_available">Neue Version</string>
     <string name="add">Hinzufügen</string>
+    <string name="about_geoar">Über GeoAR</string>
 
 </resources>
