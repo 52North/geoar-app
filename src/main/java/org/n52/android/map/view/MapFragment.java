@@ -21,6 +21,9 @@ import java.util.Map;
 import org.mapsforge.android.maps.MapController;
 import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.mapgenerator.tiledownloader.MapnikTileDownloader;
+import org.mapsforge.android.maps.overlay.ArrayCircleOverlay;
+import org.mapsforge.android.maps.overlay.CircleOverlay;
+import org.mapsforge.android.maps.overlay.OverlayCircle;
 import org.mapsforge.core.GeoPoint;
 import org.n52.android.R;
 import org.n52.android.map.view.DataSourcesOverlay.OnOverlayItemTapListener;
@@ -31,10 +34,14 @@ import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.DataSourceInstanceHolder;
 import org.n52.android.newdata.PluginLoader;
 import org.n52.android.tracking.location.LocationHandler;
+import org.n52.android.tracking.location.LocationHandler.OnLocationUpdateListener;
 import org.n52.android.utils.GeoLocation;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Paint.Style;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,6 +54,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout.LayoutParams;
 
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.MenuItem;
 
 public class MapFragment extends SherlockFragment {
 
@@ -54,6 +62,8 @@ public class MapFragment extends SherlockFragment {
 
 	private MapActivityContext mapActivity; // Special context to use MapView
 											// without MapActivity
+
+	private LocationOverlay locationOverlay;
 
 	// Overlay fields
 	private Map<DataSourceInstanceHolder, DataSourceOverlayHandler> overlayHandlerMap;
@@ -203,6 +213,34 @@ public class MapFragment extends SherlockFragment {
 
 	}
 
+	private void showOwnLocation() {
+		if (locationOverlay == null) {
+			locationOverlay = new LocationOverlay();
+			mapView.getOverlays().add(locationOverlay);
+		}
+
+		OnLocationUpdateListener updateListener = new OnLocationUpdateListener() {
+			@Override
+			public void onLocationChanged(Location location) {
+				GeoPoint center = new GeoPoint(location.getLatitude(),
+						location.getLongitude());
+				locationOverlay.setLocation(center,
+						location.hasAccuracy() ? location.getAccuracy() : 50);
+
+				mapView.getController().setCenter(center);
+			}
+		};
+
+		LocationHandler.getSingleLocation(updateListener, 5000);
+		// TODO lock while getting position
+
+		Location lastKnownLocation = LocationHandler.getLastKnownLocation();
+		if (lastKnownLocation != null) {
+			updateListener.onLocationChanged(lastKnownLocation);
+		}
+
+	}
+
 	private void updateOverlays() {
 		for (DataSourceOverlayHandler handler : overlayHandlerMap.values()) {
 			handler.updateOverlay(mapView, false);
@@ -251,5 +289,45 @@ public class MapFragment extends SherlockFragment {
 	public void onResume() {
 		mapActivity.resume();
 		super.onResume();
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.item_ownlocation) {
+			showOwnLocation();
+
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	private class LocationOverlay extends ArrayCircleOverlay {
+
+		private OverlayCircle locationCircle;
+
+		public LocationOverlay() {
+			super(null, null);
+
+			Paint paintLocationFill = new Paint();
+			paintLocationFill.setStyle(Style.FILL);
+			paintLocationFill.setColor(Color.BLUE);
+			paintLocationFill.setAlpha(120);
+			paintLocationFill.setAntiAlias(true);
+			Paint paintLocationOutline = new Paint();
+			paintLocationOutline.setStyle(Style.STROKE);
+			paintLocationOutline.setColor(Color.BLUE);
+			paintLocationOutline.setAlpha(200);
+			paintLocationOutline.setAntiAlias(true);
+
+			locationCircle = new OverlayCircle(paintLocationFill,
+					paintLocationOutline);
+			addCircle(locationCircle);
+		}
+
+		public void setLocation(GeoPoint center, float radius) {
+			locationCircle.setCircleData(center, radius);
+			requestRedraw();
+		}
+
 	}
 }

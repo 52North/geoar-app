@@ -10,5 +10,9 @@
         android:icon="@drawable/ic_menu_view"
         android:showAsAction="always"
         android:title="@string/map_item_camera"/>
+    <item
+        android:id="@+id/item_ownlocation"
+        android:showAsAction="never"
+        android:title="@string/show_location"/>
 
 </menu>

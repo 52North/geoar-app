@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.n52.android.GeoARApplication;
 import org.n52.android.R;
-import org.n52.android.newdata.DataCache;
 import org.n52.android.utils.GeoLocation;
 import org.n52.android.view.InfoView;
 import org.slf4j.Logger;
@@ -47,8 +46,8 @@ public class LocationHandler implements Serializable {
 	private static final long serialVersionUID = 6337877169906901138L;
 	private static final int DISABLE_LOCATION_UPDATES_MESSAGE = 1;
 	private static final long DISABLE_LOCATION_UPDATES_DELAY = 12000;
-	private static final Logger LOG = LoggerFactory.getLogger(LocationHandler.class);
-
+	private static final Logger LOG = LoggerFactory
+			.getLogger(LocationHandler.class);
 
 	public interface OnLocationUpdateListener {
 		void onLocationChanged(Location location);
@@ -59,7 +58,7 @@ public class LocationHandler implements Serializable {
 	private static final Object gpsProviderInfo = new Object();
 	private static List<OnLocationUpdateListener> listeners = new ArrayList<OnLocationUpdateListener>();
 
-	private static boolean manualLocationMode = true;
+	private static boolean manualLocationMode;
 	private static Location manualLocation;
 
 	private static Handler disableUpdateHandler = new Handler() {
@@ -242,4 +241,53 @@ public class LocationHandler implements Serializable {
 		}
 	}
 
+	/**
+	 * Registers location updates to actively receive a new single location fix.
+	 * The provided listener will be called once or never, depending on the
+	 * specified timeout.
+	 * 
+	 * @param listener
+	 * @param timeoutMillis
+	 *            Timeout in milliseconds
+	 */
+	public static void getSingleLocation(
+			final OnLocationUpdateListener listener, int timeoutMillis) {
+
+		/**
+		 * Location update listener removing itself after first fix and
+		 * canceling scheduled runnable
+		 */
+		class SingleLocationUpdateListener implements OnLocationUpdateListener {
+
+			Runnable cancelSingleUpdateRunnable;
+
+			@Override
+			public void onLocationChanged(Location location) {
+				// Clear updates
+				removeLocationUpdateListener(this);
+				disableUpdateHandler
+						.removeCallbacks(this.cancelSingleUpdateRunnable);
+
+				// Call actual listener
+				listener.onLocationChanged(location);
+			}
+		}
+
+		final SingleLocationUpdateListener singleUpdateListener = new SingleLocationUpdateListener();
+
+		// Runnable to be called delayed by timeoutMillis to cancel location
+		// update
+		final Runnable cancelSingleUpdateRunnable = new Runnable() {
+			@Override
+			public void run() {
+				removeLocationUpdateListener(singleUpdateListener);
+			}
+		};
+		singleUpdateListener.cancelSingleUpdateRunnable = cancelSingleUpdateRunnable;
+
+		// init updates
+		addLocationUpdateListener(singleUpdateListener);
+		disableUpdateHandler.postDelayed(cancelSingleUpdateRunnable,
+				timeoutMillis);
+	}
 }

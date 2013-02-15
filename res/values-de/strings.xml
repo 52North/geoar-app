@@ -69,5 +69,6 @@
     <string name="update_available">Neue Version</string>
     <string name="add">Hinzufügen</string>
     <string name="about_geoar">Über GeoAR</string>
+    <string name="show_location">Eigene Position</string>
 
 </resources>
