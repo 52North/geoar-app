@@ -22,6 +22,7 @@ import org.n52.android.R;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.hardware.Camera;
+import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Size;
 import android.util.AttributeSet;
 import android.view.Surface;
@@ -56,7 +57,9 @@ public class CameraView extends SurfaceView implements Callback {
 	private void init() {
 		holder = getHolder();
 		holder.addCallback(this);
-		holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS); // kept for older versions
+		holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS); // kept for
+																	// older
+																	// versions
 	}
 
 	/**
@@ -139,9 +142,20 @@ public class CameraView extends SurfaceView implements Callback {
 			break;
 		}
 
-		// Annahme, dass Kamera 90� verdreht zu Standardausrichtung platziert
-		// ist. Tats�chlicher Wert erst ab Android 2.3 abrufbar. TODO
-		int cameraRotation = (90 - degrees + 360) % 360;
+//		// Annahme, dass Kamera 90� verdreht zu Standardausrichtung platziert
+//		// ist. Tats�chlicher Wert erst ab Android 2.3 abrufbar. TODO
+//		int cameraRotation = (90 - degrees + 360) % 360;
+		CameraInfo info = new CameraInfo();
+
+		int cameraRotation;
+		if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+			cameraRotation = (info.orientation + degrees) % 360;
+			cameraRotation = (360 - cameraRotation) % 360; // compensate the mirror
+		} else { // back-facing
+			cameraRotation = (info.orientation - degrees + 360) % 360;
+		}
+		
+		cameraRotation = (90 - cameraRotation + 360) % 360;
 
 		camera.setDisplayOrientation(cameraRotation);
 
