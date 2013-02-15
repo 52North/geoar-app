@@ -64,7 +64,11 @@ public class ARObject implements OpenGLCallable {
 	
 	private static float getScaleByDistance(float distance){
 		int x = org.n52.android.view.geoar.Settings.BUFFER_MAPINTERPOLATION;
-		return (float) (x-distance)/x;
+		if(distance > x){
+			return 0.5f;
+		}
+		float scale = 1-(distance/(x*2));
+		return Math.max(0.5f, scale);
 	}
 
 	// XXX Why mapping by Class? Compatible with multiinstancedatasources?
