@@ -57,6 +57,7 @@ public class ARObject implements OpenGLCallable {
 	private final float[] tmpMatrix = new float[16];
 
 	private float distanceTo;
+	private float featureDetailsScale;
 	private final float[] newPosition = new float[4];
 	private final float[] screenCoordinates = new float[3];
 

@@ -112,7 +112,7 @@ public class NewGridFeature extends RenderFeature2 {
 			colors[i] = 1.0f;
 			colors[i + 1] = 1.0f;
 			colors[i + 2] = 1.0f;
-			colors[i + 3] = 0.5f;
+			colors[i + 3] = 0.75f;
 		}
 
 		 setRenderObjectives(vertices, colors, normals, null);
