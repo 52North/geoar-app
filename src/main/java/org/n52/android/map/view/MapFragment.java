@@ -19,10 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.mapsforge.android.maps.MapController;
-import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.mapgenerator.tiledownloader.MapnikTileDownloader;
 import org.mapsforge.android.maps.overlay.ArrayCircleOverlay;
-import org.mapsforge.android.maps.overlay.CircleOverlay;
 import org.mapsforge.android.maps.overlay.OverlayCircle;
 import org.mapsforge.core.GeoPoint;
 import org.n52.android.R;
@@ -35,7 +33,6 @@ import org.n52.android.newdata.DataSourceInstanceHolder;
 import org.n52.android.newdata.PluginLoader;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.tracking.location.LocationHandler.OnLocationUpdateListener;
-import org.n52.android.utils.GeoLocation;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -226,7 +223,7 @@ public class MapFragment extends SherlockFragment {
 						location.getLongitude());
 				locationOverlay.setLocation(center,
 						location.hasAccuracy() ? location.getAccuracy() : 50);
-				mapView.getController().setZoom(13);
+				mapView.getController().setZoom(16);
 				mapView.getController().setCenter(center);
 			}
 		};
@@ -288,6 +285,12 @@ public class MapFragment extends SherlockFragment {
 	@Override
 	public void onResume() {
 		mapActivity.resume();
+		if (!mapView.getMapPosition().isValid()) {
+			MapController controller = mapView.getController();
+			controller.setZoom(15);
+			controller.setCenter(new GeoPoint(51.935008, 7.652111)); // 52N
+		}
+
 		super.onResume();
 	}
 
