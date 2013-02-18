@@ -44,6 +44,8 @@ public class CameraView extends SurfaceView implements Callback {
 	private SurfaceHolder holder;
 	private Camera camera;
 	private int cameraId;
+	private int cameraSizeHintWidth;
+	private int cameraSizeHintHeight;
 
 	public CameraView(Context context) {
 		super(context);
@@ -159,32 +161,58 @@ public class CameraView extends SurfaceView implements Callback {
 			cameraRotation = (info.orientation - degrees + 360) % 360;
 		}
 
-//		cameraRotation = (90 - cameraRotation + 360) % 360;
-
 		camera.setDisplayOrientation(cameraRotation);
 
 		// Bildgr��e
 		Camera.Parameters parameters = camera.getParameters();
 
 		Size bestSize = getOptimalPreviewSize(
-				parameters.getSupportedPreviewSizes(), width, height);
+				parameters.getSupportedPreviewSizes(),
+				cameraSizeHintWidth != 0 ? cameraSizeHintWidth : width,
+				cameraSizeHintHeight != 0 ? cameraSizeHintHeight : height);
 		parameters.setPreviewSize(bestSize.width, bestSize.height);
 
 		// Update static camera settings fields
-		RealityCamera.setViewportSize(bestSize);
 		if (cameraRotation == 0 || cameraRotation == 180) {
+			RealityCamera.setViewportSize(bestSize);
 			RealityCamera.setFovY(parameters.getVerticalViewAngle());
-			RealityCamera.setAspect(parameters.getHorizontalViewAngle()
-					/ parameters.getVerticalViewAngle());
+			// RealityCamera.setAspect(parameters.getHorizontalViewAngle()
+			// / parameters.getVerticalViewAngle());
+			// TODO merge updates
 		} else {
+			RealityCamera.setViewportSize(bestSize.height, bestSize.width);
 			RealityCamera.setFovY(parameters.getHorizontalViewAngle());
-			RealityCamera.setAspect(parameters.getVerticalViewAngle()
-					/ parameters.getHorizontalViewAngle());
+			// RealityCamera.setAspect(parameters.getVerticalViewAngle()
+			// / parameters.getHorizontalViewAngle());
+			// TODO merge updates
 		}
 		camera.setParameters(parameters);
 		// Neustart der Vorschaudarstellung
 		camera.startPreview();
+
+		requestLayout();
 	}
+
+	// @Override
+	// protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+	//
+	// if (!RealityCamera.hasViewportSize()) {
+	// super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+	// } else {
+	// int maxWidth = MeasureSpec.getSize(widthMeasureSpec);
+	// // int maxHeight = MeasureSpec.getSize(heightMeasureSpec);
+	//
+	// float ratio = maxWidth / (float) RealityCamera.cameraViewportWidth;
+	//
+	// int widthSpec = MeasureSpec.makeMeasureSpec(maxWidth,
+	// MeasureSpec.EXACTLY);
+	// int heightSpec = MeasureSpec.makeMeasureSpec(
+	// (int) (RealityCamera.cameraViewportHeight * ratio),
+	// MeasureSpec.EXACTLY);
+	//
+	// setMeasuredDimension(widthSpec, heightSpec);
+	// }
+	// }
 
 	public void surfaceCreated(SurfaceHolder holder) {
 		try {
@@ -231,6 +259,11 @@ public class CameraView extends SurfaceView implements Callback {
 			}
 		}
 		super.onVisibilityChanged(changedView, visibility);
+	}
+
+	public void setCameraSizeHint(int width, int height) {
+		cameraSizeHintWidth = width;
+		cameraSizeHintHeight = height;
 	}
 
 }

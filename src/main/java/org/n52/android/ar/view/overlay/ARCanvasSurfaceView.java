@@ -81,8 +81,6 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener {
 						for (ARObject object : mARObjects) {
 							if (object.thisObjectHitted(motionEvent.getX(),
 									motionEvent.getY())) {
-								Toast.makeText(getContext(), "Hit! (Debug)",
-										Toast.LENGTH_SHORT).show();
 								object.onItemClicked(getContext());
 							}
 						}

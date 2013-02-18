@@ -46,6 +46,7 @@ public class RealityCamera {
 	// Viewport of camera preview
 	public static int cameraViewportWidth;
 	public static int cameraViewportHeight;
+	private static boolean hasViewportSize = false;
 
 	private static List<CameraUpdateListener> listeners = new ArrayList<CameraUpdateListener>();
 	public static float aspect;
@@ -65,8 +66,10 @@ public class RealityCamera {
 	}
 
 	public static void setFovY(float fov) {
+		boolean changed = RealityCamera.fovY != fov;
 		RealityCamera.fovY = fov;
-		onUpdate();
+		if (changed)
+			onUpdate();
 	}
 
 	public static void setViewportSize(Size size) {
@@ -74,13 +77,23 @@ public class RealityCamera {
 	}
 
 	public static void setViewportSize(int width, int height) {
+		boolean changed = cameraViewportHeight != height
+				|| cameraViewportWidth != width;
 		cameraViewportHeight = height;
 		cameraViewportWidth = width;
-		onUpdate();
+		RealityCamera.aspect = width / (float) height;
+		hasViewportSize = true;
+		if (changed)
+			onUpdate();
 	}
 
+	public static boolean hasViewportSize() {
+		return hasViewportSize;
+	}
+
+	@Deprecated
 	public static void setAspect(float aspect) {
-		RealityCamera.aspect = aspect;
+		// RealityCamera.aspect = aspect;
 	}
 
 	public static void changeHeight(float inc) {

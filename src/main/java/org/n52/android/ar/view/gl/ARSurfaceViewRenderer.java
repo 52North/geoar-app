@@ -27,10 +27,7 @@ import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.n52.android.view.geoar.gl.mode.FeatureShader;
 import org.n52.android.view.geoar.gl.mode.RenderFeature2;
 import org.n52.android.view.geoar.gl.mode.Texture;
-import org.n52.android.view.geoar.gl.mode.features.CubeFeature2;
-import org.n52.android.view.geoar.gl.mode.features.FlatCircleFeature;
 import org.n52.android.view.geoar.gl.mode.features.NewGridFeature;
-import org.n52.android.view.geoar.gl.mode.features.TriangleFeature;
 
 import android.location.Location;
 import android.opengl.GLES20;
@@ -51,7 +48,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	 * thread.
 	 */
 	public interface OpenGLCallable {
-		void onPreRender();	//unused
+		void onPreRender(); // unused
 
 		void render(final float[] projectionMatrix, final float[] viewMatrix,
 				final float[] parentMatrix, final float[] lightPosition);
@@ -78,10 +75,11 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 	private final IRotationMatrixProvider mRotationProvider;
 
-	private List<RenderFeature2> renderFeatures = new ArrayList<RenderFeature2>();
+	// private List<RenderFeature2> renderFeatures = new
+	// ArrayList<RenderFeature2>();
 
 	private RenderFeature2 grid;
-	private RenderFeature2 test;
+	// private RenderFeature2 test;
 
 	/** light parameters */
 	private final float[] lightDirection = new float[] { 3.0f, 10.0f, 2.0f,
@@ -97,10 +95,10 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 
 	// Currently always a copy of ARView's ARObjects
 	private List<ARObject> mARObjects = new ArrayList<ARObject>();
-	
-	FlatCircleFeature circleFeature;
-	
-	TriangleFeature triangle;
+
+	// FlatCircleFeature circleFeature;
+
+	// TriangleFeature triangle;
 
 	private boolean mLocationChanged;
 
@@ -122,6 +120,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 			// Camera may get initialized after creating the GL surface,
 			// projection matrix will be reset here if camera settings changed
 			GLESCamera.resetProjectionMatrix();
+
 			GLESCamera.resetViewMatrix();
 			mProjectionChanged = false;
 		}
@@ -173,15 +172,13 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 		Matrix.multiplyMV(lightDirectionMVP, 0, mvMatrix, 0, lightDirection, 0);
 
 		/** render grid */
-//		triangle.render(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
-//				mvMatrix, lightDirection);
+		// triangle.render(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
+		// mvMatrix, lightDirection);
 		grid.render(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
 				mvMatrix, lightDirection);
-		
-		GLES20.glDisable(GLES20.GL_CULL_FACE);
-		circleFeature.render(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
-				mvMatrix, lightDirection);
-		
+
+		// circleFeature.render(GLESCamera.projectionMatrix,
+		// GLESCamera.viewMatrix, mvMatrix, lightDirection);
 
 		/** render DataSources data */
 		for (ARObject feature : mARObjects) {
@@ -189,23 +186,21 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 					mvMatrix, lightDirection);
 		}
 
-		/** for testing purposes */
-		for (RenderFeature2 r : renderFeatures) {
-			r.render(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
-					mvMatrix, lightDirection);
-		}
+		// /** for testing purposes */
+		// for (RenderFeature2 r : renderFeatures) {
+		// r.render(GLESCamera.projectionMatrix, GLESCamera.viewMatrix,
+		// mvMatrix, lightDirection);
+		// }
 	}
 
 	@Override
 	public void onSurfaceChanged(GL10 glUnused, int width, int height) {
 		GLES20.glViewport(0, 0, width, height);
-		if (RealityCamera.cameraViewportHeight == 0
-				|| RealityCamera.cameraViewportWidth == 0) {
+		if (!RealityCamera.hasViewportSize()) {
 			// Set camera viewport if none exists
 			RealityCamera.setViewportSize(width, height);
-			RealityCamera.setAspect((float) width / (float) height);
+			// RealityCamera.setAspect((float) width / (float) height);
 		}
-
 		GLESCamera.resetViewportMatrix(width, height);
 		GLESCamera.resetProjectionMatrix();
 	}
@@ -249,29 +244,29 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	private void initScene() {
 		grid = new NewGridFeature();
 		grid.onCreateInGLESThread();
-		test = new CubeFeature2();
-//		test.setTextureCallback(new Callable<Bitmap>() {
-//			@Override
-//			public Bitmap call() throws Exception {
-//				return BitmapFactory.decodeResource(
-//						GeoARApplication.applicationContext.getResources(),
-//						R.drawable.n52_logo_highreso);
-//			}
-//		});
-		test.setRelativePosition(new float[] { 0, 0, -6});
-		test.onCreateInGLESThread();
-		circleFeature = new FlatCircleFeature();
-		circleFeature.setRelativePosition(new float[] {2, 0, -6});
-		circleFeature.onCreateInGLESThread();
-//		test.setSubVisualization(circleFeature);
-		
-		triangle = new TriangleFeature();
-//		triangle.setRelativePosition(new float[] {-2, 0, -6});
-		triangle.onCreateInGLESThread();
-		
-		test.setSubVisualization(triangle);
-		
-		renderFeatures.add(test);
+		// test = new CubeFeature2();
+		// test.setTextureCallback(new Callable<Bitmap>() {
+		// @Override
+		// public Bitmap call() throws Exception {
+		// return BitmapFactory.decodeResource(
+		// GeoARApplication.applicationContext.getResources(),
+		// R.drawable.n52_logo_highreso);
+		// }
+		// });
+		// test.setRelativePosition(new float[] { 0, 0, -6 });
+		// test.onCreateInGLESThread();
+		// circleFeature = new FlatCircleFeature();
+		// circleFeature.setRelativePosition(new float[] { 2, 0, -6 });
+		// circleFeature.onCreateInGLESThread();
+		// test.setSubVisualization(circleFeature);
+
+		// triangle = new TriangleFeature();
+		// triangle.setRelativePosition(new float[] {-2, 0, -6});
+		// triangle.onCreateInGLESThread();
+
+		// test.setSubVisualization(triangle);
+
+		// renderFeatures.add(test);
 
 		// // first cube
 		// RenderFeature2 first = new CubeFeature2();
@@ -306,7 +301,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	 * Notification for this {@link Renderer} that the objects to display were
 	 * changed. The renderer will schedule an update of the features to draw for
 	 * the next draw cycle.
-	 */	
+	 */
 	public void notifyARObjectsChanged() {
 		mARObjectsChanged = true;
 	}

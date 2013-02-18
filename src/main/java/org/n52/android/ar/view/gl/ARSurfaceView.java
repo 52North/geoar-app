@@ -42,6 +42,7 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.View.MeasureSpec;
 
 /**
  * View to show virtual information based on the camera's settings. It also
@@ -91,9 +92,9 @@ public class ARSurfaceView extends GLSurfaceView implements
 
 		renderer = new ARSurfaceViewRenderer(this, this);
 		setEGLContextClientVersion(2);
-		// setEGLConfigChooser(new MultisampleConfigs());
+		setEGLConfigChooser(new MultisampleConfigs());
 		// XXX Does this support transparent background?
-		
+
 		setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Forces to make translucent
 		// drawing available
 		getHolder().setFormat(PixelFormat.TRANSLUCENT);
@@ -238,4 +239,5 @@ public class ARSurfaceView extends GLSurfaceView implements
 	public List<ARObject> getARObjects() {
 		return mARView.getARObjects();
 	}
+
 }

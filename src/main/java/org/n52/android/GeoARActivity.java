@@ -140,8 +140,8 @@ public class GeoARActivity extends SherlockFragmentActivity {
 			LocationHandler.onRestoreInstanceState(savedInstanceState);
 		}
 
-		// TODO Debug only
-		LocationHandler.setManualLocation(new GeoLocation(51.965344, 7.600003));
+//		// TODO Debug only
+//		LocationHandler.setManualLocation(new GeoLocation(51.965344, 7.600003));
 	}
 
 	private void showFragment(Fragment fragment) {

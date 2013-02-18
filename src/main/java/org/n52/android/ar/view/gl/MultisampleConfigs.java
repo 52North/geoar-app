@@ -34,9 +34,10 @@ public class MultisampleConfigs implements GLSurfaceView.EGLConfigChooser {
 		//@formatter:off
         /** Try to get rgb565 standard configurations */
         int[] config = {
-                EGL10.EGL_RED_SIZE, 5,
-                EGL10.EGL_GREEN_SIZE, 6,
-                EGL10.EGL_BLUE_SIZE, 5,
+                EGL10.EGL_RED_SIZE, 8,
+                EGL10.EGL_GREEN_SIZE, 8,
+                EGL10.EGL_BLUE_SIZE, 8,
+                EGL10.EGL_ALPHA_SIZE, 8,
                 EGL10.EGL_DEPTH_SIZE, 16,
                 EGL10.EGL_RENDERABLE_TYPE, 4,
                 EGL10.EGL_SAMPLE_BUFFERS, 1,
@@ -117,16 +118,16 @@ public class MultisampleConfigs implements GLSurfaceView.EGLConfigChooser {
 			throw new IllegalArgumentException("data eglChooseConfig failed");
 		}
 
-		int index = -1;
-		for (int i = 0; i < eglConfigs.length; ++i) {
-			if(egl10.eglGetConfigAttrib(display, eglConfigs[i], EGL10.EGL_RED_SIZE, res)){
-				if(res[0] == 5){
-					index = i;
-					break;
-				}
-			}
-		}
-		
+		int index = 0;
+//		for (int i = 0; i < eglConfigs.length; ++i) {
+//			if(egl10.eglGetConfigAttrib(display, eglConfigs[i], EGL10.EGL_RED_SIZE, res)){
+//				if(res[0] == 5){
+//					index = i;
+//					break;
+//				}
+//			}
+//		}
+//		
 		EGLConfig eglConfig = null;
 		if(eglConfigs.length > 0 && index != -1){
 			eglConfig = eglConfigs[index];

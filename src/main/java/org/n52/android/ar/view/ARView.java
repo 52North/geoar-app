@@ -23,15 +23,18 @@ import java.util.Map;
 import org.n52.android.ar.view.gl.ARSurfaceView;
 import org.n52.android.ar.view.overlay.ARCanvasSurfaceView;
 import org.n52.android.tracking.camera.CameraView;
+import org.n52.android.tracking.camera.RealityCamera;
+import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.view.View.MeasureSpec;
 import android.widget.FrameLayout;
 
-public class ARView extends FrameLayout {
+public class ARView extends FrameLayout implements CameraUpdateListener {
 
 	private ARCanvasSurfaceView mCanvasOverlayView;
 	private ARSurfaceView mARSurfaceView;
@@ -70,7 +73,7 @@ public class ARView extends FrameLayout {
 			mARSurfaceView.setKeepScreenOn(true);
 			mARSurfaceView.setZOrderMediaOverlay(true);
 			addView(mARSurfaceView, new FrameLayout.LayoutParams(
-					LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 		}
 
 		mCanvasOverlayView = new ARCanvasSurfaceView(this);
@@ -142,11 +145,41 @@ public class ARView extends FrameLayout {
 	}
 
 	public void onPause() {
+		RealityCamera.removeCameraUpdateListener(this);
 		mARSurfaceView.onPause();
 	}
 
 	public void onResume() {
+		RealityCamera.addCameraUpdateListener(this);
 		mARSurfaceView.onResume();
+	}
+
+	@Override
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+
+		if (!RealityCamera.hasViewportSize()) {
+			super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+		} else {
+			int maxWidth = MeasureSpec.getSize(widthMeasureSpec);
+			int maxHeight = MeasureSpec.getSize(heightMeasureSpec);
+
+			mCameraView.setCameraSizeHint(maxWidth, maxHeight);
+
+			float ratio = maxWidth / (float) RealityCamera.cameraViewportWidth;
+
+			int widthSpec = MeasureSpec.makeMeasureSpec(maxWidth,
+					MeasureSpec.EXACTLY);
+			int heightSpec = MeasureSpec.makeMeasureSpec(
+					(int) (RealityCamera.cameraViewportHeight * ratio),
+					MeasureSpec.EXACTLY);
+			super.onMeasure(widthSpec, heightSpec);
+			setMeasuredDimension(widthSpec, heightSpec);
+		}
+	}
+
+	@Override
+	public void onCameraUpdate() {
+		requestLayout();
 	}
 
 }
