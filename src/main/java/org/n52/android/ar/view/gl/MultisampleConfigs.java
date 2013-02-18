@@ -64,9 +64,10 @@ public class MultisampleConfigs implements GLSurfaceView.EGLConfigChooser {
 
 			//@formatter:off
 			config = new int[] { 
-					EGL10.EGL_RED_SIZE, 5, 
-					EGL10.EGL_GREEN_SIZE, 6, 
-					EGL10.EGL_BLUE_SIZE, 5, 
+					EGL10.EGL_RED_SIZE, 8, 
+					EGL10.EGL_GREEN_SIZE, 8, 
+					EGL10.EGL_BLUE_SIZE, 8, 
+					EGL10.EGL_ALPHA_SIZE, 8,
 					EGL10.EGL_DEPTH_SIZE, 16,
 					EGL10.EGL_RENDERABLE_TYPE, 4,
 					EGL_COVERAGE_BUFFERS_NV, 1,
@@ -87,9 +88,10 @@ public class MultisampleConfigs implements GLSurfaceView.EGLConfigChooser {
 				/** no multisampling matched - try without. */
 				//@formatter:off
 				config = new int[] { 
-						EGL10.EGL_RED_SIZE, 5,
-						EGL10.EGL_GREEN_SIZE, 6, 
-						EGL10.EGL_BLUE_SIZE, 5,
+						EGL10.EGL_RED_SIZE, 8,
+						EGL10.EGL_GREEN_SIZE, 8, 
+						EGL10.EGL_BLUE_SIZE, 8,
+						EGL10.EGL_ALPHA_SIZE, 8,
 						EGL10.EGL_DEPTH_SIZE, 16, 
 						EGL10.EGL_RENDERABLE_TYPE, 4, 
 						EGL10.EGL_NONE 
