@@ -33,7 +33,7 @@ public class NewGridFeature extends RenderFeature2 {
 	private final int totalSize;
 	private final int gridSize;
 	private int lineColor;
-	private float thickness = 1.f;
+	private float thickness = 2.5f;
 
 	private int androidColor = -1;
 

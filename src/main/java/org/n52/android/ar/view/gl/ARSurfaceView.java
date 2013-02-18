@@ -95,7 +95,7 @@ public class ARSurfaceView extends GLSurfaceView implements
 		setEGLConfigChooser(new MultisampleConfigs());
 		// XXX Does this support transparent background?
 
-		setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Forces to make translucent
+		//setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Forces to make translucent
 		// drawing available
 		getHolder().setFormat(PixelFormat.TRANSLUCENT);
 		setRenderer(renderer);
