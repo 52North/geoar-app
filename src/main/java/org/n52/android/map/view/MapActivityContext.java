@@ -21,6 +21,7 @@ import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -46,7 +47,17 @@ public class MapActivityContext extends MapActivity {
 
 	public MapActivityContext(Activity activity) {
 		this.activity = activity;
+
 		try {
+			// try to set base context as passed activity for the case of calls
+			// to getters which were not overridden explicitly by require mBase field
+			attachBaseContext(activity);
+		} catch (IllegalStateException e) {
+
+		}
+
+		try {
+
 			// The private _final_ method getApplication has to return the
 			// fragment's activity's application, so use reflection to get
 			// the mApplication field and change it to that value
@@ -108,5 +119,10 @@ public class MapActivityContext extends MapActivity {
 	@Override
 	public SharedPreferences getSharedPreferences(String name, int mode) {
 		return activity.getSharedPreferences(name, mode);
+	}
+
+	@Override
+	public ContentResolver getContentResolver() {
+		return activity.getContentResolver();
 	}
 }
