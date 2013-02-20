@@ -109,7 +109,7 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener {
 			drawable.initDrawingTools();
 			init = true;
 		}
-		
+
 		synchronized (mARObjects) {
 			for (ARObject arObject : mARObjects) {
 				arObject.renderCanvas(poiRenderer, canvas);
@@ -176,19 +176,24 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener {
 		int textLocationX = rectLeft + 5;
 		canvas.drawText("Coordinates ", textLocationX, textLocationY, paint);
 		paint.setTextSize(20);
-		textLocationY += 20;
-		canvas.drawText("Latitude  " + lastLocation.getLatitude(),
-				textLocationX, textLocationY, paint);
-		textLocationY += 20;
-		canvas.drawText("Longitude " + lastLocation.getLongitude(),
-				textLocationX, textLocationY, paint);
+
+		if (lastLocation != null) {
+			textLocationY += 20;
+			canvas.drawText("Latitude  " + lastLocation.getLatitude(),
+					textLocationX, textLocationY, paint);
+			textLocationY += 20;
+			canvas.drawText("Longitude " + lastLocation.getLongitude(),
+					textLocationX, textLocationY, paint);
+		}
 	}
 
 	private void drawLocationDetails(Canvas canvas) {
 		Location loc = LocationHandler.getLastKnownLocation();
-		canvas.drawText("Hello World"
-				+ LocationHandler.getLastKnownLocation().getAccuracy(), 5, 30,
-				paint);
+		if (loc != null) {
+			canvas.drawText("Hello World"
+					+ LocationHandler.getLastKnownLocation().getAccuracy(), 5,
+					30, paint);
+		}
 	}
 
 	@Override

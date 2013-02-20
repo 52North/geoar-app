@@ -62,13 +62,13 @@ public class ARObject implements OpenGLCallable {
 	private final float[] screenCoordinates = new float[3];
 
 	private volatile boolean isInFrustum = false;
-	
-	private static float getScaleByDistance(float distance){
+
+	private static float getScaleByDistance(float distance) {
 		int x = org.n52.android.view.geoar.Settings.BUFFER_MAPINTERPOLATION;
-		if(distance > x){
+		if (distance > x) {
 			return 0.5f;
 		}
-		float scale = 1-(distance/(x*2));
+		float scale = 1 - (distance / (x * 2));
 		return Math.max(0.5f, scale);
 	}
 
@@ -130,6 +130,7 @@ public class ARObject implements OpenGLCallable {
 			this.featureDetailView.setDrawingCacheEnabled(false);
 
 		}
+
 		onLocationUpdate(LocationHandler.getLastKnownLocation());
 	}
 
@@ -237,7 +238,7 @@ public class ARObject implements OpenGLCallable {
 	}
 
 	public void onLocationUpdate(Location location) {
-		if (entity == null)
+		if (entity == null || location == null)
 			return;
 
 		final double longitude = entity.getLongitude();
@@ -288,7 +289,8 @@ public class ARObject implements OpenGLCallable {
 		if (isInFrustum) {
 			float scale = getScaleByDistance(distanceTo);
 			canvas.save(Canvas.MATRIX_SAVE_FLAG);
-			canvas.scale(scale, scale, screenCoordinates[0], screenCoordinates[1]);
+			canvas.scale(scale, scale, screenCoordinates[0],
+					screenCoordinates[1]);
 			canvasFeature.onRender(screenCoordinates[0], screenCoordinates[1],
 					canvas);
 			canvas.restore();

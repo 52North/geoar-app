@@ -58,10 +58,14 @@ public class ARFragment extends SherlockFragment implements
 				DataSourceVisualizationHandler visualizationHandler = new DataSourceVisualizationHandler(
 						mARView, item);
 				mVisualizationHandlerMap.put(item, visualizationHandler);
-				GeoLocation loc = new GeoLocation(LocationHandler
-						.getLastKnownLocation().getLatitude(), LocationHandler
-						.getLastKnownLocation().getLongitude());
-				visualizationHandler.setCenter(loc);
+				Location lastKnownLocation = LocationHandler
+						.getLastKnownLocation();
+				if (lastKnownLocation != null) {
+					GeoLocation loc = new GeoLocation(
+							lastKnownLocation.getLatitude(),
+							lastKnownLocation.getLongitude());
+					visualizationHandler.setCenter(loc);
+				}
 			} else if (newState == false) {
 				// data source disabled -> remove corresponding overlay handler
 				DataSourceVisualizationHandler visualizationHandler = mVisualizationHandlerMap
@@ -81,6 +85,8 @@ public class ARFragment extends SherlockFragment implements
 	}
 
 	private void updateVisualizationHandlers(Location location) {
+		if (location == null)
+			return;
 		GeoLocation gLoc = new GeoLocation(location.getLatitude(),
 				location.getLongitude());
 		updateVisualizationHandlers(gLoc);
@@ -161,7 +167,8 @@ public class ARFragment extends SherlockFragment implements
 			dataSource.getInstances().removeOnCheckedChangeListener(
 					dataSourceListener);
 		}
-		for (DataSourceVisualizationHandler handler : mVisualizationHandlerMap.values()) {
+		for (DataSourceVisualizationHandler handler : mVisualizationHandlerMap
+				.values()) {
 			handler.destroy();
 		}
 		mVisualizationHandlerMap.clear();
