@@ -109,6 +109,7 @@ public class ARSurfaceViewRenderer implements GLSurfaceView.Renderer,
 	public ARSurfaceViewRenderer(ARSurfaceView surfaceView,
 			IRotationMatrixProvider rotationMatrixProvider) {
 		this.mSurfaceView = surfaceView;
+		mUserLocation = mSurfaceView.getUserLocation();
 		this.mRotationProvider = rotationMatrixProvider;
 		mLocationChanged = true;
 		mARObjectsChanged = true;

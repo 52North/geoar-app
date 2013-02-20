@@ -70,5 +70,6 @@
     <string name="requesting_data">Requesting Data</string>
     <string name="about_geoar">About GeoAR</string>
     <string name="show_location">Show Location</string>
+    <string name="waiting_for_location_fix">Waiting for location fix</string>
 
 </resources>

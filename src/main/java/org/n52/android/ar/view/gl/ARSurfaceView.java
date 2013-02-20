@@ -73,6 +73,7 @@ public class ARSurfaceView extends GLSurfaceView implements
 	private boolean sensorValuesChanged;
 
 	private Location mLastLocation;
+	private Object locationInfoKey = new Object();
 	private ARView mARView;
 
 	public ARSurfaceView(ARView arView) {
@@ -90,12 +91,14 @@ public class ARSurfaceView extends GLSurfaceView implements
 		display = ((WindowManager) getContext().getSystemService(
 				Context.WINDOW_SERVICE)).getDefaultDisplay();
 
+		mLastLocation = LocationHandler.getLastKnownLocation();
+
 		renderer = new ARSurfaceViewRenderer(this, this);
 		setEGLContextClientVersion(2);
 		setEGLConfigChooser(new MultisampleConfigs());
 		// XXX Does this support transparent background?
 
-		//setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Forces to make translucent
+		// setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Forces to make translucent
 		// drawing available
 		getHolder().setFormat(PixelFormat.TRANSLUCENT);
 		setRenderer(renderer);
@@ -180,6 +183,8 @@ public class ARSurfaceView extends GLSurfaceView implements
 		LocationHandler.removeLocationUpdateListener(this);
 		mSensorManager.unregisterListener(this);
 
+		InfoView.clearStatus(locationInfoKey);
+
 		super.onPause();
 	}
 
@@ -196,6 +201,8 @@ public class ARSurfaceView extends GLSurfaceView implements
 				SensorManager.SENSOR_DELAY_GAME)) {
 			InfoView.setStatus(R.string.accel_not_started, 5000, accel);
 		}
+
+		getUserLocation();
 
 		super.onResume();
 	}
@@ -223,6 +230,12 @@ public class ARSurfaceView extends GLSurfaceView implements
 	}
 
 	public Location getUserLocation() {
+		if (mLastLocation == null) {
+			InfoView.setStatus(R.string.waiting_for_location_fix, -1,
+					locationInfoKey);
+		} else {
+			InfoView.clearStatus(locationInfoKey);
+		}
 		return mLastLocation;
 	}
 
