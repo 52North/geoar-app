@@ -29,6 +29,7 @@
     <string name="about_legal_text">This development is supported by the European Commissions Seventh
 		Framework Programme (FP7) via the project GeoViQua (QUAlity aware VIsualisation for the Global Earth Observation system of systems), grant
 		number 265178.</string>
+    <string name="about_libs_text">Nutzt mapsforge - free mapping and navigation tools - API, siehe http://code.google.com/p/mapsforge/</string>
     <string name="about_text">Weitere Informationen unter\nhttp://52north.org/android \n\nGeoAR ist Teil der 52°North Geostatistics Community: \nhttp://52north.org/communities/geostatistics/\n</string>
     <string name="about_contactNames"><i>Daniel Nüst (d.nuest@52north.org)</i></string>
     <string name="about_developerNames"><i>Arne de Wall, Holger Hopmann</i></string>

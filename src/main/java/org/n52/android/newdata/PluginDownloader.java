@@ -63,7 +63,7 @@ public class PluginDownloader {
 	private static DefaultHttpClient mHttpClient;
 	private static DownloadManager mDownloadManager;
 	private static List<Long> currentDownloads = new ArrayList<Long>(0);
-	
+
 	private static BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -82,9 +82,9 @@ public class PluginDownloader {
 				Cursor cursor = mDownloadManager.query(query);
 				boolean pluginAdded = false;
 				if (cursor.moveToFirst()) {
+					int columnId = cursor
+							.getColumnIndex(DownloadManager.COLUMN_ID);
 					do {
-						int columnId = cursor
-								.getColumnIndex(DownloadManager.COLUMN_ID);
 						currentDownloads.remove(cursor.getLong(columnId));
 						pluginAdded = true;
 					} while (cursor.moveToNext());

@@ -70,6 +70,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:text="@string/about_libs_text"
+            android:textColor="#cccccc"
+            android:textSize="10sp"
+            android:textStyle="italic" />
+        
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:text="@string/about_legal_text"
             android:textColor="#cccccc"
             android:textSize="10sp"

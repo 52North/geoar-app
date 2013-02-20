@@ -179,7 +179,12 @@ public class ARView extends FrameLayout implements CameraUpdateListener {
 
 	@Override
 	public void onCameraUpdate() {
-		requestLayout();
+		post(new Runnable() {
+			@Override
+			public void run() {
+				requestLayout();
+			}
+		});
 	}
 
 }
