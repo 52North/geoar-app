@@ -40,12 +40,14 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnLayoutChangeListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.FrameLayout.LayoutParams;
@@ -108,7 +110,7 @@ public class MapFragment extends SherlockFragment {
 		// Add MapView programmatically, since it needs a special context
 		// depending on a call to getActivity, so it happens here and not in
 		// onCreateView.
-
+		System.gc();
 		mapActivity = new MapActivityContext(getActivity());
 		mapView = new GeoARMapView(mapActivity);
 
@@ -180,13 +182,6 @@ public class MapFragment extends SherlockFragment {
 			}
 		});
 
-		// Update all overlays after layouting the mapview
-		new Handler().post(new Runnable() {
-			@Override
-			public void run() {
-				updateOverlays();
-			}
-		});
 		// Get Layout root
 		ViewGroup layout = (ViewGroup) getView();
 		layout.addView(mapView, LayoutParams.MATCH_PARENT,
@@ -208,6 +203,33 @@ public class MapFragment extends SherlockFragment {
 			instances.addOnCheckedChangeListener(dataSourceListener);
 		}
 
+		if (Build.VERSION.SDK_INT >= 11) {
+			// use layout change listener to get notified when mapview is
+			// layouted and has valid projection information
+			mapView.addOnLayoutChangeListener(new OnLayoutChangeListener() {
+				@Override
+				public void onLayoutChange(View v, int left, int top,
+						int right, int bottom, int oldLeft, int oldTop,
+						int oldRight, int oldBottom) {
+					if (oldRight != right || oldBottom != bottom
+							|| oldTop != top || oldLeft != left) {
+						// View layouted first time -> update overlays,
+						// projection
+						// will be valid
+						updateOverlays();
+						mapView.removeOnLayoutChangeListener(this);
+					}
+				}
+			});
+		} else {
+			// Fallback for older Versions, update after timeout
+			new Handler().postDelayed(new Runnable() {
+				@Override
+				public void run() {
+
+				}
+			}, 2000);
+		}
 	}
 
 	private void showOwnLocation() {

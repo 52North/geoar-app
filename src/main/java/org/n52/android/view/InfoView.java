@@ -268,12 +268,17 @@ public class InfoView extends LinearLayout {
 	 * @param id
 	 */
 	public static void setStatus(String status, int maxDuration, Object id) {
+		boolean update = false;
 		synchronized (statusHolderMap) {
 			StatusHolder holder = statusHolderMap.get(id);
 			if (holder == null) {
 				holder = new StatusHolder();
 				holder.id = id;
 				statusHolderMap.put(id, holder);
+				update = true;
+			}
+			if (holder.status != null && !holder.status.equals(status)) {
+				update = true;
 			}
 			holder.status = status;
 			if (maxDuration != -1) {
@@ -285,7 +290,10 @@ public class InfoView extends LinearLayout {
 					updatehandler.obtainMessage(MESSAGE_REFRESH),
 					holder.clearTime);
 		}
-		notifyStatusChangeListeners();
+
+		if (update) {
+			notifyStatusChangeListeners();
+		}
 	}
 
 	/**

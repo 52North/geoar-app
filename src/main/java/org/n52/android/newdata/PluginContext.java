@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 
 import org.n52.android.GeoARApplication;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.AssetManager;
@@ -138,7 +139,13 @@ public class PluginContext extends ContextWrapper {
 			// Create special theme to include the custom Resources
 			// instance for a plugin
 			mTheme = getResources().newTheme();
-			mTheme.setTo(getBaseContext().getTheme());
+			// Previous approach, failed on devices with special device default
+			// theme different to application theme
+			// mTheme.setTo(getBaseContext().getTheme());
+
+			// Now explicitly set Holo style (switch to ABS style when ABS
+			// works) to allow to obtain all expected styled attributes
+			mTheme.applyStyle(android.R.style.Theme_Holo, false);
 		}
 		return mTheme;
 	}

@@ -64,9 +64,7 @@ public class DataSourceOverlayHandler implements
 
 			@Override
 			public void onProgressUpdate(int progress, int maxProgress) {
-
-				InfoView.setProgressTitle(
-						"Requesting " + dataSourceInstance.getName(),
+				InfoView.setProgressTitle(R.string.requesting_data,
 						UpdateHolder.this); // TODO
 				InfoView.setProgress(progress, maxProgress, UpdateHolder.this);
 

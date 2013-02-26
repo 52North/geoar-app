@@ -68,31 +68,34 @@ public class PluginDownloader {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
-			if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
-				// long downloadId = intent.getLongExtra(
-				// DownloadManager.EXTRA_DOWNLOAD_ID, 0);
-				Query query = new Query();
+			synchronized (currentDownloads) {
+				if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)
+						&& !currentDownloads.isEmpty()) {
+					// long downloadId = intent.getLongExtra(
+					// DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+					Query query = new Query();
 
-				long[] downloads = new long[currentDownloads.size()];
-				for (int i = 0, len = currentDownloads.size(); i < len; i++) {
-					downloads[i] = currentDownloads.get(i);
-				}
-				query.setFilterById(downloads);
-				query.setFilterByStatus(DownloadManager.STATUS_SUCCESSFUL);
-				Cursor cursor = mDownloadManager.query(query);
-				boolean pluginAdded = false;
-				if (cursor.moveToFirst()) {
-					int columnId = cursor
-							.getColumnIndex(DownloadManager.COLUMN_ID);
-					do {
-						currentDownloads.remove(cursor.getLong(columnId));
-						pluginAdded = true;
-					} while (cursor.moveToNext());
-					if (pluginAdded) {
-						PluginLoader.reloadPlugins();
+					long[] downloads = new long[currentDownloads.size()];
+					for (int i = 0, len = currentDownloads.size(); i < len; i++) {
+						downloads[i] = currentDownloads.get(i);
 					}
-				}
+					query.setFilterById(downloads);
+					query.setFilterByStatus(DownloadManager.STATUS_SUCCESSFUL);
+					Cursor cursor = mDownloadManager.query(query);
+					boolean pluginAdded = false;
+					if (cursor.moveToFirst()) {
+						int columnId = cursor
+								.getColumnIndex(DownloadManager.COLUMN_ID);
+						do {
+							currentDownloads.remove(cursor.getLong(columnId));
+							pluginAdded = true;
+						} while (cursor.moveToNext());
+						if (pluginAdded) {
+							PluginLoader.reloadPlugins();
+						}
+					}
 
+				}
 			}
 		}
 	};
@@ -207,6 +210,7 @@ public class PluginDownloader {
 		while ((line = reader.readLine()) != null)
 			sb.append(line);
 		reader.close();
+		is.close();
 		return sb.toString();
 	}
 
