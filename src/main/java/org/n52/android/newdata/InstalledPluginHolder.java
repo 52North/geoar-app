@@ -213,6 +213,7 @@ public class InstalledPluginHolder extends PluginHolder {
 				if (pluginIconEntry != null) {
 					pluginIcon = BitmapFactory.decodeStream(zipFile
 							.getInputStream(pluginIconEntry));
+				} else {
 					LOG.info("Plugin " + getName() + " has no icon");
 				}
 			} catch (IOException e) {
