@@ -34,18 +34,34 @@ import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.location.Location;
-import android.media.audiofx.BassBoost.Settings;
 import android.opengl.GLU;
 import android.opengl.Matrix;
 import android.view.View;
 import android.view.View.MeasureSpec;
-import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.RelativeLayout;
 
 public class ARObject implements OpenGLCallable {
+
+	private static float getScaleByDistance(float distance) {
+		// XXX TODO FIXME reworking scaling function
+		int x = org.n52.android.view.geoar.Settings.BUFFER_MAPINTERPOLATION;
+		if (distance > x) {
+			return 0.5f;
+		}
+		float scale = 1 - (distance / (x * 2));
+		return Math.max(0.5f, scale);
+	}
+
+	private static Paint distancePaint = new Paint();
+	static {
+		distancePaint.setAntiAlias(true);
+		distancePaint.setColor(Color.GRAY);
+		distancePaint.setAlpha(100);
+	}
 
 	/** Model Matrix of this feature */
 	private final float[] modelMatrix = new float[16];
@@ -63,14 +79,6 @@ public class ARObject implements OpenGLCallable {
 
 	private volatile boolean isInFrustum = false;
 
-	private static float getScaleByDistance(float distance) {
-		int x = org.n52.android.view.geoar.Settings.BUFFER_MAPINTERPOLATION;
-		if (distance > x) {
-			return 0.5f;
-		}
-		float scale = 1 - (distance / (x * 2));
-		return Math.max(0.5f, scale);
-	}
 
 	// XXX Why mapping by Class? Compatible with multiinstancedatasources?
 	// private final Map<Class<? extends ItemVisualization>, VisualizationLayer>
@@ -252,6 +260,9 @@ public class ARObject implements OpenGLCallable {
 		distanceTo = x[0];
 		x[0] = 0;
 
+		/** set scaling */
+		this.featureDetailsScale = getScaleByDistance(distanceTo);
+
 		/** just the distance -> length 1 */
 		Location.distanceBetween(location.getLatitude(),
 				location.getLongitude(), location.getLatitude(), longitude, x);
@@ -287,13 +298,24 @@ public class ARObject implements OpenGLCallable {
 	public void renderCanvas(Paint poiRenderer, Canvas canvas) {
 		// FIXME TODO XXX distanceTo has to be in the Settings
 		if (isInFrustum) {
-			float scale = getScaleByDistance(distanceTo);
+			/**
+			 * scale the direction indicator of the ARObject with the distance
+			 * scale
+			 */
 			canvas.save(Canvas.MATRIX_SAVE_FLAG);
-			canvas.scale(scale, scale, screenCoordinates[0],
-					screenCoordinates[1]);
+
+			canvas.scale(featureDetailsScale, featureDetailsScale,
+					screenCoordinates[0], screenCoordinates[1]);
+
 			canvasFeature.onRender(screenCoordinates[0], screenCoordinates[1],
 					canvas);
 			canvas.restore();
+
+//			canvas.drawRect(screenCoordinates[0] - 20,
+//					screenCoordinates[1] - 10, screenCoordinates[0] + 20,
+//					screenCoordinates[1] + 10, distancePaint);
+
+			/** draw the featureDetailsView bitmap */
 			if (featureDetailBitmap != null)
 				canvas.drawBitmap(featureDetailBitmap, screenCoordinates[0],
 						screenCoordinates[1], null);
