@@ -18,6 +18,7 @@ package org.n52.android.newdata;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream.GetField;
 import java.net.SocketException;
 import java.util.HashSet;
 import java.util.Set;
@@ -70,6 +71,7 @@ public class DataSourceInstanceHolder implements Parcelable {
 	private final int id = nextId++;
 	private DataCache dataCache;
 	private Filter currentFilter;
+	private Boolean hasSettings = null;
 	@CheckManager
 	private CheckList<DataSourceInstanceHolder>.Checker mChecker;
 	private Exception lastError;
@@ -201,6 +203,15 @@ public class DataSourceInstanceHolder implements Parcelable {
 
 	public DataSource<? super Filter> getDataSource() {
 		return dataSource;
+	}
+
+	public boolean hasSettings() {
+		if (hasSettings == null) {
+			hasSettings = SettingsHelper.hasSettings(getCurrentFilter())
+					|| SettingsHelper.hasSettings(getDataSource());
+		}
+
+		return hasSettings;
 	}
 
 	@Override

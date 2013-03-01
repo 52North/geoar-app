@@ -85,6 +85,7 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 				}
 			}
 		};
+		public ViewGroup layoutTools;
 	}
 
 	/**
@@ -105,7 +106,7 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 					boolean isChecked) {
 				if (dataSource.areAllChecked() != isChecked) {
 					dataSource.setChecked(isChecked);
-					//notifyDataSetChanged();
+					// notifyDataSetChanged();
 				}
 			}
 		};
@@ -429,6 +430,10 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 					R.layout.datasource_list_datasourceinstance_item, parent,
 					false);
 			viewHolder = new DataSourceInstanceViewHolder();
+
+			viewHolder.layoutTools = (ViewGroup) view
+					.findViewById(R.id.layoutTools);
+
 			viewHolder.imageViewSettings = (ImageView) view
 					.findViewById(R.id.imageViewSettings);
 			viewHolder.imageViewSettings
@@ -473,6 +478,12 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 			viewHolder.checkBox.setEnabled(true);
 		}
 
+		// Hide all settings
+		boolean hasSettings = viewHolder.dataSourceInstance
+				.hasSettings();
+		viewHolder.layoutTools.setVisibility(hasSettings ? View.VISIBLE
+				: View.GONE);
+
 		return view;
 	}
 
@@ -484,7 +495,8 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 			view = mInflater.inflate(R.layout.datasource_list_datasource_item,
 					parent, false);
 			viewHolder = new DataSourceViewHolder();
-
+			view.setOnClickListener(viewHolder.clickListener);
+			
 			viewHolder.imageViewGroup = (ImageView) view
 					.findViewById(R.id.imageViewGroup);
 
@@ -498,7 +510,7 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 
 			viewHolder.textView = (TextView) view.findViewById(R.id.textView);
 
-			viewHolder.textView.setOnClickListener(viewHolder.clickListener);
+//			viewHolder.textView.setOnClickListener(viewHolder.clickListener);
 
 			viewHolder.checkBox = (CheckBox) view.findViewById(R.id.checkBox);
 
