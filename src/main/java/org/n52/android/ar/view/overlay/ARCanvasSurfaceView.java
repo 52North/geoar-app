@@ -18,11 +18,15 @@ package org.n52.android.ar.view.overlay;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.n52.android.R;
 import org.n52.android.ar.view.ARObject;
 import org.n52.android.ar.view.ARView;
+import org.n52.android.newdata.PluginActivityContext;
 import org.n52.android.tracking.camera.RealityCamera.CameraUpdateListener;
 import org.n52.android.tracking.location.LocationHandler;
 
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
@@ -81,7 +85,7 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener {
 						for (ARObject object : mARObjects) {
 							if (object.thisObjectHitted(motionEvent.getX(),
 									motionEvent.getY())) {
-								object.onItemClicked(getContext());
+								onItemClicked(object);
 							}
 						}
 					}
@@ -91,6 +95,30 @@ public class ARCanvasSurfaceView extends View implements CameraUpdateListener {
 		});
 
 		initDrawingTools();
+	}
+
+	private void onItemClicked(ARObject item) {
+		PluginActivityContext pluginActivityContext = new PluginActivityContext(
+				item.getDataSourceInstance().getParent().getPluginHolder()
+						.getPluginContext(), getContext());
+		View featureView = item.getVisualization().getFeatureView(
+				item.getEntity(), null, null, pluginActivityContext);
+		if (featureView != null) {
+			String title = item.getVisualization().getTitle(item.getEntity());
+			if (title == null || title.isEmpty()) {
+				title = "";
+			}
+			String message = item.getVisualization().getDescription(
+					item.getEntity());
+			if (message == null || message.isEmpty()) {
+				message = "";
+			}
+			Builder builder = new AlertDialog.Builder(getContext());
+			builder.setTitle(title).setMessage(message)
+					.setNeutralButton(R.string.cancel, null)
+					.setView(featureView);
+			builder.create().show();
+		}
 	}
 
 	@Override

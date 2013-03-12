@@ -124,7 +124,7 @@ public class DataSourceOverlayHandler implements
 										visualization.getDescription(entity),
 										visualization
 												.getDrawableForEntity(entity),
-										entity, visualization);
+										entity, visualization, dataSourceInstance);
 								overlayItems.add(overlayItem);
 							}
 						}

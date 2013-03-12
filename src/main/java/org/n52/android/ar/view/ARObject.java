@@ -22,6 +22,8 @@ import javax.microedition.khronos.opengles.GL10;
 import org.n52.android.R;
 import org.n52.android.ar.view.gl.ARSurfaceViewRenderer.OpenGLCallable;
 import org.n52.android.ar.view.gl.GLESCamera;
+import org.n52.android.newdata.DataSourceInstanceHolder;
+import org.n52.android.newdata.PluginActivityContext;
 import org.n52.android.newdata.SpatialEntity;
 import org.n52.android.newdata.Visualization;
 import org.n52.android.newdata.Visualization.FeatureVisualization;
@@ -79,7 +81,6 @@ public class ARObject implements OpenGLCallable {
 
 	private volatile boolean isInFrustum = false;
 
-
 	// XXX Why mapping by Class? Compatible with multiinstancedatasources?
 	// private final Map<Class<? extends ItemVisualization>, VisualizationLayer>
 	// visualizationLayers = new HashMap<Class<? extends ItemVisualization>,
@@ -91,29 +92,45 @@ public class ARObject implements OpenGLCallable {
 	private FeatureVisualization visualization;
 	private View featureDetailView;
 	private Bitmap featureDetailBitmap;
+	private DataSourceInstanceHolder dataSourceInstance;
 
 	// TODO FIXME XXX task: ARObject gains most functionalities of RenderFeature
 	// (-> RenderFeature to be more optional)
 	public ARObject(SpatialEntity entity,
 			Visualization.FeatureVisualization visualization,
 			List<RenderFeature2> features,
-			DataSourceVisualizationCanvas canvasFeature) {
+			DataSourceVisualizationCanvas canvasFeature,
+			DataSourceInstanceHolder dataSourceInstance) {
 		this.entity = entity;
 		this.renderFeatures = features;
 		this.canvasFeature = canvasFeature;
 		this.visualization = visualization;
+		this.dataSourceInstance = dataSourceInstance;
 
 		onLocationUpdate(LocationHandler.getLastKnownLocation());
+	}
+
+	public FeatureVisualization getVisualization() {
+		return visualization;
+	}
+	
+	public DataSourceInstanceHolder getDataSourceInstance() {
+		return dataSourceInstance;
+	}
+	
+	public SpatialEntity getEntity() {
+		return entity;
 	}
 
 	public ARObject(SpatialEntity entity,
 			Visualization.FeatureVisualization visualization,
 			List<RenderFeature2> features,
-			DataSourceVisualizationCanvas canvasFeature, View featureDetailView) {
+			DataSourceVisualizationCanvas canvasFeature, View featureDetailView, DataSourceInstanceHolder dataSourceInstance) {
 		this.entity = entity;
 		this.renderFeatures = features;
 		this.canvasFeature = canvasFeature;
 		this.visualization = visualization;
+		this.dataSourceInstance = dataSourceInstance;
 
 		if (featureDetailView != null) {
 			this.featureDetailView = featureDetailView;
@@ -197,26 +214,6 @@ public class ARObject implements OpenGLCallable {
 	public void initializeRendering() {
 		for (RenderFeature2 feature : renderFeatures) {
 			feature.onCreateInGLESThread();
-		}
-	}
-
-	public void onItemClicked(Context context) {
-		View featureView = visualization.getFeatureView(entity, null, null,
-				context);
-		if (featureView != null) {
-			String title = visualization.getTitle(entity);
-			if (title == null || title.isEmpty()) {
-				title = "";
-			}
-			String message = visualization.getDescription(entity);
-			if (message == null || message.isEmpty()) {
-				message = "";
-			}
-			Builder builder = new AlertDialog.Builder(context);
-			builder.setTitle(title).setMessage(message)
-					.setNeutralButton(R.string.cancel, null)
-					.setView(featureView);
-			builder.create().show();
 		}
 	}
 
@@ -311,9 +308,9 @@ public class ARObject implements OpenGLCallable {
 					canvas);
 			canvas.restore();
 
-//			canvas.drawRect(screenCoordinates[0] - 20,
-//					screenCoordinates[1] - 10, screenCoordinates[0] + 20,
-//					screenCoordinates[1] + 10, distancePaint);
+			// canvas.drawRect(screenCoordinates[0] - 20,
+			// screenCoordinates[1] - 10, screenCoordinates[0] + 20,
+			// screenCoordinates[1] + 10, distancePaint);
 
 			/** draw the featureDetailsView bitmap */
 			if (featureDetailBitmap != null)

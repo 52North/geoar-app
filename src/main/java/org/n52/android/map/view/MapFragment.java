@@ -147,10 +147,13 @@ public class MapFragment extends SherlockFragment {
 								.setMessage(item.getSnippet())
 								.setNeutralButton(R.string.cancel, null);
 
+						PluginActivityContext pluginActivityContext = new PluginActivityContext(item.getDataSourceInstance()
+								.getParent().getPluginHolder()
+								.getPluginContext(), getActivity());
 						// TODO use view caching with convertView parameter
 						View featureView = item.getVisualization()
 								.getFeatureView(item.getSpatialEntity(), null,
-										null, getActivity());
+										null, pluginActivityContext);
 
 						if (featureView != null) {
 							builder.setView(featureView);

@@ -17,6 +17,7 @@ package org.n52.android.map.view;
 
 import org.mapsforge.android.maps.overlay.OverlayItem;
 import org.mapsforge.core.GeoPoint;
+import org.n52.android.newdata.DataSourceInstanceHolder;
 import org.n52.android.newdata.SpatialEntity;
 import org.n52.android.newdata.Visualization;
 
@@ -26,13 +27,16 @@ public class VisualizationOverlayItem extends OverlayItem {
 
 	private SpatialEntity mSpatialEntity;
 	private Visualization.FeatureVisualization mVisualization;
+	private DataSourceInstanceHolder mDataSourceInstance;
 
 	public VisualizationOverlayItem(GeoPoint point, String title,
 			String snippet, Drawable marker, SpatialEntity spatialEntity,
-			Visualization.FeatureVisualization visualization) {
+			Visualization.FeatureVisualization visualization,
+			DataSourceInstanceHolder dataSourceInstance) {
 		super(point, title, snippet, marker);
-		this.mSpatialEntity = spatialEntity;
-		this.mVisualization = visualization;
+		mSpatialEntity = spatialEntity;
+		mVisualization = visualization;
+		mDataSourceInstance = dataSourceInstance;
 	}
 
 	public SpatialEntity getSpatialEntity() {
@@ -43,4 +47,7 @@ public class VisualizationOverlayItem extends OverlayItem {
 		return mVisualization;
 	}
 
+	public DataSourceInstanceHolder getDataSourceInstance() {
+		return mDataSourceInstance;
+	}
 }

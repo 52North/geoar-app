@@ -97,7 +97,9 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory,
 								features,
 								visualization.getEntityVisualization(entity),
 								visualization.getFeatureDetailView(entity,
-										null, null, GeoARApplication.applicationContext));
+										null, null,
+										GeoARApplication.applicationContext),
+								dataSourceInstance);
 						// TODO maybe just use entity + visualization
 						arObjects.add(arObject);
 					}
