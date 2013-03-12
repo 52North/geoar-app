@@ -72,5 +72,6 @@
     <string name="about_geoar">Über GeoAR</string>
     <string name="show_location">Eigene Position</string>
     <string name="waiting_for_location_fix">Warte auf Position</string>
+    <string name="requesting_data">Datenanfrage</string>
 
 </resources>

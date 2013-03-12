@@ -119,7 +119,7 @@ public class PluginContext extends ContextWrapper {
 						.cloneInContext(this);
 			}
 			return mLayoutInflater;
-		}
+		} 
 		return super.getSystemService(name);
 	}
 
@@ -146,6 +146,7 @@ public class PluginContext extends ContextWrapper {
 			// Now explicitly set Holo style (switch to ABS style when ABS
 			// works) to allow to obtain all expected styled attributes
 			mTheme.applyStyle(R.style.Theme_Sherlock, false);
+			mTheme.applyStyle(android.R.style.Theme_Black, false);
 		}
 		return mTheme;
 	}

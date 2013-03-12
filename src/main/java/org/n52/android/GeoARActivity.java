@@ -339,7 +339,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 				mPopup.setTouchable(true);
 				mPopup.setOutsideTouchable(true);
 
-				TypedArray typedArray = obtainStyledAttributes(new int[] { android.R.attr.actionDropDownStyle });
+				TypedArray typedArray = obtainStyledAttributes(new int[] { R.attr.actionDropDownStyle });
 				int resId = typedArray.getResourceId(0, 0);
 				typedArray = obtainStyledAttributes(resId,
 						new int[] { android.R.attr.popupBackground });

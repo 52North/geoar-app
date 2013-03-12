@@ -5,7 +5,6 @@
     android:orientation="vertical" >
 
     <ScrollView
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/dialogView"
         style="@style/formView"
         android:layout_width="match_parent"
@@ -45,17 +44,17 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="?android:attr/dividerHorizontal" />
+        android:background="?attr/actionBarDivider" />
 
     <LinearLayout
-        style="?android:attr/buttonBarStyle"
+        style="?attr/actionButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
 
         <Button
             android:id="@+id/negativeButton"
-            style="?android:attr/buttonBarButtonStyle"
+            style="?attr/actionButtonStyle"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_marginTop="3dip"
@@ -64,7 +63,7 @@
 
         <Button
             android:id="@+id/positiveButton"
-            style="?android:attr/buttonBarButtonStyle"
+            style="?attr/actionButtonStyle"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_marginTop="3dip"

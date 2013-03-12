@@ -15,11 +15,11 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="?android:attr/dividerHorizontal" />
+        android:background="?attr/actionBarDivider" />
 
     <Button
         android:id="@+id/buttonMore"
-        style="?android:attr/borderlessButtonStyle"
+        style="?attr/actionButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/more_" />

@@ -54,7 +54,7 @@
                 android:layout_marginBottom="5dp"
                 android:layout_marginRight="4dp"
                 android:layout_marginTop="5dp"
-                android:background="?android:attr/dividerVertical" />
+                android:background="?attr/dividerVertical" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -94,6 +94,6 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:background="?android:attr/dividerVertical" />
+        android:background="?attr/dividerVertical" />
 
 </RelativeLayout>

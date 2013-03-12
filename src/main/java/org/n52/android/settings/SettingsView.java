@@ -82,6 +82,7 @@ public class SettingsView extends LinearLayout {
 						android.R.attr.paddingRight });
 		int paddingLeft = typedArray.getDimensionPixelSize(0, 0);
 		int paddingRight = typedArray.getDimensionPixelSize(1, 0);
+		typedArray.recycle();
 
 		groupFieldMap.clear();
 

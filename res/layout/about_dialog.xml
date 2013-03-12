@@ -100,7 +100,7 @@
             android:src="@drawable/fp7" />
 
         <ImageView
-            android:id="@+id/imageView52n"
+            android:id="@+id/imageView52n2"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_gravity="center_horizontal"

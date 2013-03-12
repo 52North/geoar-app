@@ -30,6 +30,7 @@ import org.n52.android.newdata.CheckList;
 import org.n52.android.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.android.newdata.DataSourceHolder;
 import org.n52.android.newdata.DataSourceInstanceHolder;
+import org.n52.android.newdata.PluginActivityContext;
 import org.n52.android.newdata.PluginLoader;
 import org.n52.android.tracking.location.LocationHandler;
 import org.n52.android.tracking.location.LocationHandler.OnLocationUpdateListener;
