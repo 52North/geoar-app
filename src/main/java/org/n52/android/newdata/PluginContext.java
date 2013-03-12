@@ -20,8 +20,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.n52.android.GeoARApplication;
+import org.n52.android.R;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.AssetManager;
@@ -145,7 +145,7 @@ public class PluginContext extends ContextWrapper {
 
 			// Now explicitly set Holo style (switch to ABS style when ABS
 			// works) to allow to obtain all expected styled attributes
-			mTheme.applyStyle(android.R.style.Theme_Holo, false);
+			mTheme.applyStyle(R.style.Theme_Sherlock, false);
 		}
 		return mTheme;
 	}

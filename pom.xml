@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.n52.android</groupId>
 	<artifactId>52n-geoar</artifactId>
-	<version>0.5.1</version>
+	<version>0.5.2</version>
 	<packaging>apk</packaging>
 
 	<name>GeoAR</name>
@@ -88,12 +88,12 @@
 			<artifactId>log4j</artifactId>
 			<version>1.2.16</version>
 		</dependency>
-		<!-- ABS -->
+		<!-- ABS --> 
 		<dependency>
 			<groupId>com.actionbarsherlock</groupId>
-			<artifactId>actionbarsherlock</artifactId>
+			<artifactId>library</artifactId>
 			<version>4.2.0</version>
-			<type>jar</type>
+			<type>apklib</type>
 		</dependency>
 
 		<!-- Data Sources -->
@@ -212,7 +212,7 @@
 			<plugin>
 				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 				<artifactId>android-maven-plugin</artifactId>
-				<version>3.4.0</version>
+				<version>3.5.1</version>
 				<configuration>
 					<androidManifestFile>${project.basedir}/AndroidManifest.xml</androidManifestFile>
 					<assetsDirectory>${project.basedir}/assets</assetsDirectory>
