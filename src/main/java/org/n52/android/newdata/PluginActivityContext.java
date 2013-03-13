@@ -18,7 +18,21 @@ package org.n52.android.newdata;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.view.WindowManager;
 
+/**
+ * Context to wrap a {@link PluginContext} while extending it by a specific
+ * activity context. Using this wrapped context will ensure that requests for
+ * {@link WindowManager}s return the window service of the supplied activity
+ * context, whereas all other requests are handled by the {@link PluginContext}
+ * resulting in plugin-specific resources etc. This is required for the creation
+ * of some {@link View}s within plugins on Android 2.3.3.
+ */
+
+// TODO XXX Maybe better/safer/cleaner to wrap activity context directly but return plugin
+// context
+// resources?
 public class PluginActivityContext extends ContextWrapper {
 
 	private Context mActivityContext;
@@ -33,6 +47,8 @@ public class PluginActivityContext extends ContextWrapper {
 	public Object getSystemService(String name) {
 		if (LAYOUT_INFLATER_SERVICE.equals(name)) {
 			if (mLayoutInflater == null) {
+				// Even create own LayoutInflater, since base context's inflater
+				// will point to the base context, not this wrapper
 				// Get and store a LayoutInflater for this special
 				// plugin context and do not use the cached inflater
 				mLayoutInflater = LayoutInflater.from(getBaseContext())
