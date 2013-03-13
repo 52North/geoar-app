@@ -161,6 +161,7 @@ public class CameraView extends SurfaceView implements Callback {
 			cameraRotation = (info.orientation - degrees + 360) % 360;
 		}
 
+		camera.stopPreview();	// Fix for 2.3.3 Bug?
 		camera.setDisplayOrientation(cameraRotation);
 
 		// Bildgr��e
