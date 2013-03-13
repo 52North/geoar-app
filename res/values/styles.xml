@@ -34,4 +34,24 @@
         <item name="android:paddingLeft">8dp</item>
     </style>
 
+    <style name="GeoAR" />
+
+    <style name="GeoAR.BorderlessButton" />
+    <style name="GeoAR.DropDownItem">
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+    </style>
+
+    <style name="GeoAR.Theme" parent="Theme.Sherlock">
+        <item name="borderlessButtonStyle">@style/GeoAR.BorderlessButton</item>
+        <item name="dropDownItemStyle">@style/GeoAR.DropDownItem</item>
+    </style>
+
+    <style name="GeoAR.Theme.Dialog" parent="Theme.Sherlock.Dialog">
+        <item name="borderlessButtonStyle">@style/GeoAR.BorderlessButton</item>
+        <item name="dropDownItemStyle">@style/GeoAR.DropDownItem</item>
+    </style>
+
 </resources>

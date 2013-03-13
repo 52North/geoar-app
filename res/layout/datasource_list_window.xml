@@ -19,7 +19,7 @@
 
     <Button
         android:id="@+id/buttonMore"
-        style="?attr/actionButtonStyle"
+        style="?attr/borderlessButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/more_" />

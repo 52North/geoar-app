@@ -24,7 +24,7 @@
         android:allowBackup="false"
         android:icon="@drawable/icon3"
         android:label="@string/app_name"
-        android:theme="@style/Theme.Sherlock" >
+        android:theme="@style/GeoAR.Theme" >
         <activity
             android:name="org.n52.android.GeoARActivity"
             android:label="@string/app_name"
@@ -38,7 +38,7 @@
         <activity
             android:name="org.n52.android.newdata.DataSourceInstanceSettingsDialogActivity"
             android:label="Data Source Settings"
-            android:theme="@style/Theme.Sherlock.Dialog" >
+            android:theme="@style/GeoAR.Theme.Dialog" >
         </activity>
     </application>
 

@@ -47,28 +47,29 @@
         android:background="@drawable/abs__list_divider_holo_dark" />
 
     <LinearLayout
-        style="?attr/actionButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
 
         <Button
             android:id="@+id/negativeButton"
-            style="?attr/actionButtonStyle"
+            style="?attr/borderlessButtonStyle"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_marginTop="3dip"
             android:layout_weight="1"
-            android:text="@string/cancel" />
+            android:text="@string/cancel"
+            android:textSize="14sp" />
 
         <Button
             android:id="@+id/positiveButton"
-            style="?attr/actionButtonStyle"
+            style="?attr/borderlessButtonStyle"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_marginTop="3dip"
             android:layout_weight="1"
-            android:text="@string/ok" />
+            android:text="@string/ok"
+            android:textSize="14sp" />
     </LinearLayout>
 
 </LinearLayout>

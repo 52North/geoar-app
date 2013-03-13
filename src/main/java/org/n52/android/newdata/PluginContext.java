@@ -146,7 +146,7 @@ public class PluginContext extends ContextWrapper {
 
 			// Now explicitly set Holo style (switch to ABS style when ABS
 			// works) to allow to obtain all expected styled attributes
-			mTheme.applyStyle(R.style.Theme_Sherlock, false);
+			mTheme.applyStyle(R.style.GeoAR_Theme, false);
 			if (Build.VERSION.SDK_INT >= 11) {
 				mTheme.applyStyle(android.R.style.Theme_Holo, false);
 			} else {

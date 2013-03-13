@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="GeoAR.BorderlessButton" parent="android:Widget.Button">
+        <item name="android:paddingLeft">4dip</item>
+        <item name="android:paddingRight">4dip</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:background">@drawable/abs__item_background_holo_dark</item>
+        <item name="android:minHeight">@dimen/abs__action_bar_default_height</item>
+    </style>
+
+</resources>

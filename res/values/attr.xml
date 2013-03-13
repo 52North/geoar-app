@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-     <dimen name="dataSourceActionItemMinHeight">45dp</dimen>
+
+    <dimen name="dataSourceActionItemMinHeight">45dp</dimen>
+
+    <attr name="borderlessButtonStyle" format="reference" />
+    <attr name="dropDownItemStyle" format="reference" />
+
 </resources>
