@@ -5,14 +5,14 @@
     android:layout_height="match_parent" >
 
     <!--
-         <org.n52.android.view.map.GeoMapView3
+         <org.n52.geoar.view.map.GeoMapView3
 	    android:id="@+id/mapview"
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
 	    android:clickable="true"/>
     -->
     <!--
-         <org.n52.android.view.map.ManualPositionView
+         <org.n52.geoar.view.map.ManualPositionView
 		android:id="@+id/manual_position_view" 
 		android:layout_height="wrap_content"
 		android:layout_width="match_parent"

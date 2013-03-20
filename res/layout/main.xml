@@ -10,7 +10,7 @@
         android:layout_height="match_parent" >
     </FrameLayout>
 
-    <org.n52.android.view.InfoView
+    <org.n52.geoar.view.InfoView
         android:id="@+id/infoView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

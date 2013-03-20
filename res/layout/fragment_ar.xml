@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <org.n52.android.ar.view.ARView
+    <org.n52.geoar.ar.view.ARView
         android:id="@+id/arview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
