@@ -237,7 +237,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 
 		case R.id.item_map:
 			showFragment(mMapFragment);
-			IntroController.notify(R.string.intro_title_8);
+			IntroController.notify(R.string.intro_desc_3_2);
 			return true;
 
 		case R.id.item_selectsources:
@@ -329,12 +329,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 
 						IntroController.notify(getPopup().getContentView()
 								.findViewById(R.id.buttonMore));
-						IntroController.notify(R.string.intro_title_9);
-						View view = getPopup().getContentView().findViewById(
-								R.id.buttonMore);
-						View vv = new View(getApplicationContext());
-						vv.getRight();
-						
+						IntroController.notify(R.string.intro_desc_3_3);
 					}
 				}
 			});
@@ -343,8 +338,6 @@ public class GeoARActivity extends SherlockFragmentActivity {
 			IntroController.addViewToStep(2, getPopup().getContentView()
 					.findViewById(R.id.buttonMore));
 			IntroController.addViewToStep(8, view);
-			IntroController.addViewToStep(9,
-					mListView.findViewById(R.id.checkBox));
 
 			IntroController.notify(view);
 
@@ -365,6 +358,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 				DataSourceListAdapter sourceListAdapter = new DataSourceListAdapter(
 						GeoARActivity.this, mListView, visualizationClass);
 				mListView.setAdapter(sourceListAdapter);
+				IntroController.addViewToStep(9, mListView.getChildAt(mListView.getFirstVisiblePosition()));
 				mListView.setGroupIndicator(null);
 
 				// Click event for "More" button

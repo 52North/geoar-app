@@ -44,6 +44,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.n52.geoar.GeoARApplication;
+import org.n52.geoar.ar.view.IntroController;
 import org.n52.geoar.newdata.CheckList.OnCheckedChangedListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -411,8 +412,11 @@ public class PluginLoader {
 		String[] apksInDirectory = PLUGIN_DIRECTORY_PATH
 				.list(PLUGIN_FILENAME_FILTER);
 
-		if (apksInDirectory == null || apksInDirectory.length == 0)
+		if (apksInDirectory == null || apksInDirectory.length == 0){
+			IntroController.startIntro(!mInstalledPlugins.isEmpty());
 			return;
+		}
+			
 
 		// Map to store all plugins with their versions for loading only the
 		// newest ones
@@ -453,10 +457,6 @@ public class PluginLoader {
 					pluginInfo);
 			mInstalledPlugins.add(pluginHolder);
 		}
-		
-		//TODO
-//		if(!mInstalledPlugins.isEmpty())
-//			IntroHandler.skipIntro();
 	}
 
 	/**

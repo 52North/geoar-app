@@ -67,7 +67,7 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 				if (dataSourceInstance.isChecked() != isChecked) {
 					dataSourceInstance.setChecked(isChecked);
 					notifyDataSetChanged();
-					IntroController.taskCompleted(9);
+					IntroController.finishTaskIfActive(9);
 				}
 			}
 		};
@@ -209,6 +209,7 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 		public void onCheckedChanged(DataSourceInstanceHolder item,
 				boolean newState) {
 			notifyDataSetChanged();
+			IntroController.finishTaskIfActive(R.string.intro_task_3);
 		}
 	};
 
@@ -356,11 +357,9 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 						view, parent);
 
 		if (dataSource.instanceable()) {
-			IntroController.addViewToStep(9, ((DataSourceViewHolder) groupView.getTag()).checkBox);
 //			return getDataSourceView(dataSource, groupPosition, isExpanded,
 //					view, parent);
 		} else {
-			IntroController.addViewToStep(9, ((DataSourceInstanceViewHolder) groupView.getTag()).checkBox);
 //			return getDataSourceInstanceView(dataSource.getInstances().get(0),
 //					view, parent);
 		}
@@ -564,7 +563,7 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 			// viewHolder.imageViewAdd.setVisibility(View.GONE);
 		}
 
-		// IntroController.addViewToStep(9, viewHolder.checkBox);
+//		IntroController.addViewToStep(9, view);
 
 		if (viewHolder.dataSource.getVisualizations()
 				.ofType(visualizationClass).isEmpty()) {

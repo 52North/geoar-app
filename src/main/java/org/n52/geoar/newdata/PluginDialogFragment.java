@@ -95,13 +95,13 @@ public class PluginDialogFragment extends DialogFragment {
 								if (plugin instanceof InstalledPluginHolder) {
 									((InstalledPluginHolder) plugin)
 											.setChecked(true);
-									IntroController.taskCompleted(6);
-									IntroController.notify(R.string.intro_title_7);
+									IntroController.finishTaskIfActive(R.string.intro_task_2);
+									IntroController.notify(R.string.intro_desc_3_1);
 								} else if (plugin instanceof PluginDownloadHolder) {
 									PluginDownloader
 											.downloadPlugin((PluginDownloadHolder) plugin);
-									IntroController.taskCompleted(4);
-									IntroController.notify(R.string.intro_title_5);
+									IntroController.finishTaskIfActive(R.string.intro_task_1);
+									IntroController.notify(R.string.intro_desc_2_1);
 								}
 							}
 						}).setNegativeButton(R.string.cancel, null)

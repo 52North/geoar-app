@@ -177,13 +177,13 @@ public class PluginFragment extends SherlockFragment {
 				if (tabId.equals("download")
 						&& mGridViewDownload.getAdapter() == null) {
 					mGridViewDownload.setAdapter(gridAdapterDownload);
-					IntroController.notify(R.string.intro_title_4);
+					IntroController.notify(R.string.intro_desc_1_4);
 					IntroController.addViewToStep(7,
 							((SherlockFragmentActivity) getActivity())
 									.findViewById(R.id.item_map));
 				}
 				if (tabId.equals("installed")) {
-					IntroController.notify(R.string.intro_title_6);
+					IntroController.notify(R.string.intro_desc_2_2);
 				}
 			}
 		});
