@@ -37,7 +37,8 @@
     <style name="GeoAR" />
 
     <style name="GeoAR.BorderlessButton" />
-    <style name="GeoAR.DropDownItem">
+
+    <style name="GeoAR.DropDownItem">
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">8dp</item>
         <item name="android:paddingRight">8dp</item>
@@ -52,6 +53,34 @@
     <style name="GeoAR.Theme.Dialog" parent="Theme.Sherlock.Dialog">
         <item name="borderlessButtonStyle">@style/GeoAR.BorderlessButton</item>
         <item name="dropDownItemStyle">@style/GeoAR.DropDownItem</item>
+    </style>
+
+    <style name="intro_base">
+        <item name="android:paddingBottom">50dp</item>
+		<item name="android:padding">10dp</item>
+    </style>
+
+    <style name="intro_title">
+        <item name="android:textColor">#ff33b5e5</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:background">@drawable/intro_title_background</item>
+        <item name="android:padding">10dp</item>
+    </style>
+
+    <style name="intro_body">
+        <item name="android:textColor">#DDDDDD</item>
+        <item name="android:padding">10dp</item>
+    </style>
+
+    <style name="intro_dialog">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowBackground">@drawable/intro_background</item>
+        <item name="android:layout_marginLeft">0dp</item>
+        <item name="android:layout_marginRight">0dp</item>
     </style>
 
 </resources>

@@ -17,12 +17,12 @@ package org.n52.geoar;
 
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
-import org.n52.geoar.newdata.Visualization;
-import org.n52.geoar.utils.GeoLocation;
 import org.n52.geoar.ar.view.ARFragment;
+import org.n52.geoar.ar.view.IntroController;
 import org.n52.geoar.map.view.MapFragment;
 import org.n52.geoar.newdata.PluginFragment;
 import org.n52.geoar.newdata.PluginLoader;
+import org.n52.geoar.newdata.Visualization;
 import org.n52.geoar.tracking.camera.RealityCamera;
 import org.n52.geoar.tracking.location.LocationHandler;
 
@@ -31,7 +31,6 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
-import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
@@ -50,7 +49,6 @@ import android.widget.FrameLayout.LayoutParams;
 import android.widget.PopupWindow;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.internal.view.menu.ActionMenuItemView;
 import com.actionbarsherlock.view.ActionProvider;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -75,6 +73,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		if (savedInstanceState == null) {
 			// First time init
@@ -140,8 +139,11 @@ public class GeoARActivity extends SherlockFragmentActivity {
 			LocationHandler.onRestoreInstanceState(savedInstanceState);
 		}
 
-//		// TODO Debug only
-//		LocationHandler.setManualLocation(new GeoLocation(51.965344, 7.600003));
+		IntroController.initPopupShow(this);
+
+		// // TODO Debug only
+		// LocationHandler.setManualLocation(new GeoLocation(51.965344,
+		// 7.600003));
 	}
 
 	private void showFragment(Fragment fragment) {
@@ -201,7 +203,6 @@ public class GeoARActivity extends SherlockFragmentActivity {
 		// inflate common general menu definition
 		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.menu_general, menu);
-
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -219,6 +220,10 @@ public class GeoARActivity extends SherlockFragmentActivity {
 			menuItem.setActionProvider(new DataSourcesActionProvider(
 					Visualization.ARVisualization.class));
 
+		menuItem = menu.findItem(R.id.item_map);
+		if (menuItem != null)
+			IntroController.addViewToStep(7, menuItem.getActionView());
+
 		return super.onPrepareOptionsMenu(menu);
 	}
 
@@ -232,6 +237,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 
 		case R.id.item_map:
 			showFragment(mMapFragment);
+			IntroController.notify(R.string.intro_title_8);
 			return true;
 
 		case R.id.item_selectsources:
@@ -262,6 +268,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 	protected void onResume() {
 		super.onResume();
 		LocationHandler.onResume();
+
 	}
 
 	/**
@@ -273,6 +280,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 
 		private PopupWindow mPopup;
 		private LayoutInflater mInflater;
+		private View actionView;
 		private ExpandableListView mListView;
 		private Class<? extends Visualization> visualizationClass;
 
@@ -287,25 +295,58 @@ public class GeoARActivity extends SherlockFragmentActivity {
 		@Override
 		public View onCreateActionView() {
 			// Inflate the action view to be shown on the action bar.
-
-			final View actionView = mInflater.inflate(
-					R.layout.datasource_list_actionitem, null);
+			actionView = mInflater.inflate(R.layout.datasource_list_actionitem,
+					null);
 
 			// TODO use ActionMenuItemView when ABS resources work
 
-			actionView.findViewById(R.id.button).setOnClickListener(
-					new OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							if (getPopup().isShowing()) {
-								mPopup.dismiss();
-							} else {
-								// Offset by top margin to align top
-								mPopup.showAsDropDown(actionView, 0, -mPopup
-										.getContentView().getPaddingTop());
-							}
-						}
-					});
+			// actionView.findViewById(R.id.button).setOnClickListener(
+			// new OnClickListener() {
+			// @Override
+			// public void onClick(View v) {
+			// if (getPopup().isShowing()) {
+			// mPopup.dismiss();
+			// } else {
+			// // Offset by top margin to align top
+			// mPopup.showAsDropDown(actionView, 0, -mPopup
+			// .getContentView().getPaddingTop());
+			// }
+			// }
+			// });
+
+			final View view = actionView.findViewById(R.id.button);
+			view.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+
+					if (getPopup().isShowing()) {
+						mPopup.dismiss();
+					} else {
+						// Offset by top margin to align top
+						mPopup.showAsDropDown(actionView, 0, -mPopup
+								.getContentView().getPaddingTop());
+
+						IntroController.notify(getPopup().getContentView()
+								.findViewById(R.id.buttonMore));
+						IntroController.notify(R.string.intro_title_9);
+						View view = getPopup().getContentView().findViewById(
+								R.id.buttonMore);
+						View vv = new View(getApplicationContext());
+						vv.getRight();
+						
+					}
+				}
+			});
+
+			IntroController.addViewToStep(1, view);
+			IntroController.addViewToStep(2, getPopup().getContentView()
+					.findViewById(R.id.buttonMore));
+			IntroController.addViewToStep(8, view);
+			IntroController.addViewToStep(9,
+					mListView.findViewById(R.id.checkBox));
+
+			IntroController.notify(view);
 
 			return actionView;
 		}
@@ -335,7 +376,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 					}
 				});
 
-				mPopup = new PopupWindow(layout);
+				mPopup = new ActionProviderPopupWindow(layout);
 				mPopup.setTouchable(true);
 				mPopup.setOutsideTouchable(true);
 
@@ -355,6 +396,21 @@ public class GeoARActivity extends SherlockFragmentActivity {
 
 			}
 			return mPopup;
+		}
+
+		private class ActionProviderPopupWindow extends PopupWindow {
+
+			public ActionProviderPopupWindow(ViewGroup layout) {
+				super(layout);
+			}
+
+			@Override
+			public void dismiss() {
+				final View view = actionView.findViewById(R.id.button);
+				IntroController.notify(view);
+				super.dismiss();
+			}
+
 		}
 	}
 

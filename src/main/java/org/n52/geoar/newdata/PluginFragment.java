@@ -18,6 +18,7 @@ package org.n52.geoar.newdata;
 import java.util.List;
 
 import org.n52.geoar.R;
+import org.n52.geoar.ar.view.IntroController;
 import org.n52.geoar.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.geoar.newdata.CheckList.OnItemChangedListenerWrapper;
 import org.n52.geoar.newdata.PluginDownloader.OnDataSourceResultListener;
@@ -26,7 +27,9 @@ import org.n52.geoar.newdata.PluginGridAdapter.OnItemCheckedListener;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -34,9 +37,10 @@ import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.TabHost;
 import android.widget.TabHost.OnTabChangeListener;
-import android.widget.TabHost.TabContentFactory;
+import android.widget.TabHost.TabSpec;
 
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
@@ -91,6 +95,25 @@ public class PluginFragment extends SherlockFragment {
 				}
 			}
 		});
+		mGridViewInstalled.setOnTouchListener(new OnTouchListener() {
+
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				int action = event.getActionMasked();
+				if (getActivity() != null && action == MotionEvent.ACTION_UP) {
+					float currentXPosition = event.getX();
+					float currentYPosition = event.getY();
+					int position = mGridViewDownload.pointToPosition(
+							(int) currentXPosition, (int) currentYPosition);
+					InstalledPluginHolder plugin = gridAdapterInstalled
+							.getItem(position);
+					if (plugin != null)
+						PluginDialogFragment.newInstance(plugin).show(
+								getFragmentManager(), "Plugin");
+				}
+				return false;
+			}
+		});
 		gridAdapterInstalled
 				.setOnItemCheckedListener(new OnItemCheckedListener() {
 
@@ -103,31 +126,50 @@ public class PluginFragment extends SherlockFragment {
 					}
 				});
 		gridAdapterInstalled.setShowCheckBox(true);
-
 		gridAdapterDownload = new DownloadPluginsAdapter(getActivity());
 		mGridViewDownload.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				if (getActivity() != null) {
+				// if (getActivity() != null) {
+				// PluginDownloadHolder plugin = gridAdapterDownload
+				// .getItem(position);
+				//
+				// PluginDialogFragment.newInstance(plugin).show(
+				// getFragmentManager(), "Plugin");
+				// }
+			}
+		});
+		mGridViewDownload.setOnTouchListener(new OnTouchListener() {
+
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				int action = event.getActionMasked();
+				if (getActivity() != null && action == MotionEvent.ACTION_UP) {
+					float currentXPosition = event.getX();
+					float currentYPosition = event.getY();
+					int position = mGridViewDownload.pointToPosition(
+							(int) currentXPosition, (int) currentYPosition);
 					PluginDownloadHolder plugin = gridAdapterDownload
 							.getItem(position);
-
-					PluginDialogFragment.newInstance(plugin).show(
-							getFragmentManager(), "Plugin");
+					if (plugin != null)
+						PluginDialogFragment.newInstance(plugin).show(
+								getFragmentManager(), "Plugin");
 				}
+				return false;
 			}
 		});
 		gridAdapterDownload.setShowCheckBox(false);
 
 		mTabHost = (TabHost) getView().findViewById(android.R.id.tabhost);
 		mTabHost.setup();
+		TabSpec download = mTabHost.newTabSpec("download")
+				.setIndicator(getActivity().getString(R.string.download))
+				.setContent(R.id.gridViewDownload);
 		mTabHost.addTab(mTabHost.newTabSpec("installed")
 				.setIndicator(getActivity().getString(R.string.installed))
 				.setContent(R.id.gridViewInstalled));
-		mTabHost.addTab(mTabHost.newTabSpec("download")
-				.setIndicator(getActivity().getString(R.string.download))
-				.setContent(R.id.gridViewDownload));
+		mTabHost.addTab(download);
 
 		mTabHost.setOnTabChangedListener(new OnTabChangeListener() {
 			@Override
@@ -135,6 +177,13 @@ public class PluginFragment extends SherlockFragment {
 				if (tabId.equals("download")
 						&& mGridViewDownload.getAdapter() == null) {
 					mGridViewDownload.setAdapter(gridAdapterDownload);
+					IntroController.notify(R.string.intro_title_4);
+					IntroController.addViewToStep(7,
+							((SherlockFragmentActivity) getActivity())
+									.findViewById(R.id.item_map));
+				}
+				if (tabId.equals("installed")) {
+					IntroController.notify(R.string.intro_title_6);
 				}
 			}
 		});
@@ -144,6 +193,23 @@ public class PluginFragment extends SherlockFragment {
 		} else {
 			mTabHost.setCurrentTab(0);
 		}
+
+		addStepsToIntro();
+		IntroController.notify(mTabHost.getTabWidget()
+				.getChildTabViewAt(1));
+	}
+
+	private void addStepsToIntro() {
+		IntroController.addViewToStep(3, mTabHost.getTabWidget()
+				.getChildTabViewAt(1));
+		IntroController.addViewToStep(4, null);
+		IntroController.addViewToStep(5, mTabHost.getTabWidget()
+				.getChildTabViewAt(0));
+		IntroController.addViewToStep(6, null);
+		View view = ((SherlockFragmentActivity) getActivity())
+				.findViewById(R.id.item_map);
+		if (view != null)
+			IntroController.addViewToStep(7, view);
 	}
 
 	@Override
@@ -231,7 +297,6 @@ public class PluginFragment extends SherlockFragment {
 			OnDataSourceResultListener {
 
 		private OnItemChangedListenerWrapper<InstalledPluginHolder> pluginItemChangeListener = new OnItemChangedListenerWrapper<InstalledPluginHolder>() {
-
 			@Override
 			public void onItemChanged() {
 				notifyDataSetInvalidated();
@@ -282,6 +347,7 @@ public class PluginFragment extends SherlockFragment {
 		@Override
 		public void onDataSourceResult(List<PluginDownloadHolder> dataSources) {
 			this.plugins = dataSources;
+			// IntroController.releaseNextStep();
 			notifyDataSetInvalidated();
 		}
 

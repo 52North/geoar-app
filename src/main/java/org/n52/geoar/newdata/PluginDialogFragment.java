@@ -16,6 +16,7 @@
 package org.n52.geoar.newdata;
 
 import org.n52.geoar.R;
+import org.n52.geoar.ar.view.IntroController;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -94,9 +95,13 @@ public class PluginDialogFragment extends DialogFragment {
 								if (plugin instanceof InstalledPluginHolder) {
 									((InstalledPluginHolder) plugin)
 											.setChecked(true);
+									IntroController.taskCompleted(6);
+									IntroController.notify(R.string.intro_title_7);
 								} else if (plugin instanceof PluginDownloadHolder) {
 									PluginDownloader
 											.downloadPlugin((PluginDownloadHolder) plugin);
+									IntroController.taskCompleted(4);
+									IntroController.notify(R.string.intro_title_5);
 								}
 							}
 						}).setNegativeButton(R.string.cancel, null)

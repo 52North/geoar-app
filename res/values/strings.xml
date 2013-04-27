@@ -71,5 +71,26 @@
     <string name="about_geoar">About GeoAR</string>
     <string name="show_location">Show Location</string>
     <string name="waiting_for_location_fix">Waiting for location fix</string>
-
+    <string name="intro_start_title">Welcome to GeoAR!</string>
+    <string name="intro_start_desc">You have not installed any DataSources at the moment. DataSources are essential for viewing data in GeoAR.\nIn order to install a DataSource, just follow the steps in this introduction.</string>
+    <string name="intro_title_1">#1 Download DataSources</string>
+    <string name="intro_desc_1">Under the DataSource button you will find all the DataSources you have activated.\nAt the moment you got no DataSource installed. To install a DataSource, click on the highlighted DATA SOURCES button in the upper ActionBar. </string>
+    <string name="intro_title_2">#2 Download DataSources</string>
+    <string name="intro_desc_2">Any installed and activated DataSource will be listed here.\n\nJust click on MORE... in order to come to the place where DataSouces were handled. </string>
+    <string name="intro_title_3">#3 Download DataSources</string>
+    <string name="intro_desc_3">This area shows up two tabs with installed and downloadable DataSources.\n\nClick on the DOWNLOAD tab to get a list of DataSources you are able to download</string>
+    <string name="intro_title_4">#4 Download DataSources</string>
+    <string name="intro_desc_4">Now its up to you to make a decision which DataSource you would like to install.</string>
+    <string name="intro_title_5">#5 Select DataSource</string>
+    <string name="intro_desc_5">You have successfully downloaded a DataSource! In order to use these, they must be activated.\n\nGo back to the INSTALLED tab, where you will find your DataSource.</string>
+    <string name="intro_title_6">#6 Select DataSource</string>
+    <string name="intro_desc_6">In this view all the downloaded DataSources are listed. These can be enabled and disabled upon your request.\n\nIn order to enable/disable a DataSource, click on the respective field or on the corresponding checkbox in the lower left of the field.</string>
+    <string name="intro_title_7">#7 Activate DataSource</string>
+    <string name="intro_desc_7">Your selected DataSource is activated. Go back to the Map View.</string>
+    <string name="intro_title_8">#8 Activate DataSource</string>
+    <string name="intro_desc_8">Activate in View</string>
+    <string name="intro_title_9">#9 Activate DataSource</string>
+    <string name="intro_desc_9">Click on checkbox</string>
+    <string name="intro_title_10">#10 Click on Checkbox</string>
+    <string name="intro_desc_10">Click on the checkbox</string>
 </resources>

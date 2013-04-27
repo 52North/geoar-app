@@ -356,16 +356,12 @@ public class PluginLoader {
 			return new PluginInfo(pluginFile, name, description, version,
 					identifier, publisher);
 		} catch (SAXException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ZipException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -457,7 +453,10 @@ public class PluginLoader {
 					pluginInfo);
 			mInstalledPlugins.add(pluginHolder);
 		}
-
+		
+		//TODO
+//		if(!mInstalledPlugins.isEmpty())
+//			IntroHandler.skipIntro();
 	}
 
 	/**
@@ -494,6 +493,10 @@ public class PluginLoader {
 	 */
 	public static List<DataSourceHolder> getDataSources() {
 		return mDataSources;
+	}
+	
+	public static boolean hasDataSources(){
+		return mInstalledPlugins == null ? false : mInstalledPlugins.size() > 0;
 	}
 
 	public static InstalledPluginHolder getPluginByIdentifier(String identifier) {

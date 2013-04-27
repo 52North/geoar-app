@@ -17,13 +17,14 @@ package org.n52.geoar;
 
 import java.util.List;
 
-import org.n52.geoar.newdata.Visualization;
+import org.n52.geoar.ar.view.IntroController;
+import org.n52.geoar.newdata.CheckList.OnCheckedChangedListener;
+import org.n52.geoar.newdata.CheckList.OnItemChangedListenerWrapper;
 import org.n52.geoar.newdata.DataSourceHolder;
 import org.n52.geoar.newdata.DataSourceInstanceHolder;
 import org.n52.geoar.newdata.InstalledPluginHolder;
 import org.n52.geoar.newdata.PluginLoader;
-import org.n52.geoar.newdata.CheckList.OnCheckedChangedListener;
-import org.n52.geoar.newdata.CheckList.OnItemChangedListenerWrapper;
+import org.n52.geoar.newdata.Visualization;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -50,7 +51,7 @@ import android.widget.TextView;
 public class DataSourceListAdapter extends BaseExpandableListAdapter {
 
 	/**
-	 * Holder for child items
+	 * Holder for child items 
 	 * 
 	 */
 	private class DataSourceInstanceViewHolder {
@@ -66,6 +67,7 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 				if (dataSourceInstance.isChecked() != isChecked) {
 					dataSourceInstance.setChecked(isChecked);
 					notifyDataSetChanged();
+					IntroController.taskCompleted(9);
 				}
 			}
 		};
@@ -348,13 +350,22 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 			ViewGroup parent) {
 		DataSourceHolder dataSource = mDataSources.get(groupPosition);
 
+		View groupView = dataSource.instanceable() ? getDataSourceView(dataSource,
+				groupPosition, isExpanded, view, parent)
+				: getDataSourceInstanceView(dataSource.getInstances().get(0),
+						view, parent);
+
 		if (dataSource.instanceable()) {
-			return getDataSourceView(dataSource, groupPosition, isExpanded,
-					view, parent);
+			IntroController.addViewToStep(9, ((DataSourceViewHolder) groupView.getTag()).checkBox);
+//			return getDataSourceView(dataSource, groupPosition, isExpanded,
+//					view, parent);
 		} else {
-			return getDataSourceInstanceView(dataSource.getInstances().get(0),
-					view, parent);
+			IntroController.addViewToStep(9, ((DataSourceInstanceViewHolder) groupView.getTag()).checkBox);
+//			return getDataSourceInstanceView(dataSource.getInstances().get(0),
+//					view, parent);
 		}
+		groupView.postInvalidateDelayed(50);
+		return groupView;
 	}
 
 	@Override
@@ -479,8 +490,7 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 		}
 
 		// Hide all settings
-		boolean hasSettings = viewHolder.dataSourceInstance
-				.hasSettings();
+		boolean hasSettings = viewHolder.dataSourceInstance.hasSettings();
 		viewHolder.layoutTools.setVisibility(hasSettings ? View.VISIBLE
 				: View.GONE);
 
@@ -489,14 +499,14 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 
 	private View getDataSourceView(DataSourceHolder dataSource,
 			int groupPosition, boolean isExpanded, View view, ViewGroup parent) {
-		DataSourceViewHolder viewHolder;
+		final DataSourceViewHolder viewHolder;
 
 		if (view == null) {
 			view = mInflater.inflate(R.layout.datasource_list_datasource_item,
 					parent, false);
 			viewHolder = new DataSourceViewHolder();
 			view.setOnClickListener(viewHolder.clickListener);
-			
+
 			viewHolder.imageViewGroup = (ImageView) view
 					.findViewById(R.id.imageViewGroup);
 
@@ -510,7 +520,7 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 
 			viewHolder.textView = (TextView) view.findViewById(R.id.textView);
 
-//			viewHolder.textView.setOnClickListener(viewHolder.clickListener);
+			// viewHolder.textView.setOnClickListener(viewHolder.clickListener);
 
 			viewHolder.checkBox = (CheckBox) view.findViewById(R.id.checkBox);
 
@@ -538,6 +548,7 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 			viewHolder.layoutActions.setVisibility(View.VISIBLE);
 			viewHolder.imageViewGroup.setVisibility(View.GONE);
 			viewHolder.checkBox.setVisibility(View.GONE);
+
 			// if (dataSource.instanceable()) {
 			// viewHolder.imageViewAdd.setVisibility(View.VISIBLE);
 			// } else {
@@ -549,8 +560,11 @@ public class DataSourceListAdapter extends BaseExpandableListAdapter {
 			viewHolder.layoutActions.setVisibility(View.GONE);
 			viewHolder.imageViewGroup.setVisibility(View.VISIBLE);
 			viewHolder.checkBox.setVisibility(View.VISIBLE);
+
 			// viewHolder.imageViewAdd.setVisibility(View.GONE);
 		}
+
+		// IntroController.addViewToStep(9, viewHolder.checkBox);
 
 		if (viewHolder.dataSource.getVisualizations()
 				.ofType(visualizationClass).isEmpty()) {

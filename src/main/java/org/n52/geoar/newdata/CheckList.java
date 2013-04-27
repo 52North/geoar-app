@@ -129,6 +129,7 @@ public class CheckList<T> extends ArrayList<T> {
 		}
 		return resultList;
 	}
+	
 
 	public List<T> getUncheckedItems() {
 		List<T> resultList = new ArrayList<T>();
@@ -307,6 +308,10 @@ public class CheckList<T> extends ArrayList<T> {
 		}
 	}
 
+	public boolean hasChecked() {
+		return checkSet.cardinality() > 0;
+	}
+	
 	public boolean allChecked() {
 		return checkSet.cardinality() == size();
 	}

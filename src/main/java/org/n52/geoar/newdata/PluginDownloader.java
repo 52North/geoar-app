@@ -121,7 +121,7 @@ public class PluginDownloader {
 	}
 
 	// TODO externalize string
-	static final String SERVER_URL = "http://geoviqua.dev.52north.org/geoar/codebase";
+	static final String SERVER_URL = "http://geoviqua.dev.52north.org:8081/geoar/codebase";
 
 	private static final String CODEBASE_ID = "id";
 	private static final String CODEBASE_NAME = "name";

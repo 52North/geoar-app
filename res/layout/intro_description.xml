@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@+style/intro_base"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:orientation="vertical" >
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/intro_layout"
+        android:layout_alignLeft="@id/intro_layout"
+        android:layout_alignRight="@id/intro_layout"
+        android:layout_alignTop="@id/intro_layout"
+        android:alpha="0.8"
+        android:background="@drawable/intro_background" >
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@id/intro_layout"
+        style="@+style/intro_dialog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:clickable="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="bottom"
+        android:orientation="vertical" >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/intro_skipButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:drawableLeft="@drawable/abs__ic_clear"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:textColor="#EEEEEE"
+                android:alpha="0.7"
+                android:text="Skip" />
+
+            <TextView
+                android:id="@+id/intro_titleTextView"
+                style="@+style/intro_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:alpha="0.7"
+                android:text="Title" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/intro_descriptionTextView"
+            style="@+style/intro_body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Description Description Description Description Description Description Description Description Description " />
+
+        <ImageView
+            android:id="@+id/intro_imageView"
+            android:layout_width="329dp"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/intro_startButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:clickable="true"
+            android:drawableStart="@android:drawable/ic_media_play"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:text="Start" />
+
+    </LinearLayout>
+
+</RelativeLayout>
