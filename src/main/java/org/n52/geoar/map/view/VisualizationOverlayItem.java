@@ -17,20 +17,22 @@ package org.n52.geoar.map.view;
 
 import org.mapsforge.android.maps.overlay.OverlayItem;
 import org.mapsforge.core.GeoPoint;
-import org.n52.geoar.newdata.SpatialEntity;
-import org.n52.geoar.newdata.Visualization;
 import org.n52.geoar.newdata.DataSourceInstanceHolder;
+import org.n52.geoar.newdata.SpatialEntity2;
+import org.n52.geoar.newdata.Visualization;
 
 import android.graphics.drawable.Drawable;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 public class VisualizationOverlayItem extends OverlayItem {
 
-	private SpatialEntity mSpatialEntity;
+	private SpatialEntity2<? extends Geometry> mSpatialEntity;
 	private Visualization.FeatureVisualization mVisualization;
 	private DataSourceInstanceHolder mDataSourceInstance;
 
 	public VisualizationOverlayItem(GeoPoint point, String title,
-			String snippet, Drawable marker, SpatialEntity spatialEntity,
+			String snippet, Drawable marker, SpatialEntity2<? extends Geometry> spatialEntity,
 			Visualization.FeatureVisualization visualization,
 			DataSourceInstanceHolder dataSourceInstance) {
 		super(point, title, snippet, marker);
@@ -39,7 +41,7 @@ public class VisualizationOverlayItem extends OverlayItem {
 		mDataSourceInstance = dataSourceInstance;
 	}
 
-	public SpatialEntity getSpatialEntity() {
+	public SpatialEntity2<? extends Geometry> getSpatialEntity() {
 		return mSpatialEntity;
 	}
 

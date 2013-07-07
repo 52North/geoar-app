@@ -25,6 +25,8 @@
         android:icon="@drawable/icon3"
         android:label="@string/app_name"
         android:theme="@style/GeoAR.Theme" >
+
+
         <activity
             android:name="org.n52.geoar.GeoARActivity"
             android:label="@string/app_name"

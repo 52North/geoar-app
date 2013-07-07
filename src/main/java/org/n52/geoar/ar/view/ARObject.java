@@ -19,21 +19,16 @@ import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import org.n52.geoar.newdata.SpatialEntity;
+import org.n52.geoar.ar.view.gl.ARSurfaceViewRenderer.OpenGLCallable;
+import org.n52.geoar.ar.view.gl.GLESCamera;
+import org.n52.geoar.newdata.DataSourceInstanceHolder;
+import org.n52.geoar.newdata.SpatialEntity2;
 import org.n52.geoar.newdata.Visualization;
 import org.n52.geoar.newdata.Visualization.FeatureVisualization;
 import org.n52.geoar.newdata.vis.DataSourceVisualization.DataSourceVisualizationCanvas;
-import org.n52.geoar.R;
-import org.n52.geoar.ar.view.gl.GLESCamera;
-import org.n52.geoar.ar.view.gl.ARSurfaceViewRenderer.OpenGLCallable;
-import org.n52.geoar.newdata.DataSourceInstanceHolder;
-import org.n52.geoar.newdata.PluginActivityContext;
 import org.n52.geoar.tracking.location.LocationHandler;
 import org.n52.geoar.view.geoar.gl.mode.RenderFeature2;
 
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -45,6 +40,8 @@ import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.RelativeLayout;
+
+import com.vividsolutions.jts.geom.Geometry;
 
 public class ARObject implements OpenGLCallable {
 
@@ -86,7 +83,7 @@ public class ARObject implements OpenGLCallable {
 	// visualizationLayers = new HashMap<Class<? extends ItemVisualization>,
 	// VisualizationLayer>();
 
-	private final SpatialEntity entity;
+	private final SpatialEntity2<? extends Geometry> entity;
 	private DataSourceVisualizationCanvas canvasFeature;
 	private List<RenderFeature2> renderFeatures;
 	private FeatureVisualization visualization;
@@ -96,7 +93,7 @@ public class ARObject implements OpenGLCallable {
 
 	// TODO FIXME XXX task: ARObject gains most functionalities of RenderFeature
 	// (-> RenderFeature to be more optional)
-	public ARObject(SpatialEntity entity,
+	public ARObject(SpatialEntity2<? extends Geometry> entity,
 			Visualization.FeatureVisualization visualization,
 			List<RenderFeature2> features,
 			DataSourceVisualizationCanvas canvasFeature,
@@ -118,11 +115,11 @@ public class ARObject implements OpenGLCallable {
 		return dataSourceInstance;
 	}
 	
-	public SpatialEntity getEntity() {
+	public SpatialEntity2<? extends Geometry> getEntity() {
 		return entity;
 	}
 
-	public ARObject(SpatialEntity entity,
+	public ARObject(SpatialEntity2<? extends Geometry> entity,
 			Visualization.FeatureVisualization visualization,
 			List<RenderFeature2> features,
 			DataSourceVisualizationCanvas canvasFeature, View featureDetailView, DataSourceInstanceHolder dataSourceInstance) {
@@ -248,7 +245,7 @@ public class ARObject implements OpenGLCallable {
 
 		final double longitude = entity.getLongitude();
 		final double latitude = entity.getLatitude();
-		int altitude = entity.getAltitude();
+		int altitude = (int) entity.getAltitude();
 
 		/** calc the distance XXX */
 		final float[] x = new float[1];

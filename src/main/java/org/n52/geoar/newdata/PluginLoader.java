@@ -57,6 +57,10 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.util.Base64;
 
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
+
 public class PluginLoader {
 
 	/**
@@ -125,6 +129,7 @@ public class PluginLoader {
 		}
 	};
 	private static DefaultHttpClient mHttpClient;
+	private static GeometryFactory mGeometryFactory;
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(PluginLoader.class);
@@ -161,6 +166,13 @@ public class PluginLoader {
 		}
 
 		return mHttpClient;
+	}
+	
+	public static GeometryFactory getGeometryFactory(){
+	    if(mGeometryFactory == null){
+	        mGeometryFactory = new GeometryFactory();
+	    }
+	    return mGeometryFactory;
 	}
 
 	/**

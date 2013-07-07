@@ -21,15 +21,15 @@ import java.util.List;
 import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.Projection;
 import org.mapsforge.core.GeoPoint;
-import org.n52.geoar.alg.proj.MercatorRect;
-import org.n52.geoar.newdata.SpatialEntity;
-import org.n52.geoar.newdata.Visualization.MapVisualization.ItemVisualization;
 import org.n52.geoar.R;
-import org.n52.geoar.newdata.DataSourceInstanceHolder;
+import org.n52.geoar.alg.proj.MercatorRect;
 import org.n52.geoar.newdata.DataCache.Cancelable;
 import org.n52.geoar.newdata.DataCache.DataSourceErrorType;
 import org.n52.geoar.newdata.DataCache.GetDataBoundsCallback;
+import org.n52.geoar.newdata.DataSourceInstanceHolder;
 import org.n52.geoar.newdata.DataSourceInstanceHolder.DataSourceSettingsChangedListener;
+import org.n52.geoar.newdata.SpatialEntity2;
+import org.n52.geoar.newdata.Visualization.MapVisualization.ItemVisualization;
 import org.n52.geoar.view.InfoView;
 import org.n52.geoar.view.geoar.Settings;
 import org.slf4j.Logger;
@@ -37,7 +37,8 @@ import org.slf4j.LoggerFactory;
 
 import android.graphics.Point;
 import android.os.Handler;
-import android.view.MotionEvent;
+
+import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * @author Holger Hopmann
@@ -106,7 +107,7 @@ public class DataSourceOverlayHandler implements
 
 			@Override
 			public void onReceiveDataUpdate(MercatorRect bounds,
-					List<? extends SpatialEntity> data) {
+					List<? extends SpatialEntity2<? extends Geometry>> data) {
 				if (!canceled) {
 					synchronized (updateLock) {
 						List<VisualizationOverlayItem> overlayItems = new ArrayList<VisualizationOverlayItem>();
@@ -114,7 +115,7 @@ public class DataSourceOverlayHandler implements
 								.getParent().getVisualizations()
 								.getCheckedItems(ItemVisualization.class);
 
-						for (SpatialEntity entity : data) {
+						for (SpatialEntity2<? extends Geometry> entity : data) {
 							GeoPoint point = new GeoPoint(entity.getLatitude(),
 									entity.getLongitude());
 

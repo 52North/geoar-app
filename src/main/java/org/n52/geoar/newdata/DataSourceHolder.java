@@ -359,6 +359,11 @@ public class DataSourceHolder implements Parcelable {
 						f.setAccessible(true);
 						f.set(target, mPluginHolder.getPluginContext());
 					}
+					
+					if (f.isAnnotationPresent(Annotations.SharedGeometryFactory.class)) {
+					    f.setAccessible(true);
+					    f.set(target, PluginLoader.getGeometryFactory());
+					}
 
 				}
 				currentClass = currentClass.getSuperclass();

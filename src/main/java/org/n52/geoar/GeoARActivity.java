@@ -15,6 +15,8 @@
  */
 package org.n52.geoar;
 
+import java.io.IOException;
+
 import org.mapsforge.android.maps.MapActivity;
 import org.mapsforge.android.maps.MapView;
 import org.n52.geoar.ar.view.ARFragment;
@@ -31,6 +33,7 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.res.AssetManager;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
@@ -75,6 +78,15 @@ public class GeoARActivity extends SherlockFragmentActivity {
 		setContentView(R.layout.main);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+		AssetManager assetManager = getAssets();
+		String[] files;
+		try {
+			files = assetManager.list("");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		if (savedInstanceState == null) {
 			// First time init
 			Builder builder = new AlertDialog.Builder(this);

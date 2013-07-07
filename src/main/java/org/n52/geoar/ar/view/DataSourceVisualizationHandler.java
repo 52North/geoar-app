@@ -18,27 +18,29 @@ package org.n52.geoar.ar.view;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.n52.geoar.GeoARApplication;
+import org.n52.geoar.R;
 import org.n52.geoar.alg.proj.MercatorPoint;
 import org.n52.geoar.alg.proj.MercatorProj;
 import org.n52.geoar.alg.proj.MercatorRect;
+import org.n52.geoar.newdata.DataCache.Cancelable;
+import org.n52.geoar.newdata.DataCache.DataSourceErrorType;
+import org.n52.geoar.newdata.DataCache.GetDataBoundsCallback;
+import org.n52.geoar.newdata.DataSourceInstanceHolder;
+import org.n52.geoar.newdata.DataSourceInstanceHolder.DataSourceSettingsChangedListener;
 import org.n52.geoar.newdata.RenderFeatureFactory;
-import org.n52.geoar.newdata.SpatialEntity;
+import org.n52.geoar.newdata.SpatialEntity2;
 import org.n52.geoar.newdata.Visualization.ARVisualization;
 import org.n52.geoar.newdata.Visualization.ARVisualization.ItemVisualization;
 import org.n52.geoar.newdata.vis.DataSourceVisualization.DataSourceVisualizationGL;
 import org.n52.geoar.utils.GeoLocation;
-import org.n52.geoar.GeoARApplication;
-import org.n52.geoar.R;
-import org.n52.geoar.newdata.DataSourceInstanceHolder;
-import org.n52.geoar.newdata.DataCache.Cancelable;
-import org.n52.geoar.newdata.DataCache.DataSourceErrorType;
-import org.n52.geoar.newdata.DataCache.GetDataBoundsCallback;
-import org.n52.geoar.newdata.DataSourceInstanceHolder.DataSourceSettingsChangedListener;
 import org.n52.geoar.view.InfoView;
 import org.n52.geoar.view.geoar.Settings;
 import org.n52.geoar.view.geoar.gl.mode.RenderFeature2;
 import org.n52.geoar.view.geoar.gl.mode.features.CubeFeature2;
 import org.n52.geoar.view.geoar.gl.mode.features.SphereFeature;
+
+import com.vividsolutions.jts.geom.Geometry;
 
 public class DataSourceVisualizationHandler implements RenderFeatureFactory,
 		DataSourceSettingsChangedListener {
@@ -68,7 +70,7 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory,
 
 		@Override
 		public void onReceiveDataUpdate(MercatorRect bounds,
-				List<? extends SpatialEntity> data) {
+				List<? extends SpatialEntity2<? extends Geometry>> data) {
 
 			synchronized (mutex) {
 				List<ARObject> arObjects = new ArrayList<ARObject>();
@@ -78,7 +80,7 @@ public class DataSourceVisualizationHandler implements RenderFeatureFactory,
 						.getCheckedItems(
 								ARVisualization.ItemVisualization.class);
 
-				for (SpatialEntity entity : data) {
+				for (SpatialEntity2<? extends Geometry> entity : data) {
 
 					for (ItemVisualization visualization : visualizations) {
 						// XXX FIXME TODO List is no longer needed
