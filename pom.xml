@@ -40,18 +40,13 @@
 		</dependency>
 
 		<!-- using lib-repository, maven will install automatically -->
-		<dependency>
+ 		<dependency>
 			<groupId>org.mapsforge</groupId>
 			<artifactId>mapsforge-map-patched</artifactId>
 			<version>0.3.0</version>
 			<classifier>jar-with-dependencies</classifier>
 		</dependency>
 
-		<dependency>
-			<groupId>commons-beanutils</groupId>
-			<artifactId>commons-beanutils</artifactId>
-			<version>1.8.3</version>
-		</dependency>
 		<dependency>
 			<groupId>com.vividsolutions</groupId>
 			<artifactId>jts</artifactId>

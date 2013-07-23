@@ -127,6 +127,7 @@ public class DataCache {
                                                      // if following request
                                                      // does not fail
                 } catch (Exception e) {
+                    e.printStackTrace();
                     LOG.error(logTag + " Exception on request", e);
                     dataSourceInstance.reportError(e);
                     if (e instanceof SocketException) {
@@ -208,9 +209,9 @@ public class DataCache {
                         mEntityIndex.query(envelope, new ItemVisitor() {
                             @Override
                             public void visitItem(Object item) {
+                                @SuppressWarnings("unchecked")
                                 SpatialEntity2<? extends Geometry> entity = (SpatialEntity2<? extends Geometry>) item;
-                                if (envelope.contains(entity.getLongitude(),
-                                        entity.getLatitude())) {
+                                if (envelope.intersects(entity.getEnvelope())) {
                                     resultList.add(entity);
                                 }
                             }
@@ -373,6 +374,7 @@ public class DataCache {
                     SpatialEntity2<? extends Geometry> entity = (SpatialEntity2<? extends Geometry>) item;
                     if (envelope.contains(entity.getLongitude(),
                             entity.getLatitude())) {
+//                    if (envelope.intersects(entity.getGeometry().getEnvelopeInternal())) {
                         entitiesToReplace.add(entity);
                     }
                 }
@@ -384,9 +386,11 @@ public class DataCache {
             }
 
             for (SpatialEntity2<? extends Geometry> entity : data) {
-                mEntityIndex.insert(
-                        new Envelope(new Coordinate(entity.getLongitude(),
-                                entity.getLatitude())), entity);
+                mEntityIndex.insert(entity.getGeometry().getEnvelopeInternal(),
+                        entity);
+                // mEntityIndex.insert(
+                // new Envelope(new Coordinate(entity.getLongitude(),
+                // entity.getLatitude())), entity);
             }
         }
 
@@ -540,7 +544,8 @@ public class DataCache {
                 this.y = y;
             }
 
-            public void onReceiveMeasurements(List<? extends SpatialEntity2<? extends Geometry>> data) {
+            public void onReceiveMeasurements(
+                    List<? extends SpatialEntity2<? extends Geometry>> data) {
 
                 if (!active.get()) {
                     return;

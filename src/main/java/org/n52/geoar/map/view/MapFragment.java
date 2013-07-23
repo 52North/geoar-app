@@ -24,17 +24,20 @@ import org.mapsforge.android.maps.overlay.ArrayCircleOverlay;
 import org.mapsforge.android.maps.overlay.OverlayCircle;
 import org.mapsforge.core.GeoPoint;
 import org.n52.geoar.R;
-import org.n52.geoar.map.view.DataSourcesOverlay.OnOverlayItemTapListener;
 import org.n52.geoar.map.view.GeoARMapView.OnZoomChangeListener;
+import org.n52.geoar.map.view.overlay.DataSourcesOverlay;
+import org.n52.geoar.map.view.overlay.DataSourcesOverlay.OnOverlayItemTapListener;
+import org.n52.geoar.map.view.overlay.OverlayType;
 import org.n52.geoar.newdata.CheckList;
+import org.n52.geoar.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.geoar.newdata.DataSourceHolder;
 import org.n52.geoar.newdata.DataSourceInstanceHolder;
 import org.n52.geoar.newdata.PluginActivityContext;
 import org.n52.geoar.newdata.PluginLoader;
-import org.n52.geoar.newdata.CheckList.OnCheckedChangedListener;
 import org.n52.geoar.tracking.location.LocationHandler;
 import org.n52.geoar.tracking.location.LocationHandler.OnLocationUpdateListener;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.graphics.Color;
@@ -55,7 +58,13 @@ import android.widget.FrameLayout.LayoutParams;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.MenuItem;
+import com.vividsolutions.jts.geom.Geometry;
 
+/**
+ * 
+ * @author Arne de Wall <a.dewall@52North.org>
+ *
+ */
 public class MapFragment extends SherlockFragment {
 
 	private GeoARMapView mapView;
@@ -104,7 +113,8 @@ public class MapFragment extends SherlockFragment {
 		return inflater.inflate(R.layout.map_fragment, container, false);
 	}
 
-	@Override
+	@SuppressLint("NewApi")
+    @Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
@@ -139,28 +149,28 @@ public class MapFragment extends SherlockFragment {
 		dataSourcesOverlay
 				.setOverlayItemTapListener(new OnOverlayItemTapListener() {
 
-					@Override
-					public boolean onOverlayItemTap(
-							VisualizationOverlayItem item) {
-						Builder builder = new AlertDialog.Builder(getActivity());
-						builder.setTitle(item.getTitle())
-								.setMessage(item.getSnippet())
-								.setNeutralButton(R.string.cancel, null);
+                    @Override
+                    public boolean onOverlayItemTap(
+                            OverlayType<? extends Geometry> item) {
+                        Builder builder = new AlertDialog.Builder(getActivity());
+                        builder.setTitle(item.getTitle())
+                                .setMessage(item.getDescription())
+                                .setNeutralButton(R.string.cancel, null);
 
-						PluginActivityContext pluginActivityContext = new PluginActivityContext(item.getDataSourceInstance()
-								.getParent().getPluginHolder()
-								.getPluginContext(), getActivity());
-						// TODO use view caching with convertView parameter
-						View featureView = item.getVisualization()
-								.getFeatureView(item.getSpatialEntity(), null,
-										null, pluginActivityContext);
+                        PluginActivityContext pluginActivityContext = new PluginActivityContext(item.getDataSourceInstance()
+                                .getParent().getPluginHolder()
+                                .getPluginContext(), getActivity());
+                        // TODO use view caching with convertView parameter
+                        View featureView = item.getVisualization()
+                                .getFeatureView(item.getSpatialEntity(), null,
+                                        null, pluginActivityContext);
 
-						if (featureView != null) {
-							builder.setView(featureView);
-						}
-						builder.show();
-						return true;
-					}
+                        if (featureView != null) {
+                            builder.setView(featureView);
+                        }
+                        builder.show();
+                        return true;
+                    }
 				});
 
 		mapView.getOverlays().add(dataSourcesOverlay);
@@ -211,7 +221,8 @@ public class MapFragment extends SherlockFragment {
 			// use layout change listener to get notified when mapview is
 			// layouted and has valid projection information
 			mapView.addOnLayoutChangeListener(new OnLayoutChangeListener() {
-				@Override
+				@SuppressLint("NewApi")
+                @Override
 				public void onLayoutChange(View v, int left, int top,
 						int right, int bottom, int oldLeft, int oldTop,
 						int oldRight, int oldBottom) {

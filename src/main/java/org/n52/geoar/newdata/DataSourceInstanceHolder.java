@@ -18,14 +18,10 @@ package org.n52.geoar.newdata;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream.GetField;
 import java.net.SocketException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.n52.geoar.newdata.DataSource;
-import org.n52.geoar.newdata.Filter;
-import org.n52.geoar.newdata.PluginException;
 import org.n52.geoar.GeoARApplication;
 import org.n52.geoar.R;
 import org.n52.geoar.newdata.CheckList.CheckManager;

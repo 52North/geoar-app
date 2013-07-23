@@ -156,6 +156,7 @@ public class GeoARActivity extends SherlockFragmentActivity {
 		// // TODO Debug only
 		// LocationHandler.setManualLocation(new GeoLocation(51.965344,
 		// 7.600003));
+		
 	}
 
 	private void showFragment(Fragment fragment) {
