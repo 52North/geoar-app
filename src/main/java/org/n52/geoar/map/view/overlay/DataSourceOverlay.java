@@ -24,6 +24,7 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
  * 
@@ -32,6 +33,8 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 public abstract class DataSourceOverlay<G extends Geometry, T extends OverlayType<G>>
         extends Overlay {
+    
+    protected static final GeometryFactory FACTORY = new GeometryFactory();
 
     public DataSourceOverlay() {
 

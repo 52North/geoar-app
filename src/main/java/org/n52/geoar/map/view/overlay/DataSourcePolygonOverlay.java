@@ -16,7 +16,6 @@
 package org.n52.geoar.map.view.overlay;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.mapsforge.android.maps.Projection;
@@ -29,45 +28,89 @@ import android.graphics.Point;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * 
  * @author Arne de Wall <a.dewall@52North.org>
  * 
  */
-public class DataSourcePolylineOverlay extends
-        DataSourceOverlay<LineString, PolylineOverlayType> {
+public class DataSourcePolygonOverlay extends
+        DataSourceOverlay<Polygon, PolygonOverlayType> {
 
     private Paint defaultPaintFill;
     private Paint defaultPaintOutline;
+
     private final Path path = new Path();
 
-    private List<PolylineOverlayType> polylines = new ArrayList<PolylineOverlayType>();
+    private List<PolygonOverlayType> polygons = new ArrayList<PolygonOverlayType>();
 
-    public DataSourcePolylineOverlay() {
+    public DataSourcePolygonOverlay() {
         super();
         this.path.setFillType(Path.FillType.EVEN_ODD);
     }
 
     @Override
+    public void setOverlayTypes(List<PolygonOverlayType> overlayTypes) {
+        synchronized (polygons) {
+            this.polygons.clear();
+            this.polygons.addAll(overlayTypes);
+        }
+        populate();
+    }
+
+    @Override
+    public void addOverlayType(OverlayType<? extends Geometry> overlaytype) {
+        synchronized (polygons) {
+            polygons.add((PolygonOverlayType) overlaytype);
+        }
+        populate();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void addOverlayTypes(
+            List<OverlayType<? extends Geometry>> overlaytypes) {
+        synchronized(polygons){
+            polygons.addAll((List<PolygonOverlayType>)(List<?>) overlaytypes);
+        }
+        populate();
+    }
+
+    @Override
+    public void removeOverlayType(OverlayType<? extends Geometry> overlayType) {
+        synchronized(polygons){
+            this.polygons.remove(overlayType);
+        }
+        populate();
+    }
+
+    @Override
+    public void clear() {
+        synchronized(polygons){
+            this.polygons.clear();
+        }
+        populate();
+    }
+
+    @Override
     protected void drawOverlayBitmap(Canvas canvas, Point drawPosition,
             Projection projection, byte drawZoomLevel) {
-        if (polylines.size() == 0)
+        if (polygons.size() == 0)
             return;
-
-        synchronized (polylines) {
-            for (PolylineOverlayType polyline : polylines) {
-                if (polyline.geometry == null
-                        || polyline.geometry.getCoordinates().length <= 1)
+        
+        synchronized (polygons) {
+            for (PolygonOverlayType polygon : polygons) {
+                if (polygon.geometry == null
+                        || polygon.geometry.getCoordinates().length <= 1)
                     continue;
 
-                if (drawZoomLevel != polyline.cachedZoomLevel) {
+                if (drawZoomLevel != polygon.cachedZoomLevel) {
                     android.graphics.Point point = new Point();
                     List<Coordinate> projectedCoordinates = new ArrayList<Coordinate>(
-                            polyline.getGeometry().getNumPoints());
-                    for (Coordinate coordinate : polyline.getGeometry()
+                            polygon.getGeometry().getNumPoints());
+                    for (Coordinate coordinate : polygon.getGeometry()
                             .getCoordinates()) {
                         android.graphics.Point res = projection.toPoint(
                                 new GeoPoint(coordinate.y, coordinate.x),
@@ -75,22 +118,22 @@ public class DataSourcePolylineOverlay extends
                         projectedCoordinates.add(new Coordinate(res.x, res.y));
                     }
 
-                    polyline.cachedLineString = FACTORY
-                            .createLineString(projectedCoordinates
-                                    .toArray(new Coordinate[projectedCoordinates
-                                            .size()]));
+//                    polygon.cachedPolygon = FACTORY.create
+//                            .createPolygon(projectedCoordinates
+//                                    .toArray(new Coordinate[projectedCoordinates
+//                                            .size()]));
 
-                    polyline.cachedZoomLevel = drawZoomLevel;
+                    polygon.cachedZoomLevel = drawZoomLevel;
                 }
 
-                createPath(path, drawPosition, polyline.cachedLineString);
-                drawPath(path, canvas, polyline);
+                createPath(path, drawPosition, polygon.cachedPolygon);
+                drawPath(path, canvas, polygon);
             }
         }
     }
-
+    
     protected void createPath(final Path path, final Point drawPosition,
-            final LineString lineString) {
+            final Polygon lineString) {
         path.reset();
         boolean start = true;
         for (Coordinate coordinate : lineString.getCoordinates()) {
@@ -106,53 +149,9 @@ public class DataSourcePolylineOverlay extends
     }
 
     protected void drawPath(final Path path, final Canvas canvas,
-            PolylineOverlayType overlayType) {
+            PolygonOverlayType overlayType) {
         canvas.drawPath(path, overlayType.paintOutline);
         canvas.drawPath(path, overlayType.paintFill);
-    }
-
-    @Override
-    public void setOverlayTypes(List<PolylineOverlayType> overlayTypes) {
-        synchronized (polylines) {
-            this.polylines.clear();
-            this.polylines.addAll(overlayTypes);
-        }
-        populate();
-    }
-
-    @Override
-    public void clear() {
-        synchronized (polylines) {
-            this.polylines.clear();
-        }
-        populate();
-    }
-
-    @Override
-    public void removeOverlayType(OverlayType<? extends Geometry> overlayType) {
-        synchronized (polylines) {
-            this.polylines.remove(overlayType);
-        }
-        populate();
-    }
-
-    @Override
-    public void addOverlayType(OverlayType<? extends Geometry> overlaytype) {
-        synchronized (polylines) {
-            this.polylines.add((PolylineOverlayType) overlaytype);
-        }
-        populate();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void addOverlayTypes(
-            List<OverlayType<? extends Geometry>> overlaytypes) {
-        synchronized (polylines) {
-            this.polylines
-                    .addAll((List<PolylineOverlayType>) (List<?>) overlaytypes);
-        }
-        populate();
     }
 
 }

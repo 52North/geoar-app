@@ -23,7 +23,7 @@ import org.mapsforge.android.maps.Projection;
 import org.mapsforge.core.GeoPoint;
 import org.n52.geoar.R;
 import org.n52.geoar.alg.proj.MercatorRect;
-import org.n52.geoar.map.view.overlay.DataSourceOverlay;
+import org.n52.geoar.exception.UnsupportedGeometryType;
 import org.n52.geoar.map.view.overlay.DataSourcesOverlay;
 import org.n52.geoar.map.view.overlay.OverlayType;
 import org.n52.geoar.map.view.overlay.PointOverlayType;
@@ -45,6 +45,7 @@ import android.os.Handler;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * @author Holger Hopmann
@@ -122,33 +123,41 @@ public class DataSourceOverlayHandler implements
                                 .getCheckedItems(ItemVisualization.class);
 
                         for (SpatialEntity2<? extends Geometry> entity : data) {
+                            Geometry geometry = entity.getGeometry();
 
                             for (ItemVisualization visualization : visualizations) {
-//                                PointOverlayType overlayType = new PointOverlayType(
-//                                        (com.vividsolutions.jts.geom.Point) (entity
-//                                                .getGeometry()), visualization
-//                                                .getTitle(entity),
-//                                        visualization.getDescription(entity),
-//                                        visualization
-//                                                .getDrawableForEntity(entity),
-//                                        entity, visualization,
-//                                        dataSourceInstance);
-
-                                PolylineOverlayType overlayType = new PolylineOverlayType(
-                                        (LineString) entity.getGeometry(),
-                                        visualization.getTitle(entity),
-                                        visualization.getDescription(entity),
-                                        entity, visualization,
-                                        dataSourceInstance);
-                                // OverlayType<?> overlayItem = new
-                                // OverlayType<?>(
-                                // point, visualization.getTitle(entity),
-                                // visualization.getDescription(entity),
-                                // visualization
-                                // .getDrawableForEntity(entity),
-                                // entity, visualization,
-                                // dataSourceInstance);
-                                overlayItems.add(overlayType);
+                                OverlayType<? extends Geometry> overlayType;
+                                if (geometry instanceof LineString) {
+                                    overlayItems.add(new PolylineOverlayType(
+                                            (LineString) entity.getGeometry(),
+                                            visualization.getTitle(entity),
+                                            visualization
+                                                    .getDescription(entity),
+                                            entity, visualization,
+                                            dataSourceInstance));
+                                } else if (geometry instanceof com.vividsolutions.jts.geom.Point) {
+                                    overlayItems
+                                            .add(new PointOverlayType(
+                                                    (com.vividsolutions.jts.geom.Point) (entity
+                                                            .getGeometry()),
+                                                    visualization
+                                                            .getTitle(entity),
+                                                    visualization
+                                                            .getDescription(entity),
+                                                    visualization
+                                                            .getDrawableForEntity(entity),
+                                                    entity, visualization,
+                                                    dataSourceInstance));
+                                } else if (geometry instanceof Polygon){
+                                    
+                                } else {
+                                    // FIXME handle this gracefully
+                                    try {
+                                        throw new UnsupportedGeometryType(geometry.getClass().toString());
+                                    } catch (UnsupportedGeometryType e) {
+                                        e.printStackTrace();
+                                    }
+                                }
                             }
                         }
                         overlay.setOverlayItems(overlayItems,
