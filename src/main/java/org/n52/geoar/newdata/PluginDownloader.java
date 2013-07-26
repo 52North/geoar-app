@@ -54,6 +54,11 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
 
+/**
+ * 
+ * @author Arne de Wall <a.dewall@52North.org>
+ *
+ */
 public class PluginDownloader {
 
 	public interface OnDataSourceResultListener {
@@ -121,7 +126,7 @@ public class PluginDownloader {
 	}
 
 	// TODO externalize string
-	static final String SERVER_URL = "http://geoviqua.dev.52north.org:8081/geoar/codebase";
+	static final String SERVER_URL = "http://geoviqua.dev.52north.org/geoar/codebase";
 
 	private static final String CODEBASE_ID = "id";
 	private static final String CODEBASE_NAME = "name";

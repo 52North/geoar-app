@@ -18,6 +18,11 @@ package org.n52.geoar.newdata;
 import org.n52.geoar.utils.DataSourceLoggerFactory;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * @author Arne de Wall <a.dewall@52North.org>
+ *
+ */
 public class PluginLogger implements DataSourceLoggerFactory.Logger {
 
 	private org.slf4j.Logger logger;
