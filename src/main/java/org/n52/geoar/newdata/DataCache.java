@@ -374,7 +374,9 @@ public class DataCache {
                     SpatialEntity2<? extends Geometry> entity = (SpatialEntity2<? extends Geometry>) item;
                     if (envelope.contains(entity.getLongitude(),
                             entity.getLatitude())) {
-//                    if (envelope.intersects(entity.getGeometry().getEnvelopeInternal())) {
+                        // if
+                        // (envelope.intersects(entity.getGeometry().getEnvelopeInternal()))
+                        // {
                         entitiesToReplace.add(entity);
                     }
                 }
@@ -559,7 +561,10 @@ public class DataCache {
                     tileMonitorSet.clear(checkIndex);
                     progress.incrementAndGet();
                     if (data != null) {
-                        measurementsList.addAll(data);
+                        for (SpatialEntity2<? extends Geometry> entity : data)
+                            if (!measurementsList.contains(entity))
+                                measurementsList.add(entity);
+//                        measurementsList.addAll(data);
                     }
                     callback.onProgressUpdate(progress.get(), tileCount);
                     LOG.debug("Loaded Tile " + x + "," + y);

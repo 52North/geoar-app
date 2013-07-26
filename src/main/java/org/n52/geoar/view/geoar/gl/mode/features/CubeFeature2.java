@@ -19,6 +19,11 @@ import org.n52.geoar.view.geoar.gl.mode.RenderFeature2;
 
 import android.opengl.GLES20;
 
+/**
+ * 
+ * @author Arne de Wall <a.dewall@52North.org>
+ *
+ */
 public class CubeFeature2 extends RenderFeature2 {
 	
 

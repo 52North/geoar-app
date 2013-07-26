@@ -32,8 +32,8 @@ import android.widget.RelativeLayout.LayoutParams;
 
 /**
  * 
- * @author Arne de Wall
- * 
+ * @author Arne de Wall <a.dewall@52North.org>
+ *
  */
 public class IntroController {
 

@@ -39,14 +39,14 @@ public class PolylineOverlayType extends OverlayType<LineString> {
     static{
         staticPaintFill = new Paint();
         staticPaintFill.setStyle(Style.STROKE);
-        staticPaintFill.setStrokeWidth(5);
+        staticPaintFill.setStrokeWidth(7);
         staticPaintFill.setColor(Color.BLUE);
-        staticPaintFill.setAlpha(120);
+        staticPaintFill.setAlpha(100);
         staticPaintFill.setAntiAlias(true);
         staticPaintOutline = new Paint();
         staticPaintOutline.setStyle(Style.STROKE);
         staticPaintOutline.setColor(Color.BLUE);
-        staticPaintOutline.setAlpha(200);
+        staticPaintOutline.setAlpha(100);
         staticPaintOutline.setAntiAlias(true);
     }
 

@@ -16,8 +16,9 @@
 package org.n52.geoar.map.view.overlay;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.mapsforge.android.maps.Projection;
 import org.mapsforge.core.GeoPoint;
@@ -29,7 +30,6 @@ import android.graphics.Point;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 
 /**
@@ -44,7 +44,7 @@ public class DataSourcePolylineOverlay extends
     private Paint defaultPaintOutline;
     private final Path path = new Path();
 
-    private List<PolylineOverlayType> polylines = new ArrayList<PolylineOverlayType>();
+    private Set<PolylineOverlayType> polylines = new HashSet<PolylineOverlayType>();
 
     public DataSourcePolylineOverlay() {
         super();
@@ -85,6 +85,7 @@ public class DataSourcePolylineOverlay extends
 
                 createPath(path, drawPosition, polyline.cachedLineString);
                 drawPath(path, canvas, polyline);
+                path.rewind();
             }
         }
     }
@@ -153,6 +154,11 @@ public class DataSourcePolylineOverlay extends
                     .addAll((List<PolylineOverlayType>) (List<?>) overlaytypes);
         }
         populate();
+    }
+
+    @Override
+    public List<PolylineOverlayType> getOverlayTypes() {
+        return new ArrayList<PolylineOverlayType>(polylines);
     }
 
 }

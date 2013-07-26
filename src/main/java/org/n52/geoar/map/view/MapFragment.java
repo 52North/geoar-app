@@ -129,6 +129,7 @@ public class MapFragment extends SherlockFragment {
 		// setMapFile(new File(Environment.getExternalStorageDirectory()
 		// + "/GeoAR/map.map"));
 		mapView.setClickable(true);
+		
 		// setRenderTheme(DEFAULT_RENDER_THEME);
 
 		mapView.setMapGenerator(new MapnikTileDownloader());

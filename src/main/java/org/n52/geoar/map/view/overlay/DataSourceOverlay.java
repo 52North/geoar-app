@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.mapsforge.android.maps.Projection;
 import org.mapsforge.android.maps.overlay.Overlay;
+import org.n52.geoar.map.view.overlay.DataSourcesOverlay.OnOverlayItemTapListener;
 
 import android.graphics.Canvas;
 import android.graphics.Point;
@@ -35,10 +36,13 @@ public abstract class DataSourceOverlay<G extends Geometry, T extends OverlayTyp
         extends Overlay {
     
     protected static final GeometryFactory FACTORY = new GeometryFactory();
-
+    
+    protected OnOverlayItemTapListener overlayItemTapListener;
+    
     public DataSourceOverlay() {
-
     }
+    
+    public abstract List<T> getOverlayTypes();
     
     public abstract void setOverlayTypes(List<T> overlayTypes);
 
@@ -53,7 +57,7 @@ public abstract class DataSourceOverlay<G extends Geometry, T extends OverlayTyp
     protected abstract void drawOverlayBitmap(Canvas canvas, Point drawPosition,
             Projection projection, byte zoomLevel);
 
-    protected void populate() {
+    protected final void populate() {
         super.requestRedraw();
     }
 }

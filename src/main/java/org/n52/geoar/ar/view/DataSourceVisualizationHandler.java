@@ -42,6 +42,11 @@ import org.n52.geoar.view.geoar.gl.mode.features.SphereFeature;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+/**
+ * 
+ * @author Arne de Wall <a.dewall@52North.org>
+ *
+ */
 public class DataSourceVisualizationHandler implements RenderFeatureFactory,
 		DataSourceSettingsChangedListener {
 

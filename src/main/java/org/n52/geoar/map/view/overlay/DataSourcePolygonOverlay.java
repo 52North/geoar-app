@@ -16,7 +16,9 @@
 package org.n52.geoar.map.view.overlay;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.mapsforge.android.maps.Projection;
 import org.mapsforge.core.GeoPoint;
@@ -28,7 +30,6 @@ import android.graphics.Point;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Polygon;
 
 /**
@@ -44,7 +45,7 @@ public class DataSourcePolygonOverlay extends
 
     private final Path path = new Path();
 
-    private List<PolygonOverlayType> polygons = new ArrayList<PolygonOverlayType>();
+    private Set<PolygonOverlayType> polygons = new HashSet<PolygonOverlayType>();
 
     public DataSourcePolygonOverlay() {
         super();
@@ -118,6 +119,7 @@ public class DataSourcePolygonOverlay extends
                         projectedCoordinates.add(new Coordinate(res.x, res.y));
                     }
 
+                    // TODO XXX FIXME
 //                    polygon.cachedPolygon = FACTORY.create
 //                            .createPolygon(projectedCoordinates
 //                                    .toArray(new Coordinate[projectedCoordinates
@@ -152,6 +154,11 @@ public class DataSourcePolygonOverlay extends
             PolygonOverlayType overlayType) {
         canvas.drawPath(path, overlayType.paintOutline);
         canvas.drawPath(path, overlayType.paintFill);
+    }
+
+    @Override
+    public List<PolygonOverlayType> getOverlayTypes() {
+        return new ArrayList<PolygonOverlayType>(polygons);
     }
 
 }

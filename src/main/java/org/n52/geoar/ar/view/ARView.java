@@ -31,9 +31,13 @@ import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.view.View.MeasureSpec;
 import android.widget.FrameLayout;
 
+/**
+ * 
+ * @author Arne de Wall <a.dewall@52North.org>
+ *
+ */
 public class ARView extends FrameLayout implements CameraUpdateListener {
 
 	private ARCanvasSurfaceView mCanvasOverlayView;

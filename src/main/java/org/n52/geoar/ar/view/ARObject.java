@@ -43,6 +43,11 @@ import android.widget.RelativeLayout;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+/**
+ * 
+ * @author Arne de Wall <a.dewall@52North.org>
+ *
+ */
 public class ARObject implements OpenGLCallable {
 
 	private static float getScaleByDistance(float distance) {

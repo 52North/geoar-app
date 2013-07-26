@@ -17,7 +17,9 @@ package org.n52.geoar.map.view.overlay;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.mapsforge.android.maps.MapView;
 import org.mapsforge.android.maps.Projection;
@@ -40,16 +42,27 @@ public class DataSourcePointOverlay extends
 
     private final List<PointOverlayType> pointOverlays = Collections
             .synchronizedList(new ArrayList<PointOverlayType>());
-    private final List<Integer> visiblePointOverlays = Collections
-            .synchronizedList(new ArrayList<Integer>());
+    private final Set<Integer> visiblePointOverlays = Collections
+            .synchronizedSet(new HashSet<Integer>());
 
     private Drawable defaultMarker;
 
     private int left, right, bottom, top;
     private android.graphics.Point itemPosition;
+    
+    public DataSourcePointOverlay(){
+    }
+
+    @Override
+    public boolean onLongPress(GeoPoint geoPoint, MapView mapView) {
+        return super.onLongPress(geoPoint, mapView);
+    }
 
     @Override
     public boolean onTap(GeoPoint geoPoint, MapView mapView) {
+        if(overlayItemTapListener == null)
+            return false;
+        
         Projection projection = mapView.getProjection();
         android.graphics.Point eventPosition = projection.toPixels(geoPoint,
                 null);
@@ -77,6 +90,7 @@ public class DataSourcePointOverlay extends
                     && checkLeft <= eventPosition.x
                     && checkBottom >= eventPosition.y
                     && checkTop <= eventPosition.y) {
+                overlayItemTapListener.onOverlayItemTap(pointOverlays.get(index));
                 return true;
             }
         }
@@ -157,4 +171,9 @@ public class DataSourcePointOverlay extends
         populate();
     }
 
+    @Override
+    public List<PointOverlayType> getOverlayTypes() {
+        return new ArrayList<PointOverlayType>(pointOverlays);
+    }
+    
 }
