@@ -42,6 +42,7 @@ public class DataSourcesOverlay extends Overlay {
         {
             put(PointOverlayType.class, DataSourcePointOverlay.class);
             put(PolylineOverlayType.class, DataSourcePolylineOverlay.class);
+            put(PolygonOverlayType.class, DataSourcePolygonOverlay.class);
         }
     };
 
