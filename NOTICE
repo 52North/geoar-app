@@ -1,7 +1,39 @@
-   =========================================================================
-   ==  Example NOTICE file for use with the Apache License, Version 2.0,  ==
-   ==  in this case for the 52°North Uncertainty Visualisation Selector.  ==
-   =========================================================================
+Copyright 2013 52°North Initiative for Geospatial Open Source Software GmbH
 
-   52° North GeoAR - an Android AR application for spatial data
-   Copyright 2011 52°North Initiative for Geospatial Open Source Software GmbH
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+ 
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
+This project includes:   ActionBarSherlock under Apache License Version 2.0
+  Android Support Library (v4) under Apache License Version 2.0
+  Apache Log4j under The Apache Software License, Version 2.0
+  apktool library under Apache License, Version 2.0
+  Codec under The Apache Software License, Version 2.0
+  Commons Logging under The Apache Software License, Version 2.0
+  Compiler assisted localization library (CAL10N) -    API under MIT License
+  GeoAR under Apache 2
+  GeoAR Data Source Library under Apache 2
+  Google Android Java ME Library (Khronos) under Apache 2.0
+  Google Android Library under Apache 2.0
+  HttpClient under Apache License
+  HttpCore under Apache License
+  JSON (JavaScript Object Notation) under provided without support or warranty
+  JTS Topology Suite under GNU LESSER GENERAL PUBLIC LICENSE
+  Logback Android Classic Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
+  Logback Android Core Module under Eclipse Public License - v 1.0 or GNU Lesser General Public License
+  mapsforge-map-patched under GNU Lesser General Public License (LGPL)
+  MXP1: Xml Pull Parser 3rd Edition (XPP3) under Indiana University Extreme! Lab Software License, vesion 1.1.1 or Public Domain or Apache Software License, version 1.1
+  SLF4J API Module under MIT License
+  SLF4J Extensions Module under MIT License
+  xmlParserAPIs under The Apache Software License, Version 2.0
+
+

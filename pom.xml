@@ -40,7 +40,7 @@
 		</dependency>
 
 		<!-- using lib-repository, maven will install automatically -->
- 		<dependency>
+		<dependency>
 			<groupId>org.mapsforge</groupId>
 			<artifactId>mapsforge-map-patched</artifactId>
 			<version>0.3.0</version>
@@ -88,10 +88,10 @@
 			<artifactId>log4j</artifactId>
 			<version>1.2.16</version>
 		</dependency>
-		<!-- ABS -->
+
 		<dependency>
 			<groupId>com.actionbarsherlock</groupId>
-			<artifactId>library</artifactId>
+			<artifactId>actionbarsherlock</artifactId>
 			<version>4.2.0</version>
 			<type>apklib</type>
 		</dependency>
@@ -228,9 +228,6 @@
 			</plugin>
 
 			<plugin>
-				<!-- check for correct source file headers during test phase: http://code.google.com/p/maven-license-plugin/wiki/HowTo -->
-				<!-- run "mvn license:check -Dyear=2011" to check -->
-				<!-- run "mvn license:format -Dyear=2011" to add to the files -->
 				<groupId>com.mycila.maven-license-plugin</groupId>
 				<artifactId>maven-license-plugin</artifactId>
 				<version>1.9.0</version>
@@ -260,6 +257,28 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.jasig.maven</groupId>
+				<artifactId>maven-notice-plugin</artifactId>
+				<version>1.0.6</version>
+				<configuration>
+					<noticeTemplate>src/main/resources/NOTICE.template</noticeTemplate>
+					<licenseMapping>
+						<param>http://52north.github.io/cdn/licenses/license-mappings.xml</param>
+					</licenseMapping>
+					<generateChildNotices>false</generateChildNotices>
+				</configuration>
+				<executions>
+					<execution>
+						<id>check-license</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.5.1</version>
@@ -297,33 +316,42 @@
 					</lifecycleMappingMetadata>
 				</configuration>
 			</plugin>
-
-			<!-- Build number plugin, build number string available via ${buildNumber} -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>buildnumber-maven-plugin</artifactId>
-				<version>1.1</version>
-				<executions>
-					<execution>
-						<phase>validate</phase>
-						<goals>
-							<goal>create</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<providerImplementations>
-						<svn>javasvn</svn>
-					</providerImplementations>
-					<revisionOnScmFailure>?</revisionOnScmFailure>
-					<format>{0,number}, {1,date,yyyy-MM-dd HH:mm:ss}</format>
-					<items>
-						<item>buildNumber</item>
-						<item>timestamp</item>
-					</items>
-				</configuration>
-			</plugin>
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.jasig.maven
+										</groupId>
+										<artifactId>
+											maven-notice-plugin
+										</artifactId>
+										<versionRange>
+											[1.0.5,)
+										</versionRange>
+										<goals>
+											<goal>check</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 	<repositories>
 		<repository> <!-- Tentative local repo for libs that are not migrated to Maven dependency 
