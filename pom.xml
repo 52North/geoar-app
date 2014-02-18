@@ -18,7 +18,9 @@
 	</organization>
 
 	<scm>
-		<connection>scm:svn:https://svn.52north.org/svn/projects/android/geoar/trunk</connection>
+		<!-- We use the fork & pull development model: https://help.github.com/articles/using-pull-requests -->
+		<connection>scm:git:git://github.com/52North/geoar-app.git</connection>
+		<url>https://github.com/52North/geoar-app</url>
 	</scm>
 
 	<licenses>
@@ -155,6 +157,7 @@
 					<plugin>
 						<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 						<artifactId>android-maven-plugin</artifactId>
+						<version>3.8.2</version>
 						<inherited>true</inherited>
 						<executions>
 							<execution>
@@ -212,7 +215,7 @@
 			<plugin>
 				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 				<artifactId>android-maven-plugin</artifactId>
-				<version>3.5.1</version>
+				<version>3.8.2</version>
 				<configuration>
 					<androidManifestFile>${project.basedir}/AndroidManifest.xml</androidManifestFile>
 					<assetsDirectory>${project.basedir}/assets</assetsDirectory>
@@ -248,11 +251,10 @@
 				</configuration>
 				<executions>
 					<execution>
-						<phase>test</phase>
-						<!-- test will fail if license headers are not correct -->
+						<id>check-license</id>
+						<phase>initialize</phase>
 						<goals>
 							<goal>check</goal>
-							<!-- <goal>format</goal> -->
 						</goals>
 					</execution>
 				</executions>
@@ -270,7 +272,7 @@
 				</configuration>
 				<executions>
 					<execution>
-						<id>check-license</id>
+						<id>check-notice</id>
 						<phase>initialize</phase>
 						<goals>
 							<goal>check</goal>
@@ -287,36 +289,8 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
-
-			<!-- http://stackoverflow.com/questions/6352208/how-to-solve-plugin-execution-not-covered-by-lifecycle-configuration-for-sprin -->
-			<!--This plugin's configuration is used to store Eclipse m2e settings 
-				only. It has no influence on the Maven build itself. -->
-			<plugin>
-				<groupId>org.eclipse.m2e</groupId>
-				<artifactId>lifecycle-mapping</artifactId>
-				<version>1.0.0</version>
-				<configuration>
-					<lifecycleMappingMetadata>
-						<pluginExecutions>
-							<pluginExecution>
-								<pluginExecutionFilter>
-									<groupId>org.codehaus.mojo</groupId>
-									<artifactId>aspectj-maven-plugin</artifactId>
-									<versionRange>[1.0,)</versionRange>
-									<goals>
-										<goal>test-compile</goal>
-										<goal>compile</goal>
-									</goals>
-								</pluginExecutionFilter>
-								<action>
-									<execute />
-								</action>
-							</pluginExecution>
-						</pluginExecutions>
-					</lifecycleMappingMetadata>
-				</configuration>
-			</plugin>
 		</plugins>
+
 		<pluginManagement>
 			<plugins>
 				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
@@ -336,10 +310,48 @@
 											maven-notice-plugin
 										</artifactId>
 										<versionRange>
-											[1.0.5,)
+											[1.0.6,)
 										</versionRange>
 										<goals>
 											<goal>check</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											com.mycila.maven-license-plugin
+										</groupId>
+										<artifactId>
+											maven-license-plugin
+										</artifactId>
+										<versionRange>
+											[1.9.0,)
+										</versionRange>
+										<goals>
+											<goal>check</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											com.jayway.maven.plugins.android.generation2
+										</groupId>
+										<artifactId>
+											android-maven-plugin
+										</artifactId>
+										<versionRange>
+											[3.8.2,)
+										</versionRange>
+										<goals>
+											<goal>consume-aar</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>
