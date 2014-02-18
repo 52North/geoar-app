@@ -30,6 +30,25 @@
 			<comments>A business-friendly OSS license</comments>
 		</license>
 	</licenses>
+	
+	<developers>
+		<developer>
+			<name>Arne de Wall</name>
+			<email>a.dewall@52north.org</email>
+			<organization>${project.organization.name}</organization>
+			<organizationUrl>${project.organization.url}</organizationUrl>
+			<timezone>GMT+1</timezone>
+			<id>dewall</id>
+		</developer>
+		<developer>
+			<name>Holger Hopmann</name>
+			<email>h.hopmann@52north.org</email>
+			<organization>${project.organization.name}</organization>
+			<organizationUrl>${project.organization.url}</organizationUrl>
+			<timezone>GMT+1</timezone>
+			<id>hopmann</id>
+		</developer>
+	</developers>
 
 	<dependencies>
 		<dependency>
