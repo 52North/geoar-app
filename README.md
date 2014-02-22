@@ -12,11 +12,15 @@ https://wiki.52north.org/bin/view/Projects/GeoAR
 
 Maven version 3.1.1 is required.
 
+### Dependencies
+
+The project **geoar-ds** must be installed manually to the local repository, see https://github.com/52North/geoar-ds/blob/master/README.md
+
 ## License
 
 GeoAR is published under Apache Software License, Version 2.0.
 
-Used libraries are listed in the NOTICE file.
+Used libraries and their licenses are listed in the NOTICE file.
 
 ## Contact
 
