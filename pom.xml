@@ -118,7 +118,7 @@
 		<!-- Data Sources -->
 		<dependency>
 			<groupId>org.n52.geoar</groupId>
-			<artifactId>52n-geoar-ds</artifactId>
+			<artifactId>geoar-ds</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
