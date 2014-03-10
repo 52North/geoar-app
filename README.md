@@ -8,9 +8,11 @@ https://wiki.52north.org/bin/view/Projects/GeoAR
 
 ## Development
 
-``mvn clean install``, optionally with ``-Dandroid.sdk.path=$ANDROID_HOME``
+Build the app with ``mvn clean install``, optionally with ``-Dandroid.sdk.path=$ANDROID_HOME``
 
 Maven version 3.1.1 is required.
+
+To deploy the app directly to a device, see tutorial here: http://www.vogella.com/tutorials/AndroidBuildMaven/article.html
 
 ### Dependencies
 
