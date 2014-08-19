@@ -8,19 +8,21 @@ https://wiki.52north.org/bin/view/Projects/GeoAR
 
 ## Development
 
-Build the app with ``mvn clean install``, optionally with ``-Dandroid.sdk.path=$ANDROID_HOME``
+### Requirements
 
-Maven version 3.1.1 is required.
+* Android SDK, see http://developer.android.com/sdk/index.html
+* Maven >= 3.1.1
+* **geoar-ds** in the local Maven repository, see https://github.com/52North/geoar-ds/blob/master/README.md
+
+### Build
+
+Build the app with ``mvn clean install``, optionally with ``-Dandroid.sdk.path=$ANDROID_HOME``
 
 To deploy the app directly to a device, see tutorial here: http://www.vogella.com/tutorials/AndroidBuildMaven/article.html
 
 ### Contributing
 
 We use the fork & pull development modell, and you can check out the open issues (https://github.com/52North/geoar-app/issues) if you are interested to work with the code.
-
-### Dependencies
-
-The project **geoar-ds** must be installed manually to the local repository, see https://github.com/52North/geoar-ds/blob/master/README.md
 
 ## License
 
